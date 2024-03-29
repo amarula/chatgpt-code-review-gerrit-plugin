@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.client.patch.code;
 
-import com.googlesource.gerrit.plugins.chatgpt.model.chatgpt.ChatGptReplyItem;
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritCodeRange;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.chatgpt.ChatGptReplyItem;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritCodeRange;
 import com.googlesource.gerrit.plugins.chatgpt.model.patch.code.CodeFinderDiff;
 import com.googlesource.gerrit.plugins.chatgpt.model.patch.diff.DiffContent;
 import lombok.extern.slf4j.Slf4j;

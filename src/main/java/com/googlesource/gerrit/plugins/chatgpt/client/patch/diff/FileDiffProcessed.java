@@ -1,6 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.client.patch.diff;
 
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritPatchSetFileDiff;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritPatchSetFileDiff;
 import com.googlesource.gerrit.plugins.chatgpt.model.patch.code.CodeFinderDiff;
 import com.googlesource.gerrit.plugins.chatgpt.model.patch.diff.DiffContent;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
