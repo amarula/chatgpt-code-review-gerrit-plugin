@@ -1,6 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.model.review;
 
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritCodeRange;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritCodeRange;
 import lombok.Data;
 
 import static com.googlesource.gerrit.plugins.chatgpt.settings.StaticSettings.GERRIT_PATCH_SET_FILENAME;

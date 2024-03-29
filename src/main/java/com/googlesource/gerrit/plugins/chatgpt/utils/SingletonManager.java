@@ -1,6 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.utils;
 
-import com.googlesource.gerrit.plugins.chatgpt.client.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
 
 import java.util.HashMap;
 import java.util.Map;
