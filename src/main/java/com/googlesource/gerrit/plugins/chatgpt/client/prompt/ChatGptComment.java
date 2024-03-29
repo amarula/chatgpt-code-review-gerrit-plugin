@@ -1,10 +1,10 @@
 package com.googlesource.gerrit.plugins.chatgpt.client.prompt;
 
-import com.googlesource.gerrit.plugins.chatgpt.client.common.ClientBase;
-import com.googlesource.gerrit.plugins.chatgpt.client.common.ClientMessage;
-import com.googlesource.gerrit.plugins.chatgpt.client.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.ClientBase;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.messages.ClientMessage;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritComment;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
 import lombok.extern.slf4j.Slf4j;
 

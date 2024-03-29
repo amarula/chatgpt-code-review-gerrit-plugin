@@ -2,17 +2,17 @@ package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.google.gson.Gson;
 import com.google.inject.Inject;
-import com.googlesource.gerrit.plugins.chatgpt.client.DebugComment;
-import com.googlesource.gerrit.plugins.chatgpt.client.chatgpt.ChatGptClient;
-import com.googlesource.gerrit.plugins.chatgpt.client.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.client.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.client.gerrit.GerritClientReview;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.chatgpt.ChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClientReview;
+import com.googlesource.gerrit.plugins.chatgpt.client.messages.DebugMessages;
 import com.googlesource.gerrit.plugins.chatgpt.client.patch.comment.GerritCommentRange;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.model.chatgpt.ChatGptReplyItem;
-import com.googlesource.gerrit.plugins.chatgpt.model.chatgpt.ChatGptResponseContent;
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritCodeRange;
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritComment;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.chatgpt.ChatGptReplyItem;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.chatgpt.ChatGptResponseContent;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritCodeRange;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.model.review.ReviewBatch;
 import com.googlesource.gerrit.plugins.chatgpt.model.settings.Settings;
 import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
@@ -106,7 +106,7 @@ public class PatchSetReviewer {
                 continue;
             }
             if (settings.getDebugMode()) {
-                reply += DebugComment.getDebugMessage(replyItem, isHidden);
+                reply += DebugMessages.getDebugMessage(replyItem, isHidden);
             }
             ReviewBatch batchMap = new ReviewBatch();
             batchMap.setContent(reply);

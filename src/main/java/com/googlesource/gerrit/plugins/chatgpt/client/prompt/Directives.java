@@ -1,6 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.client.prompt;
 
-import com.googlesource.gerrit.plugins.chatgpt.client.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.model.settings.Settings;
 import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
 

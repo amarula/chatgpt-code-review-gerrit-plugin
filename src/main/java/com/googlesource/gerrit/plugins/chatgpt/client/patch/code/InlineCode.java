@@ -1,9 +1,9 @@
 package com.googlesource.gerrit.plugins.chatgpt.client.patch.code;
 
 import com.googlesource.gerrit.plugins.chatgpt.client.patch.diff.FileDiffProcessed;
-import com.googlesource.gerrit.plugins.chatgpt.model.chatgpt.ChatGptReplyItem;
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritCodeRange;
-import com.googlesource.gerrit.plugins.chatgpt.model.gerrit.GerritComment;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.chatgpt.ChatGptReplyItem;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritCodeRange;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritComment;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
