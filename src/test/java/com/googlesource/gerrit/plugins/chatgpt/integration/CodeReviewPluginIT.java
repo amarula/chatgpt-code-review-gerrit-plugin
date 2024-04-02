@@ -1,11 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.integration;
 
-import com.googlesource.gerrit.plugins.chatgpt.client.api.chatgpt.ChatGptClient;
-import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClientReview;
-import com.googlesource.gerrit.plugins.chatgpt.client.prompt.ChatGptPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.model.review.ReviewBatch;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.Test;
