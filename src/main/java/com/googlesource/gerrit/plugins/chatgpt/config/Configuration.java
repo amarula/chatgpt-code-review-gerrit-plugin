@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static com.googlesource.gerrit.plugins.chatgpt.settings.StaticSettings.MODES;
+
 @Slf4j
 public class Configuration {
     // Config Constants
@@ -21,6 +23,7 @@ public class Configuration {
     public static final double DEFAULT_GPT_REVIEW_TEMPERATURE = 0.2;
     public static final double DEFAULT_GPT_COMMENT_TEMPERATURE = 1.0;
 
+    private static final String DEFAULT_GPT_MODE = "stateless";
     private static final boolean DEFAULT_REVIEW_PATCH_SET = true;
     private static final boolean DEFAULT_REVIEW_COMMIT_MESSAGES = true;
     private static final boolean DEFAULT_FULL_FILE_REVIEW = true;
@@ -91,6 +94,7 @@ public class Configuration {
     private static final String KEY_GPT_DOMAIN = "gptDomain";
     private static final String KEY_GPT_MODEL = "gptModel";
     private static final String KEY_STREAM_OUTPUT = "gptStreamOutput";
+    private static final String KEY_GPT_MODE = "gptMode";
     private static final String KEY_REVIEW_COMMIT_MESSAGES = "gptReviewCommitMessages";
     private static final String KEY_REVIEW_PATCH_SET = "gptReviewPatchSet";
     private static final String KEY_FULL_FILE_REVIEW = "gptFullFileReview";
@@ -152,6 +156,15 @@ public class Configuration {
 
     public boolean getGptReviewPatchSet() {
         return getBoolean(KEY_REVIEW_PATCH_SET, DEFAULT_REVIEW_PATCH_SET);
+    }
+
+    public MODES getGptMode() {
+        String mode = getString(KEY_GPT_MODE, DEFAULT_GPT_MODE);
+        try {
+            return Enum.valueOf(MODES.class, mode);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Illegal mode: " + mode, e);
+        }
     }
 
     public boolean getGptReviewCommitMessages() {
