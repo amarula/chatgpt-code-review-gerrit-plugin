@@ -49,7 +49,7 @@ public class GerritClientAccount extends GerritClientBase {
         }
     }
 
-    protected Integer getNotNullAccountId(String authorUsername) {
+    public Integer getNotNullAccountId(String authorUsername) {
         return getAccountId(authorUsername).orElseThrow(() -> new NoSuchElementException(
                 String.format("Error retrieving '%s' account ID in Gerrit", authorUsername)));
     }
