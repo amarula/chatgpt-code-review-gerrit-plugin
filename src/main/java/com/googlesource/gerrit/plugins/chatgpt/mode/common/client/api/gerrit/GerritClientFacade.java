@@ -1,22 +1,29 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.mode.ModeClassLoader;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit.GerritClientPatchSetStateless;
+import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.ClassUtils.registerDynamicClasses;
+
 @Slf4j
 public class GerritClientFacade {
     private final GerritClientDetail gerritClientDetail;
-    private final GerritClientPatchSet gerritClientPatchSet;
+    private final IGerritClientPatchSet gerritClientPatchSet;
     private final GerritClientComments gerritClientComments;
 
     public GerritClientFacade(Configuration config) {
         gerritClientDetail = new GerritClientDetail(config);
-        gerritClientPatchSet = new GerritClientPatchSet(config);
+        gerritClientPatchSet = (IGerritClientPatchSet) ModeClassLoader.getInstance(
+                "client.api.gerrit.GerritClientPatchSet", config, config);
+        registerDynamicClasses(GerritClientPatchSetStateless.class);
         gerritClientComments = new GerritClientComments(config);
     }
 
