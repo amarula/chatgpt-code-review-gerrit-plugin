@@ -5,6 +5,8 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.ClassUtils.createNewInstanceWithArgs;
+
 public class SingletonManager {
     private static final Map<String, Object> instances = new HashMap<>();
 
@@ -39,11 +41,7 @@ public class SingletonManager {
             if (constructorArgs == null || constructorArgs.length == 0) {
                 instance = clazz.getDeclaredConstructor().newInstance();
             } else {
-                Class<?>[] argClasses = new Class[constructorArgs.length];
-                for (int i = 0; i < constructorArgs.length; i++) {
-                    argClasses[i] = constructorArgs[i].getClass();
-                }
-                instance = clazz.getDeclaredConstructor(argClasses).newInstance(constructorArgs);
+                instance = createNewInstanceWithArgs(clazz, constructorArgs);
             }
             instances.put(key, instance);
             return instance;
