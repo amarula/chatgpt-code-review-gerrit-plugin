@@ -2,8 +2,8 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.google.gson.JsonObject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
-import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +39,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
     }
 
     private boolean isChangeSetBased(GerritChange change) {
-        return !DynamicSettings.getInstance(change).getForcedReviewLastPatchSet();
+        return !ChangeSetDataHandler.getInstance(change).getForcedReviewLastPatchSet();
     }
 
 }
