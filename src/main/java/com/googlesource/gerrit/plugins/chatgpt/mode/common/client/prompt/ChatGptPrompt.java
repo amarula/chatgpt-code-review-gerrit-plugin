@@ -3,8 +3,8 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.settings.Settings;
-import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -107,8 +107,8 @@ public class ChatGptPrompt {
 
     public String getGptUserPrompt(String patchSet, String changeId) {
         List<String> prompt = new ArrayList<>();
-        Settings settings = DynamicSettings.getInstance(changeId);
-        String gptRequestUserPrompt = settings.getGptRequestUserPrompt();
+        ChangeSetData changeSetData = ChangeSetDataHandler.getInstance(changeId);
+        String gptRequestUserPrompt = changeSetData.getGptRequestUserPrompt();
         boolean isValidRequestUserPrompt = gptRequestUserPrompt != null && !gptRequestUserPrompt.isEmpty();
         if (isCommentEvent && isValidRequestUserPrompt) {
             log.debug("ConfigsDynamically value found: {}", gptRequestUserPrompt);
@@ -117,7 +117,7 @@ public class ChatGptPrompt {
                     patchSet,
                     DEFAULT_GPT_REQUEST_PROMPT_REQUESTS,
                     gptRequestUserPrompt,
-                    getCommentRequestUserPrompt(settings.getCommentPropertiesSize())
+                    getCommentRequestUserPrompt(changeSetData.getCommentPropertiesSize())
             ));
         }
         else {
@@ -129,9 +129,9 @@ public class ChatGptPrompt {
                 prompt.add(DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY);
                 prompt.add(gptRequestUserPrompt);
             }
-            if (!settings.getDirectives().isEmpty()) {
+            if (!changeSetData.getDirectives().isEmpty()) {
                 prompt.add(DEFAULT_GPT_REVIEW_PROMPT_DIRECTIVES);
-                prompt.add(getNumberedListString(new ArrayList<>(settings.getDirectives())));
+                prompt.add(getNumberedListString(new ArrayList<>(changeSetData.getDirectives())));
             }
         }
         return joinWithNewLine(prompt);

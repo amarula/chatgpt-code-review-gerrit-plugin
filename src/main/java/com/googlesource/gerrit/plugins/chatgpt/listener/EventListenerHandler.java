@@ -9,10 +9,10 @@ import com.google.gerrit.server.events.Event;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.settings.Settings;
-import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +40,7 @@ public class EventListenerHandler {
             1, 1, 0L, TimeUnit.MILLISECONDS, queue, threadFactory, handler);
     private final GerritClient gerritClient;
     private Configuration config;
-    private Settings settings;
+    private ChangeSetData changeSetData;
     @Getter
     private CompletableFuture<Void> latestFuture;
 
@@ -55,7 +55,7 @@ public class EventListenerHandler {
     public void initialize(GerritChange change) {
         gerritClient.initialize(config, change);
         Integer gptAccountId = gerritClient.getNotNullAccountId(change, config.getGerritUserName());
-        settings = DynamicSettings.getNewInstance(config, change, gptAccountId);
+        changeSetData = ChangeSetDataHandler.getNewInstance(config, change, gptAccountId);
     }
 
     public void handleEvent(Configuration config, Event event) {
@@ -170,7 +170,7 @@ public class EventListenerHandler {
         boolean isCommentEvent = EVENT_COMMENT_MAP.get(eventType);
         if (isCommentEvent) {
             if (!gerritClient.retrieveLastComments(change)) {
-                if (settings.getForcedReview()) {
+                if (changeSetData.getForcedReview()) {
                     isCommentEvent = false;
                 }
                 else {
@@ -196,7 +196,7 @@ public class EventListenerHandler {
 
     private void destroy(GerritChange change) {
         gerritClient.destroy(change);
-        DynamicSettings.removeInstance(change);
+        ChangeSetDataHandler.removeInstance(change);
     }
 
 }

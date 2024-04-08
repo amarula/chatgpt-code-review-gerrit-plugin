@@ -15,7 +15,7 @@ import java.net.URI;
 import java.util.*;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.getTimeStamp;
-import static com.googlesource.gerrit.plugins.chatgpt.settings.StaticSettings.GERRIT_PATCH_SET_FILENAME;
+import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 
 @Slf4j
 public class GerritClientComments extends GerritClientAccount {

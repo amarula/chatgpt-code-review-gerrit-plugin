@@ -3,6 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt;
 import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
@@ -13,9 +14,8 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.Cha
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.settings.Settings;
-import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -53,7 +53,7 @@ public class PatchSetReviewer {
             log.info("No file to review has been found in the PatchSet");
             return;
         }
-        DynamicSettings.update(config, change, gerritClient);
+        ChangeSetDataHandler.update(config, change, gerritClient);
 
         String reviewReply = getReviewReply(change, patchSet);
         log.debug("ChatGPT response: {}", reviewReply);
@@ -92,7 +92,7 @@ public class PatchSetReviewer {
 
     private void retrieveReviewBatches(String reviewReply, GerritChange change) {
         ChatGptResponseContent reviewJson = gson.fromJson(reviewReply, ChatGptResponseContent.class);
-        Settings settings = DynamicSettings.getInstance(change);
+        ChangeSetData changeSetData = ChangeSetDataHandler.getInstance(change);
         for (ChatGptReplyItem replyItem : reviewJson.getReplies()) {
             String reply = replyItem.getReply();
             Integer score = replyItem.getScore();
@@ -102,10 +102,10 @@ public class PatchSetReviewer {
             if (!replyItem.isConflicting() && !isIrrelevant && score != null) {
                 reviewScores.add(score);
             }
-            if (settings.getReplyFilterEnabled() && isHidden) {
+            if (changeSetData.getReplyFilterEnabled() && isHidden) {
                 continue;
             }
-            if (settings.getDebugMode()) {
+            if (changeSetData.getDebugMode()) {
                 reply += DebugMessages.getDebugMessage(replyItem, isHidden);
             }
             ReviewBatch batchMap = new ReviewBatch();
