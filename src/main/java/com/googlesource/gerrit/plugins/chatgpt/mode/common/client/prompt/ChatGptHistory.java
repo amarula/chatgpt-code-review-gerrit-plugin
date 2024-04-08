@@ -6,7 +6,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.Cha
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.CommentData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
-import com.googlesource.gerrit.plugins.chatgpt.settings.StaticSettings;
+import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -18,8 +18,8 @@ public class ChatGptHistory extends ChatGptComment {
     private static final String ROLE_USER = "user";
     private static final String ROLE_ASSISTANT = "assistant";
     private static final Set<String> MESSAGES_EXCLUDED_FROM_HISTORY = new HashSet<>() {{
-        add(StaticSettings.GERRIT_DEFAULT_MESSAGE_DONE);
-        add(StaticSettings.EMPTY_REVIEW_MESSAGE);
+        add(Settings.GERRIT_DEFAULT_MESSAGE_DONE);
+        add(Settings.EMPTY_REVIEW_MESSAGE);
     }};
 
     private final HashMap<String, GerritComment> commentMap;

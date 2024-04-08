@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.settings;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data;
 
 import lombok.Data;
 import lombok.NonNull;
@@ -11,7 +11,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Data
 @Slf4j
-public class Settings {
+public class ChangeSetData {
     @NonNull
     private Integer gptAccountId;
     private String gptRequestUserPrompt;

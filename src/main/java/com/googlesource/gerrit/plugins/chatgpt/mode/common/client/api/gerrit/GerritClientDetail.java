@@ -1,11 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPatchSetDetail;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
-import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -30,7 +30,7 @@ public class GerritClientDetail extends GerritClientBase {
     }
 
     public GerritPermittedVotingRange getPermittedVotingRange(GerritChange change) {
-        int gptAccountId = DynamicSettings.getInstance(change).getGptAccountId();
+        int gptAccountId = ChangeSetDataHandler.getInstance(change).getGptAccountId();
         loadPatchSetDetail(change);
         List<GerritPatchSetDetail.Permission> permissions = gerritPatchSetDetail.getLabels().getCodeReview().getAll();
         if (permissions == null) {
