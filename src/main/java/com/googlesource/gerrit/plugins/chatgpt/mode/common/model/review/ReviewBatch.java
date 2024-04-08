@@ -3,7 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
 import lombok.Data;
 
-import static com.googlesource.gerrit.plugins.chatgpt.settings.StaticSettings.GERRIT_PATCH_SET_FILENAME;
+import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 
 @Data
 public class ReviewBatch {

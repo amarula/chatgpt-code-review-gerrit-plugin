@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.MessageSanitizer.sanitizeChatGptMessage;
-import static com.googlesource.gerrit.plugins.chatgpt.settings.StaticSettings.EMPTY_REVIEW_MESSAGE;
+import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.EMPTY_REVIEW_MESSAGE;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 @Slf4j

@@ -1,11 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
-import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -18,7 +18,7 @@ public class ChatGptComment extends ClientBase {
     public ChatGptComment(Configuration config, GerritChange change) {
         super(config);
         this.change = change;
-        gptAccountId = DynamicSettings.getInstance(change).getGptAccountId();
+        gptAccountId = ChangeSetDataHandler.getInstance(change).getGptAccountId();
     }
 
     protected String getCleanedMessage(GerritComment commentProperty) {

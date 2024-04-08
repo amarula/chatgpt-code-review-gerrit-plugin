@@ -1,9 +1,9 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands;
 
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.Directives;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.settings.Settings;
-import com.googlesource.gerrit.plugins.chatgpt.settings.DynamicSettings;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,14 +46,14 @@ public class ClientCommands {
             COMMAND_MAP.keySet()) + ")\\b((?:\\s+--\\w+(?:=\\w+)?)+)?");
     private static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(\\w+))?");
 
-    private final Settings settings;
+    private final ChangeSetData changeSetData;
     @Getter
     private final Directives directives;
     @Getter
     private boolean containingHistoryCommand;
 
     public ClientCommands(GerritChange change) {
-        settings = DynamicSettings.getInstance(change);
+        changeSetData = ChangeSetDataHandler.getInstance(change);
         directives = new Directives(change);
         containingHistoryCommand = false;
     }
@@ -86,10 +86,10 @@ public class ClientCommands {
     private void parseCommand(String comment, String commandString, boolean isNotHistory) {
         COMMAND_SET command = COMMAND_MAP.get(commandString);
         if (isNotHistory && REVIEW_COMMANDS.contains(command)) {
-            settings.setForcedReview(true);
+            changeSetData.setForcedReview(true);
             if (command == COMMAND_SET.REVIEW_LAST) {
                 log.info("Forced review command applied to the last Patch Set");
-                settings.setForcedReviewLastPatchSet(true);
+                changeSetData.setForcedReviewLastPatchSet(true);
             }
             else {
                 log.info("Forced review command applied to the entire Change Set");
@@ -111,12 +111,12 @@ public class ClientCommands {
                     case FILTER:
                         boolean value = Boolean.parseBoolean(reviewOptionsMatcher.group(2));
                         log.info("Option 'replyFilterEnabled' set to {}", value);
-                        settings.setReplyFilterEnabled(value);
+                        changeSetData.setReplyFilterEnabled(value);
                         break;
                     case DEBUG:
                         log.info("Response Mode set to Debug");
-                        settings.setDebugMode(true);
-                        settings.setReplyFilterEnabled(false);
+                        changeSetData.setDebugMode(true);
+                        changeSetData.setReplyFilterEnabled(false);
                         break;
                 }
             }
