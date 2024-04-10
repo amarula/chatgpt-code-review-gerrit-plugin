@@ -10,6 +10,7 @@ import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -58,7 +59,7 @@ public class EventListenerHandler {
         changeSetData = ChangeSetDataHandler.getNewInstance(config, change, gptAccountId);
     }
 
-    public void handleEvent(Configuration config, Event event) {
+    public void handleEvent(Configuration config, Event event, PluginDataHandler pluginDataHandler) {
         this.config = config;
         GerritChange change = new GerritChange(event);
         initialize(change);
