@@ -25,7 +25,6 @@ import com.googlesource.gerrit.plugins.chatgpt.listener.GerritListener;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -259,8 +258,7 @@ public class ChatGptReviewTest {
     @Test
     public void patchSetCreatedOrUpdatedStreamed() throws InterruptedException, NoSuchProjectException, ExecutionException {
         GerritClient gerritClient = new GerritClient();
-        ChatGptClient chatGptClient = new ChatGptClient();
-        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient, chatGptClient);
+        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient);
         ConfigCreator mockConfigCreator = mock(ConfigCreator.class);
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
         String reviewUserPrompt = joinWithNewLine(Arrays.asList(
@@ -291,7 +289,7 @@ public class ChatGptReviewTest {
                 WireMock.urlEqualTo(gerritSetReviewUri(getGerritChange().getFullChangeId())));
         List<LoggedRequest> loggedRequests = WireMock.findAll(requestPatternBuilder);
         Assert.assertEquals(1, loggedRequests.size());
-        JsonObject gptRequestBody = gson.fromJson(chatGptClient.getRequestBody(), JsonObject.class);
+        JsonObject gptRequestBody = gson.fromJson(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
         JsonArray prompts = gptRequestBody.get("messages").getAsJsonArray();
         String systemPrompt = prompts.get(0).getAsJsonObject().get("content").getAsString();
         Assert.assertEquals(expectedSystemPromptReview, systemPrompt);
@@ -309,8 +307,7 @@ public class ChatGptReviewTest {
         when(globalConfig.getBoolean(Mockito.eq("enabledVoting"), Mockito.anyBoolean()))
                 .thenReturn(true);
         GerritClient gerritClient = new GerritClient();
-        ChatGptClient chatGptClient = new ChatGptClient();
-        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient, chatGptClient);
+        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient);
         ConfigCreator mockConfigCreator = mock(ConfigCreator.class);
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
         String reviewVoteUserPrompt = joinWithNewLine(Arrays.asList(
@@ -348,7 +345,7 @@ public class ChatGptReviewTest {
                 WireMock.urlEqualTo(gerritSetReviewUri(getGerritChange().getFullChangeId())));
         List<LoggedRequest> loggedRequests = WireMock.findAll(requestPatternBuilder);
         Assert.assertEquals(1, loggedRequests.size());
-        JsonObject gptRequestBody = gson.fromJson(chatGptClient.getRequestBody(), JsonObject.class);
+        JsonObject gptRequestBody = gson.fromJson(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
         JsonArray prompts = gptRequestBody.get("messages").getAsJsonArray();
         String userPrompt = prompts.get(1).getAsJsonObject().get("content").getAsString();
         Assert.assertEquals(reviewVoteUserPrompt, userPrompt);
@@ -362,8 +359,7 @@ public class ChatGptReviewTest {
         when(globalConfig.getString(Mockito.eq("disabledGroups"), Mockito.anyString()))
                 .thenReturn(GERRIT_USER_GROUP);
         GerritClient gerritClient = new GerritClient();
-        ChatGptClient chatGptClient = new ChatGptClient();
-        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient, chatGptClient);
+        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient);
         ConfigCreator mockConfigCreator = mock(ConfigCreator.class);
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
 
@@ -386,8 +382,7 @@ public class ChatGptReviewTest {
     public void gptMentionedInComment() throws InterruptedException, NoSuchProjectException, ExecutionException {
         GerritChange gerritChange = getGerritChange();
         GerritClient gerritClient = new GerritClient();
-        ChatGptClient chatGptClient = new ChatGptClient();
-        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient, chatGptClient);
+        PatchSetReviewer patchSetReviewer = new PatchSetReviewer(gerritClient);
         ConfigCreator mockConfigCreator = mock(ConfigCreator.class);
         when(config.getGerritUserName()).thenReturn(GERRIT_GPT_USERNAME);
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
@@ -426,7 +421,7 @@ public class ChatGptReviewTest {
                 WireMock.urlEqualTo(gerritSetReviewUri(gerritChange.getFullChangeId())));
         List<LoggedRequest> loggedRequests = WireMock.findAll(requestPatternBuilder);
         Assert.assertEquals(1, loggedRequests.size());
-        JsonObject gptRequestBody = gson.fromJson(chatGptClient.getRequestBody(), JsonObject.class);
+        JsonObject gptRequestBody = gson.fromJson(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
         JsonArray prompts = gptRequestBody.get("messages").getAsJsonArray();
         String userPrompt = prompts.get(1).getAsJsonObject().get("content").getAsString();
         Assert.assertEquals(commentUserPrompt, userPrompt);

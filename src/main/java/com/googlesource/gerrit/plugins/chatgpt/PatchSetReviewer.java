@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.ModeClassLoader;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
@@ -16,9 +16,14 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.Gerr
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptClientStateless;
+import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+
+import static com.googlesource.gerrit.plugins.chatgpt.utils.ClassUtils.registerDynamicClasses;
 
 @Slf4j
 public class PatchSetReviewer {
@@ -27,18 +32,18 @@ public class PatchSetReviewer {
 
     private final Gson gson = new Gson();
     private final GerritClient gerritClient;
-    private final ChatGptClient chatGptClient;
 
     private Configuration config;
+    @Getter
+    private IChatGptClient chatGptClient;
     private GerritCommentRange gerritCommentRange;
     private List<ReviewBatch> reviewBatches;
     private List<GerritComment> commentProperties;
     private List<Integer> reviewScores;
 
     @Inject
-    PatchSetReviewer(GerritClient gerritClient, ChatGptClient chatGptClient) {
+    PatchSetReviewer(GerritClient gerritClient) {
         this.gerritClient = gerritClient;
-        this.chatGptClient = chatGptClient;
     }
 
     public void review(Configuration config, GerritChange change) throws Exception {
@@ -126,6 +131,10 @@ public class PatchSetReviewer {
             log.warn("Patch set too large. Skipping review. changeId: {}", change.getFullChangeId());
             return String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines());
         }
+        chatGptClient = (IChatGptClient) ModeClassLoader.getInstance(
+                "client.api.chatgpt.ChatGptClient", config);
+        registerDynamicClasses(ChatGptClientStateless.class);
+
         return chatGptClient.ask(config, change, patchSet);
     }
 
