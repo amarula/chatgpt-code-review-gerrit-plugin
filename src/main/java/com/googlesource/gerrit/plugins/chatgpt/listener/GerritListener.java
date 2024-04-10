@@ -10,18 +10,21 @@ import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GerritListener implements EventListener {
     private final ConfigCreator configCreator;
-
     private final EventListenerHandler eventListenerHandler;
+    private final PluginDataHandler pluginDataHandler;
 
     @Inject
-    public GerritListener(ConfigCreator configCreator, EventListenerHandler eventListenerHandler) {
+    public GerritListener(ConfigCreator configCreator, EventListenerHandler eventListenerHandler, PluginDataHandler
+            pluginDataHandler) {
         this.configCreator = configCreator;
         this.eventListenerHandler = eventListenerHandler;
+        this.pluginDataHandler = pluginDataHandler;
     }
 
     @Override
@@ -37,11 +40,10 @@ public class GerritListener implements EventListener {
 
         try {
             Configuration config = configCreator.createConfig(projectNameKey);
-            eventListenerHandler.handleEvent(config, patchSetEvent);
+            eventListenerHandler.handleEvent(config, patchSetEvent, pluginDataHandler);
         } catch (NoSuchProjectException e) {
             log.error("Project not found: {}", projectNameKey, e);
         }
     }
-
 
 }

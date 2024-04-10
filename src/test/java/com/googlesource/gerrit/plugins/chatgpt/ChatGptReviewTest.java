@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventListenerHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.GerritListener;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
@@ -34,6 +35,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
@@ -87,6 +89,9 @@ public class ChatGptReviewTest {
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9527);
+
+    @Mock
+    private PluginDataHandler pluginDataHandler;
 
     private PluginConfig globalConfig;
     private PluginConfig projectConfig;
@@ -277,7 +282,7 @@ public class ChatGptReviewTest {
         event.patchSet = this::createPatchSetAttribute;
         EventListenerHandler eventListenerHandler = new EventListenerHandler(patchSetReviewer, gerritClient);
 
-        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler);
+        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler, pluginDataHandler);
         gerritListener.onEvent(event);
         CompletableFuture<Void> future = eventListenerHandler.getLatestFuture();
         future.get();
@@ -334,7 +339,7 @@ public class ChatGptReviewTest {
         event.patchSet = this::createPatchSetAttribute;
         EventListenerHandler eventListenerHandler = new EventListenerHandler(patchSetReviewer, gerritClient);
 
-        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler);
+        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler, pluginDataHandler);
         gerritListener.onEvent(event);
         CompletableFuture<Void> future = eventListenerHandler.getLatestFuture();
         future.get();
@@ -370,7 +375,7 @@ public class ChatGptReviewTest {
         event.patchSet = this::createPatchSetAttribute;
         EventListenerHandler eventListenerHandler = new EventListenerHandler(patchSetReviewer, gerritClient);
 
-        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler);
+        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler, pluginDataHandler);
         gerritListener.onEvent(event);
         CompletableFuture<Void> future = eventListenerHandler.getLatestFuture();
         Assert.assertThrows(NullPointerException.class, () -> future.get());
@@ -404,7 +409,7 @@ public class ChatGptReviewTest {
         event.eventCreatedOn = TEST_TIMESTAMP;
         EventListenerHandler eventListenerHandler = new EventListenerHandler(patchSetReviewer, gerritClient);
 
-        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler);
+        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler, pluginDataHandler);
         gerritListener.onEvent(event);
         int commentPropertiesSize = gerritClient.getClientData(gerritChange).getCommentProperties().size();
         CompletableFuture<Void> future = eventListenerHandler.getLatestFuture();
