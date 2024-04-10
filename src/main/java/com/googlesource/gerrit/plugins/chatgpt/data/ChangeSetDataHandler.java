@@ -1,13 +1,13 @@
 package com.googlesource.gerrit.plugins.chatgpt.data;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.singleton.ChangeSetSingletonManager;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptUserPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.utils.SingletonManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
@@ -16,18 +16,18 @@ import java.util.HashSet;
 public class ChangeSetDataHandler {
 
     public static ChangeSetData getNewInstance(Configuration config, GerritChange change, Integer gptAccountId) {
-        return SingletonManager.getNewInstance(ChangeSetData.class, change,
+        return ChangeSetSingletonManager.getNewInstance(ChangeSetData.class, change,
                 gptAccountId,
                 config.getVotingMinScore(),
                 config.getVotingMaxScore());
     }
 
     public static ChangeSetData getInstance(GerritChange change) {
-        return SingletonManager.getInstance(ChangeSetData.class, change);
+        return ChangeSetSingletonManager.getInstance(ChangeSetData.class, change);
     }
 
     public static ChangeSetData getInstance(String changeId) {
-        return SingletonManager.getInstance(ChangeSetData.class, changeId);
+        return getInstance(new GerritChange(changeId));
     }
 
     public static void update(Configuration config, GerritChange change, GerritClient gerritClient) {
@@ -54,7 +54,7 @@ public class ChangeSetDataHandler {
     }
 
     public static void removeInstance(GerritChange change) {
-        SingletonManager.removeInstance(ChangeSetData.class, change.getFullChangeId());
+        ChangeSetSingletonManager.removeInstance(ChangeSetData.class, change);
     }
 
 }

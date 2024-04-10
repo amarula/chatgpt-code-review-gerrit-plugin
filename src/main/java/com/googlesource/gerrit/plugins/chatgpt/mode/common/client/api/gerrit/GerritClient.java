@@ -2,10 +2,10 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.singleton.ChangeSetSingletonManager;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
-import com.googlesource.gerrit.plugins.chatgpt.utils.SingletonManager;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
@@ -22,7 +22,7 @@ public class GerritClient {
 
     public void initialize(Configuration config, GerritChange change) {
         log.debug("Initializing client instances for change: {}", change.getFullChangeId());
-        gerritClientFacade = SingletonManager.getInstance(GerritClientFacade.class, change, config);
+        gerritClientFacade = ChangeSetSingletonManager.getInstance(GerritClientFacade.class, change, config);
     }
 
     public GerritPermittedVotingRange getPermittedVotingRange(GerritChange change) {
@@ -79,11 +79,11 @@ public class GerritClient {
 
     public void destroy(GerritChange change) {
         log.debug("Destroying GerritClientFacade instance for change: {}", change.getFullChangeId());
-        SingletonManager.removeInstance(GerritClientFacade.class, change.getFullChangeId());
+        ChangeSetSingletonManager.removeInstance(GerritClientFacade.class, change);
     }
 
     private void updateGerritClientFacade(GerritChange change) {
-        gerritClientFacade = SingletonManager.getInstance(GerritClientFacade.class, change);
+        gerritClientFacade = ChangeSetSingletonManager.getInstance(GerritClientFacade.class, change);
     }
 
 }

@@ -47,7 +47,6 @@ public class GerritChange {
         patchSetEvent = (PatchSetEvent) event;
     }
 
-    // Incomplete initialization used by CodeReviewPluginIT
     public GerritChange(String fullChangeId) {
         this.fullChangeId = fullChangeId;
     }
