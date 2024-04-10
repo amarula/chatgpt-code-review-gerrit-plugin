@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt;
+package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt;
 
 import com.google.common.net.HttpHeaders;
 import com.google.gson.Gson;
@@ -7,9 +7,11 @@ import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.HttpClientWithRetry;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
+import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -25,7 +27,7 @@ import java.util.Optional;
 
 @Slf4j
 @Singleton
-public class ChatGptClient {
+public class ChatGptClientStateless implements IChatGptClient {
     private static final int REVIEW_ATTEMPT_LIMIT = 3;
     @Getter
     private String requestBody;
@@ -35,6 +37,7 @@ public class ChatGptClient {
     private final HttpClientWithRetry httpClientWithRetry = new HttpClientWithRetry();
     private boolean isCommentEvent = false;
 
+    @Override
     public String ask(Configuration config, String changeId, String patchSet) throws Exception {
         for (int attemptInd = 0; attemptInd < REVIEW_ATTEMPT_LIMIT; attemptInd++) {
             HttpRequest request = createRequest(config, changeId, patchSet);
@@ -56,6 +59,7 @@ public class ChatGptClient {
         throw new RuntimeException("Failed to receive valid ChatGPT response");
     }
 
+    @Override
     public String ask(Configuration config, GerritChange change, String patchSet) throws Exception {
         isCommentEvent = change.getIsCommentEvent();
 
