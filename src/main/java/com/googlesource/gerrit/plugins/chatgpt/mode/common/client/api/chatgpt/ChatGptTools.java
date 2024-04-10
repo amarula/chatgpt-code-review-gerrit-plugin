@@ -7,7 +7,7 @@ import com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-class ChatGptTools {
+public class ChatGptTools {
     private final static Gson gson = new Gson();
 
     public static ChatGptRequest retrieveTools() {
