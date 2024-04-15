@@ -2,7 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.google.common.net.HttpHeaders;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;

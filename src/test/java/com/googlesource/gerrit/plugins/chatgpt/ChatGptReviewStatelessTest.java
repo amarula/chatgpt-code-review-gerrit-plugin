@@ -21,9 +21,9 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventListenerHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.GerritListener;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -49,7 +49,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
-import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator.*;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless.*;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithNewLine;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -58,7 +58,7 @@ import static org.mockito.Mockito.when;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
-public class ChatGptReviewTest {
+public class ChatGptReviewStatelessTest {
     private static final Path basePath = Paths.get("src/test/resources");
     private static final String GERRIT_AUTH_BASE_URL = "http://localhost:9527";
     private static final int GERRIT_GPT_ACCOUNT_ID = 1000000;
@@ -164,7 +164,7 @@ public class ChatGptReviewTest {
                         .withBody("[{\"_account_id\": " + GERRIT_USER_ACCOUNT_ID + "}]")));
 
         // Mock the behavior of the gerritAccountGroups request
-        WireMock.stubFor(WireMock.get(UriResourceLocator.gerritAccountsUri() +
+        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritAccountsUri() +
                             gerritGroupPostfixUri(GERRIT_USER_ACCOUNT_ID))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
@@ -186,21 +186,21 @@ public class ChatGptReviewTest {
                         .withBodyFile("gerritPatchSetDetail.json")));
 
         // Mock the behavior of the gerritPatchSetFiles request
-        WireMock.stubFor(WireMock.get(gerritPatchSetFilesUri(fullChangeId))
+        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("gerritPatchSetFiles.json")));
 
         // Mock the behavior of the gerritPatchSet diff requests
-        WireMock.stubFor(WireMock.get(gerritPatchSetFilesUri(fullChangeId) +
-                            gerritDiffPostfixUri("/COMMIT_MSG"))
+        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId) +
+                            UriResourceLocatorStateless.gerritDiffPostfixUri("/COMMIT_MSG"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("gerritPatchSetDiffCommitMsg.json")));
-        WireMock.stubFor(WireMock.get(gerritPatchSetFilesUri(fullChangeId) +
-                            gerritDiffPostfixUri("test_file.py"))
+        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId) +
+                            UriResourceLocatorStateless.gerritDiffPostfixUri("test_file.py"))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -215,7 +215,7 @@ public class ChatGptReviewTest {
 
         // Mock the behavior of the askGpt request
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocator.chatCompletionsUri()).getPath()))
+                        + UriResourceLocatorStateless.chatCompletionsUri()).getPath()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -322,7 +322,7 @@ public class ChatGptReviewTest {
 
         chatGptPromptStateless.setCommentEvent(false);
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocator.chatCompletionsUri()).getPath()))
+                        + UriResourceLocatorStateless.chatCompletionsUri()).getPath()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -388,7 +388,7 @@ public class ChatGptReviewTest {
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
         chatGptPromptStateless.setCommentEvent(true);
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocator.chatCompletionsUri()).getPath()))
+                        + UriResourceLocatorStateless.chatCompletionsUri()).getPath()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())

@@ -4,11 +4,11 @@ import com.google.common.net.HttpHeaders;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.HttpClientWithRetry;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -101,7 +101,7 @@ public class ChatGptClientStateless implements IChatGptClient {
     }
 
     private HttpRequest createRequest(Configuration config, String changeId, String patchSet) {
-        URI uri = URI.create(URI.create(config.getGptDomain()) + UriResourceLocator.chatCompletionsUri());
+        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateless.chatCompletionsUri());
         log.debug("ChatGPT request URI: {}", uri);
         requestBody = createRequestBody(config, changeId, patchSet);
         log.debug("ChatGPT request body: {}", requestBody);
