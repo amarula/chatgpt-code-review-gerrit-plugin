@@ -2,7 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.google.gson.JsonArray;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
