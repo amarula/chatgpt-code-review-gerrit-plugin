@@ -1,6 +1,5 @@
 package com.googlesource.gerrit.plugins.chatgpt;
 
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
@@ -24,13 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.ClassUtils.registerDynamicClasses;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class PatchSetReviewer {
     private static final String SPLIT_REVIEW_MSG = "Too many changes. Please consider splitting into patches smaller " +
             "than %s lines for review.";
 
-    private final Gson gson = new Gson();
     private final GerritClient gerritClient;
 
     private Configuration config;
@@ -96,7 +95,7 @@ public class PatchSetReviewer {
     }
 
     private void retrieveReviewBatches(String reviewReply, GerritChange change) {
-        ChatGptResponseContent reviewJson = gson.fromJson(reviewReply, ChatGptResponseContent.class);
+        ChatGptResponseContent reviewJson = getGson().fromJson(reviewReply, ChatGptResponseContent.class);
         ChangeSetData changeSetData = ChangeSetDataHandler.getInstance(change);
         for (ChatGptReplyItem replyItem : reviewJson.getReplies()) {
             String reply = replyItem.getReply();

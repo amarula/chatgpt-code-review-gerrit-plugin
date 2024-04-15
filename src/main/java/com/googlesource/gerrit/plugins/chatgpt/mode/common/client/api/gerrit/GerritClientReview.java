@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.MessageSanitizer.sanitizeChatGptMessage;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.EMPTY_REVIEW_MESSAGE;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 @Slf4j
@@ -37,7 +38,7 @@ public class GerritClientReview extends GerritClientAccount {
         log.debug("Set-Review uri: {}", uri);
         String auth = generateBasicAuth(config.getGerritUserName(),
                 config.getGerritPassword());
-        String json = gson.toJson(reviewMap);
+        String json = getGson().toJson(reviewMap);
         log.debug("Set-Review JSON: {}", json);
         HttpRequest request = HttpRequest.newBuilder()
                 .header(HttpHeaders.AUTHORIZATION, auth)

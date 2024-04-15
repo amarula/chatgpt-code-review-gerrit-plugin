@@ -1,8 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt;
 
 import com.google.common.net.HttpHeaders;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.HttpClientWithRetry;
@@ -25,15 +23,15 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Optional;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getNoEscapedGson;
+
 @Slf4j
 @Singleton
 public class ChatGptClientStateless implements IChatGptClient {
     private static final int REVIEW_ATTEMPT_LIMIT = 3;
     @Getter
     private String requestBody;
-    private final Gson gson = new GsonBuilder()
-            .disableHtmlEscaping()
-            .create();
     private final HttpClientWithRetry httpClientWithRetry = new HttpClientWithRetry();
     private boolean isCommentEvent = false;
 
@@ -79,13 +77,14 @@ public class ChatGptClientStateless implements IChatGptClient {
         }
         else {
             ChatGptResponseUnstreamed chatGptResponseUnstreamed =
-                    gson.fromJson(body, ChatGptResponseUnstreamed.class);
+                    getGson().fromJson(body, ChatGptResponseUnstreamed.class);
             return getResponseContent(chatGptResponseUnstreamed.getChoices().get(0).getMessage().getToolCalls());
         }
     }
 
     private boolean validateResponse(String contentExtracted, String changeId, int attemptInd) {
-        ChatGptResponseContent chatGptResponseContent = gson.fromJson(contentExtracted, ChatGptResponseContent.class);
+        ChatGptResponseContent chatGptResponseContent =
+                getGson().fromJson(contentExtracted, ChatGptResponseContent.class);
         String returnedChangeId = chatGptResponseContent.getChangeId();
         // A response is considered valid if either no changeId is returned or the changeId returned matches the one
         // provided in the request
@@ -140,7 +139,7 @@ public class ChatGptClientStateless implements IChatGptClient {
                 .toolChoice(tools.getToolChoice())
                 .build();
 
-        return gson.toJson(chatGptRequest);
+        return getNoEscapedGson().toJson(chatGptRequest);
     }
 
     private Optional<String> extractContentFromLine(String line) {
@@ -150,7 +149,7 @@ public class ChatGptClientStateless implements IChatGptClient {
             return Optional.empty();
         }
         ChatGptResponseStreamed chatGptResponseStreamed =
-                gson.fromJson(line.substring("data: ".length()), ChatGptResponseStreamed.class);
+                getGson().fromJson(line.substring("data: ".length()), ChatGptResponseStreamed.class);
         ChatGptResponseMessage delta = chatGptResponseStreamed.getChoices().get(0).getDelta();
         if (delta == null || delta.getToolCalls() == null) {
             return Optional.empty();
