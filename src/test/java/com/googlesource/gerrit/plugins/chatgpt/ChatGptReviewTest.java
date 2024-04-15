@@ -24,7 +24,7 @@ import com.googlesource.gerrit.plugins.chatgpt.listener.GerritListener;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
@@ -93,7 +93,7 @@ public class ChatGptReviewTest {
     private PluginConfig globalConfig;
     private PluginConfig projectConfig;
     private Configuration config;
-    private ChatGptPrompt chatGptPrompt;
+    private ChatGptPromptStateless chatGptPromptStateless;
 
     @Before
     public void before() throws IOException {
@@ -143,7 +143,7 @@ public class ChatGptReviewTest {
         when(config.getGerritUserName()).thenReturn(GERRIT_GPT_USERNAME);
 
         // Load the prompts
-        chatGptPrompt = new ChatGptPrompt(config);
+        chatGptPromptStateless = new ChatGptPromptStateless(config);
     }
 
     private void setupMockRequests() {
@@ -235,7 +235,7 @@ public class ChatGptReviewTest {
         promptTagReview = new String(Files.readAllBytes(basePath.resolve(
                 "__files/chatGptPromptTagReview.json")));
         promptTagComments = new String(Files.readAllBytes(basePath.resolve("__files/chatGptPromptTagRequests.json")));
-        expectedSystemPromptReview = ChatGptPrompt.getDefaultGptReviewSystemPrompt();
+        expectedSystemPromptReview = ChatGptPromptStateless.getDefaultGptReviewSystemPrompt();
     }
 
     private AccountAttribute createTestAccountAttribute() {
@@ -260,15 +260,16 @@ public class ChatGptReviewTest {
         ConfigCreator mockConfigCreator = mock(ConfigCreator.class);
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
         String reviewUserPrompt = joinWithNewLine(Arrays.asList(
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT,
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + " " + chatGptPrompt.getPatchSetReviewUserPrompt(),
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES,
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_DIFF,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + " " +
+                        chatGptPromptStateless.getPatchSetReviewUserPrompt(),
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_DIFF,
                 diffContent,
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY,
                 promptTagReview
         ));
-        chatGptPrompt.setCommentEvent(false);
+        chatGptPromptStateless.setCommentEvent(false);
 
         PatchSetCreatedEvent event = mock(PatchSetCreatedEvent.class);
         when(event.getProjectNameKey()).thenReturn(PROJECT_NAME);
@@ -309,16 +310,17 @@ public class ChatGptReviewTest {
         ConfigCreator mockConfigCreator = mock(ConfigCreator.class);
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
         String reviewVoteUserPrompt = joinWithNewLine(Arrays.asList(
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT,
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + " " + chatGptPrompt.getPatchSetReviewUserPrompt(),
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES,
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_DIFF,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + " " +
+                        chatGptPromptStateless.getPatchSetReviewUserPrompt(),
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_DIFF,
                 diffContent,
-                ChatGptPrompt.DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY,
+                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY,
                 promptTagReview
         ));
 
-        chatGptPrompt.setCommentEvent(false);
+        chatGptPromptStateless.setCommentEvent(false);
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
                         + UriResourceLocator.chatCompletionsUri()).getPath()))
                 .willReturn(WireMock.aResponse()
@@ -384,7 +386,7 @@ public class ChatGptReviewTest {
         ConfigCreator mockConfigCreator = mock(ConfigCreator.class);
         when(config.getGerritUserName()).thenReturn(GERRIT_GPT_USERNAME);
         when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
-        chatGptPrompt.setCommentEvent(true);
+        chatGptPromptStateless.setCommentEvent(true);
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
                         + UriResourceLocator.chatCompletionsUri()).getPath()))
                 .willReturn(WireMock.aResponse()
@@ -409,11 +411,11 @@ public class ChatGptReviewTest {
         future.get();
 
         String commentUserPrompt = joinWithNewLine(Arrays.asList(
-                ChatGptPrompt.DEFAULT_GPT_REQUEST_PROMPT_DIFF,
+                ChatGptPromptStateless.DEFAULT_GPT_REQUEST_PROMPT_DIFF,
                 diffContent,
-                ChatGptPrompt.DEFAULT_GPT_REQUEST_PROMPT_REQUESTS,
+                ChatGptPromptStateless.DEFAULT_GPT_REQUEST_PROMPT_REQUESTS,
                 promptTagComments,
-                ChatGptPrompt.getCommentRequestUserPrompt(commentPropertiesSize)
+                ChatGptPromptStateless.getCommentRequestUserPrompt(commentPropertiesSize)
         ));
         RequestPatternBuilder requestPatternBuilder = WireMock.postRequestedFor(
                 WireMock.urlEqualTo(gerritSetReviewUri(gerritChange.getFullChangeId())));
