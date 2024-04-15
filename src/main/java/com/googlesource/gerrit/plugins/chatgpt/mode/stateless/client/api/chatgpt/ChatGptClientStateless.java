@@ -3,9 +3,9 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgp
 import com.google.common.net.HttpHeaders;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.HttpClientWithRetry;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http.HttpClientWithRetry;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
