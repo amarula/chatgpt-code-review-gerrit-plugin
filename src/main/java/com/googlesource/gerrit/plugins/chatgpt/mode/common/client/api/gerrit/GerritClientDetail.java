@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.net.URI;
 import java.util.List;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+
 @Slf4j
 public class GerritClientDetail extends GerritClientBase {
     private GerritPatchSetDetail gerritPatchSetDetail;
@@ -62,7 +64,7 @@ public class GerritClientDetail extends GerritClientBase {
         URI uri = URI.create(config.getGerritAuthBaseUrl()
                 + UriResourceLocator.gerritGetPatchSetDetailUri(fullChangeId));
         String responseBody = forwardGetRequest(uri);
-        return gson.fromJson(responseBody, GerritPatchSetDetail.class);
+        return getGson().fromJson(responseBody, GerritPatchSetDetail.class);
     }
 
 }

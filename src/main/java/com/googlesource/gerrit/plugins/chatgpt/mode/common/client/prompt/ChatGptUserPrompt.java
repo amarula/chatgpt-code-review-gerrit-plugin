@@ -1,6 +1,5 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
-import com.google.gson.Gson;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptMessageItem;
@@ -9,10 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+
 @Slf4j
 public class ChatGptUserPrompt {
     private final ChatGptUserPromptBase chatGptUserPromptBase;
-    private final Gson gson = new Gson();
 
     public ChatGptUserPrompt(Configuration config, GerritChange change, GerritClientData gerritClientData) {
         if (change.getIsCommentEvent()) {
@@ -28,7 +28,7 @@ public class ChatGptUserPrompt {
             chatGptUserPromptBase.addMessageItem(i);
         }
         List<ChatGptMessageItem> messageItems = chatGptUserPromptBase.getMessageItems();
-        return messageItems.isEmpty() ? "" : gson.toJson(messageItems);
+        return messageItems.isEmpty() ? "" : getGson().toJson(messageItems);
     }
 
 }
