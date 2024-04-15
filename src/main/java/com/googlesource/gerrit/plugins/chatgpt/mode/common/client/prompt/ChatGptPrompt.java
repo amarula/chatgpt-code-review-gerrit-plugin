@@ -1,6 +1,5 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
@@ -15,6 +14,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 @Slf4j
@@ -187,10 +187,9 @@ public class ChatGptPrompt {
     private void loadPrompts() {
         // Avoid repeated loading of prompt constants
         if (DEFAULT_GPT_SYSTEM_PROMPT != null) return;
-        Gson gson = new Gson();
         Class<? extends ChatGptPrompt> me = this.getClass();
         try (InputStreamReader reader = FileUtils.getInputStreamReader("Config/prompts.json")) {
-            Map<String, Object> values = gson.fromJson(reader, new TypeToken<Map<String, Object>>(){}.getType());
+            Map<String, Object> values = getGson().fromJson(reader, new TypeToken<Map<String, Object>>(){}.getType());
             for (Map.Entry<String, Object> entry : values.entrySet()) {
                 try {
                     Field field = me.getDeclaredField(entry.getKey());

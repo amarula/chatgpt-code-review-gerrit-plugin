@@ -14,6 +14,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.*;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.getTimeStamp;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 
@@ -69,7 +70,7 @@ public class GerritClientComments extends GerritClientAccount {
                 + UriResourceLocator.gerritGetAllPatchSetCommentsUri(change.getFullChangeId()));
         String responseBody = forwardGetRequest(uri);
         Type mapEntryType = new TypeToken<Map<String, List<GerritComment>>>(){}.getType();
-        Map<String, List<GerritComment>> lastCommentMap = gson.fromJson(responseBody, mapEntryType);
+        Map<String, List<GerritComment>> lastCommentMap = getGson().fromJson(responseBody, mapEntryType);
 
         String latestChangeMessageId = null;
         HashMap<String, List<GerritComment>> latestComments = new HashMap<>();
