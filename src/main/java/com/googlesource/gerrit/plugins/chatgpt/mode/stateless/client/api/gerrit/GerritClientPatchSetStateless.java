@@ -1,7 +1,5 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
@@ -19,11 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getNoEscapedGson;
+
 @Slf4j
 public class GerritClientPatchSetStateless extends GerritClientPatchSet implements IGerritClientPatchSet {
-    private final Gson gson = new GsonBuilder()
-            .disableHtmlEscaping()
-            .create();
     private final List<String> diffs;
     private boolean isCommitMessage;
 
@@ -70,14 +68,14 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
 
     private void processFileDiff(String filename, String fileDiffJson) {
         log.debug("FileDiff Json processed: {}", fileDiffJson);
-        GerritPatchSetFileDiff gerritPatchSetFileDiff = gson.fromJson(fileDiffJson, GerritPatchSetFileDiff.class);
+        GerritPatchSetFileDiff gerritPatchSetFileDiff = getGson().fromJson(fileDiffJson, GerritPatchSetFileDiff.class);
         // Initialize the reduced file diff for the Gerrit review with fields `meta_a` and `meta_b`
         GerritReviewFileDiff gerritReviewFileDiff = new GerritReviewFileDiff(gerritPatchSetFileDiff.getMetaA(),
                 gerritPatchSetFileDiff.getMetaB());
         FileDiffProcessed fileDiffProcessed = new FileDiffProcessed(config, isCommitMessage, gerritPatchSetFileDiff);
         fileDiffsProcessed.put(filename, fileDiffProcessed);
         gerritReviewFileDiff.setContent(fileDiffProcessed.getReviewDiffContent());
-        diffs.add(gson.toJson(gerritReviewFileDiff));
+        diffs.add(getNoEscapedGson().toJson(gerritReviewFileDiff));
     }
 
     private String getFileDiffsJson(String fullChangeId, List<String> files, int revisionBase) throws Exception {
