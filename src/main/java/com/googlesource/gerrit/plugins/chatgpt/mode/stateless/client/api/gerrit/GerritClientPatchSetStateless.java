@@ -3,13 +3,13 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPatchSetFileDiff;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritReviewFileDiff;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -45,8 +45,8 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
 
     private List<String> getAffectedFiles(String fullChangeId, int revisionBase) throws Exception {
         URI uri = URI.create(config.getGerritAuthBaseUrl()
-                + UriResourceLocator.gerritPatchSetFilesUri(fullChangeId)
-                + UriResourceLocator.gerritRevisionBasePostfixUri(revisionBase));
+                + UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId)
+                + UriResourceLocatorStateless.gerritRevisionBasePostfixUri(revisionBase));
         log.debug("Affected Files URI: '{}'", uri);
         JsonObject affectedFileMap = forwardGetRequestReturnJsonObject(uri);
         List<String> files = new ArrayList<>();
@@ -87,9 +87,9 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
                 continue;
             }
             URI uri = URI.create(config.getGerritAuthBaseUrl()
-                    + UriResourceLocator.gerritPatchSetFilesUri(fullChangeId)
-                    + UriResourceLocator.gerritDiffPostfixUri(filename)
-                    + UriResourceLocator.gerritRevisionBasePostfixUri(revisionBase));
+                    + UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId)
+                    + UriResourceLocatorStateless.gerritDiffPostfixUri(filename)
+                    + UriResourceLocatorStateless.gerritRevisionBasePostfixUri(revisionBase));
             log.debug("getFileDiffsJson URI: '{}'", uri);
             String fileDiffJson = forwardGetRequest(uri).replaceAll("^[')\\]}]+", "");
             processFileDiff(filename, fileDiffJson);

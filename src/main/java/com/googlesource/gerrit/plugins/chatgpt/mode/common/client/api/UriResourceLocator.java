@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.client;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -6,10 +6,6 @@ import java.nio.charset.StandardCharsets;
 
 public class UriResourceLocator {
     private static final String AUTH_PREFIX_URI = "/a";
-
-    private UriResourceLocator() {
-        throw new IllegalStateException("Utility class");
-    }
 
     public static String gerritAccountsUri() {
         return AUTH_PREFIX_URI + "/accounts";
@@ -27,16 +23,8 @@ public class UriResourceLocator {
         return revisionBase > 0 ? "/?base=" + revisionBase : "";
     }
 
-    public static String gerritDiffPostfixUri(String filename) {
-        return "/" + URLEncoder.encode(filename, StandardCharsets.UTF_8) + "/diff";
-    }
-
     public static String gerritPatchSetRevisionsUri(String fullChangeId) {
         return gerritSetChangesUri(fullChangeId, "/?o=ALL_REVISIONS");
-    }
-
-    public static String gerritPatchSetFilesUri(String fullChangeId) {
-        return gerritSetChangesUri(fullChangeId, "/revisions/current/files");
     }
 
     public static String gerritGetAllPatchSetCommentsUri(String fullChangeId) {
@@ -51,11 +39,7 @@ public class UriResourceLocator {
         return gerritSetChangesUri(fullChangeId, "/detail");
     }
 
-    public static String chatCompletionsUri() {
-        return "/v1/chat/completions";
-    }
-
-    private static String gerritSetChangesUri(String fullChangeId, String uriPostfix) {
+    protected static String gerritSetChangesUri(String fullChangeId, String uriPostfix) {
         return AUTH_PREFIX_URI + "/changes/" + fullChangeId + uriPostfix;
     }
 
