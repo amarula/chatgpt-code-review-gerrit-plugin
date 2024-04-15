@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.client;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http;
 
 import com.github.rholder.retry.*;
 import com.google.inject.Singleton;
