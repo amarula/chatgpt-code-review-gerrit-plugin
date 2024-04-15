@@ -7,9 +7,9 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.HttpClientWith
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -115,14 +115,14 @@ public class ChatGptClientStateless implements IChatGptClient {
     }
 
     private String createRequestBody(Configuration config, String changeId, String patchSet) {
-        ChatGptPrompt chatGptPrompt = new ChatGptPrompt(config, isCommentEvent);
+        ChatGptPromptStateless chatGptPromptStateless = new ChatGptPromptStateless(config, isCommentEvent);
         ChatGptRequestMessage systemMessage = ChatGptRequestMessage.builder()
                 .role("system")
-                .content(chatGptPrompt.getGptSystemPrompt())
+                .content(chatGptPromptStateless.getGptSystemPrompt())
                 .build();
         ChatGptRequestMessage userMessage = ChatGptRequestMessage.builder()
                 .role("user")
-                .content(chatGptPrompt.getGptUserPrompt(patchSet, changeId))
+                .content(chatGptPromptStateless.getGptUserPrompt(patchSet, changeId))
                 .build();
 
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, isCommentEvent);
