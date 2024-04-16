@@ -10,6 +10,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.model.api.chatgpt.ChatGptCompletionRequest;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -126,8 +127,10 @@ public class ChatGptClientStateless implements IChatGptClient {
                 .build();
 
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, isCommentEvent);
-        ChatGptRequest tools = ChatGptTools.retrieveTools();
-        ChatGptRequest chatGptRequest = ChatGptRequest.builder()
+        ChatGptTool[] tools = new ChatGptTool[] {
+                ChatGptTools.retrieveFormatRepliesTool()
+        };
+        ChatGptCompletionRequest chatGptCompletionRequest = ChatGptCompletionRequest.builder()
                 .model(config.getGptModel())
                 .messages(List.of(systemMessage, userMessage))
                 .temperature(chatGptParameters.getGptTemperature())
@@ -135,11 +138,11 @@ public class ChatGptClientStateless implements IChatGptClient {
                 // Seed value is Utilized to prevent ChatGPT from mixing up separate API calls that occur in close
                 // temporal proximity.
                 .seed(chatGptParameters.getRandomSeed())
-                .tools(tools.getTools())
-                .toolChoice(tools.getToolChoice())
+                .tools(tools)
+                .toolChoice(ChatGptTools.retrieveFormatRepliesToolChoice())
                 .build();
 
-        return getNoEscapedGson().toJson(chatGptRequest);
+        return getNoEscapedGson().toJson(chatGptCompletionRequest);
     }
 
     private Optional<String> extractContentFromLine(String line) {
