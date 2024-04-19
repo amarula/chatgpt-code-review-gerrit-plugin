@@ -26,7 +26,7 @@ public class GerritChange {
     private Change.Key changeKey;
     private String fullChangeId;
     @Setter
-    private Boolean isCommentEvent;
+    private Boolean isCommentEvent = false;
 
     public GerritChange(Project.NameKey projectNameKey, BranchNameKey branchNameKey, Change.Key changeKey) {
         this.projectNameKey = projectNameKey;
@@ -58,6 +58,10 @@ public class GerritChange {
         catch (NullPointerException e) {
             return Optional.empty();
         }
+    }
+
+    public String getProjectName() {
+        return getProjectNameKey().toString();
     }
 
     private void buildFullChangeId() {
