@@ -1,11 +1,15 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt;
 
 import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Data
 public class ChatGptTool {
+    @NonNull
     private String type;
     private Function function;
 
