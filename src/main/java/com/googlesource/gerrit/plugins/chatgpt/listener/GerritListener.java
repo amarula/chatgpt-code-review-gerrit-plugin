@@ -11,19 +11,26 @@ import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GerritListener implements EventListener {
     private final ConfigCreator configCreator;
     private final EventListenerHandler eventListenerHandler;
+    private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler pluginDataHandler;
 
     @Inject
-    public GerritListener(ConfigCreator configCreator, EventListenerHandler eventListenerHandler, PluginDataHandler
-            pluginDataHandler) {
+    public GerritListener(
+            ConfigCreator configCreator,
+            EventListenerHandler eventListenerHandler,
+            GitRepoFiles gitRepoFiles,
+            PluginDataHandler pluginDataHandler
+    ) {
         this.configCreator = configCreator;
         this.eventListenerHandler = eventListenerHandler;
+        this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandler = pluginDataHandler;
     }
 
@@ -40,7 +47,7 @@ public class GerritListener implements EventListener {
 
         try {
             Configuration config = configCreator.createConfig(projectNameKey);
-            eventListenerHandler.handleEvent(config, patchSetEvent, pluginDataHandler);
+            eventListenerHandler.handleEvent(config, patchSetEvent, gitRepoFiles, pluginDataHandler);
         } catch (NoSuchProjectException e) {
             log.error("Project not found: {}", projectNameKey, e);
         }

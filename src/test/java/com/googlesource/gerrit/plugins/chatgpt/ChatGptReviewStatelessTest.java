@@ -34,6 +34,13 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
     private ChatGptPromptStateless chatGptPromptStateless;
 
     protected void initConfig() {
+        super.initGlobalAndProjectConfig();
+
+        when(globalConfig.getBoolean(Mockito.eq("gptStreamOutput"), Mockito.anyBoolean()))
+                .thenReturn(GPT_STREAM_OUTPUT);
+        when(globalConfig.getBoolean(Mockito.eq("gptReviewCommitMessages"), Mockito.anyBoolean()))
+                .thenReturn(true);
+
         super.initConfig();
 
         // Load the prompts
