@@ -23,9 +23,10 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventListenerHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.GerritListener;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.NonNull;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
@@ -74,6 +75,9 @@ public class ChatGptReviewTestBase {
     public WireMockRule wireMockRule = new WireMockRule(9527);
 
     @Mock
+    protected GitRepoFiles gitRepoFiles;
+
+    @Mock
     protected PluginDataHandler pluginDataHandler;
 
     protected PluginConfig globalConfig;
@@ -87,6 +91,7 @@ public class ChatGptReviewTestBase {
 
     @Before
     public void before() throws NoSuchProjectException {
+        initGlobalAndProjectConfig();
         initConfig();
         setupMockRequests();
         initComparisonContent();
@@ -97,7 +102,7 @@ public class ChatGptReviewTestBase {
         return new GerritChange(PROJECT_NAME, BRANCH_NAME, CHANGE_ID);
     }
 
-    protected void initConfig() {
+    protected void initGlobalAndProjectConfig() {
         globalConfig = mock(PluginConfig.class);
         Answer<Object> returnDefaultArgument = invocation -> {
             // Return the second argument (i.e., the Default value) passed to the method
@@ -118,16 +123,14 @@ public class ChatGptReviewTestBase {
         // Mock the Global Config values that differ from the ones provided by Default
         when(globalConfig.getString(Mockito.eq("gptDomain"), Mockito.anyString()))
                 .thenReturn(GPT_DOMAIN);
-        when(globalConfig.getBoolean(Mockito.eq("gptStreamOutput"), Mockito.anyBoolean()))
-                .thenReturn(GPT_STREAM_OUTPUT);
-        when(globalConfig.getBoolean(Mockito.eq("gptReviewCommitMessages"), Mockito.anyBoolean()))
-                .thenReturn(true);
 
         projectConfig = mock(PluginConfig.class);
 
         // Mock the Project Config values
         when(projectConfig.getBoolean(Mockito.eq("isEnabled"), Mockito.anyBoolean())).thenReturn(true);
+    }
 
+    protected void initConfig() {
         config = new Configuration(globalConfig, projectConfig);
 
         // Mock the config instance values
@@ -152,7 +155,7 @@ public class ChatGptReviewTestBase {
                         .withBody("[{\"_account_id\": " + GERRIT_USER_ACCOUNT_ID + "}]")));
 
         // Mock the behavior of the gerritAccountGroups request
-        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritAccountsUri() +
+        WireMock.stubFor(WireMock.get(UriResourceLocator.gerritAccountsUri() +
                         gerritGroupPostfixUri(GERRIT_USER_ACCOUNT_ID))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
@@ -203,7 +206,8 @@ public class ChatGptReviewTestBase {
         typeSpecificSetup.accept(event);
 
         EventListenerHandler eventListenerHandler = new EventListenerHandler(patchSetReviewer, gerritClient);
-        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler, pluginDataHandler);
+        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler, gitRepoFiles,
+                pluginDataHandler);
         gerritListener.onEvent(event);
 
         return eventListenerHandler.getLatestFuture();

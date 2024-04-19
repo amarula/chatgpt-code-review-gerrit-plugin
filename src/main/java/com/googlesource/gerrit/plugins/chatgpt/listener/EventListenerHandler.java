@@ -11,9 +11,12 @@ import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.data.ProjectDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFilesHandler;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,16 +56,23 @@ public class EventListenerHandler {
         addShutdownHoot();
     }
 
-    public void initialize(GerritChange change) {
+    public void initialize(GerritChange change, GitRepoFiles gitRepoFiles, PluginDataHandler pluginDataHandler) {
         gerritClient.initialize(config, change);
         Integer gptAccountId = gerritClient.getNotNullAccountId(change, config.getGerritUserName());
         changeSetData = ChangeSetDataHandler.getNewInstance(config, change, gptAccountId);
+        GitRepoFilesHandler.createNewInstance(gitRepoFiles);
+        ProjectDataHandler.createNewInstance(pluginDataHandler);
     }
 
-    public void handleEvent(Configuration config, Event event, PluginDataHandler pluginDataHandler) {
+    public void handleEvent(
+            Configuration config,
+            Event event,
+            GitRepoFiles gitRepoFiles,
+            PluginDataHandler pluginDataHandler
+    ) {
         this.config = config;
         GerritChange change = new GerritChange(event);
-        initialize(change);
+        initialize(change, gitRepoFiles, pluginDataHandler);
 
         if (!preProcessEvent(change)) {
             destroy(change);

@@ -39,19 +39,6 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
                 DEFAULT_GPT_SYSTEM_PROMPT_INPUT_DESCRIPTION_REVIEW;
     }
 
-    public String getPatchSetReviewUserPrompt() {
-        List<String> attributes = new ArrayList<>(PATCH_SET_REVIEW_REPLY_ATTRIBUTES);
-        if (config.isVotingEnabled() || config.getFilterNegativeComments()) {
-            updateScoreDescription();
-        }
-        else {
-            attributes.remove(ATTRIBUTE_SCORE);
-        }
-        updateRelevanceDescription();
-        return buildFieldSpecifications(attributes) + SPACE +
-                DEFAULT_GPT_REPLIES_PROMPT_INLINE;
-    }
-
     public String getGptSystemPrompt() {
         List<String> prompt = new ArrayList<>(Arrays.asList(
                 config.getString(Configuration.KEY_GPT_SYSTEM_PROMPT, DEFAULT_GPT_SYSTEM_PROMPT), DOT,
@@ -109,24 +96,6 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
             steps.add(DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES);
         }
         return steps;
-    }
-
-    private void updateScoreDescription() {
-        String scoreDescription = DEFAULT_GPT_REPLIES_ATTRIBUTES.get(ATTRIBUTE_SCORE);
-        if (scoreDescription.contains("%d")) {
-            scoreDescription = String.format(scoreDescription, config.getVotingMinScore(), config.getVotingMaxScore());
-            DEFAULT_GPT_REPLIES_ATTRIBUTES.put(ATTRIBUTE_SCORE, scoreDescription);
-        }
-    }
-
-    private void updateRelevanceDescription() {
-        String relevanceDescription = DEFAULT_GPT_REPLIES_ATTRIBUTES.get(ATTRIBUTE_RELEVANCE);
-        if (relevanceDescription.contains("%s")) {
-            String defaultGptRelevanceRules = config.getString(Configuration.KEY_GPT_RELEVANCE_RULES,
-                    DEFAULT_GPT_RELEVANCE_RULES);
-            relevanceDescription = String.format(relevanceDescription, defaultGptRelevanceRules);
-            DEFAULT_GPT_REPLIES_ATTRIBUTES.put(ATTRIBUTE_RELEVANCE, relevanceDescription);
-        }
     }
 
 }
