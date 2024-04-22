@@ -24,6 +24,30 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "78da71e1_59f66c78",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-22T21:04:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77fd16a2_7d28b21b",
+      "range": {
+        "startLine": 20,
+        "startChar": 50,
+        "endLine": 20,
+        "endChar": 60
+      },
+      "revId": "338be70731aa89191594bb57294322e08e1dac9c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bc2d9562_50087d20",
@@ -37,6 +61,30 @@
       "writtenOn": "2024-04-22T20:47:31Z",
       "side": 1,
       "message": "remove?",
+      "range": {
+        "startLine": 24,
+        "startChar": 44,
+        "endLine": 24,
+        "endChar": 48
+      },
+      "revId": "338be70731aa89191594bb57294322e08e1dac9c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "89584b26_f6e8419c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-22T21:04:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bc2d9562_50087d20",
       "range": {
         "startLine": 24,
         "startChar": 44,
@@ -70,6 +118,30 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "12fb8d5a_253ce528",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-22T21:04:59Z",
+      "side": 1,
+      "message": "I hope now it\u0027s clear what I meant, let me know if anything else needs explanation.",
+      "parentUuid": "426e8a94_944fd203",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 11
+      },
+      "revId": "338be70731aa89191594bb57294322e08e1dac9c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "099472cb_80e8253f",
@@ -93,6 +165,30 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8c2ac483_846b9470",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/config/Configuration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-22T21:04:59Z",
+      "side": 1,
+      "message": "I\u0027ve noticed that public fields are grouped together, so I\u0027ve moved that one. It would also look odd to have a single `public` filed surrounded with bunch of `private` fields ;)",
+      "parentUuid": "099472cb_80e8253f",
+      "range": {
+        "startLine": 89,
+        "startChar": 2,
+        "endLine": 89,
+        "endChar": 70
+      },
+      "revId": "338be70731aa89191594bb57294322e08e1dac9c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6cca40c8_93abf428",
@@ -106,6 +202,30 @@
       "writtenOn": "2024-04-22T20:47:31Z",
       "side": 1,
       "message": "I think this might be creating issue, when the user doesn\u0027t have any preferred email set.\n\nIn that case, `escapedUserEmail` will be empty string \"\", which will cause any comment containing an empty string to trigger Chat GPT.\n\nI have managed to reproduce this, see a snapshot here [1]\n\n\n[1] https://imgur.com/a/qva90hU",
+      "range": {
+        "startLine": 82,
+        "startChar": 34,
+        "endLine": 82,
+        "endChar": 74
+      },
+      "revId": "338be70731aa89191594bb57294322e08e1dac9c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "32a70e04_a41ffe8f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/messages/ClientMessage.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-22T21:04:59Z",
+      "side": 1,
+      "message": "Good catch!",
+      "parentUuid": "6cca40c8_93abf428",
       "range": {
         "startLine": 82,
         "startChar": 34,
