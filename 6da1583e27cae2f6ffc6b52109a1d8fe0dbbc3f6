@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b4f8f867_952e2cf3",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-04-22T15:59:11Z",
+      "side": 1,
+      "message": "Why not using Guice injection instead?\n\n- You add `@Inject` to the constructor\n- Add `Provider\u003cGson\u003e` as constrcutor\u0027s parameter\n- Bind a `Gson.class` to `GsonUtils`\n- Make `GsonUtils` implement `Provider\u003cGson\u003e`",
+      "range": {
+        "startLine": 20,
+        "startChar": 60,
+        "endLine": 20,
+        "endChar": 77
+      },
+      "revId": "6da1583e27cae2f6ffc6b52109a1d8fe0dbbc3f6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
