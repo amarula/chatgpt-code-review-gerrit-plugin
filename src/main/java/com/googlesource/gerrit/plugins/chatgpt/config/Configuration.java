@@ -86,10 +86,10 @@ public class Configuration {
     public static final String KEY_GPT_COMMENT_TEMPERATURE = "gptCommentTemperature";
     public static final String KEY_VOTING_MIN_SCORE = "votingMinScore";
     public static final String KEY_VOTING_MAX_SCORE = "votingMaxScore";
+    public static final String KEY_GERRIT_USERNAME = "gerritUserName";
 
     private static final String KEY_GPT_TOKEN = "gptToken";
     private static final String KEY_GERRIT_AUTH_BASE_URL = "gerritAuthBaseUrl";
-    private static final String KEY_GERRIT_USERNAME = "gerritUserName";
     private static final String KEY_GERRIT_PASSWORD = "gerritPassword";
     private static final String KEY_GPT_DOMAIN = "gptDomain";
     private static final String KEY_GPT_MODEL = "gptModel";
@@ -124,10 +124,17 @@ public class Configuration {
     private final PluginConfig globalConfig;
     @Getter
     private final PluginConfig projectConfig;
+    @Getter
+    private final String gerritUserEmail;
 
     public Configuration(PluginConfig globalConfig, PluginConfig projectConfig) {
+        this(globalConfig, projectConfig, "");
+    }
+
+    public Configuration(PluginConfig globalConfig, PluginConfig projectConfig, String gerritUserEmail) {
         this.globalConfig = globalConfig;
         this.projectConfig = projectConfig;
+        this.gerritUserEmail = gerritUserEmail;
     }
 
     public String getGptToken() {
