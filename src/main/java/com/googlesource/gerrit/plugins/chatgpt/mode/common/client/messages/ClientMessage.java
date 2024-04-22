@@ -77,9 +77,16 @@ public class ClientMessage extends ClientBase {
     }
 
     private Pattern getBotMentionPattern() {
-        String escapedUserName = Pattern.quote(config.getGerritUserName());
-        String emailRegex = "@" + escapedUserName + "(?:@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})?\\b";
+        String emailRegex = "@" + getUserNameOrEmail() + "(?:@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})?\\b";
         return Pattern.compile(emailRegex);
     }
 
+    private String getUserNameOrEmail() {
+        String escapedUserName = Pattern.quote(config.getGerritUserName());
+        String escapedUserEmail = Pattern.quote(config.getGerritUserEmail());
+        if (escapedUserEmail.isBlank()) {
+            return  escapedUserName;
+        }
+        return escapedUserName + "|" + escapedUserEmail;
+    }
 }
