@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "73a68ea2_690becb6",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/messages/ClientMessage.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-22T21:23:52Z",
+      "side": 1,
+      "message": "This is still not working because the quoting is adding, \\Q and \\E are respectively to represent the start and end of the literal string, so `escapedUserEmail` will never be blank.\n\nWe should test `config.getGerritUserEmail()` instead",
+      "range": {
+        "startLine": 87,
+        "startChar": 12,
+        "endLine": 87,
+        "endChar": 38
+      },
+      "revId": "653244cf1b57116af0b41c3d4d81140d2f91a3df",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
