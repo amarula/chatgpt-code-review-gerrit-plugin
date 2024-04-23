@@ -46,6 +46,30 @@
       },
       "revId": "f1568cb9c0d62d683367c1fb279951267bfe74cb",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "18f955fb_23ee8c47",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritChange.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-04-23T08:38:17Z",
+      "side": 1,
+      "message": "Ah, right, because of the `@Setter` Lombok\u0027s magic 😜 Worth putting a small comment on L29 on this rationale? (it isn\u0027t obvious from the code)",
+      "parentUuid": "67df7cbb_2d89b97f",
+      "range": {
+        "startLine": 29,
+        "startChar": 12,
+        "endLine": 29,
+        "endChar": 19
+      },
+      "revId": "f1568cb9c0d62d683367c1fb279951267bfe74cb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
