@@ -48,6 +48,30 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "17593cfa_d99d7792",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-23T10:31:41Z",
+      "side": 1,
+      "message": "It seems to be fixed with the next patchsets.",
+      "parentUuid": "6f9c4e5b_ebc9426b",
+      "range": {
+        "startLine": 44,
+        "startChar": 8,
+        "endLine": 44,
+        "endChar": 108
+      },
+      "revId": "6a8d108ee47fb11cafc24ea9b7432cd94a134252",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "690a16f5_1c345da1",
@@ -85,6 +109,30 @@
       "side": 1,
       "message": "The `getLabel` cannot be `null` hence only `all` needs to be taken care of.\nFixed.",
       "parentUuid": "690a16f5_1c345da1",
+      "range": {
+        "startLine": 101,
+        "startChar": 12,
+        "endLine": 103,
+        "endChar": 35
+      },
+      "revId": "6a8d108ee47fb11cafc24ea9b7432cd94a134252",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3fb4eb5e_f70829b5",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-23T10:31:41Z",
+      "side": 1,
+      "message": "It seems to be fixed with the next patchsets.",
+      "parentUuid": "aaeb9231_6ae9f1d2",
       "range": {
         "startLine": 101,
         "startChar": 12,
