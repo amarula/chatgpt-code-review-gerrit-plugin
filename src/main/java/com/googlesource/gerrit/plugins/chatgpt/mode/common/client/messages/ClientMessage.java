@@ -77,7 +77,7 @@ public class ClientMessage extends ClientBase {
     }
 
     private Pattern getBotMentionPattern() {
-        String emailRegex = "@" + getUserNameOrEmail() + "(?:@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})?\\b";
+        String emailRegex = "@" + getUserNameOrEmail() + "\\b";
         return Pattern.compile(emailRegex);
     }
 
