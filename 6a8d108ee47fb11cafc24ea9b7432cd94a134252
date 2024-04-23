@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "6f9c4e5b_ebc9426b",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-23T09:32:39Z",
+      "side": 1,
+      "message": "AFAIU that is not correct the line in question ensures that it actually cannot be `null`:\n```\ngerritPatchSetDetail.getWorkInProgress() !\u003d null \u0026\u0026 gerritPatchSetDetail.getWorkInProgress()\n```",
+      "parentUuid": "f3d01eb0_eb009987",
+      "range": {
+        "startLine": 44,
+        "startChar": 8,
+        "endLine": 44,
+        "endChar": 108
+      },
+      "revId": "6a8d108ee47fb11cafc24ea9b7432cd94a134252",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "690a16f5_1c345da1",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
         "patchSetId": 1
@@ -37,6 +61,30 @@
       "writtenOn": "2024-04-23T07:57:26Z",
       "side": 1,
       "message": "This will raise `NullPointerException` when no label is set",
+      "range": {
+        "startLine": 101,
+        "startChar": 12,
+        "endLine": 103,
+        "endChar": 35
+      },
+      "revId": "6a8d108ee47fb11cafc24ea9b7432cd94a134252",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "aaeb9231_6ae9f1d2",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-23T09:32:39Z",
+      "side": 1,
+      "message": "The `getLabel` cannot be `null` hence only `all` needs to be taken care of.\nFixed.",
+      "parentUuid": "690a16f5_1c345da1",
       "range": {
         "startLine": 101,
         "startChar": 12,
