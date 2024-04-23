@@ -1,16 +1,16 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
-import com.google.gson.JsonArray;
+import com.google.gerrit.extensions.common.AccountInfo;
+import com.google.gerrit.extensions.common.GroupInfo;
+import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import lombok.extern.slf4j.Slf4j;
 
-import java.net.URI;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Slf4j
 public class GerritClientAccount extends GerritClientBase {
@@ -37,11 +37,12 @@ public class GerritClientAccount extends GerritClientBase {
     }
 
     protected Optional<Integer> getAccountId(String authorUsername) {
-        URI uri = URI.create(config.getGerritAuthBaseUrl()
-                + UriResourceLocator.gerritAccountIdUri(authorUsername));
-        try {
-            JsonArray responseArray = forwardGetRequestReturnJsonArray(uri);
-            return Optional.of(responseArray.get(0).getAsJsonObject().get("_account_id").getAsInt());
+        try (ManualRequestContext requestContext = config.openRequestContext()) {
+            List<AccountInfo> accounts = config.getGerritApi().accounts().query(authorUsername).get();
+            if (accounts.isEmpty()) {
+                return Optional.empty();
+            }
+            return Optional.of(accounts.get(0)).map(a -> a._accountId);
         }
         catch (Exception e) {
             log.error("Could not find account ID for username '{}'", authorUsername);
@@ -55,14 +56,9 @@ public class GerritClientAccount extends GerritClientBase {
     }
 
     private List<String> getAccountGroups(Integer accountId) {
-        URI uri = URI.create(config.getGerritAuthBaseUrl()
-                + UriResourceLocator.gerritAccountsUri()
-                + UriResourceLocator.gerritGroupPostfixUri(accountId));
-        try {
-            JsonArray responseArray = forwardGetRequestReturnJsonArray(uri);
-            return StreamSupport.stream(responseArray.spliterator(), false)
-                    .map(jsonElement -> jsonElement.getAsJsonObject().get("name").getAsString())
-                    .collect(Collectors.toList());
+        try (ManualRequestContext requestContext = config.openRequestContext()) {
+            List<GroupInfo> groups = config.getGerritApi().accounts().id(accountId).getGroups();
+            return groups.stream().map(g -> g.name).collect(toList());
         }
         catch (Exception e) {
             log.error("Could not find groups for account ID {}", accountId);
