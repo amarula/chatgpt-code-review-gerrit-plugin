@@ -12,9 +12,14 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.extensions.api.GerritApi;
+import com.google.gerrit.extensions.api.accounts.AccountApi;
+import com.google.gerrit.extensions.api.accounts.Accounts;
+import com.google.gerrit.extensions.api.accounts.Accounts.QueryRequest;
 import com.google.gerrit.extensions.api.changes.ChangeApi;
 import com.google.gerrit.extensions.api.changes.Changes;
+import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.extensions.common.GroupInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.json.OutputFormat;
 import com.google.gerrit.server.config.PluginConfig;
@@ -36,7 +41,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import com.googlesource.gerrit.plugins.chatgpt.listener.GerritEventContextModule;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
+import com.google.inject.TypeLiteral;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade;
@@ -169,27 +174,15 @@ public class ChatGptReviewTestBase {
     protected void setupMockRequests() throws RestApiException {
         String fullChangeId = getGerritChange().getFullChangeId();
 
+        Accounts accountsMock = mockGerritAccountsRestEndpoint();
         // Mock the behavior of the gerritAccountIdUri request
-        WireMock.stubFor(WireMock.get(gerritAccountIdUri(GERRIT_GPT_USERNAME))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBody("[{\"_account_id\": " + GERRIT_GPT_ACCOUNT_ID + "}]")));
+        mockGerritAccountsQueryApiCall(accountsMock, GERRIT_GPT_USERNAME, GERRIT_GPT_ACCOUNT_ID);
 
         // Mock the behavior of the gerritAccountIdUri request
-        WireMock.stubFor(WireMock.get(gerritAccountIdUri(GERRIT_USER_USERNAME))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBody("[{\"_account_id\": " + GERRIT_USER_ACCOUNT_ID + "}]")));
+        mockGerritAccountsQueryApiCall(accountsMock, GERRIT_USER_USERNAME, GERRIT_USER_ACCOUNT_ID);
 
         // Mock the behavior of the gerritAccountGroups request
-        WireMock.stubFor(WireMock.get(UriResourceLocator.gerritAccountsUri() +
-                        gerritGroupPostfixUri(GERRIT_USER_ACCOUNT_ID))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("gerritAccountGroups.json")));
+        mockGerritAccountGroupsApiCall(accountsMock, GERRIT_USER_ACCOUNT_ID);
 
         // Mock the behavior of the gerritPatchSetRevisionsUri request
         WireMock.stubFor(WireMock.get(gerritPatchSetRevisionsUri(fullChangeId))
@@ -204,7 +197,7 @@ public class ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("gerritPatchSetDetail.json")));
-        mockGerritApi();
+        mockGerritChangeDetailsApiCall();
 
         // Mock the behavior of the gerritPatchSet comments request
         WireMock.stubFor(WireMock.get(gerritGetAllPatchSetCommentsUri(fullChangeId))
@@ -219,7 +212,32 @@ public class ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)));
     }
 
-    private void mockGerritApi() throws RestApiException {
+    private Accounts mockGerritAccountsRestEndpoint() {
+        Accounts accountsMock = mock(Accounts.class);
+        when(gerritApi.accounts()).thenReturn(accountsMock);
+        return accountsMock;
+    }
+
+    private void mockGerritAccountsQueryApiCall(
+        Accounts accountsMock, String username, int expectedAccountId) throws RestApiException {
+        QueryRequest queryRequestMock = mock(QueryRequest.class);
+        when(accountsMock.query(username)).thenReturn(queryRequestMock);
+        when(queryRequestMock.get()).thenReturn(List.of(new AccountInfo(expectedAccountId)));
+    }
+
+    private void mockGerritAccountGroupsApiCall(Accounts accountsMock, int accountId)
+        throws RestApiException {
+        Gson gson = OutputFormat.JSON.newGson();
+        List<GroupInfo> groups =
+            gson.fromJson(
+                readTestFile("__files/gerritAccountGroups.json"),
+                new TypeLiteral<List<GroupInfo>>() {}.getType());
+        AccountApi accountApiMock = mock(AccountApi.class);
+        when(accountsMock.id(accountId)).thenReturn(accountApiMock);
+        when(accountApiMock.getGroups()).thenReturn(groups);
+    }
+
+    private void mockGerritChangeDetailsApiCall() throws RestApiException {
         Gson gson = OutputFormat.JSON.newGson();
         ChangeInfo changeInfo = gson.fromJson(readTestFile("__files/gerritPatchSetDetail.json"), ChangeInfo.class);
         Changes changesMock = mock(Changes.class);
