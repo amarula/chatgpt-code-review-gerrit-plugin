@@ -46,6 +46,30 @@
       },
       "revId": "6da1583e27cae2f6ffc6b52109a1d8fe0dbbc3f6",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8770ab4e_bc03530e",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-04-23T08:40:35Z",
+      "side": 1,
+      "message": "Generally speaking with Gerrit plugins the best choice is always injection, because of the need to decouple the use of interfaces from the way that those are built and integrated with their implementations.\n\nHowever, you have a point that here doesn\u0027t really provide so much benefit.",
+      "parentUuid": "3a5b8238_814b0194",
+      "range": {
+        "startLine": 20,
+        "startChar": 60,
+        "endLine": 20,
+        "endChar": 77
+      },
+      "revId": "6da1583e27cae2f6ffc6b52109a1d8fe0dbbc3f6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
