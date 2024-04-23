@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7969f9b6_f157e829",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-23T11:28:12Z",
+      "side": 1,
+      "message": "Good finding @patrizio.gelosi@amarulasolutions.com",
+      "revId": "2945dbd055ccd504c9c53e1718af5558e0e18750",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
