@@ -1,6 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.config;
 
+import com.google.gerrit.entities.Account;
+import com.google.gerrit.extensions.api.GerritApi;
 import com.google.gerrit.server.config.PluginConfig;
+import com.google.gerrit.server.util.ManualRequestContext;
+import com.google.gerrit.server.util.OneOffRequestContext;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -120,21 +125,29 @@ public class Configuration {
     private static final String KEY_IGNORE_OUTDATED_INLINE_COMMENTS = "ignoreOutdatedInlineComments";
     private static final String KEY_IGNORE_RESOLVED_CHAT_GPT_COMMENTS = "ignoreResolvedChatGptComments";
 
+    private final OneOffRequestContext context;
+    private final Account.Id userId;
     @Getter
     private final PluginConfig globalConfig;
     @Getter
     private final PluginConfig projectConfig;
     @Getter
     private final String gerritUserEmail;
+    @Getter
+    private final GerritApi gerritApi;
 
-    public Configuration(PluginConfig globalConfig, PluginConfig projectConfig) {
-        this(globalConfig, projectConfig, "");
-    }
 
-    public Configuration(PluginConfig globalConfig, PluginConfig projectConfig, String gerritUserEmail) {
+    public Configuration(OneOffRequestContext context, GerritApi gerritApi, PluginConfig globalConfig, PluginConfig projectConfig, String gerritUserEmail, Account.Id userId) {
+        this.context = context;
+        this.gerritApi = gerritApi;
         this.globalConfig = globalConfig;
         this.projectConfig = projectConfig;
         this.gerritUserEmail = gerritUserEmail;
+        this.userId = userId;
+    }
+
+    public ManualRequestContext openRequestContext() {
+      return context.openAs(userId);
     }
 
     public String getGptToken() {
