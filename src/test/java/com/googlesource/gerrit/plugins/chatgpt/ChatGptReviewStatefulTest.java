@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.common.net.HttpHeaders;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings.MODES;
@@ -52,7 +53,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         chatGptPromptStateful = new ChatGptPromptStateful(config, getGerritChange());
     }
 
-    protected void setupMockRequests() {
+    protected void setupMockRequests() throws RestApiException {
         super.setupMockRequests();
 
         // Mock the behavior of the ChatGPT create file request

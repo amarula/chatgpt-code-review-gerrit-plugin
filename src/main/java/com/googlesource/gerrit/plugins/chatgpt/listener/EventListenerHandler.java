@@ -58,8 +58,7 @@ public class EventListenerHandler {
 
     public void initialize(GerritChange change, GitRepoFiles gitRepoFiles, PluginDataHandler pluginDataHandler) {
         gerritClient.initialize(config, change);
-        Integer gptAccountId = gerritClient.getNotNullAccountId(change, config.getGerritUserName());
-        changeSetData = ChangeSetDataHandler.getNewInstance(config, change, gptAccountId);
+        changeSetData = ChangeSetDataHandler.getNewInstance(config, change, config.getUserId().get());
         GitRepoFilesHandler.createNewInstance(gitRepoFiles);
         ProjectDataHandler.createNewInstance(pluginDataHandler);
     }
