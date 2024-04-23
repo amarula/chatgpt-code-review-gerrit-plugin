@@ -22,6 +22,30 @@
       },
       "revId": "f1568cb9c0d62d683367c1fb279951267bfe74cb",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "67df7cbb_2d89b97f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritChange.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-23T06:15:28Z",
+      "side": 1,
+      "message": "It\u0027s mainly to have the getter method named `getIsCommentEvent` instead of `isCommentEvent`. Using the latter could lead to a naming conflict with the property itself.",
+      "parentUuid": "aeb46529_64037e5f",
+      "range": {
+        "startLine": 29,
+        "startChar": 12,
+        "endLine": 29,
+        "endChar": 19
+      },
+      "revId": "f1568cb9c0d62d683367c1fb279951267bfe74cb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
