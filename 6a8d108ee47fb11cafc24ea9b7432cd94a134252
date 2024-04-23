@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f3d01eb0_eb009987",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-23T07:57:26Z",
+      "side": 1,
+      "message": "Now `isWorkInProgress` will raise `NullPointerException` when no WIP is set",
+      "range": {
+        "startLine": 44,
+        "startChar": 8,
+        "endLine": 44,
+        "endChar": 108
+      },
+      "revId": "6a8d108ee47fb11cafc24ea9b7432cd94a134252",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "690a16f5_1c345da1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-23T07:57:26Z",
+      "side": 1,
+      "message": "This will raise `NullPointerException` when no label is set",
+      "range": {
+        "startLine": 101,
+        "startChar": 12,
+        "endLine": 103,
+        "endChar": 35
+      },
+      "revId": "6a8d108ee47fb11cafc24ea9b7432cd94a134252",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
