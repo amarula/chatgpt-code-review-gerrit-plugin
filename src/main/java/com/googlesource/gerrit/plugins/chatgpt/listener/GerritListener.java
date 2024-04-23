@@ -10,28 +10,17 @@ import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class GerritListener implements EventListener {
     private final ConfigCreator configCreator;
-    private final EventListenerHandler eventListenerHandler;
-    private final GitRepoFiles gitRepoFiles;
-    private final PluginDataHandler pluginDataHandler;
+    private final EventHandlerExecutor evenHandlerExecutor;
 
     @Inject
-    public GerritListener(
-            ConfigCreator configCreator,
-            EventListenerHandler eventListenerHandler,
-            GitRepoFiles gitRepoFiles,
-            PluginDataHandler pluginDataHandler
-    ) {
+    public GerritListener(ConfigCreator configCreator, EventHandlerExecutor evenHandlerExecutor) {
         this.configCreator = configCreator;
-        this.eventListenerHandler = eventListenerHandler;
-        this.gitRepoFiles = gitRepoFiles;
-        this.pluginDataHandler = pluginDataHandler;
+        this.evenHandlerExecutor = evenHandlerExecutor;
     }
 
     @Override
@@ -47,7 +36,7 @@ public class GerritListener implements EventListener {
 
         try {
             Configuration config = configCreator.createConfig(projectNameKey);
-            eventListenerHandler.handleEvent(config, patchSetEvent, gitRepoFiles, pluginDataHandler);
+            evenHandlerExecutor.execute(config, patchSetEvent);
         } catch (NoSuchProjectException e) {
             log.error("Project not found: {}", projectNameKey, e);
         }

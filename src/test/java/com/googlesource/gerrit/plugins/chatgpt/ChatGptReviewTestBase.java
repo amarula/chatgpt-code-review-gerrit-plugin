@@ -18,11 +18,12 @@ import com.google.gerrit.server.events.PatchSetEvent;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
-import com.googlesource.gerrit.plugins.chatgpt.listener.EventListenerHandler;
-import com.googlesource.gerrit.plugins.chatgpt.listener.GerritListener;
+import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
@@ -32,7 +33,6 @@ import org.apache.http.entity.ContentType;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -42,7 +42,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
@@ -199,18 +198,23 @@ public class ChatGptReviewTestBase {
         }
     }
 
-    protected CompletableFuture<Void> handleEventBasedOnType(boolean isCommentEvent) {
+    protected EventHandlerTask.Result handleEventBasedOnType(boolean isCommentEvent) {
         Consumer<Event> typeSpecificSetup = getTypeSpecificSetup(isCommentEvent);
         Event event = isCommentEvent ? mock(CommentAddedEvent.class) : mock(PatchSetCreatedEvent.class);
         setupCommonEventMocks((PatchSetEvent) event); // Apply common mock configurations
         typeSpecificSetup.accept(event);
 
-        EventListenerHandler eventListenerHandler = new EventListenerHandler(patchSetReviewer, gerritClient);
-        GerritListener gerritListener = new GerritListener(mockConfigCreator, eventListenerHandler, gitRepoFiles,
-                pluginDataHandler);
-        gerritListener.onEvent(event);
-
-        return eventListenerHandler.getLatestFuture();
+        EventHandlerTask.Factory factory = Guice.createInjector(EventHandlerTask.MODULE, new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(GerritClient.class).toInstance(gerritClient);
+                bind(GitRepoFiles.class).toInstance(gitRepoFiles);
+                bind(ConfigCreator.class).toInstance(mockConfigCreator);
+                bind(PatchSetReviewer.class).toInstance(patchSetReviewer);
+                bind(PluginDataHandler.class).toInstance(pluginDataHandler);
+            }
+        }).getInstance(EventHandlerTask.Factory.class);
+        return factory.create(config, event).execute();
     }
 
     protected void testRequestSent() {
@@ -227,7 +231,6 @@ public class ChatGptReviewTestBase {
         gerritClient = new GerritClient();
         patchSetReviewer = new PatchSetReviewer(gerritClient);
         mockConfigCreator = mock(ConfigCreator.class);
-        when(mockConfigCreator.createConfig(ArgumentMatchers.any())).thenReturn(config);
     }
 
     private AccountAttribute createTestAccountAttribute() {
