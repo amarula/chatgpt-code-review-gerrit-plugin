@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7cca6b34_d5bd4a49",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-23T08:34:22Z",
+      "side": 1,
+      "message": "Verified this locally by using users with and without emails, with both autocompletion and username only.\n\nHappy with the result, all good from my side.",
+      "revId": "64bf0cadf2253f7c30ee3825b1e74496236831d9",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
