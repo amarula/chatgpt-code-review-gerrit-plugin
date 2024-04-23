@@ -10,16 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant.*;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -27,7 +23,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @Slf4j
-@RunWith(MockitoJUnitRunner.class)
 public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     private static final String CHAT_GPT_FILE_ID = "file-TEST_FILE_ID";
     private static final String CHAT_GPT_ASSISTANT_ID = "asst_TEST_ASSISTANT_ID";
@@ -92,11 +87,10 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     }
 
     @Test
-    public void assistantCreated() throws InterruptedException, ExecutionException {
+    public void assistantCreated() {
         Map<String, String> mockedPluginDataHandler = new HashMap<>();
         setupAssistantCreatedTest(mockedPluginDataHandler);
-        CompletableFuture<Void> future = handleEventBasedOnType(false);
-        future.get();
+        handleEventBasedOnType(false);
 
         String projectFileIdKey = PROJECT_NAME + "." + KEY_FILE_ID;
         Assert.assertEquals(mockedPluginDataHandler.get(projectFileIdKey), CHAT_GPT_FILE_ID);
