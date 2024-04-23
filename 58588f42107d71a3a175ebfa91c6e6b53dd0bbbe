@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4029040b_0cc58474",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientDetail.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-23T09:38:12Z",
+      "side": 1,
+      "message": "deal with the case when `info.messages` is `null`",
+      "range": {
+        "startLine": 102,
+        "startChar": 14,
+        "endLine": 102,
+        "endChar": 27
+      },
+      "revId": "58588f42107d71a3a175ebfa91c6e6b53dd0bbbe",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
