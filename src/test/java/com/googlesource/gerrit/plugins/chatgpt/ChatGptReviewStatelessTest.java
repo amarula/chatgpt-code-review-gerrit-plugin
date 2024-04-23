@@ -3,6 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.common.net.HttpHeaders;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         chatGptPromptStateless = new ChatGptPromptStateless(config);
     }
 
-    protected void setupMockRequests() {
+    protected void setupMockRequests() throws RestApiException {
         super.setupMockRequests();
 
         String fullChangeId = getGerritChange().getFullChangeId();
