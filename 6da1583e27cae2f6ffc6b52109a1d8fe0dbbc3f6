@@ -22,6 +22,30 @@
       },
       "revId": "6da1583e27cae2f6ffc6b52109a1d8fe0dbbc3f6",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3a5b8238_814b0194",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-23T06:24:39Z",
+      "side": 1,
+      "message": "This is a good point. I did consider using injection, but then opted for a more straightforward approach. Could you elaborate on the advantages of using Guice injection instead of static methods in this context?",
+      "parentUuid": "b4f8f867_952e2cf3",
+      "range": {
+        "startLine": 20,
+        "startChar": 60,
+        "endLine": 20,
+        "endChar": 77
+      },
+      "revId": "6da1583e27cae2f6ffc6b52109a1d8fe0dbbc3f6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
