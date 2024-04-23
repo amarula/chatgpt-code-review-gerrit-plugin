@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.util.List;
 
+// TODO remove once migration to GerritApi is finished and com.google.gerrit.extensions.common.ChangeInfo is used
 @Data
 public class GerritPatchSetDetail {
     private Labels labels;
