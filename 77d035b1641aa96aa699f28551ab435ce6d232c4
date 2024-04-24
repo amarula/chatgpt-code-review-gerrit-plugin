@@ -18,6 +18,24 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "558101f2_f6a0daaa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-24T18:56:12Z",
+      "side": 1,
+      "message": "Yes, I see the same and this will be fixed by follow-up changes that are removing `CustomClassLoder`, `SingletonManager` and others in favour of Guice injection.",
+      "parentUuid": "6d8c8b8e_38682927",
+      "revId": "77d035b1641aa96aa699f28551ab435ce6d232c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1ffa37de_27e000c0",
@@ -31,6 +49,30 @@
       "writtenOn": "2024-04-24T15:03:22Z",
       "side": 1,
       "message": "This method always returns `OK` even for executions that resulted in a failure.\nI think that might be misleading, should we model a `FAILURE` result too?",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 25
+      },
+      "revId": "77d035b1641aa96aa699f28551ab435ce6d232c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "41579d6c_12ae8f2f",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/listener/EventHandlerTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-24T18:56:12Z",
+      "side": 1,
+      "message": "This is only added for testing purposes, as previously the `ComposableFuture` was used to test not-supported projects. I can add `FAILURE`",
+      "parentUuid": "1ffa37de_27e000c0",
       "range": {
         "startLine": 109,
         "startChar": 0,
@@ -64,6 +106,30 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "47eb58fe_953da0d0",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatelessTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-24T18:56:12Z",
+      "side": 1,
+      "message": "I doubt that rebasing on 1193727 will help. But after migration to Guice, this test is bassing again without any modifications to the test code.",
+      "parentUuid": "b32df68b_d16ca447",
+      "range": {
+        "startLine": 160,
+        "startChar": 0,
+        "endLine": 162,
+        "endChar": 41
+      },
+      "revId": "77d035b1641aa96aa699f28551ab435ce6d232c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6cbbe560_702d6bef",
@@ -77,6 +143,30 @@
       "writtenOn": "2024-04-24T15:07:08Z",
       "side": 1,
       "message": "Why binding these classes here? Are they not handled by Guice already?",
+      "range": {
+        "startLine": 235,
+        "startChar": 0,
+        "endLine": 239,
+        "endChar": 76
+      },
+      "revId": "77d035b1641aa96aa699f28551ab435ce6d232c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e587b48b_13c44091",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-24T18:56:12Z",
+      "side": 1,
+      "message": "We need to have the same instance of those classes in the tests and _production_ code. Some of those are mocks that provide data, others have some parts mocked or stubbed.\n\nAlso without those bindings tests are failing.",
+      "parentUuid": "6cbbe560_702d6bef",
       "range": {
         "startLine": 235,
         "startChar": 0,
