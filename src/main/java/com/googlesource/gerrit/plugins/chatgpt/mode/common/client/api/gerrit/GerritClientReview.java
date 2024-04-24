@@ -1,26 +1,24 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
-import com.google.common.net.HttpHeaders;
+import com.google.common.base.Strings;
+import com.google.gerrit.extensions.client.Comment;
+import com.google.gerrit.entities.LabelId;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.api.changes.ReviewInput.CommentInput;
+import com.google.gerrit.extensions.api.changes.ReviewResult;
+import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.entity.ContentType;
 
-import java.net.URI;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.MessageSanitizer.sanitizeChatGptMessage;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.EMPTY_REVIEW_MESSAGE;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-import static java.net.HttpURLConnection.HTTP_OK;
 
 @Slf4j
 public class GerritClientReview extends GerritClientAccount {
@@ -28,39 +26,35 @@ public class GerritClientReview extends GerritClientAccount {
         super(config);
     }
 
-    public void setReview(String fullChangeId, List<ReviewBatch> reviewBatches, Integer reviewScore) throws Exception {
-        GerritReview reviewMap = buildReview(reviewBatches, reviewScore);
-        if (reviewMap.getComments() == null && reviewMap.getMessage() == null) {
+    public void setReview(GerritChange change, List<ReviewBatch> reviewBatches, Integer reviewScore) throws Exception {
+        ReviewInput reviewInput = buildReview(reviewBatches, reviewScore);
+        if (reviewInput.comments == null && reviewInput.message == null) {
             return;
         }
-        URI uri = URI.create(config.getGerritAuthBaseUrl()
-                + UriResourceLocator.gerritSetReviewUri(fullChangeId));
-        log.debug("Set-Review uri: {}", uri);
-        String auth = generateBasicAuth(config.getGerritUserName(),
-                config.getGerritPassword());
-        String json = getGson().toJson(reviewMap);
-        log.debug("Set-Review JSON: {}", json);
-        HttpRequest request = HttpRequest.newBuilder()
-                .header(HttpHeaders.AUTHORIZATION, auth)
-                .header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                .uri(uri)
-                .POST(HttpRequest.BodyPublishers.ofString(json))
-                .build();
+        try (ManualRequestContext requestContext = config.openRequestContext()) {
+            ReviewResult result = config
+                .getGerritApi()
+                .changes()
+                .id(
+                    change.getProjectName(),
+                    change.getBranchNameKey().shortName(),
+                    change.getChangeKey().get())
+                .current()
+                .review(reviewInput);
 
-        HttpResponse<String> response = httpClientWithRetry.execute(request);
-
-        if (response.statusCode() != HTTP_OK) {
-            log.error("Review setting failed with status code: {}", response.statusCode());
+            if (!Strings.isNullOrEmpty(result.error)) {
+              log.error("Review setting failed with status code: {}", result.error);
+            }
         }
     }
 
-    public void setReview(String fullChangeId, List<ReviewBatch> reviewBatches) throws Exception {
-        setReview(fullChangeId, reviewBatches, null);
+    public void setReview(GerritChange change, List<ReviewBatch> reviewBatches) throws Exception {
+        setReview(change, reviewBatches, null);
     }
 
-    private GerritReview buildReview(List<ReviewBatch> reviewBatches, Integer reviewScore) {
-        GerritReview reviewMap = new GerritReview();
-        Map<String, List<GerritComment>> comments = new HashMap<>();
+    private ReviewInput buildReview(List<ReviewBatch> reviewBatches, Integer reviewScore) {
+        ReviewInput reviewInput = ReviewInput.create();
+        Map<String, List<CommentInput>> comments = new HashMap<>();
         for (ReviewBatch reviewBatch : reviewBatches) {
             String message = sanitizeChatGptMessage(reviewBatch.getContent());
             if (message.trim().isEmpty()) {
@@ -69,32 +63,41 @@ public class GerritClientReview extends GerritClientAccount {
             }
             boolean unresolved;
             String filename = reviewBatch.getFilename();
-            List<GerritComment> filenameComments = comments.getOrDefault(filename, new ArrayList<>());
-            GerritComment filenameComment = new GerritComment();
-            filenameComment.setMessage(message);
+            List<CommentInput> filenameComments = comments.getOrDefault(filename, new ArrayList<>());
+            CommentInput filenameComment = new CommentInput();
+            filenameComment.message = message;
             if (reviewBatch.getLine() != null || reviewBatch.getRange() != null) {
-                filenameComment.setLine(reviewBatch.getLine());
-                filenameComment.setRange(reviewBatch.getRange());
-                filenameComment.setInReplyTo(reviewBatch.getId());
+                filenameComment.line = reviewBatch.getLine();
+                Optional.ofNullable(reviewBatch.getRange())
+                    .ifPresent(
+                        r -> {
+                          Comment.Range range = new Comment.Range();
+                          range.startLine = r.startLine;
+                          range.startCharacter = r.startCharacter;
+                          range.endLine = r.endLine;
+                          range.endCharacter = r.endCharacter;
+                          filenameComment.range = range;
+                        });
+                filenameComment.inReplyTo = reviewBatch.getId();
                 unresolved = !config.getInlineCommentsAsResolved();
             }
             else {
                 unresolved = !config.getPatchSetCommentsAsResolved();
             }
-            filenameComment.setUnresolved(unresolved);
+            filenameComment.unresolved = unresolved;
             filenameComments.add(filenameComment);
             comments.putIfAbsent(filename, filenameComments);
         }
         if (comments.isEmpty()) {
-            reviewMap.setMessage(EMPTY_REVIEW_MESSAGE);
+            reviewInput.message(EMPTY_REVIEW_MESSAGE);
         }
         else {
-            reviewMap.setComments(comments);
+            reviewInput.comments = comments;
         }
         if (reviewScore != null) {
-            reviewMap.setLabels(new GerritReview.Labels(reviewScore));
+            reviewInput.label(LabelId.CODE_REVIEW, reviewScore);
         }
-        return reviewMap;
+        return reviewInput;
     }
 
 }
