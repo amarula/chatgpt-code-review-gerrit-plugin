@@ -8,10 +8,10 @@ import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelInfo;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPatchSetDetail;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
 import static java.util.Collections.emptyList;
@@ -19,7 +19,6 @@ import static java.util.stream.Collectors.toList;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -32,11 +31,13 @@ public class GerritClientDetail {
     private static final SimpleDateFormat DATE_FORMAT = newFormat();
 
     private final Configuration config;
+    private final int gptAccountId;
 
     private GerritPatchSetDetail gerritPatchSetDetail;
 
-    public GerritClientDetail(Configuration config) {
+    public GerritClientDetail(Configuration config, ChangeSetData changeSetData) {
         this.config = config;
+        this.gptAccountId = changeSetData.getGptAccountId();
     }
 
     public List<GerritComment> getMessages(GerritChange change) {
@@ -50,7 +51,6 @@ public class GerritClientDetail {
     }
 
     public GerritPermittedVotingRange getPermittedVotingRange(GerritChange change) {
-        int gptAccountId = ChangeSetDataHandler.getInstance(change).getGptAccountId();
         loadPatchSetDetail(change);
         List<GerritPatchSetDetail.Permission> permissions = gerritPatchSetDetail.getLabels().getCodeReview().getAll();
         if (permissions == null) {

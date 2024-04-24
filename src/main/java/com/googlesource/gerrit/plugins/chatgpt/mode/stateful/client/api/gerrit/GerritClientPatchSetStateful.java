@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientPatchSet;
@@ -14,7 +15,7 @@ public class GerritClientPatchSetStateful extends GerritClientPatchSet implement
         super(config);
     }
 
-    public String getPatchSet(GerritChange change) {
+    public String getPatchSet(ChangeSetData changeSetData, GerritChange change) {
         ChatGptAssistant chatGptAssistant = new ChatGptAssistant(config, change);
         chatGptAssistant.setupAssistant();
 

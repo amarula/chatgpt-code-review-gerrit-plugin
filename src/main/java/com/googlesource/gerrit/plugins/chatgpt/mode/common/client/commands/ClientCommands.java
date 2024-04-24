@@ -52,9 +52,9 @@ public class ClientCommands {
     @Getter
     private boolean containingHistoryCommand;
 
-    public ClientCommands(GerritChange change) {
-        changeSetData = ChangeSetDataHandler.getInstance(change);
-        directives = new Directives(change);
+    public ClientCommands(ChangeSetData changeSetData, GerritChange change) {
+        this.changeSetData = changeSetData;
+        directives = new Directives(changeSetData);
         containingHistoryCommand = false;
     }
 
