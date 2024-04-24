@@ -63,6 +63,30 @@
       },
       "revId": "e188e7724f384b7326d91fbba2c2efccc70fe265",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa727ef6_1872348e",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-24T08:00:36Z",
+      "side": 1,
+      "message": "Sounds good @geminica.programs@gmail.com, resolving this for now.",
+      "parentUuid": "67c464c3_379bc880",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 71
+      },
+      "revId": "e188e7724f384b7326d91fbba2c2efccc70fe265",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
