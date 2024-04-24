@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientPatchSet;
@@ -26,6 +27,7 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
     private final List<String> diffs;
     private boolean isCommitMessage;
 
+    @Inject
     public GerritClientPatchSetStateless(Configuration config) {
         super(config);
         diffs = new ArrayList<>();

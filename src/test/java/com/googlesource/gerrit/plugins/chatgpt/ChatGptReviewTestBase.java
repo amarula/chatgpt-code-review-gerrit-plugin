@@ -33,7 +33,13 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptClientStateless;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit.GerritClientPatchSetStateless;
 import lombok.NonNull;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
@@ -241,10 +247,10 @@ public class ChatGptReviewTestBase {
         prompts = gptRequestBody.get("messages").getAsJsonArray();
     }
 
-    private void initTest () throws NoSuchProjectException {
+    private void initTest() {
         ChangeSetData changeSetData = new ChangeSetData(GPT_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getMaxReviewFileSize());
-        gerritClient = new GerritClient(new GerritClientFacade(config, changeSetData));
-        patchSetReviewer = new PatchSetReviewer(gerritClient, config, changeSetData);
+        gerritClient = new GerritClient(new GerritClientFacade(config, changeSetData, getGerritClientPatchSet()));
+        patchSetReviewer = new PatchSetReviewer(gerritClient, config, changeSetData, getChatGptClient());
         mockConfigCreator = mock(ConfigCreator.class);
     }
 
@@ -298,5 +304,19 @@ public class ChatGptReviewTestBase {
         doReturn(Optional.of(accountState)).when(accountCache).getByUsername(GERRIT_GPT_USERNAME);
 
         return accountCache;
+    }
+
+    private IChatGptClient getChatGptClient() {
+        return switch (config.getGptMode()) {
+            case stateful -> new ChatGptClientStateful();
+            case stateless -> new ChatGptClientStateless();
+        };
+    }
+
+    private IGerritClientPatchSet getGerritClientPatchSet() {
+        return switch (config.getGptMode()) {
+            case stateful -> new GerritClientPatchSetStateful(config);
+            case stateless -> new GerritClientPatchSetStateless(config);
+        };
     }
 }
