@@ -33,10 +33,10 @@ public class EventHandlerExecutor {
     }
 
     public void execute(Configuration config, Event event) {
-        GerritEventContextModule contextModule = new GerritEventContextModule(config);
-        EventHandlerTask.Factory taskHandlerFactory = injector.createChildInjector(contextModule)
-                .getInstance(EventHandlerTask.Factory.class);
-        executor.execute(taskHandlerFactory.create(event));
+        GerritEventContextModule contextModule = new GerritEventContextModule(config, event);
+        EventHandlerTask task = injector.createChildInjector(contextModule)
+                .getInstance(EventHandlerTask.class);
+        executor.execute(task);
     }
 
     void shutdown() {
