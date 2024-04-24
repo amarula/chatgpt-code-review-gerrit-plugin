@@ -7,12 +7,9 @@ import com.google.gerrit.server.data.ChangeAttribute;
 import com.google.gerrit.server.data.PatchSetAttribute;
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
-import com.googlesource.gerrit.plugins.chatgpt.data.ProjectDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
@@ -39,7 +36,6 @@ public class EventHandlerTask implements Runnable {
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final PatchSetReviewer reviewer;
-    private final PluginDataHandler pluginDataHandler;
 
     @Inject
     EventHandlerTask(
@@ -47,15 +43,13 @@ public class EventHandlerTask implements Runnable {
             ChangeSetData changeSetData,
             GerritChange change,
             PatchSetReviewer reviewer,
-            GerritClient gerritClient,
-            PluginDataHandler pluginDataHandler
+            GerritClient gerritClient
     ) {
         this.changeSetData = changeSetData;
         this.change = change;
         this.reviewer = reviewer;
         this.gerritClient = gerritClient;
         this.config = config;
-        this.pluginDataHandler = pluginDataHandler;
     }
 
     @Override
@@ -65,8 +59,6 @@ public class EventHandlerTask implements Runnable {
 
     @VisibleForTesting
     public Result execute() {
-        ProjectDataHandler.createNewInstance(pluginDataHandler);
-
         if (!preProcessEvent(change, changeSetData)) {
             return Result.NOT_SUPPORTED;
         }

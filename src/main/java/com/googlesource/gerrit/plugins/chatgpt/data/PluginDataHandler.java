@@ -2,11 +2,13 @@ package com.googlesource.gerrit.plugins.chatgpt.data;
 
 import com.google.inject.Inject;
 
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
+@Singleton
 public class PluginDataHandler {
     private final Path configFile;
     private final Properties configProperties = new Properties();

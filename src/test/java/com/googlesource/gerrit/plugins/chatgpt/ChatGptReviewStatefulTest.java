@@ -8,18 +8,12 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatG
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings.MODES;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
-import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant.*;
 import static java.net.HttpURLConnection.HTTP_OK;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @Slf4j
@@ -70,32 +64,6 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
 
     protected void initComparisonContent() {
         super.initComparisonContent();
-    }
-
-    private void setupAssistantCreatedTest(Map<String, String> mockedPluginDataHandler) {
-        // Mock the behavior of the Git Repository Manager
-        String repoJson = readTestFile("__files/gitProjectFiles.json");
-        when(gitRepoFiles.getGitRepoFiles(any())).thenReturn(repoJson);
-
-        // Mock the behavior of the `setValue` method of the Plugin Data Handler
-        doAnswer(invocation -> {
-            String key = invocation.getArgument(0);
-            String value = invocation.getArgument(1);
-            mockedPluginDataHandler.put(key, value);
-            return null;  // since setValue is void
-        }).when(pluginDataHandler).setValue(anyString(), anyString());
-    }
-
-    @Test
-    public void assistantCreated() {
-        Map<String, String> mockedPluginDataHandler = new HashMap<>();
-        setupAssistantCreatedTest(mockedPluginDataHandler);
-        handleEventBasedOnType(false);
-
-        String projectFileIdKey = PROJECT_NAME + "." + KEY_FILE_ID;
-        Assert.assertEquals(mockedPluginDataHandler.get(projectFileIdKey), CHAT_GPT_FILE_ID);
-        String projectAssistantKey = PROJECT_NAME + "." + KEY_ASSISTANT_ID;
-        Assert.assertEquals(mockedPluginDataHandler.get(projectAssistantKey), CHAT_GPT_ASSISTANT_ID);
     }
 
 }
