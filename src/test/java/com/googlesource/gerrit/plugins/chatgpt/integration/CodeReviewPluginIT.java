@@ -53,7 +53,6 @@ public class CodeReviewPluginIT {
         when(config.getGerritUserName()).thenReturn("Your Gerrit username");
         when(config.getGerritPassword()).thenReturn("Your Gerrit password");
 
-        gerritClient.initialize(config);
         String patchSet = gerritClient.getPatchSet("${changeId}");
         log.info("patchSet: {}", patchSet);
         assertNotNull(patchSet);
@@ -68,8 +67,6 @@ public class CodeReviewPluginIT {
         List<ReviewBatch> reviewBatches = new ArrayList<>();
         reviewBatches.add(new ReviewBatch());
         reviewBatches.get(0).setContent("message");
-
-        gerritClient.initialize(config);
 
         GerritClientReview gerritClientReview = new GerritClientReview(config);
         gerritClientReview.setReview("Your changeId", reviewBatches);

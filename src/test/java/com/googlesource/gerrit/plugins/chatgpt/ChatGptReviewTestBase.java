@@ -28,6 +28,7 @@ import com.googlesource.gerrit.plugins.chatgpt.listener.GerritEventContextModule
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.NonNull;
 import org.apache.http.entity.ContentType;
@@ -231,7 +232,7 @@ public class ChatGptReviewTestBase {
     }
 
     private void initTest () throws NoSuchProjectException {
-        gerritClient = new GerritClient();
+        gerritClient = new GerritClient(new GerritClientFacade(config));
         patchSetReviewer = new PatchSetReviewer(gerritClient, config);
         mockConfigCreator = mock(ConfigCreator.class);
     }
