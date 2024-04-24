@@ -1,32 +1,25 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.google.inject.Singleton;
-import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.singleton.ChangeSetSingletonManager;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 
 @Slf4j
 @Singleton
 public class GerritClient {
-    private static final String DEFAULT_CHANGE_ID = "DEFAULT_CHANGE_ID";
-    private static GerritClientFacade gerritClientFacade;
+    private final GerritClientFacade gerritClientFacade;
 
-    public void initialize(Configuration config) {
-        initialize(config, new GerritChange(DEFAULT_CHANGE_ID));
-    }
-
-    public void initialize(Configuration config, GerritChange change) {
-        log.debug("Initializing client instances for change: {}", change.getFullChangeId());
-        gerritClientFacade = ChangeSetSingletonManager.getInstance(GerritClientFacade.class, change, config);
+    @Inject
+    public GerritClient(GerritClientFacade gerritClientFacade) {
+        this.gerritClientFacade = gerritClientFacade;
     }
 
     public GerritPermittedVotingRange getPermittedVotingRange(GerritChange change) {
-        updateGerritClientFacade(change);
         return gerritClientFacade.getPermittedVotingRange(change);
     }
 
@@ -35,7 +28,6 @@ public class GerritClient {
     }
 
     public String getPatchSet(GerritChange change) throws Exception {
-        updateGerritClientFacade(change);
         return gerritClientFacade.getPatchSet(change);
     }
 
@@ -48,42 +40,26 @@ public class GerritClient {
     }
 
     public boolean isWorkInProgress(GerritChange change) {
-        updateGerritClientFacade(change);
         return gerritClientFacade.isWorkInProgress(change);
     }
 
     public HashMap<String, FileDiffProcessed> getFileDiffsProcessed(GerritChange change) {
-        updateGerritClientFacade(change);
         return gerritClientFacade.getFileDiffsProcessed();
     }
 
     public Integer getNotNullAccountId(GerritChange change, String authorUsername) {
-        updateGerritClientFacade(change);
         return gerritClientFacade.getNotNullAccountId(authorUsername);
     }
 
     public boolean retrieveLastComments(GerritChange change) {
-        updateGerritClientFacade(change);
         return gerritClientFacade.retrieveLastComments(change);
     }
 
     public void retrievePatchSetInfo(GerritChange change) {
-        updateGerritClientFacade(change);
         gerritClientFacade.retrievePatchSetInfo(change);
     }
 
     public GerritClientData getClientData(GerritChange change) {
-        updateGerritClientFacade(change);
         return gerritClientFacade.getClientData(change);
     }
-
-    public void destroy(GerritChange change) {
-        log.debug("Destroying GerritClientFacade instance for change: {}", change.getFullChangeId());
-        ChangeSetSingletonManager.removeInstance(GerritClientFacade.class, change);
-    }
-
-    private void updateGerritClientFacade(GerritChange change) {
-        gerritClientFacade = ChangeSetSingletonManager.getInstance(GerritClientFacade.class, change);
-    }
-
 }
