@@ -2,7 +2,6 @@ package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.google.common.net.HttpHeaders;
 import com.google.gerrit.entities.Account;
@@ -17,6 +16,8 @@ import com.google.gerrit.extensions.api.accounts.Accounts;
 import com.google.gerrit.extensions.api.accounts.Accounts.QueryRequest;
 import com.google.gerrit.extensions.api.changes.ChangeApi;
 import com.google.gerrit.extensions.api.changes.Changes;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.api.changes.RevisionApi;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.GroupInfo;
@@ -55,9 +56,9 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit.GerritClientPatchSetStateless;
 import lombok.NonNull;
 import org.apache.http.entity.ContentType;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -78,6 +79,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class ChatGptReviewTestBase {
@@ -113,6 +115,12 @@ public class ChatGptReviewTestBase {
     protected OneOffRequestContext context;
     @Mock
     protected GerritApi gerritApi;
+    @Mock
+    protected Changes changesMock;
+    @Mock
+    protected ChangeApi changeApiMock;
+    @Mock
+    protected RevisionApi revisionApiMock;
 
     protected PluginConfig globalConfig;
     protected PluginConfig projectConfig;
@@ -184,6 +192,7 @@ public class ChatGptReviewTestBase {
         // Mock the behavior of the gerritAccountGroups request
         mockGerritAccountGroupsApiCall(accountsMock, GERRIT_USER_ACCOUNT_ID);
 
+        mockGerritChangeApiRestEndpoint();
         // Mock the behavior of the gerritPatchSetRevisionsUri request
         WireMock.stubFor(WireMock.get(gerritPatchSetRevisionsUri(fullChangeId))
                 .willReturn(WireMock.aResponse()
@@ -238,16 +247,21 @@ public class ChatGptReviewTestBase {
     }
 
     private void mockGerritChangeDetailsApiCall() throws RestApiException {
-        Gson gson = OutputFormat.JSON.newGson();
-        ChangeInfo changeInfo = gson.fromJson(readTestFile("__files/gerritPatchSetDetail.json"), ChangeInfo.class);
-        Changes changesMock = mock(Changes.class);
-        when(gerritApi.changes()).thenReturn(changesMock);
-        ChangeApi changeApiMock = mock(ChangeApi.class);
-        when(changesMock.id(PROJECT_NAME.get(), BRANCH_NAME.shortName(), CHANGE_ID.get())).thenReturn(changeApiMock);
+        ChangeInfo changeInfo = readTestFileToClass("__files/gerritPatchSetDetail.json", ChangeInfo.class);
         when(changeApiMock.get()).thenReturn(changeInfo);
     }
 
+    private void mockGerritChangeApiRestEndpoint() throws RestApiException {
+        when(gerritApi.changes()).thenReturn(changesMock);
+        when(changesMock.id(PROJECT_NAME.get(), BRANCH_NAME.shortName(), CHANGE_ID.get())).thenReturn(changeApiMock);
+    }
+
     protected void initComparisonContent() {}
+
+    protected <T> T readTestFileToClass(String filename, Class<T> clazz) {
+        Gson gson = OutputFormat.JSON.newGson();
+        return gson.fromJson(readTestFile(filename), clazz);
+    }
 
     protected String readTestFile(String filename) {
         try {
@@ -279,14 +293,13 @@ public class ChatGptReviewTestBase {
         return task.execute();
     }
 
-    protected void testRequestSent() {
-        RequestPatternBuilder requestPatternBuilder = WireMock.postRequestedFor(
-                WireMock.urlEqualTo(gerritSetReviewUri(getGerritChange().getFullChangeId())));
-        loggedRequests = WireMock.findAll(requestPatternBuilder);
-        Assert.assertEquals(1, loggedRequests.size());
+    protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
+        ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class); 
+        verify(revisionApiMock).review(reviewInputCaptor.capture());
         JsonObject gptRequestBody = getGson().fromJson(patchSetReviewer.getChatGptClient().getRequestBody(),
                 JsonObject.class);
         prompts = gptRequestBody.get("messages").getAsJsonArray();
+        return reviewInputCaptor;
     }
 
     private void initTest() {
