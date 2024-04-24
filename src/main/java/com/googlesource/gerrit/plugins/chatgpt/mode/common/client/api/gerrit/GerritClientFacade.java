@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
+import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.ModeClassLoader;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
@@ -20,6 +21,7 @@ public class GerritClientFacade {
     private final IGerritClientPatchSet gerritClientPatchSet;
     private final GerritClientComments gerritClientComments;
 
+    @Inject
     public GerritClientFacade(Configuration config) {
         gerritClientDetail = new GerritClientDetail(config);
         gerritClientPatchSet = (IGerritClientPatchSet) ModeClassLoader.getInstance(
