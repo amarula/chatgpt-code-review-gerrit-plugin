@@ -3,12 +3,8 @@ package com.googlesource.gerrit.plugins.chatgpt.listener;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.gerrit.extensions.client.ChangeKind;
-import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.server.data.ChangeAttribute;
 import com.google.gerrit.server.data.PatchSetAttribute;
-import com.google.gerrit.server.events.Event;
-import com.google.inject.Module;
-import com.google.inject.assistedinject.Assisted;
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
@@ -30,17 +26,6 @@ import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
 
 @Slf4j
 public class EventHandlerTask implements Runnable {
-    public static final Module MODULE = new FactoryModule() {
-        @Override
-        protected void configure() {
-            factory(EventHandlerTask.Factory.class);
-        }
-    };
-
-    public interface Factory {
-        EventHandlerTask create(Event event);
-    }
-
     @VisibleForTesting
     public enum Result {
         OK, NOT_SUPPORTED, FAILURE
@@ -51,26 +36,26 @@ public class EventHandlerTask implements Runnable {
             "comment-added", true
     );
 
-    private final Event event;
     private final Configuration config;
     private final GerritClient gerritClient;
     private final GitRepoFiles gitRepoFiles;
+    private final GerritChange change;
     private final PatchSetReviewer reviewer;
     private final PluginDataHandler pluginDataHandler;
 
     @Inject
     EventHandlerTask(
             Configuration config,
+            GerritChange change,
             PatchSetReviewer reviewer,
             GerritClient gerritClient,
             GitRepoFiles gitRepoFiles,
-            PluginDataHandler pluginDataHandler,
-            @Assisted Event event
+            PluginDataHandler pluginDataHandler
     ) {
+        this.change = change;
         this.reviewer = reviewer;
         this.gerritClient = gerritClient;
         this.config = config;
-        this.event = event;
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandler = pluginDataHandler;
     }
@@ -82,7 +67,6 @@ public class EventHandlerTask implements Runnable {
 
     @VisibleForTesting
     public Result execute() {
-        GerritChange change = new GerritChange(event);
         gerritClient.initialize(config, change);
         Integer gptAccountId = gerritClient.getNotNullAccountId(change, config.getGerritUserName());
         ChangeSetData changeSetData = ChangeSetDataHandler.getNewInstance(config, change, gptAccountId);
