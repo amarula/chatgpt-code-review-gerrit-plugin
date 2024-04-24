@@ -8,7 +8,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http.HttpClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptTool;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFilesHandler;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptCreateAssistantResponse;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptFilesResponse;
@@ -32,10 +32,12 @@ public class ChatGptAssistant extends ClientBase {
 
     private final HttpClient httpClient = new HttpClient();
     private final GerritChange change;
+    private final GitRepoFiles gitRepoFiles;
 
-    public ChatGptAssistant(Configuration config, GerritChange change) {
+    public ChatGptAssistant(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
         super(config);
         this.change = change;
+        this.gitRepoFiles = gitRepoFiles;
     }
 
     public void setupAssistant() {
@@ -53,7 +55,7 @@ public class ChatGptAssistant extends ClientBase {
     }
 
     private String uploadRepoFiles() {
-        String repoFiles = GitRepoFilesHandler.getInstance().getGitRepoFiles(change);
+        String repoFiles = gitRepoFiles.getGitRepoFiles(change);
         Path repoPath = createTempFileWithContent(change.getProjectName(), ".json", repoFiles);
         ChatGptFiles chatGptFiles = new ChatGptFiles(config);
         ChatGptFilesResponse chatGptFilesResponse = chatGptFiles.uploadFiles(repoPath);

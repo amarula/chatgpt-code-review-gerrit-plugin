@@ -14,7 +14,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFilesHandler;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -37,7 +36,6 @@ public class EventHandlerTask implements Runnable {
 
     private final Configuration config;
     private final GerritClient gerritClient;
-    private final GitRepoFiles gitRepoFiles;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final PatchSetReviewer reviewer;
@@ -50,7 +48,6 @@ public class EventHandlerTask implements Runnable {
             GerritChange change,
             PatchSetReviewer reviewer,
             GerritClient gerritClient,
-            GitRepoFiles gitRepoFiles,
             PluginDataHandler pluginDataHandler
     ) {
         this.changeSetData = changeSetData;
@@ -58,7 +55,6 @@ public class EventHandlerTask implements Runnable {
         this.reviewer = reviewer;
         this.gerritClient = gerritClient;
         this.config = config;
-        this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandler = pluginDataHandler;
     }
 
@@ -69,7 +65,6 @@ public class EventHandlerTask implements Runnable {
 
     @VisibleForTesting
     public Result execute() {
-        GitRepoFilesHandler.createNewInstance(gitRepoFiles);
         ProjectDataHandler.createNewInstance(pluginDataHandler);
 
         if (!preProcessEvent(change, changeSetData)) {
