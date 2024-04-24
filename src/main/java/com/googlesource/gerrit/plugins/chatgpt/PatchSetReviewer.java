@@ -3,7 +3,6 @@ package com.googlesource.gerrit.plugins.chatgpt;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
-import com.googlesource.gerrit.plugins.chatgpt.mode.ModeClassLoader;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
@@ -33,19 +32,20 @@ public class PatchSetReviewer {
     private final Configuration config;
     private final GerritClient gerritClient;
     private final ChangeSetData changeSetData;
-
     @Getter
-    private IChatGptClient chatGptClient;
+    private final IChatGptClient chatGptClient;
+
     private GerritCommentRange gerritCommentRange;
     private List<ReviewBatch> reviewBatches;
     private List<GerritComment> commentProperties;
     private List<Integer> reviewScores;
 
     @Inject
-    PatchSetReviewer(GerritClient gerritClient, Configuration config, ChangeSetData changeSetData) {
+    PatchSetReviewer(GerritClient gerritClient, Configuration config, ChangeSetData changeSetData, IChatGptClient chatGptClient) {
         this.config = config;
         this.gerritClient = gerritClient;
         this.changeSetData = changeSetData;
+        this.chatGptClient = chatGptClient;
     }
 
     public void review(GerritChange change) throws Exception {
@@ -131,8 +131,6 @@ public class PatchSetReviewer {
             log.warn("Patch set too large. Skipping review. changeId: {}", change.getFullChangeId());
             return String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines());
         }
-        chatGptClient = (IChatGptClient) ModeClassLoader.getInstance(
-                "client.api.chatgpt.ChatGptClient", config);
         registerDynamicClasses(ChatGptClientStateless.class);
 
         return chatGptClient.ask(config, changeSetData, change, patchSet);
