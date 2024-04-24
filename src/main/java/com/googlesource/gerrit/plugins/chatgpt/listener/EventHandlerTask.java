@@ -96,7 +96,7 @@ public class EventHandlerTask implements Runnable {
 
         try {
             log.info("Processing change: {}", change.getFullChangeId());
-            reviewer.review(config, change);
+            reviewer.review(change);
             log.info("Finished processing change: {}", change.getFullChangeId());
         } catch (Exception e) {
             log.error("Error while processing change: {}", change.getFullChangeId(), e);

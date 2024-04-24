@@ -232,7 +232,7 @@ public class ChatGptReviewTestBase {
 
     private void initTest () throws NoSuchProjectException {
         gerritClient = new GerritClient();
-        patchSetReviewer = new PatchSetReviewer(gerritClient);
+        patchSetReviewer = new PatchSetReviewer(gerritClient, config);
         mockConfigCreator = mock(ConfigCreator.class);
     }
 
