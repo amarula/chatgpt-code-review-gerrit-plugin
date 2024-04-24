@@ -52,6 +52,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                 .thenReturn(GPT_STREAM_OUTPUT);
         when(globalConfig.getBoolean(Mockito.eq("gptReviewCommitMessages"), Mockito.anyBoolean()))
                 .thenReturn(true);
+        when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_GPT_USERNAME);
 
         super.initConfig();
 
