@@ -30,9 +30,9 @@ public class PatchSetReviewer {
     private static final String SPLIT_REVIEW_MSG = "Too many changes. Please consider splitting into patches smaller " +
             "than %s lines for review.";
 
+    private final Configuration config;
     private final GerritClient gerritClient;
 
-    private Configuration config;
     @Getter
     private IChatGptClient chatGptClient;
     private GerritCommentRange gerritCommentRange;
@@ -41,12 +41,12 @@ public class PatchSetReviewer {
     private List<Integer> reviewScores;
 
     @Inject
-    PatchSetReviewer(GerritClient gerritClient) {
+    PatchSetReviewer(GerritClient gerritClient, Configuration config) {
+        this.config = config;
         this.gerritClient = gerritClient;
     }
 
-    public void review(Configuration config, GerritChange change) throws Exception {
-        this.config = config;
+    public void review(GerritChange change) throws Exception {
         reviewBatches = new ArrayList<>();
         reviewScores = new ArrayList<>();
         commentProperties = gerritClient.getClientData(change).getCommentProperties();
