@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.ProjectDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -33,20 +33,22 @@ public class ChatGptAssistant extends ClientBase {
     private final HttpClient httpClient = new HttpClient();
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
+    private final PluginDataHandler pluginDataHandler;
 
-    public ChatGptAssistant(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
+    public ChatGptAssistant(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles, PluginDataHandler pluginDataHandler) {
         super(config);
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
+        this.pluginDataHandler = pluginDataHandler;
     }
 
     public void setupAssistant() {
-        String assistantId = ProjectDataHandler.getValue(change, KEY_ASSISTANT_ID);
+        String assistantId = pluginDataHandler.getValue(KEY_ASSISTANT_ID);
         if (assistantId == null) {
             String fileId = uploadRepoFiles();
-            ProjectDataHandler.setValue(change, KEY_FILE_ID, fileId);
+            pluginDataHandler.setValue(KEY_FILE_ID, fileId);
             assistantId = createAssistant(fileId);
-            ProjectDataHandler.setValue(change, KEY_ASSISTANT_ID, assistantId);
+            pluginDataHandler.setValue(KEY_ASSISTANT_ID, assistantId);
             log.info("Project assistant created with ID: {}", assistantId);
         }
         else {
