@@ -52,6 +52,24 @@
       "parentUuid": "9d1d3d3b_86cb2b15",
       "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6b696f26_f9cdb7eb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-24T16:14:59Z",
+      "side": 1,
+      "message": "Sorry @syntonyze@gmail.com, I haven\u0027t read your reply before posting mine. I\u0027m working at alternative approaches for `retrieveComments`, since the current one seems to be outdated.",
+      "parentUuid": "5e2865ab_73689a53",
+      "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
