@@ -38,7 +38,7 @@ public class EventHandlerTask implements Runnable {
     };
 
     public interface Factory {
-        EventHandlerTask create(Configuration config, Event event);
+        EventHandlerTask create(Event event);
     }
 
     @VisibleForTesting
@@ -60,11 +60,11 @@ public class EventHandlerTask implements Runnable {
 
     @Inject
     EventHandlerTask(
+            Configuration config,
             PatchSetReviewer reviewer,
             GerritClient gerritClient,
             GitRepoFiles gitRepoFiles,
             PluginDataHandler pluginDataHandler,
-            @Assisted Configuration config,
             @Assisted Event event
     ) {
         this.reviewer = reviewer;
