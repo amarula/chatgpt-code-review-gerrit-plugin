@@ -205,10 +205,10 @@ public class ChatGptReviewTestBase {
         setupCommonEventMocks((PatchSetEvent) event); // Apply common mock configurations
         typeSpecificSetup.accept(event);
 
-        EventHandlerTask.Factory factory = Guice.createInjector(EventHandlerTask.MODULE, new AbstractModule() {
+        EventHandlerTask task = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
-                install(new GerritEventContextModule(config));
+                install(new GerritEventContextModule(config, event));
 
                 bind(GerritClient.class).toInstance(gerritClient);
                 bind(GitRepoFiles.class).toInstance(gitRepoFiles);
@@ -216,8 +216,8 @@ public class ChatGptReviewTestBase {
                 bind(PatchSetReviewer.class).toInstance(patchSetReviewer);
                 bind(PluginDataHandler.class).toInstance(pluginDataHandler);
             }
-        }).getInstance(EventHandlerTask.Factory.class);
-        return factory.create(event).execute();
+        }).getInstance(EventHandlerTask.class);
+        return task.execute();
     }
 
     protected void testRequestSent() {
