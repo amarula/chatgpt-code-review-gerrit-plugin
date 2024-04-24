@@ -16,6 +16,24 @@
       "message": "It is WIP as in `com.googlesource.gerrit.plugins.chatgpt.ChatGptReviewStatelessTest.gptMentionedInComment()` the last assertion fails and so far I have no clue how to fix it..",
       "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f24986c1_564152a3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-24T14:29:43Z",
+      "side": 1,
+      "message": "The problem is the way `retrieveComments` works I believe.\n\nThe current code, (before your change) gets a map`file -\u003e List\u003cComments\u003e`\n\n```\nfor (Map.Entry\u003cString, List\u003cGerritComment\u003e\u003e entry : lastCommentMap.entrySet()) {\n```\n\ntraverses it and gets the latest one it encounters (that is recent enough):\n\n```\n                if (commentAuthorUsername.equals(authorUsername) \u0026\u0026\n                        updatedTimeStamp \u003e\u003d change.getEventTimeStamp() - MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT) {\n                    log.debug(\"Found comment with updatedTimeStamp : {}\", updatedTimeStamp);\n                    latestChangeMessageId \u003d changeMessageId;\n                }\n```\n\nThe problem is that this traversal is _unordered_ and nothing is preventing the `latestChangeMessageId` from being updated with a comment that is *not* the latest: as long as it is more recent than the change event timestamp.\n\nThis is exactly what\u0027s happening here.\nThe current implementation (before your change @geminica.programs@gmail.com), selects `latestChangeMessageId\u003ddaf5e2e0e4f404759c5af6aabe5b0a5250fe0da3` (updated on `2023-11-06 11:47:51.000000000`), whilst your new implementation happen to select `latestChangeMessageId\u003dcdd9047ba969b9fce3c37b78c62e530e9f9b83bd` (updated on `2024-02-13 07:52:17.000000000`).\n\n\nI believe the test expectation is not correct, since it ignores the fact that there is a more recent comment than the one being returned.\n\nFrom what I understand, we should make `retrieveComments` stable and always return the latest comment (and update the expectation), rather than choosing an arbitrary comment that is more recent than the change event.\n\n@patrizio.gelosi@amarulasolutions.com, @geminica.programs@gmail.com WDYT?",
+      "parentUuid": "9d1d3d3b_86cb2b15",
+      "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
