@@ -1,39 +1,26 @@
 package com.googlesource.gerrit.plugins.chatgpt.data;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.singleton.ChangeSetSingletonManager;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptUserPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashSet;
 
 @Slf4j
 public class ChangeSetDataHandler {
-
-    public static ChangeSetData getNewInstance(Configuration config, GerritChange change, Integer gptAccountId) {
-        return ChangeSetSingletonManager.getNewInstance(ChangeSetData.class, change,
-                gptAccountId,
-                config.getVotingMinScore(),
-                config.getVotingMaxScore());
-    }
-
-    public static ChangeSetData getInstance(GerritChange change) {
-        return ChangeSetSingletonManager.getInstance(ChangeSetData.class, change);
-    }
-
-    public static ChangeSetData getInstance(String changeId) {
-        return getInstance(new GerritChange(changeId));
-    }
-
-    public static void update(Configuration config, GerritChange change, GerritClient gerritClient) {
-        ChangeSetData changeSetData = getInstance(change);
+    public static void update(
+            Configuration config,
+            GerritChange change,
+            GerritClient gerritClient,
+            ChangeSetData changeSetData
+    ) {
         GerritClientData gerritClientData = gerritClient.getClientData(change);
-        ChatGptUserPrompt chatGptUserPrompt = new ChatGptUserPrompt(config, change, gerritClientData);
+        ChatGptUserPrompt chatGptUserPrompt = new ChatGptUserPrompt(config, changeSetData, change, gerritClientData);
 
         changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
         changeSetData.setDirectives(new HashSet<>());
@@ -52,9 +39,4 @@ public class ChangeSetDataHandler {
             }
         }
     }
-
-    public static void removeInstance(GerritChange change) {
-        ChangeSetSingletonManager.removeInstance(ChangeSetData.class, change);
-    }
-
 }

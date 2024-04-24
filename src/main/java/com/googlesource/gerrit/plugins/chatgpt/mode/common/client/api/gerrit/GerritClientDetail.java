@@ -1,11 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPatchSetDetail;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
 import java.net.URI;
@@ -16,9 +16,11 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 @Slf4j
 public class GerritClientDetail extends GerritClientBase {
     private GerritPatchSetDetail gerritPatchSetDetail;
+    private final int gptAccountId;
 
-    public GerritClientDetail(Configuration config) {
+    public GerritClientDetail(Configuration config, ChangeSetData changeSetData) {
         super(config);
+        this.gptAccountId = changeSetData.getGptAccountId();
     }
 
     public List<GerritComment> getMessages(GerritChange change) {
@@ -32,7 +34,6 @@ public class GerritClientDetail extends GerritClientBase {
     }
 
     public GerritPermittedVotingRange getPermittedVotingRange(GerritChange change) {
-        int gptAccountId = ChangeSetDataHandler.getInstance(change).getGptAccountId();
         loadPatchSetDetail(change);
         List<GerritPatchSetDetail.Permission> permissions = gerritPatchSetDetail.getLabels().getCodeReview().getAll();
         if (permissions == null) {

@@ -5,9 +5,12 @@ import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.google.common.net.HttpHeaders;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.server.account.AccountCache;
+import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.data.AccountAttribute;
 import com.google.gerrit.server.data.PatchSetAttribute;
@@ -29,6 +32,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourc
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.NonNull;
 import org.apache.http.entity.ContentType;
@@ -43,13 +47,17 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator.*;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -71,6 +79,7 @@ public class ChatGptReviewTestBase {
     protected static final BranchNameKey BRANCH_NAME = BranchNameKey.create(PROJECT_NAME, "myBranchName");
     protected static final boolean GPT_STREAM_OUTPUT = true;
     protected static final long TEST_TIMESTAMP = 1699270812;
+    private static  final int GPT_USER_ACCOUNT_ID = 1000000;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9527);
@@ -216,6 +225,7 @@ public class ChatGptReviewTestBase {
                 bind(ConfigCreator.class).toInstance(mockConfigCreator);
                 bind(PatchSetReviewer.class).toInstance(patchSetReviewer);
                 bind(PluginDataHandler.class).toInstance(pluginDataHandler);
+                bind(AccountCache.class).toInstance(mockAccountCache());
             }
         }).getInstance(EventHandlerTask.class);
         return task.execute();
@@ -232,8 +242,9 @@ public class ChatGptReviewTestBase {
     }
 
     private void initTest () throws NoSuchProjectException {
-        gerritClient = new GerritClient(new GerritClientFacade(config));
-        patchSetReviewer = new PatchSetReviewer(gerritClient, config);
+        ChangeSetData changeSetData = new ChangeSetData(GPT_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getMaxReviewFileSize());
+        gerritClient = new GerritClient(new GerritClientFacade(config, changeSetData));
+        patchSetReviewer = new PatchSetReviewer(gerritClient, config, changeSetData);
         mockConfigCreator = mock(ConfigCreator.class);
     }
 
@@ -280,4 +291,12 @@ public class ChatGptReviewTestBase {
         when(event.getChangeKey()).thenReturn(CHANGE_ID);
     }
 
+    private AccountCache mockAccountCache() {
+        AccountCache accountCache = mock(AccountCache.class);
+        Account account = Account.builder(Account.id(GPT_USER_ACCOUNT_ID), Instant.now()).build();
+        AccountState accountState = AccountState.forAccount(account, Collections.emptyList());
+        doReturn(Optional.of(accountState)).when(accountCache).getByUsername(GERRIT_GPT_USERNAME);
+
+        return accountCache;
+    }
 }

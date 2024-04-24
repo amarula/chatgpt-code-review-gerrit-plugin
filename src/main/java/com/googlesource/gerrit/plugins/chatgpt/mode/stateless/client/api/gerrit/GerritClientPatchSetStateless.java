@@ -8,6 +8,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPatchSetFileDiff;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritReviewFileDiff;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +31,8 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
         diffs = new ArrayList<>();
     }
 
-    public String getPatchSet(GerritChange change) throws Exception {
-        int revisionBase = getChangeSetRevisionBase(change);
+    public String getPatchSet(ChangeSetData changeSetData, GerritChange change) throws Exception {
+        int revisionBase = getChangeSetRevisionBase(changeSetData);
         log.debug("Revision base: {}", revisionBase);
 
         List<String> files = getAffectedFiles(change.getFullChangeId(), revisionBase);

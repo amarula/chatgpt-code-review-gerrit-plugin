@@ -6,6 +6,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.CommentData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_P
 public class GerritClientComments extends GerritClientAccount {
     private static final Integer MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT = 2;
 
+    private final ChangeSetData changeSetData;
     private final HashMap<String, GerritComment> commentMap;
     private final HashMap<String, GerritComment> patchSetCommentMap;
 
@@ -29,8 +31,9 @@ public class GerritClientComments extends GerritClientAccount {
     @Getter
     private List<GerritComment> commentProperties;
 
-    public GerritClientComments(Configuration config) {
+    public GerritClientComments(Configuration config, ChangeSetData changeSetData) {
         super(config);
+        this.changeSetData = changeSetData;
         commentProperties = new ArrayList<>();
         commentMap = new HashMap<>();
         patchSetCommentMap = new HashMap<>();
@@ -104,7 +107,7 @@ public class GerritClientComments extends GerritClientAccount {
     }
 
     private void addLastComments(GerritChange change) {
-        ClientMessage clientMessage = new ClientMessage(config, change);
+        ClientMessage clientMessage = new ClientMessage(config, changeSetData, change);
         try {
             List<GerritComment> latestComments = retrieveComments(change);
             if (latestComments == null) {
