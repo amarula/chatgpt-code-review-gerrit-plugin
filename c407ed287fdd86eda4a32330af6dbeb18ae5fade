@@ -48,6 +48,30 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8264cf6f_03ed92c1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/config/ConfigCreator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-24T10:10:24Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "09af6546_6944d3cc",
+      "range": {
+        "startLine": 54,
+        "startChar": 16,
+        "endLine": 59,
+        "endChar": 93
+      },
+      "revId": "c407ed287fdd86eda4a32330af6dbeb18ae5fade",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e4bd3f38_8211c681",
