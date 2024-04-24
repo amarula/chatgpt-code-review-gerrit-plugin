@@ -315,7 +315,7 @@ public class ChatGptReviewTestBase {
 
     private IGerritClientPatchSet getGerritClientPatchSet() {
         return switch (config.getGptMode()) {
-            case stateful -> new GerritClientPatchSetStateful(config);
+            case stateful -> new GerritClientPatchSetStateful(config, gitRepoFiles);
             case stateless -> new GerritClientPatchSetStateless(config);
         };
     }
