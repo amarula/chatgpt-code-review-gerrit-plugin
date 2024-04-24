@@ -22,6 +22,30 @@
       },
       "revId": "e8fecbb5811bd871796bfd6cb884b6cefbfb50dc",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "90c2607b_4d34feb0",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-24T21:10:03Z",
+      "side": 1,
+      "message": "Yes, this is intentional. I believe there\u0027s more of `javax.inject.Inject` in the code, especially now ;)",
+      "parentUuid": "a10e5315_9ad30ef0",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 27
+      },
+      "revId": "e8fecbb5811bd871796bfd6cb884b6cefbfb50dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
