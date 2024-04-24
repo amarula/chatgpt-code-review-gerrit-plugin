@@ -3,6 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptMessageItem;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,12 +15,12 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 public class ChatGptUserPrompt {
     private final ChatGptUserPromptBase chatGptUserPromptBase;
 
-    public ChatGptUserPrompt(Configuration config, GerritChange change, GerritClientData gerritClientData) {
+    public ChatGptUserPrompt(Configuration config, ChangeSetData changeSetData, GerritChange change, GerritClientData gerritClientData) {
         if (change.getIsCommentEvent()) {
-            chatGptUserPromptBase = new ChatGptUserPromptRequests(config, change, gerritClientData);
+            chatGptUserPromptBase = new ChatGptUserPromptRequests(config, changeSetData, change, gerritClientData);
         }
         else {
-            chatGptUserPromptBase = new ChatGptUserPromptReview(config, change, gerritClientData);
+            chatGptUserPromptBase = new ChatGptUserPromptReview(config, changeSetData, change, gerritClientData);
         }
     }
 

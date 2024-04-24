@@ -50,9 +50,8 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
         return concatenate(prompt);
     }
 
-    public String getGptUserPrompt(String patchSet, String changeId) {
+    public String getGptUserPrompt(ChangeSetData changeSetData, String patchSet) {
         List<String> prompt = new ArrayList<>();
-        ChangeSetData changeSetData = ChangeSetDataHandler.getInstance(changeId);
         String gptRequestUserPrompt = changeSetData.getGptRequestUserPrompt();
         boolean isValidRequestUserPrompt = gptRequestUserPrompt != null && !gptRequestUserPrompt.isEmpty();
         if (isCommentEvent && isValidRequestUserPrompt) {

@@ -32,6 +32,7 @@ public class PatchSetReviewer {
 
     private final Configuration config;
     private final GerritClient gerritClient;
+    private final ChangeSetData changeSetData;
 
     @Getter
     private IChatGptClient chatGptClient;
@@ -41,9 +42,10 @@ public class PatchSetReviewer {
     private List<Integer> reviewScores;
 
     @Inject
-    PatchSetReviewer(GerritClient gerritClient, Configuration config) {
+    PatchSetReviewer(GerritClient gerritClient, Configuration config, ChangeSetData changeSetData) {
         this.config = config;
         this.gerritClient = gerritClient;
+        this.changeSetData = changeSetData;
     }
 
     public void review(GerritChange change) throws Exception {
@@ -57,7 +59,7 @@ public class PatchSetReviewer {
             log.info("No file to review has been found in the PatchSet");
             return;
         }
-        ChangeSetDataHandler.update(config, change, gerritClient);
+        ChangeSetDataHandler.update(config, change, gerritClient, changeSetData);
 
         String reviewReply = getReviewReply(change, patchSet);
         log.debug("ChatGPT response: {}", reviewReply);
@@ -96,7 +98,6 @@ public class PatchSetReviewer {
 
     private void retrieveReviewBatches(String reviewReply, GerritChange change) {
         ChatGptResponseContent reviewJson = getGson().fromJson(reviewReply, ChatGptResponseContent.class);
-        ChangeSetData changeSetData = ChangeSetDataHandler.getInstance(change);
         for (ChatGptReplyItem replyItem : reviewJson.getReplies()) {
             String reply = replyItem.getReply();
             Integer score = replyItem.getScore();
@@ -134,7 +135,7 @@ public class PatchSetReviewer {
                 "client.api.chatgpt.ChatGptClient", config);
         registerDynamicClasses(ChatGptClientStateless.class);
 
-        return chatGptClient.ask(config, change, patchSet);
+        return chatGptClient.ask(config, changeSetData, change, patchSet);
     }
 
     private Integer getReviewScore() {
