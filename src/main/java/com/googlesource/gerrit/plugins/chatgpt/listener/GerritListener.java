@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.listener;
 
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.server.config.GerritInstanceId;
 import com.google.gerrit.server.events.PatchSetEvent;
 import com.google.gerrit.server.events.Event;
 import com.google.gerrit.server.events.EventListener;
@@ -12,20 +13,31 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import java.util.Objects;
 
 @Slf4j
 public class GerritListener implements EventListener {
+    private final String myInstanceId;
     private final ConfigCreator configCreator;
     private final EventHandlerExecutor evenHandlerExecutor;
 
     @Inject
-    public GerritListener(ConfigCreator configCreator, EventHandlerExecutor evenHandlerExecutor) {
+    public GerritListener(
+            ConfigCreator configCreator,
+            EventHandlerExecutor evenHandlerExecutor,
+            @GerritInstanceId String myInstanceId
+    ) {
         this.configCreator = configCreator;
         this.evenHandlerExecutor = evenHandlerExecutor;
+        this.myInstanceId = myInstanceId;
     }
 
     @Override
     public void onEvent(Event event) {
+        if (!Objects.equals(event.instanceId, myInstanceId)) {
+            log.debug("Ignore event from another instance");
+            return;
+        }
         if (!(event instanceof CommentAddedEvent || event instanceof PatchSetCreatedEvent)) {
             log.debug("The event is not a PatchSetCreatedEvent, it is: {}", event);
             return;
