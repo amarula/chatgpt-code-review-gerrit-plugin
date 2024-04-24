@@ -63,7 +63,7 @@ public class PatchSetReviewer {
         log.debug("ChatGPT response: {}", reviewReply);
 
         retrieveReviewBatches(reviewReply, change);
-        gerritClientReview.setReview(change.getFullChangeId(), reviewBatches, getReviewScore());
+        gerritClientReview.setReview(change, reviewBatches, getReviewScore());
     }
 
     private void setCommentBatchMap(ReviewBatch batchMap, Integer batchID) {
