@@ -6,14 +6,10 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.Fil
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit.GerritClientPatchSetStateless;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
-
-import static com.googlesource.gerrit.plugins.chatgpt.utils.ClassUtils.registerDynamicClasses;
 
 @Slf4j
 public class GerritClientFacade {
@@ -27,7 +23,6 @@ public class GerritClientFacade {
         gerritClientDetail = new GerritClientDetail(config, changeSetData);
         this.gerritClientPatchSet = gerritClientPatchSet;
         this.changeSetData = changeSetData;
-        registerDynamicClasses(GerritClientPatchSetStateless.class, GerritClientPatchSetStateful.class);
         gerritClientComments = new GerritClientComments(config, changeSetData);
     }
 
