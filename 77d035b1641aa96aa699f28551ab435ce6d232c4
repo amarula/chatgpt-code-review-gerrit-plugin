@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6d8c8b8e_38682927",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-24T15:03:22Z",
+      "side": 1,
+      "message": "I get an error in the logs when ChatGPT replies to comment:\n\n```\n[2024-04-24T16:59:08.620+02:00] [ChatGPT request executor] INFO  com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask : Event type comment-added\n[2024-04-24T16:59:08.621+02:00] [ChatGPT request executor] ERROR com.google.gerrit.pgm.Daemon : Thread ChatGPT request executor threw exception\njava.lang.RuntimeException: Error creating instance for class: com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade\n\tat com.googlesource.gerrit.plugins.chatgpt.data.singleton.SingletonManager.createNewInstance(SingletonManager.java:38)\n\tat com.googlesource.gerrit.plugins.chatgpt.data.singleton.SingletonManager.getInstance(SingletonManager.java:13)\n\tat com.googlesource.gerrit.plugins.chatgpt.data.singleton.ChangeSetSingletonManager.getInstance(ChangeSetSingletonManager.java:11)\n\tat com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient.updateGerritClientFacade(GerritClient.java:86)\n\tat com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient.retrieveLastComments(GerritClient.java:66)\n\tat com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.preProcessEvent(EventHandlerTask.java:124)\n\tat com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.execute(EventHandlerTask.java:92)\n\tat com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.run(EventHandlerTask.java:80)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)\n\tat java.base/java.lang.Thread.run(Thread.java:840)\nCaused by: java.lang.NoSuchMethodException: com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade.\u003cinit\u003e()\n\tat java.base/java.lang.Class.getConstructor0(Class.java:3585)\n\tat java.base/java.lang.Class.getDeclaredConstructor(Class.java:2754)\n\tat com.googlesource.gerrit.plugins.chatgpt.data.singleton.SingletonManager.createNewInstance(SingletonManager.java:31)\n\t... 10 more\n```\n\n@dariusz.luksza@gmail.com, do you get the same?",
+      "revId": "77d035b1641aa96aa699f28551ab435ce6d232c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1ffa37de_27e000c0",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/listener/EventHandlerTask.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-24T15:03:22Z",
+      "side": 1,
+      "message": "This method always returns `OK` even for executions that resulted in a failure.\nI think that might be misleading, should we model a `FAILURE` result too?",
+      "range": {
+        "startLine": 109,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 25
+      },
+      "revId": "77d035b1641aa96aa699f28551ab435ce6d232c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b32df68b_d16ca447",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatelessTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-24T15:03:22Z",
+      "side": 1,
+      "message": "Can this be rebases on 1193727, then, will that work?",
+      "range": {
+        "startLine": 160,
+        "startChar": 0,
+        "endLine": 162,
+        "endChar": 41
+      },
+      "revId": "77d035b1641aa96aa699f28551ab435ce6d232c4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
