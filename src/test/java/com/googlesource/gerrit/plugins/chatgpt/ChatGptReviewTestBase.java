@@ -14,9 +14,11 @@ import com.google.gerrit.extensions.api.accounts.AccountApi;
 import com.google.gerrit.extensions.api.accounts.Accounts;
 import com.google.gerrit.extensions.api.accounts.Accounts.QueryRequest;
 import com.google.gerrit.extensions.api.changes.ChangeApi;
+import com.google.gerrit.extensions.api.changes.ChangeApi.CommentsRequest;
 import com.google.gerrit.extensions.api.changes.Changes;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.extensions.common.CommentInfo;
 import com.google.gerrit.extensions.common.GroupInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.json.OutputFormat;
@@ -56,6 +58,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
@@ -169,6 +172,7 @@ public class ChatGptReviewTestBase {
         // Mock the behavior of the gerritAccountGroups request
         mockGerritAccountGroupsApiCall(accountsMock, GERRIT_USER_ACCOUNT_ID);
 
+        ChangeApi changeApiMock = mockGerritChangeApiRestEndpoint();
         // Mock the behavior of the gerritPatchSetRevisionsUri request
         WireMock.stubFor(WireMock.get(gerritPatchSetRevisionsUri(fullChangeId))
                 .willReturn(WireMock.aResponse()
@@ -182,7 +186,7 @@ public class ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("gerritPatchSetDetail.json")));
-        mockGerritChangeDetailsApiCall();
+        mockGerritChangeDetailsApiCall(changeApiMock);
 
         // Mock the behavior of the gerritPatchSet comments request
         WireMock.stubFor(WireMock.get(gerritGetAllPatchSetCommentsUri(fullChangeId))
@@ -190,6 +194,7 @@ public class ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("gerritPatchSetComments.json")));
+        mockGerritChangeCommentsApiCall(changeApiMock);
 
         // Mock the behavior of the postReview request
         WireMock.stubFor(WireMock.post(gerritSetReviewUri(fullChangeId))
@@ -222,14 +227,29 @@ public class ChatGptReviewTestBase {
         when(accountApiMock.getGroups()).thenReturn(groups);
     }
 
-    private void mockGerritChangeDetailsApiCall() throws RestApiException {
+    private void mockGerritChangeCommentsApiCall(ChangeApi changeApiMock) throws RestApiException {
+        Gson gson = OutputFormat.JSON.newGson();
+        Map<String, List<CommentInfo>> comments =
+            gson.fromJson(
+                readTestFile("__files/gerritPatchSetComments.json"),
+                new TypeLiteral<Map<String, List<CommentInfo>>>() {}.getType());
+        CommentsRequest commentsRequestMock = mock(CommentsRequest.class);
+        when(changeApiMock.commentsRequest()).thenReturn(commentsRequestMock);
+        when(commentsRequestMock.get()).thenReturn(comments);
+    }
+
+    private void mockGerritChangeDetailsApiCall(ChangeApi changeApiMock) throws RestApiException {
         Gson gson = OutputFormat.JSON.newGson();
         ChangeInfo changeInfo = gson.fromJson(readTestFile("__files/gerritPatchSetDetail.json"), ChangeInfo.class);
+        when(changeApiMock.get()).thenReturn(changeInfo);
+    }
+
+    private ChangeApi mockGerritChangeApiRestEndpoint() throws RestApiException {
         Changes changesMock = mock(Changes.class);
         when(gerritApi.changes()).thenReturn(changesMock);
         ChangeApi changeApiMock = mock(ChangeApi.class);
         when(changesMock.id(PROJECT_NAME.get(), BRANCH_NAME.shortName(), CHANGE_ID.get())).thenReturn(changeApiMock);
-        when(changeApiMock.get()).thenReturn(changeInfo);
+        return changeApiMock;
     }
 
     protected void initComparisonContent() {}
