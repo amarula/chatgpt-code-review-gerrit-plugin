@@ -2,7 +2,10 @@ package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.common.net.HttpHeaders;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.json.OutputFormat;
+import com.google.gson.Gson;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +13,7 @@ import org.apache.http.entity.ContentType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -25,12 +29,12 @@ import static org.mockito.Mockito.when;
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
 public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
-    private String expectedResponseStreamed;
+    private ReviewInput expectedResponseStreamed;
     private String expectedSystemPromptReview;
     private String promptTagReview;
     private String promptTagComments;
     private String diffContent;
-    private String gerritPatchSetReview;
+    private ReviewInput gerritPatchSetReview;
 
     private ChatGptPromptStateless chatGptPromptStateless;
 
@@ -81,14 +85,17 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseStreamed.txt")));
+
+        // Mock the GerritApi's revision API
+        when(changeApiMock.current()).thenReturn(revisionApiMock);
     }
 
     protected void initComparisonContent() {
         super.initComparisonContent();
 
         diffContent = readTestFile("reducePatchSet/patchSetDiffOutput.json");
-        gerritPatchSetReview = readTestFile("__files/gerritPatchSetReview.json");
-        expectedResponseStreamed = readTestFile("__files/chatGptExpectedResponseStreamed.json");
+        gerritPatchSetReview = readTestFileToClass("__files/gerritPatchSetReview.json", ReviewInput.class);
+        expectedResponseStreamed = readTestFileToClass("__files/chatGptExpectedResponseStreamed.json", ReviewInput.class);
         promptTagReview = readTestFile("__files/chatGptPromptTagReview.json");
         promptTagComments = readTestFile("__files/chatGptPromptTagRequests.json");
         expectedSystemPromptReview = ChatGptPromptStateless.getDefaultGptReviewSystemPrompt();
@@ -108,24 +115,25 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
     }
 
     @Test
-    public void patchSetCreatedOrUpdatedStreamed() throws InterruptedException, ExecutionException {
+    public void patchSetCreatedOrUpdatedStreamed() throws InterruptedException, ExecutionException, RestApiException {
         String reviewUserPrompt = getReviewUserPrompt();
         chatGptPromptStateless.setCommentEvent(false);
 
         CompletableFuture<Void> future = handleEventBasedOnType(false);
         future.get();
 
-        testRequestSent();
+        ArgumentCaptor<ReviewInput> captor = testRequestSent();
         String systemPrompt = prompts.get(0).getAsJsonObject().get("content").getAsString();
         Assert.assertEquals(expectedSystemPromptReview, systemPrompt);
         String userPrompt = prompts.get(1).getAsJsonObject().get("content").getAsString();
         Assert.assertEquals(reviewUserPrompt, userPrompt);
-        String requestBody = loggedRequests.get(0).getBodyAsString();
-        Assert.assertEquals(expectedResponseStreamed, requestBody);
+
+        Gson gson = OutputFormat.JSON_COMPACT.newGson();
+        Assert.assertEquals(gson.toJson(expectedResponseStreamed), gson.toJson(captor.getAllValues().get(0)));
     }
 
     @Test
-    public void patchSetCreatedOrUpdatedUnstreamed() throws InterruptedException, ExecutionException {
+    public void patchSetCreatedOrUpdatedUnstreamed() throws InterruptedException, ExecutionException, RestApiException {
         when(globalConfig.getBoolean(Mockito.eq("gptStreamOutput"), Mockito.anyBoolean()))
                 .thenReturn(false);
         when(globalConfig.getBoolean(Mockito.eq("enabledVoting"), Mockito.anyBoolean()))
@@ -143,11 +151,12 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         CompletableFuture<Void> future = handleEventBasedOnType(false);
         future.get();
 
-        testRequestSent();
+        ArgumentCaptor<ReviewInput> captor = testRequestSent();
         String userPrompt = prompts.get(1).getAsJsonObject().get("content").getAsString();
         Assert.assertEquals(reviewUserPrompt, userPrompt);
-        String requestBody = loggedRequests.get(0).getBodyAsString();
-        Assert.assertEquals(gerritPatchSetReview, requestBody);
+
+        Gson gson = OutputFormat.JSON_COMPACT.newGson();
+        Assert.assertEquals(gson.toJson(gerritPatchSetReview), gson.toJson(captor.getAllValues().get(0)));
     }
 
     @Test
@@ -160,7 +169,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
     }
 
     @Test
-    public void gptMentionedInComment() throws InterruptedException, ExecutionException {
+    public void gptMentionedInComment() throws InterruptedException, ExecutionException, RestApiException {
         when(config.getGerritUserName()).thenReturn(GERRIT_GPT_USERNAME);
         chatGptPromptStateless.setCommentEvent(true);
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()

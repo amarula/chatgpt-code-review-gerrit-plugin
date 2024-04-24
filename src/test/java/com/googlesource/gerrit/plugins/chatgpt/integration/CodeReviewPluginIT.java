@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.integration;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
@@ -72,6 +73,6 @@ public class CodeReviewPluginIT {
         gerritClient.initialize(config);
 
         GerritClientReview gerritClientReview = new GerritClientReview(config);
-        gerritClientReview.setReview("Your changeId", reviewBatches);
+        gerritClientReview.setReview(new GerritChange("Your changeId"), reviewBatches);
     }
 }
