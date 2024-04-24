@@ -145,7 +145,7 @@ public class GerritClientDetail {
         return comment;
     }
 
-    private static GerritComment.Author toAuthor(AccountInfo authorInfo ) {
+    static GerritComment.Author toAuthor(AccountInfo authorInfo ) {
         GerritComment.Author author = new GerritComment.Author();
         author.setAccountId(authorInfo._accountId);
         author.setName(authorInfo.name);
@@ -158,7 +158,7 @@ public class GerritClientDetail {
     /**
      * Date format copied from <b>com.google.gerrit.json.SqlTimestampDeserializer</b>
      */
-    private static String toDateString(Timestamp input) {
+    static String toDateString(Timestamp input) {
         return DATE_FORMAT.format(input) + "000000";
     }
 
