@@ -7,6 +7,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.Ch
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http.HttpClientWithRetry;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
@@ -37,9 +38,9 @@ public class ChatGptClientStateless implements IChatGptClient {
     private boolean isCommentEvent = false;
 
     @Override
-    public String ask(Configuration config, String changeId, String patchSet) throws Exception {
+    public String ask(Configuration config, ChangeSetData changeSetData, String changeId, String patchSet) throws Exception {
         for (int attemptInd = 0; attemptInd < REVIEW_ATTEMPT_LIMIT; attemptInd++) {
-            HttpRequest request = createRequest(config, changeId, patchSet);
+            HttpRequest request = createRequest(config, changeSetData, patchSet);
             log.debug("ChatGPT request: {}", request.toString());
 
             HttpResponse<String> response = httpClientWithRetry.execute(request);
@@ -59,10 +60,10 @@ public class ChatGptClientStateless implements IChatGptClient {
     }
 
     @Override
-    public String ask(Configuration config, GerritChange change, String patchSet) throws Exception {
+    public String ask(Configuration config, ChangeSetData changeSetData, GerritChange change, String patchSet) throws Exception {
         isCommentEvent = change.getIsCommentEvent();
 
-        return this.ask(config, change.getFullChangeId(), patchSet);
+        return this.ask(config, changeSetData, change.getFullChangeId(), patchSet);
     }
 
     private String extractContent(Configuration config, String body) throws Exception {
@@ -101,10 +102,10 @@ public class ChatGptClientStateless implements IChatGptClient {
         return toolCalls.get(0).getFunction().getArguments();
     }
 
-    private HttpRequest createRequest(Configuration config, String changeId, String patchSet) {
+    private HttpRequest createRequest(Configuration config, ChangeSetData changeSetData, String patchSet) {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateless.chatCompletionsUri());
         log.debug("ChatGPT request URI: {}", uri);
-        requestBody = createRequestBody(config, changeId, patchSet);
+        requestBody = createRequestBody(config, changeSetData, patchSet);
         log.debug("ChatGPT request body: {}", requestBody);
 
         return HttpRequest.newBuilder()
@@ -115,7 +116,7 @@ public class ChatGptClientStateless implements IChatGptClient {
                 .build();
     }
 
-    private String createRequestBody(Configuration config, String changeId, String patchSet) {
+    private String createRequestBody(Configuration config, ChangeSetData changeSetData, String patchSet) {
         ChatGptPromptStateless chatGptPromptStateless = new ChatGptPromptStateless(config, isCommentEvent);
         ChatGptRequestMessage systemMessage = ChatGptRequestMessage.builder()
                 .role("system")
@@ -123,7 +124,7 @@ public class ChatGptClientStateless implements IChatGptClient {
                 .build();
         ChatGptRequestMessage userMessage = ChatGptRequestMessage.builder()
                 .role("user")
-                .content(chatGptPromptStateless.getGptUserPrompt(patchSet, changeId))
+                .content(chatGptPromptStateless.getGptUserPrompt(changeSetData, patchSet))
                 .build();
 
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, isCommentEvent);
