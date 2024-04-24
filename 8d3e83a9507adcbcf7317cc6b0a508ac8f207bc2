@@ -34,6 +34,24 @@
       "parentUuid": "9d1d3d3b_86cb2b15",
       "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5e2865ab_73689a53",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-24T14:49:26Z",
+      "side": 1,
+      "message": "The test failure highlights a problem with how the `addLastComments` method populates `commentProperties` based on the `latestComments` returned by `retrieveComments` method. In greater details, the test failure is due to a lack of 2 comments in the comment history sent, Previously, using `gerritGetAllPatchSetCommentsUri`, a `latestComments` group with 3 items was processed last. Now, with the `getGerritApi` method, a smaller group of comments is returned, resulting in two fewer comments in the history.\n\nThe problem revealed is that `retrieveComments` is not guaranteed to return a complete list with all the comments to be sent to ChatGPT as comment history.",
+      "parentUuid": "9d1d3d3b_86cb2b15",
+      "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
