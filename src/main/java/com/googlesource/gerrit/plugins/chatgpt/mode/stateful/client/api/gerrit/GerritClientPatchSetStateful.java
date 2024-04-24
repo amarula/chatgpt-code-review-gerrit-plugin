@@ -8,9 +8,12 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
+
 @Slf4j
 public class GerritClientPatchSetStateful extends GerritClientPatchSet implements IGerritClientPatchSet {
 
+    @Inject
     public GerritClientPatchSetStateful(Configuration config) {
         super(config);
     }
