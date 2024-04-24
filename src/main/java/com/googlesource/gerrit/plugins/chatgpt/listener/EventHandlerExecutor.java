@@ -6,6 +6,7 @@ import com.google.gerrit.server.events.Event;
 import com.google.gerrit.server.git.WorkQueue;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.google.inject.Injector;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,24 +16,27 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Singleton
 public class EventHandlerExecutor {
+    private final Injector injector;
     private final ScheduledExecutorService executor;
-    private final EventHandlerTask.Factory taskHandlerFactory;
 
     @Inject
     EventHandlerExecutor(
+            Injector injector,
             WorkQueue workQueue,
-            EventHandlerTask.Factory taskHandlerFactory,
             @PluginName String pluginName,
             PluginConfigFactory pluginConfigFactory
     ) {
-        this.taskHandlerFactory = taskHandlerFactory;
+        this.injector = injector;
         int maximumPoolSize = pluginConfigFactory.getFromGerritConfig(pluginName)
                 .getInt("maximumPoolSize", 2);
         this.executor = workQueue.createQueue(maximumPoolSize, "ChatGPT request executor");
     }
 
     public void execute(Configuration config, Event event) {
-        executor.execute(taskHandlerFactory.create(config, event));
+        GerritEventContextModule contextModule = new GerritEventContextModule(config);
+        EventHandlerTask.Factory taskHandlerFactory = injector.createChildInjector(contextModule)
+                .getInstance(EventHandlerTask.Factory.class);
+        executor.execute(taskHandlerFactory.create(event));
     }
 
     void shutdown() {

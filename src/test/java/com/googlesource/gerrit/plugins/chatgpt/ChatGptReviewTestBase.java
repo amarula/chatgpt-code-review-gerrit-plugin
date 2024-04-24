@@ -24,6 +24,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
+import com.googlesource.gerrit.plugins.chatgpt.listener.GerritEventContextModule;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
@@ -207,6 +208,8 @@ public class ChatGptReviewTestBase {
         EventHandlerTask.Factory factory = Guice.createInjector(EventHandlerTask.MODULE, new AbstractModule() {
             @Override
             protected void configure() {
+                install(new GerritEventContextModule(config));
+
                 bind(GerritClient.class).toInstance(gerritClient);
                 bind(GitRepoFiles.class).toInstance(gitRepoFiles);
                 bind(ConfigCreator.class).toInstance(mockConfigCreator);
@@ -214,7 +217,7 @@ public class ChatGptReviewTestBase {
                 bind(PluginDataHandler.class).toInstance(pluginDataHandler);
             }
         }).getInstance(EventHandlerTask.Factory.class);
-        return factory.create(config, event).execute();
+        return factory.create(event).execute();
     }
 
     protected void testRequestSent() {
