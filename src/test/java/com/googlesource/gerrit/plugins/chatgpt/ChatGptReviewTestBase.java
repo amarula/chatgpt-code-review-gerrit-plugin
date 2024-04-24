@@ -15,11 +15,13 @@ import com.google.gerrit.extensions.api.accounts.AccountApi;
 import com.google.gerrit.extensions.api.accounts.Accounts;
 import com.google.gerrit.extensions.api.accounts.Accounts.QueryRequest;
 import com.google.gerrit.extensions.api.changes.ChangeApi;
+import com.google.gerrit.extensions.api.changes.ChangeApi.CommentsRequest;
 import com.google.gerrit.extensions.api.changes.Changes;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.changes.RevisionApi;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.extensions.common.CommentInfo;
 import com.google.gerrit.extensions.common.GroupInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.json.OutputFormat;
@@ -72,6 +74,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
@@ -122,6 +125,8 @@ public class ChatGptReviewTestBase {
     protected ChangeApi changeApiMock;
     @Mock
     protected RevisionApi revisionApiMock;
+    @Mock
+    protected CommentsRequest commentsRequestMock;
 
     protected PluginConfig globalConfig;
     protected PluginConfig projectConfig;
@@ -153,9 +158,6 @@ public class ChatGptReviewTestBase {
         };
 
         // Mock the Global Config values not provided by Default
-        when(globalConfig.getString("gerritAuthBaseUrl")).thenReturn(GERRIT_AUTH_BASE_URL);
-        when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_USER_USERNAME);
-        when(globalConfig.getString("gerritPassword")).thenReturn(GERRIT_USER_PASSWORD);
         when(globalConfig.getString("gptToken")).thenReturn(GPT_TOKEN);
 
         // Mock the Global Config values to the Defaults passed as second arguments of the `get*` methods.
@@ -175,9 +177,6 @@ public class ChatGptReviewTestBase {
 
     protected void initConfig() {
         config = new Configuration(context, gerritApi, globalConfig, projectConfig, "gpt@email.com", Account.id(1000000));
-
-        // Mock the config instance values
-        when(config.getGerritUserName()).thenReturn(GERRIT_GPT_USERNAME);
     }
 
     protected void setupMockRequests() throws RestApiException {
@@ -215,6 +214,7 @@ public class ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("gerritPatchSetComments.json")));
+        mockGerritChangeCommentsApiCall();
 
         // Mock the behavior of the postReview request
         WireMock.stubFor(WireMock.post(gerritSetReviewUri(fullChangeId))
@@ -250,6 +250,15 @@ public class ChatGptReviewTestBase {
     private void mockGerritChangeDetailsApiCall() throws RestApiException {
         ChangeInfo changeInfo = readTestFileToClass("__files/gerritPatchSetDetail.json", ChangeInfo.class);
         when(changeApiMock.get()).thenReturn(changeInfo);
+    }
+
+    private void mockGerritChangeCommentsApiCall() throws RestApiException {
+        Map<String, List<CommentInfo>> comments =
+            readTestFileToType(
+                "__files/gerritPatchSetComments.json",
+                new TypeLiteral<Map<String, List<CommentInfo>>>() {}.getType());
+        when(changeApiMock.commentsRequest()).thenReturn(commentsRequestMock);
+        when(commentsRequestMock.get()).thenReturn(comments);
     }
 
     private void mockGerritChangeApiRestEndpoint() throws RestApiException {
