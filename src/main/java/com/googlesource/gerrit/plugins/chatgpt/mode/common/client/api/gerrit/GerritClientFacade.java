@@ -2,7 +2,6 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.ModeClassLoader;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -24,10 +23,9 @@ public class GerritClientFacade {
     private final GerritClientComments gerritClientComments;
 
     @Inject
-    public GerritClientFacade(Configuration config, ChangeSetData changeSetData) {
+    public GerritClientFacade(Configuration config, ChangeSetData changeSetData, IGerritClientPatchSet gerritClientPatchSet) {
         gerritClientDetail = new GerritClientDetail(config, changeSetData);
-        gerritClientPatchSet = (IGerritClientPatchSet) ModeClassLoader.getInstance(
-                "client.api.gerrit.GerritClientPatchSet", config, config);
+        this.gerritClientPatchSet = gerritClientPatchSet;
         this.changeSetData = changeSetData;
         registerDynamicClasses(GerritClientPatchSetStateless.class, GerritClientPatchSetStateful.class);
         gerritClientComments = new GerritClientComments(config, changeSetData);
