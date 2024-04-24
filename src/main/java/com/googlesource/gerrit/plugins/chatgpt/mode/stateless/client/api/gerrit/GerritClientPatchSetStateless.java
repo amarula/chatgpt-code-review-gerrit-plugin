@@ -13,6 +13,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
     private final List<String> diffs;
     private boolean isCommitMessage;
 
+    @Inject
     public GerritClientPatchSetStateless(Configuration config) {
         super(config);
         diffs = new ArrayList<>();
