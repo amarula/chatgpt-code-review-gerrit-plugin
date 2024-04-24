@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,12 +35,12 @@ public class GerritClientPatchSet extends GerritClientAccount {
         }
     }
 
-    protected int getChangeSetRevisionBase(GerritChange change) {
-        return isChangeSetBased(change) ? 0 : revisionBase;
+    protected int getChangeSetRevisionBase(ChangeSetData changeSetData) {
+        return isChangeSetBased(changeSetData) ? 0 : revisionBase;
     }
 
-    private boolean isChangeSetBased(GerritChange change) {
-        return !ChangeSetDataHandler.getInstance(change).getForcedReviewLastPatchSet();
+    private boolean isChangeSetBased(ChangeSetData changeSetData) {
+        return !changeSetData.getForcedReviewLastPatchSet();
     }
 
 }

@@ -3,6 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.integration;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
@@ -36,13 +37,14 @@ public class CodeReviewPluginIT {
 
     @Test
     public void sayHelloToGPT() throws Exception {
+        ChangeSetData changeSetData = new ChangeSetData(1, config.getVotingMinScore(), config.getMaxReviewFileSize());
         ChatGptPromptStateless chatGptPromptStateless = new ChatGptPromptStateless(config, true);
         when(config.getGptDomain()).thenReturn(Configuration.OPENAI_DOMAIN);
         when(config.getGptToken()).thenReturn("Your GPT token");
         when(config.getGptModel()).thenReturn(Configuration.DEFAULT_GPT_MODEL);
         when(chatGptPromptStateless.getGptSystemPrompt()).thenReturn(ChatGptPromptStateless.DEFAULT_GPT_SYSTEM_PROMPT);
 
-        String answer = chatGptClient.ask(config, "", "hello");
+        String answer = chatGptClient.ask(config, changeSetData, "", "hello");
         log.info("answer: {}", answer);
         assertNotNull(answer);
     }
