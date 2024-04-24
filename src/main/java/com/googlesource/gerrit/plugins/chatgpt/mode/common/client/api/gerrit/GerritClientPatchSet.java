@@ -1,14 +1,14 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
-import com.google.gson.JsonObject;
+import java.util.Optional;
+
+import com.google.gerrit.extensions.client.ListChangesOption;
+import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.net.URI;
-import java.util.*;
 
 @Slf4j
 public class GerritClientPatchSet extends GerritClientAccount {
@@ -20,13 +20,20 @@ public class GerritClientPatchSet extends GerritClientAccount {
     }
 
     public void retrieveRevisionBase(GerritChange change) {
-        URI uri = URI.create(config.getGerritAuthBaseUrl()
-                + UriResourceLocator.gerritPatchSetRevisionsUri(change.getFullChangeId()));
-        log.debug("Retrieve Revision URI: '{}'", uri);
-        try {
-            JsonObject reviews = forwardGetRequestReturnJsonObject(uri);
-            Set<String> revisions = reviews.get("revisions").getAsJsonObject().keySet();
-            revisionBase = revisions.size() -1;
+        try (ManualRequestContext requestContext = config.openRequestContext()) {
+            ChangeInfo changeInfo =
+                config
+                    .getGerritApi()
+                    .changes()
+                    .id(
+                        change.getProjectName(),
+                        change.getBranchNameKey().shortName(),
+                        change.getChangeKey().get())
+                    .get(ListChangesOption.ALL_REVISIONS);
+            revisionBase =
+                Optional.ofNullable(changeInfo.revisions)
+                    .map(revisions -> revisions.size() - 1)
+                    .orElse(-1);
         }
         catch (Exception e) {
             log.error("Could not retrieve revisions for PatchSet with fullChangeId: {}", change.getFullChangeId(), e);
