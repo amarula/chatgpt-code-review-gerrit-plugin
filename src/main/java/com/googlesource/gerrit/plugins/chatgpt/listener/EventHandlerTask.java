@@ -7,7 +7,6 @@ import com.google.gerrit.server.data.ChangeAttribute;
 import com.google.gerrit.server.data.PatchSetAttribute;
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.ProjectDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -39,6 +38,7 @@ public class EventHandlerTask implements Runnable {
     private final Configuration config;
     private final GerritClient gerritClient;
     private final GitRepoFiles gitRepoFiles;
+    private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final PatchSetReviewer reviewer;
     private final PluginDataHandler pluginDataHandler;
@@ -46,12 +46,14 @@ public class EventHandlerTask implements Runnable {
     @Inject
     EventHandlerTask(
             Configuration config,
+            ChangeSetData changeSetData,
             GerritChange change,
             PatchSetReviewer reviewer,
             GerritClient gerritClient,
             GitRepoFiles gitRepoFiles,
             PluginDataHandler pluginDataHandler
     ) {
+        this.changeSetData = changeSetData;
         this.change = change;
         this.reviewer = reviewer;
         this.gerritClient = gerritClient;
@@ -67,13 +69,10 @@ public class EventHandlerTask implements Runnable {
 
     @VisibleForTesting
     public Result execute() {
-        Integer gptAccountId = gerritClient.getNotNullAccountId(change, config.getGerritUserName());
-        ChangeSetData changeSetData = ChangeSetDataHandler.getNewInstance(config, change, gptAccountId);
         GitRepoFilesHandler.createNewInstance(gitRepoFiles);
         ProjectDataHandler.createNewInstance(pluginDataHandler);
 
         if (!preProcessEvent(change, changeSetData)) {
-            destroy(change);
             return Result.NOT_SUPPORTED;
         }
 
@@ -87,8 +86,6 @@ public class EventHandlerTask implements Runnable {
                 Thread.currentThread().interrupt();
             }
             return Result.FAILURE;
-        } finally {
-            destroy(change);
         }
         return Result.OK;
     }
@@ -126,11 +123,6 @@ public class EventHandlerTask implements Runnable {
         }
 
         return true;
-    }
-
-    private void destroy(GerritChange change) {
-        log.info("destroying {}",change);
-        ChangeSetDataHandler.removeInstance(change);
     }
 
     private boolean isReviewEnabled(GerritChange change) {

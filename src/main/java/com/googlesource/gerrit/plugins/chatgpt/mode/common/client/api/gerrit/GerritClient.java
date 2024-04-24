@@ -47,7 +47,7 @@ public class GerritClient {
         return gerritClientFacade.getFileDiffsProcessed();
     }
 
-    public Integer getNotNullAccountId(GerritChange change, String authorUsername) {
+    public Integer getNotNullAccountId(String authorUsername) {
         return gerritClientFacade.getNotNullAccountId(authorUsername);
     }
 
