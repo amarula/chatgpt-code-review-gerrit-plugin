@@ -14,14 +14,12 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.Gerr
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptClientStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.ClassUtils.registerDynamicClasses;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
@@ -131,7 +129,6 @@ public class PatchSetReviewer {
             log.warn("Patch set too large. Skipping review. changeId: {}", change.getFullChangeId());
             return String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines());
         }
-        registerDynamicClasses(ChatGptClientStateless.class);
 
         return chatGptClient.ask(config, changeSetData, change, patchSet);
     }
