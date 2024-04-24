@@ -10,6 +10,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.G
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
 import java.util.HashMap;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.ClassUtils.registerDynamicClasses;
@@ -20,6 +21,7 @@ public class GerritClientFacade {
     private final IGerritClientPatchSet gerritClientPatchSet;
     private final GerritClientComments gerritClientComments;
 
+    @Inject
     public GerritClientFacade(Configuration config) {
         gerritClientDetail = new GerritClientDetail(config);
         gerritClientPatchSet = (IGerritClientPatchSet) ModeClassLoader.getInstance(

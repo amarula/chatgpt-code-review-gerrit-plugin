@@ -157,8 +157,6 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
     }
 
     @Test
-    @Ignore("Instance of GerritClient is unregistered from SingletonManager before we can access it in L#172." +
-            "This will be fixed when we migrate to Guice RequestScoped injection.")
     public void gptMentionedInComment() {
         when(config.getGerritUserName()).thenReturn(GERRIT_GPT_USERNAME);
         chatGptPromptStateless.setCommentEvent(true);

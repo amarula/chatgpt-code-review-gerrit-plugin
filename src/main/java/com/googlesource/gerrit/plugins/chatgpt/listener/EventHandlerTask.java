@@ -67,7 +67,6 @@ public class EventHandlerTask implements Runnable {
 
     @VisibleForTesting
     public Result execute() {
-        gerritClient.initialize(config, change);
         Integer gptAccountId = gerritClient.getNotNullAccountId(change, config.getGerritUserName());
         ChangeSetData changeSetData = ChangeSetDataHandler.getNewInstance(config, change, gptAccountId);
         GitRepoFilesHandler.createNewInstance(gitRepoFiles);
@@ -131,7 +130,6 @@ public class EventHandlerTask implements Runnable {
 
     private void destroy(GerritChange change) {
         log.info("destroying {}",change);
-        gerritClient.destroy(change);
         ChangeSetDataHandler.removeInstance(change);
     }
 
