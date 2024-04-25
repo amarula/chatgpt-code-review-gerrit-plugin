@@ -3,13 +3,18 @@ package com.googlesource.gerrit.plugins.chatgpt;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.common.net.HttpHeaders;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
+import com.google.gerrit.extensions.api.changes.FileApi;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.common.DiffInfo;
+import com.google.gerrit.extensions.common.FileInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.json.OutputFormat;
 import com.google.gson.Gson;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.commons.lang3.reflect.TypeLiteral;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -21,9 +26,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Map;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithNewLine;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -55,28 +62,25 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
     protected void setupMockRequests() throws RestApiException {
         super.setupMockRequests();
 
-        String fullChangeId = getGerritChange().getFullChangeId();
+        // Mock the GerritApi's revision API
+        when(changeApiMock.current()).thenReturn(revisionApiMock);
 
         // Mock the behavior of the gerritPatchSetFiles request
-        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("gerritPatchSetFiles.json")));
+        Map<String, FileInfo> files =
+            readTestFileToType(
+                "__files/gerritPatchSetFiles.json",
+                new TypeLiteral<Map<String, FileInfo>>() {}.getType());
+        when(revisionApiMock.files(0)).thenReturn(files);
 
         // Mock the behavior of the gerritPatchSet diff requests
-        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId) +
-                            UriResourceLocatorStateless.gerritDiffPostfixUri("/COMMIT_MSG"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("gerritPatchSetDiffCommitMsg.json")));
-        WireMock.stubFor(WireMock.get(UriResourceLocatorStateless.gerritPatchSetFilesUri(fullChangeId) +
-                            UriResourceLocatorStateless.gerritDiffPostfixUri("test_file.py"))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("gerritPatchSetDiffTestFile.json")));
+        FileApi commitMsgFileMock = mock(FileApi.class);
+        when(revisionApiMock.file("/COMMIT_MSG")).thenReturn(commitMsgFileMock);
+        DiffInfo commitMsgFileDiff = readTestFileToClass("__files/gerritPatchSetDiffCommitMsg.json", DiffInfo.class);
+        when(commitMsgFileMock.diff(0)).thenReturn(commitMsgFileDiff);
+        FileApi testFileMock = mock(FileApi.class);
+        when(revisionApiMock.file("test_file.py")).thenReturn(testFileMock);
+        DiffInfo testFileDiff = readTestFileToClass("__files/gerritPatchSetDiffTestFile.json", DiffInfo.class);
+        when(testFileMock.diff(0)).thenReturn(testFileDiff);
 
         // Mock the behavior of the askGpt request
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
@@ -85,9 +89,6 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseStreamed.txt")));
-
-        // Mock the GerritApi's revision API
-        when(changeApiMock.current()).thenReturn(revisionApiMock);
     }
 
     protected void initComparisonContent() {
