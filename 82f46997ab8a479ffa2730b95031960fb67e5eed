@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "88a3f473_91928eaa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2024-04-25T12:41:10Z",
+      "side": 1,
+      "message": "Is possible to make this issue linked direct to the issue in gerrit configuration?",
+      "revId": "82f46997ab8a479ffa2730b95031960fb67e5eed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "53d962ff_06031d29",
