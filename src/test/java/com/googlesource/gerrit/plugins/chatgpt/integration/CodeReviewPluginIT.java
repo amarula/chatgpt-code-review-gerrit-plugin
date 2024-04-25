@@ -52,9 +52,7 @@ public class CodeReviewPluginIT {
 
     @Test
     public void getPatchSet() throws Exception {
-        when(config.getGerritAuthBaseUrl()).thenReturn("Your Gerrit URL");
         when(config.getGerritUserName()).thenReturn("Your Gerrit username");
-        when(config.getGerritPassword()).thenReturn("Your Gerrit password");
 
         String patchSet = gerritClient.getPatchSet("${changeId}");
         log.info("patchSet: {}", patchSet);
@@ -63,9 +61,7 @@ public class CodeReviewPluginIT {
 
     @Test
     public void setReview() throws Exception {
-        when(config.getGerritAuthBaseUrl()).thenReturn("Your Gerrit URL");
         when(config.getGerritUserName()).thenReturn("Your Gerrit username");
-        when(config.getGerritPassword()).thenReturn("Your Gerrit password");
 
         List<ReviewBatch> reviewBatches = new ArrayList<>();
         reviewBatches.add(new ReviewBatch());
