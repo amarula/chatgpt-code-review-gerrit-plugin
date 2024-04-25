@@ -1,9 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import com.google.common.net.HttpHeaders;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
@@ -45,7 +43,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.NonNull;
-import org.apache.http.entity.ContentType;
 import org.junit.Before;
 import org.junit.Rule;
 import org.mockito.ArgumentCaptor;
@@ -65,9 +62,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
-import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.UriResourceLocator.*;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-import static java.net.HttpURLConnection.HTTP_OK;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -178,33 +173,12 @@ public class ChatGptReviewTestBase {
         mockGerritAccountGroupsApiCall(accountsMock, GERRIT_USER_ACCOUNT_ID);
 
         mockGerritChangeApiRestEndpoint();
-        // Mock the behavior of the gerritPatchSetRevisionsUri request
-        WireMock.stubFor(WireMock.get(gerritPatchSetRevisionsUri(fullChangeId))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBody("{\"revisions\":{\"aa5be5ebb80846475ec4dfe43e0799eb73c6415a\":{}}}")));
 
         // Mock the behavior of the gerritGetPatchSetDetailUri request
-        WireMock.stubFor(WireMock.get(gerritGetPatchSetDetailUri(fullChangeId))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("gerritPatchSetDetail.json")));
         mockGerritChangeDetailsApiCall();
 
         // Mock the behavior of the gerritPatchSet comments request
-        WireMock.stubFor(WireMock.get(gerritGetAllPatchSetCommentsUri(fullChangeId))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("gerritPatchSetComments.json")));
         mockGerritChangeCommentsApiCall();
-
-        // Mock the behavior of the postReview request
-        WireMock.stubFor(WireMock.post(gerritSetReviewUri(fullChangeId))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)));
     }
 
     private Accounts mockGerritAccountsRestEndpoint() {
