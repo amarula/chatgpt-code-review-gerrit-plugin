@@ -64,6 +64,7 @@ import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -261,6 +262,11 @@ public class ChatGptReviewTestBase {
     protected <T> T readTestFileToClass(String filename, Class<T> clazz) {
         Gson gson = OutputFormat.JSON.newGson();
         return gson.fromJson(readTestFile(filename), clazz);
+    }
+
+    protected <T> T readTestFileToType(String filename, Type type) {
+        Gson gson = OutputFormat.JSON.newGson();
+        return gson.fromJson(readTestFile(filename), type);
     }
 
     protected String readTestFile(String filename) {
