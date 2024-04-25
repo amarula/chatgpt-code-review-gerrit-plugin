@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dac8d402_63228f88",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatelessTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-25T07:43:30Z",
+      "side": 1,
+      "message": "nit: not needed",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 106
+      },
+      "revId": "537ebb8cdb30258175d55e8d7d31839af635ef20",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1562ed82_808a2922",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewTestBase.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-25T07:43:30Z",
+      "side": 1,
+      "message": "nit: not needed",
+      "revId": "537ebb8cdb30258175d55e8d7d31839af635ef20",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
