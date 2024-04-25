@@ -30,15 +30,11 @@ Reviews can be also triggered by directing a comment with the `/review` command 
    `[plugin "chatgpt-code-review-gerrit-plugin"]`:
 
 - `gptToken`: OpenAI GPT token.
-- `gerritAuthBaseUrl`: The URL of your Gerrit instance, similar to `https://gerrit.local.team`.
-
-  **NOTE**: Do not append "/a" authentication sub-path to the Gerrit URL.
 - `gerritUserName`: Gerrit username of ChatGPT user.
-- `gerritPassword`: Gerrit password of ChatGPT user.
 - `globalEnable`: Default value is false. The plugin will only review specified repositories. If set to true, the plugin
    will by default review all pull requests.
 
-   For enhanced security, consider storing sensitive information like gptToken and gerritPassword in a secure location
+   For enhanced security, consider storing sensitive information like gptToken in a secure location
    or file. Detailed instructions on how to do this will be provided later in this document.
 
 4. **Verify:** After restarting Gerrit, you can see the following information in Gerrit's logs:
@@ -84,7 +80,6 @@ as follows:
 [plugin "chatgpt-code-review-gerrit-plugin"]
     # Required parameters
     gptToken = {gptToken}
-    gerritAuthBaseUrl = {gerritAuthBaseUrl}
     ...
 
     # Optional parameters
@@ -95,13 +90,12 @@ as follows:
 
 #### Secure Configuration
 
-It is highly recommended to store sensitive information such as `gptToken` and `gerritPassword` in the `secure.config`
+It is highly recommended to store sensitive information such as `gptToken` in the `secure.config`
 file. Please edit the file at $gerrit_site/etc/`secure.config` and include the following details:
 
 ```
 [plugin "chatgpt-code-review-gerrit-plugin"]
     gptToken = {gptToken}
-    gerritPassword = {gerritPassword}
 ```
 
 If you wish to encrypt the information within the `secure.config` file, you can refer
@@ -115,7 +109,6 @@ To add the following content, please edit the `project.config` file in `refs/met
 [plugin "chatgpt-code-review-gerrit-plugin"]
     # Required parameters
     gerritUserName = {gerritUserName}
-    gerritAuthBaseUrl = {gerritAuthBaseUrl}
     ...
 
     # Optional parameters
@@ -127,7 +120,7 @@ To add the following content, please edit the `project.config` file in `refs/met
 #### Secure Configuration
 
 Please ensure **strict control over the access permissions of `refs/meta/config`** since sensitive information such as
-`gptToken` and `gerritPassword` is configured in the `project.config` file within `refs/meta/config`.
+`gptToken` is configured in the `project.config` file within `refs/meta/config`.
 
 ### Optional Parameters
 
