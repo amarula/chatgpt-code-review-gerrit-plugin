@@ -94,8 +94,6 @@ public class Configuration {
     public static final String KEY_GERRIT_USERNAME = "gerritUserName";
 
     private static final String KEY_GPT_TOKEN = "gptToken";
-    private static final String KEY_GERRIT_AUTH_BASE_URL = "gerritAuthBaseUrl";
-    private static final String KEY_GERRIT_PASSWORD = "gerritPassword";
     private static final String KEY_GPT_DOMAIN = "gptDomain";
     private static final String KEY_GPT_MODEL = "gptModel";
     private static final String KEY_STREAM_OUTPUT = "gptStreamOutput";
@@ -155,16 +153,8 @@ public class Configuration {
         return getValidatedOrThrow(KEY_GPT_TOKEN);
     }
 
-    public String getGerritAuthBaseUrl() {
-        return getValidatedOrThrow(KEY_GERRIT_AUTH_BASE_URL);
-    }
-
     public String getGerritUserName() {
         return getValidatedOrThrow(KEY_GERRIT_USERNAME);
-    }
-
-    public String getGerritPassword() {
-        return getValidatedOrThrow(KEY_GERRIT_PASSWORD);
     }
 
     public String getGptDomain() {
