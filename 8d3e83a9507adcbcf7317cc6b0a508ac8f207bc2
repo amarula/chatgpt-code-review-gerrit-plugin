@@ -70,6 +70,24 @@
       "parentUuid": "5e2865ab_73689a53",
       "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fb6e9ea9_3e023b12",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-25T20:25:24Z",
+      "side": 1,
+      "message": "The problem of choosing the last comment is still there but for the time being I have preserved the existing behaviour by making sure that the result\u0027s order of comments in files. IOW using GerritApi has no difference to the original code.",
+      "parentUuid": "6b696f26_f9cdb7eb",
+      "revId": "8d3e83a9507adcbcf7317cc6b0a508ac8f207bc2",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
