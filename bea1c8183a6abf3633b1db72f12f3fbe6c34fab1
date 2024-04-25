@@ -22,6 +22,30 @@
       },
       "revId": "bea1c8183a6abf3633b1db72f12f3fbe6c34fab1",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3dd2e414_54e5abef",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/listener/GerritListener.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-25T14:30:28Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "10536af0_ccfe8c7c",
+      "range": {
+        "startLine": 28,
+        "startChar": 12,
+        "endLine": 28,
+        "endChar": 49
+      },
+      "revId": "bea1c8183a6abf3633b1db72f12f3fbe6c34fab1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
