@@ -94,6 +94,30 @@
       },
       "revId": "5359fbac6c1a06d97b55ddab1688ef5d3bd642ab",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f307334e_9a0b6e58",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-25T10:40:17Z",
+      "side": 1,
+      "message": "Done\n\nHere are cherry-picked changes:\n\nhttps://review.gerrithub.io/c/amarula/chatgpt-code-review-gerrit-plugin/+/1193644\nhttps://review.gerrithub.io/c/amarula/chatgpt-code-review-gerrit-plugin/+/1193669\n\nAfter the above are merged I\u0027ll remove them from this chain. Let\u0027s keep them in till then.",
+      "parentUuid": "983ed3d1_408bee93",
+      "range": {
+        "startLine": 20,
+        "startChar": 8,
+        "endLine": 20,
+        "endChar": 30
+      },
+      "revId": "5359fbac6c1a06d97b55ddab1688ef5d3bd642ab",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
