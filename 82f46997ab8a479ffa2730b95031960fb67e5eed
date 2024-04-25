@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "53d962ff_06031d29",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-25T10:15:00Z",
+      "side": 1,
+      "message": "PS #7 ensures that mapping is called only when the source (date, author, etc...) is not NPE",
+      "revId": "82f46997ab8a479ffa2730b95031960fb67e5eed",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
