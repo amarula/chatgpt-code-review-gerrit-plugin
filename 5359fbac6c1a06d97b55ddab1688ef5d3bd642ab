@@ -22,6 +22,30 @@
       },
       "revId": "5359fbac6c1a06d97b55ddab1688ef5d3bd642ab",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3fec7c33_b971f748",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2024-04-25T07:20:39Z",
+      "side": 1,
+      "message": "If people fix it up and rebase on top of current merged patches the two connected to the email fix problem, I can merge them and move on then on rest",
+      "parentUuid": "52824cf8_462ebbcd",
+      "range": {
+        "startLine": 20,
+        "startChar": 8,
+        "endLine": 20,
+        "endChar": 30
+      },
+      "revId": "5359fbac6c1a06d97b55ddab1688ef5d3bd642ab",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
