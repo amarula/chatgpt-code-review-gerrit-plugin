@@ -16,6 +16,24 @@
       "message": "this file no longer tests anything - should be removed?",
       "revId": "9e0e89b6dda4cb61e87bcaa4d56b6b0378d2c3d6",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6b20b040_8e7e523f",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatefulTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-26T10:17:57Z",
+      "side": 0,
+      "message": "Addressed in #[I9b217ae4ecc7a](https://review.gerrithub.io/c/amarula/chatgpt-code-review-gerrit-plugin/+/1193888)",
+      "parentUuid": "d10855f9_ad7d53e9",
+      "revId": "9e0e89b6dda4cb61e87bcaa4d56b6b0378d2c3d6",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
