@@ -46,6 +46,30 @@
       },
       "revId": "e8fecbb5811bd871796bfd6cb884b6cefbfb50dc",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6b76b4b2_89fde212",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-26T05:57:14Z",
+      "side": 1,
+      "message": "I would second Tony here. The `javax.inject.Inject` is marked as [deprecated](https://docs.oracle.com/javaee/6/api/javax/inject/package-summary.html) and it shouldn\u0027t be introduced to the code.\n\nThere is also the case if consistency.\nPrior your changes `javax.inject.Inject` is not used in the plugin\u0027s code:\n```\n$ git grep -n \"javax.inject.Inject\" | wc -l\n       0\n```\n\nvs `com.google.inject.Inject`:\n```\n$ git grep -c \"com.google.inject.Inject\" | wc -l\n       4\n```\n\nwhich is probably not a big number but it is driven by the Gerrit\u0027s core where we have:\n```\n$ git grep \"javax.inject.Inject\" origin/master | wc -l\n      21\n```\na few leftovers, vs\n```\n$ git grep \"com.google.inject.Inject\" origin/master | wc -l\n    1319\n```",
+      "parentUuid": "90c2607b_4d34feb0",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 27
+      },
+      "revId": "e8fecbb5811bd871796bfd6cb884b6cefbfb50dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
