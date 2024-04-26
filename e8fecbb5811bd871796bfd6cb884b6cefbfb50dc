@@ -70,6 +70,30 @@
       },
       "revId": "e8fecbb5811bd871796bfd6cb884b6cefbfb50dc",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "52fce630_2d047622",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClient.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-04-26T07:04:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b76b4b2_89fde212",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 27
+      },
+      "revId": "e8fecbb5811bd871796bfd6cb884b6cefbfb50dc",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
