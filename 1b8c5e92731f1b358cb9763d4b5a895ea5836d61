@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e6829d3b_ec21036b",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/listener/EventHandlerExecutor.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-27T07:40:09Z",
+      "side": 1,
+      "message": "question: AFAIU when task executed through the `newCachedThreadPool` blokes (and IMHO it cannot be excluded as ChatGPT API is called) then new threads will be spawned and there is no limit on number of them.\n\nHow about creating the pool manually e.g.:\n```\n        int maximumPoolSize \u003d 10;\n        this.executor \u003d\n            new ThreadPoolExecutor(\n                0,\n                maximumPoolSize,\n                60L,\n                TimeUnit.SECONDS,\n                new SynchronousQueue\u003cRunnable\u003e(),\n                new ThreadFactoryBuilder().setNameFormat(\"ChatGPT request executor\").build());\n```\nso that executor has a room for spawning new threads when needed, it removes (after `60s`) the idle threads and system is not overloaded with threads in case when comments are coming and ChatGPT API is slow to respond? The `maximumPoolSize` could be read from the config (also the idle time) with some reasonable default.\nConsidering number of changes in chain it could be added as a follow-up. WDYT?",
+      "range": {
+        "startLine": 23,
+        "startChar": 24,
+        "endLine": 23,
+        "endChar": 53
+      },
+      "revId": "1b8c5e92731f1b358cb9763d4b5a895ea5836d61",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
