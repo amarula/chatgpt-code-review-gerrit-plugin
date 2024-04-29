@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ba3abfc8_00d6fd83",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/listener/PluginLifecycleListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-29T06:46:43Z",
+      "side": 1,
+      "message": "is this needed? AFAIU hooking on `LifecycleListener` should do the same as Gerrit will be called on JVM shutdown and it will make sure that plugins get shut as well...",
+      "range": {
+        "startLine": 22,
+        "startChar": 8,
+        "endLine": 22,
+        "endChar": 59
+      },
+      "revId": "952e825d098731a570806d005b6273fe21a2b722",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
