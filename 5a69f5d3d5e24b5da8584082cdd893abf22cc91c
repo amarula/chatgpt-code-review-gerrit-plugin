@@ -141,6 +141,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "23d74d00_8a5260d3",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-04-29T23:00:48Z",
+      "side": 1,
+      "message": "The condition in the method \u0027isDisabledUser\u0027 looks correct. It checks if the authorUsername is not in the enabledUsers list, is in the disabledUsers list, or if the authorUsername belongs to a disabled user group. This logic aligns with the expected behavior based on the implementation provided.",
+      "parentUuid": "8d1b02b5_7a214d54",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 55
+      },
+      "revId": "5a69f5d3d5e24b5da8584082cdd893abf22cc91c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "4afb040f_93eba8b0",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
         "patchSetId": 7
