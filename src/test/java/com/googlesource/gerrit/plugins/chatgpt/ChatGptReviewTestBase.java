@@ -11,13 +11,11 @@ import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.extensions.api.GerritApi;
 import com.google.gerrit.extensions.api.accounts.AccountApi;
 import com.google.gerrit.extensions.api.accounts.Accounts;
-import com.google.gerrit.extensions.api.accounts.Accounts.QueryRequest;
 import com.google.gerrit.extensions.api.changes.ChangeApi;
 import com.google.gerrit.extensions.api.changes.ChangeApi.CommentsRequest;
 import com.google.gerrit.extensions.api.changes.Changes;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.changes.RevisionApi;
-import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.CommentInfo;
 import com.google.gerrit.extensions.common.GroupInfo;
@@ -43,9 +41,12 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import com.googlesource.gerrit.plugins.chatgpt.listener.GerritEventContextModule;
 import com.google.inject.TypeLiteral;
+import com.google.inject.util.Providers;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientComments;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
@@ -122,6 +123,8 @@ public class ChatGptReviewTestBase {
     protected RevisionApi revisionApiMock;
     @Mock
     protected CommentsRequest commentsRequestMock;
+    @Mock
+    protected AccountCache accountCacheMock;
 
     protected PluginConfig globalConfig;
     protected PluginConfig projectConfig;
@@ -177,10 +180,10 @@ public class ChatGptReviewTestBase {
     protected void setupMockRequests() throws RestApiException {
         Accounts accountsMock = mockGerritAccountsRestEndpoint();
         // Mock the behavior of the gerritAccountIdUri request
-        mockGerritAccountsQueryApiCall(accountsMock, GERRIT_GPT_USERNAME, GERRIT_GPT_ACCOUNT_ID);
+        mockGerritAccountsQueryApiCall(GERRIT_GPT_USERNAME, GERRIT_GPT_ACCOUNT_ID);
 
         // Mock the behavior of the gerritAccountIdUri request
-        mockGerritAccountsQueryApiCall(accountsMock, GERRIT_USER_USERNAME, GERRIT_USER_ACCOUNT_ID);
+        mockGerritAccountsQueryApiCall(GERRIT_USER_USERNAME, GERRIT_USER_ACCOUNT_ID);
 
         // Mock the behavior of the gerritAccountGroups request
         mockGerritAccountGroupsApiCall(accountsMock, GERRIT_USER_ACCOUNT_ID);
@@ -201,10 +204,12 @@ public class ChatGptReviewTestBase {
     }
 
     private void mockGerritAccountsQueryApiCall(
-        Accounts accountsMock, String username, int expectedAccountId) throws RestApiException {
-        QueryRequest queryRequestMock = mock(QueryRequest.class);
-        when(accountsMock.query(username)).thenReturn(queryRequestMock);
-        when(queryRequestMock.get()).thenReturn(List.of(new AccountInfo(expectedAccountId)));
+        String username, int expectedAccountId) throws RestApiException {
+        AccountState accountStateMock = mock(AccountState.class);
+        Account accountMock = mock(Account.class);
+        when(accountStateMock.account()).thenReturn(accountMock);
+        when(accountMock.id()).thenReturn(Account.id(expectedAccountId));
+        when(accountCacheMock.getByUsername(username)).thenReturn(Optional.of(accountStateMock));
     }
 
     private void mockGerritAccountGroupsApiCall(Accounts accountsMock, int accountId)
@@ -291,8 +296,20 @@ public class ChatGptReviewTestBase {
 
     private void initTest() {
         ChangeSetData changeSetData = new ChangeSetData(GPT_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getMaxReviewFileSize());
-        gerritClient = new GerritClient(new GerritClientFacade(config, changeSetData, getGerritClientPatchSet()));
-        patchSetReviewer = new PatchSetReviewer(gerritClient, config, changeSetData, getChatGptClient());
+        gerritClient =
+            new GerritClient(
+                new GerritClientFacade(
+                    config,
+                    changeSetData,
+                    new GerritClientComments(config, accountCacheMock, changeSetData),
+                    getGerritClientPatchSet()));
+        patchSetReviewer =
+            new PatchSetReviewer(
+                gerritClient,
+                config,
+                changeSetData,
+                Providers.of(new GerritClientReview(config, accountCacheMock)),
+                getChatGptClient());
         mockConfigCreator = mock(ConfigCreator.class);
     }
 
@@ -357,8 +374,8 @@ public class ChatGptReviewTestBase {
 
     private IGerritClientPatchSet getGerritClientPatchSet() {
         return switch (config.getGptMode()) {
-            case stateful -> new GerritClientPatchSetStateful(config, gitRepoFiles, pluginDataHandler);
-            case stateless -> new GerritClientPatchSetStateless(config);
+            case stateful -> new GerritClientPatchSetStateful(config, accountCacheMock, gitRepoFiles, pluginDataHandler);
+            case stateless -> new GerritClientPatchSetStateless(config, accountCacheMock);
         };
     }
 }

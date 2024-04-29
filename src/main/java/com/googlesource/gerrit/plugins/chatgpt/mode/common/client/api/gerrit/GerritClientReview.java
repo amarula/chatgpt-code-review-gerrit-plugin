@@ -1,12 +1,15 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.gerrit.extensions.client.Comment;
 import com.google.gerrit.entities.LabelId;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.changes.ReviewInput.CommentInput;
 import com.google.gerrit.extensions.api.changes.ReviewResult;
+import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
+import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +25,10 @@ import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.EMPTY_RE
 
 @Slf4j
 public class GerritClientReview extends GerritClientAccount {
-    public GerritClientReview(Configuration config) {
-        super(config);
+    @VisibleForTesting
+    @Inject
+    public GerritClientReview(Configuration config, AccountCache accountCache) {
+        super(config, accountCache);
     }
 
     public void setReview(GerritChange change, List<ReviewBatch> reviewBatches, Integer reviewScore) throws Exception {

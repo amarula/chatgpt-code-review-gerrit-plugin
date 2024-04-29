@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
@@ -15,15 +16,20 @@ import java.util.HashMap;
 public class GerritClientFacade {
     private final ChangeSetData changeSetData;
     private final GerritClientDetail gerritClientDetail;
-    private final IGerritClientPatchSet gerritClientPatchSet;
     private final GerritClientComments gerritClientComments;
+    private final IGerritClientPatchSet gerritClientPatchSet;
 
+    @VisibleForTesting
     @Inject
-    public GerritClientFacade(Configuration config, ChangeSetData changeSetData, IGerritClientPatchSet gerritClientPatchSet) {
+    public GerritClientFacade(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritClientComments gerritClientComments,
+            IGerritClientPatchSet gerritClientPatchSet) {
         gerritClientDetail = new GerritClientDetail(config, changeSetData);
         this.gerritClientPatchSet = gerritClientPatchSet;
         this.changeSetData = changeSetData;
-        gerritClientComments = new GerritClientComments(config, changeSetData);
+        this.gerritClientComments = gerritClientComments;
     }
 
     public GerritPermittedVotingRange getPermittedVotingRange(GerritChange change) {

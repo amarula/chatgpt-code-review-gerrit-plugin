@@ -1,8 +1,10 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit;
 
 import com.google.inject.Inject;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.extensions.common.DiffInfo;
 import com.google.gerrit.extensions.common.FileInfo;
+import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -29,9 +31,10 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
     private final List<String> diffs;
     private boolean isCommitMessage;
 
+    @VisibleForTesting
     @Inject
-    public GerritClientPatchSetStateless(Configuration config) {
-        super(config);
+    public GerritClientPatchSetStateless(Configuration config, AccountCache accountCache) {
+        super(config, accountCache);
         diffs = new ArrayList<>();
     }
 
