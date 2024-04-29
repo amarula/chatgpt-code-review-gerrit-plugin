@@ -30,7 +30,18 @@ import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_P
 
 @Slf4j
 public class GerritClientComments extends GerritClientAccount {
-    private static final Integer MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT = 2;
+    // Gerrit does not pass the comments that have been published as payload
+    // to the CommentAddedEvent, therefore the ChatGPT plugin does not have
+    // a reliable way to understand exactly which comments are published at this
+    // point in time.
+    // This temporary *hack* assumes that a human being does not post more than
+    // one review per minute, therefore all the comments published in the past
+    // 60 seconds are assumed the last ones published.
+    //
+    // A better solution would be reading the change notes from NoteDb directly
+    // and just retrieve the comments from there, as every published comments
+    // are inserted as a single commit to the /meta ref.
+    private static final Integer MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT = 60;
 
     private final ChangeSetData changeSetData;
     private final ICodeContextPolicy codeContextPolicy;
@@ -138,8 +149,10 @@ public class GerritClientComments extends GerritClientAccount {
                     if (commentAuthorUsername.equals(authorUsername)
                         && updatedTimeStamp
                             >= change.getEventTimeStamp() - MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT) {
-                      log.debug("Found comment with updatedTimeStamp : {}", updatedTimeStamp);
+                      log.debug("Found comment with updatedTimeStamp : {} which is posted in the past {} secs", updatedTimeStamp, MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT);
                       latestChangeMessageId = changeMessageId;
+                    } else {
+                        log.debug("Discarding comment from {} with updatedTimeStamp : {} because it is too old", commentAuthorUsername, updatedTimeStamp);
                     }
                     latestComments
                         .computeIfAbsent(changeMessageId, k -> new ArrayList<>())
