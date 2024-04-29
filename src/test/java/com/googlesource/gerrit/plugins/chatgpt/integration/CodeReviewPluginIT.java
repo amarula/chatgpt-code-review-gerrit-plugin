@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.integration;
 
+import com.google.gerrit.server.account.AccountCache;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
@@ -36,6 +37,9 @@ public class CodeReviewPluginIT {
     @InjectMocks
     private IChatGptClient chatGptClient;
 
+    @InjectMocks
+    private AccountCache accountCache;
+
     @Test
     public void sayHelloToGPT() throws Exception {
         ChangeSetData changeSetData = new ChangeSetData(1, config.getVotingMinScore(), config.getMaxReviewFileSize());
@@ -67,7 +71,7 @@ public class CodeReviewPluginIT {
         reviewBatches.add(new ReviewBatch());
         reviewBatches.get(0).setContent("message");
 
-        GerritClientReview gerritClientReview = new GerritClientReview(config);
+        GerritClientReview gerritClientReview = new GerritClientReview(config, accountCache);
         gerritClientReview.setReview(new GerritChange("Your changeId"), reviewBatches);
     }
 }

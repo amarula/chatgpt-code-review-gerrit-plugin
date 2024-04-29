@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -30,6 +31,7 @@ public class PatchSetReviewer {
     private final Configuration config;
     private final GerritClient gerritClient;
     private final ChangeSetData changeSetData;
+    private final Provider<GerritClientReview> clientReviewProvider;
     @Getter
     private final IChatGptClient chatGptClient;
 
@@ -39,10 +41,16 @@ public class PatchSetReviewer {
     private List<Integer> reviewScores;
 
     @Inject
-    PatchSetReviewer(GerritClient gerritClient, Configuration config, ChangeSetData changeSetData, IChatGptClient chatGptClient) {
+    PatchSetReviewer(
+            GerritClient gerritClient,
+            Configuration config,
+            ChangeSetData changeSetData,
+            Provider<GerritClientReview> clientReviewProvider,
+            IChatGptClient chatGptClient) {
         this.config = config;
         this.gerritClient = gerritClient;
         this.changeSetData = changeSetData;
+        this.clientReviewProvider = clientReviewProvider;
         this.chatGptClient = chatGptClient;
     }
 
@@ -51,7 +59,6 @@ public class PatchSetReviewer {
         reviewScores = new ArrayList<>();
         commentProperties = gerritClient.getClientData(change).getCommentProperties();
         gerritCommentRange = new GerritCommentRange(gerritClient, change);
-        GerritClientReview gerritClientReview = new GerritClientReview(config);
         String patchSet = gerritClient.getPatchSet(change);
         if (patchSet.isEmpty()) {
             log.info("No file to review has been found in the PatchSet");
@@ -63,7 +70,7 @@ public class PatchSetReviewer {
         log.debug("ChatGPT response: {}", reviewReply);
 
         retrieveReviewBatches(reviewReply, change);
-        gerritClientReview.setReview(change, reviewBatches, getReviewScore());
+        clientReviewProvider.get().setReview(change, reviewBatches, getReviewScore());
     }
 
     private void setCommentBatchMap(ReviewBatch batchMap, Integer batchID) {

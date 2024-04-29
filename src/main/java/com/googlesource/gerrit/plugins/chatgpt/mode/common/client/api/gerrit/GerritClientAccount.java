@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
-import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.common.GroupInfo;
+import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import lombok.extern.slf4j.Slf4j;
@@ -14,9 +14,11 @@ import java.util.Optional;
 
 @Slf4j
 public class GerritClientAccount extends GerritClientBase {
+    private final AccountCache accountCache;
 
-    public GerritClientAccount(Configuration config) {
+    public GerritClientAccount(Configuration config, AccountCache accountCache) {
         super(config);
+        this.accountCache = accountCache;
     }
 
     public boolean isDisabledUser(String authorUsername) {
@@ -37,12 +39,10 @@ public class GerritClientAccount extends GerritClientBase {
     }
 
     protected Optional<Integer> getAccountId(String authorUsername) {
-        try (ManualRequestContext requestContext = config.openRequestContext()) {
-            List<AccountInfo> accounts = config.getGerritApi().accounts().query(authorUsername).get();
-            if (accounts.isEmpty()) {
-                return Optional.empty();
-            }
-            return Optional.of(accounts.get(0)).map(a -> a._accountId);
+        try {
+            return accountCache
+                .getByUsername(authorUsername)
+                .map(accountState -> accountState.account().id().get());
         }
         catch (Exception e) {
             log.error("Could not find account ID for username '{}'", authorUsername);
