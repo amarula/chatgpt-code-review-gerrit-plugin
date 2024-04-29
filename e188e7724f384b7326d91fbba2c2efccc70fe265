@@ -87,6 +87,30 @@
       },
       "revId": "e188e7724f384b7326d91fbba2c2efccc70fe265",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3a68cf8a_92a7d2ca",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1019121
+      },
+      "writtenOn": "2024-04-29T07:35:48Z",
+      "side": 1,
+      "message": "Addressed in [#1194003](https://review.gerrithub.io/c/amarula/chatgpt-code-review-gerrit-plugin/+/1194003)",
+      "parentUuid": "fa727ef6_1872348e",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 71
+      },
+      "revId": "e188e7724f384b7326d91fbba2c2efccc70fe265",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
