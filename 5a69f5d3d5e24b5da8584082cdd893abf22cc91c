@@ -118,6 +118,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "8d1b02b5_7a214d54",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-04-29T23:00:39Z",
+      "side": 1,
+      "message": "@chatgpt@gerritforge.com is this condition correct?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 55
+      },
+      "revId": "5a69f5d3d5e24b5da8584082cdd893abf22cc91c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "4afb040f_93eba8b0",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
         "patchSetId": 7
