@@ -49,6 +49,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ff37e7d6_eb4443b9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-04-29T22:57:29Z",
+      "side": 1,
+      "message": "@chatgpt@gerritforge.com is this spelled correctly?",
+      "range": {
+        "startLine": 15,
+        "startChar": 6,
+        "endLine": 15,
+        "endChar": 25
+      },
+      "revId": "5a69f5d3d5e24b5da8584082cdd893abf22cc91c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3bb6c9ef_78a4d754",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
         "patchSetId": 7
