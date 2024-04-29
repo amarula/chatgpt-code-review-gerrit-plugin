@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
@@ -16,8 +17,8 @@ public class GerritClientPatchSet extends GerritClientAccount {
     @Getter
     protected Integer revisionBase = 0;
 
-    public GerritClientPatchSet(Configuration config) {
-        super(config);
+    public GerritClientPatchSet(Configuration config, AccountCache accountCache) {
+        super(config, accountCache);
     }
 
     public void retrieveRevisionBase(GerritChange change) {

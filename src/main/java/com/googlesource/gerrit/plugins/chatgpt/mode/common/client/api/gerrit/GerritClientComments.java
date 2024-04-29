@@ -1,8 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.extensions.common.CommentInfo;
+import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.events.CommentAddedEvent;
 import com.google.gerrit.server.util.ManualRequestContext;
+import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
@@ -33,8 +36,10 @@ public class GerritClientComments extends GerritClientAccount {
     @Getter
     private List<GerritComment> commentProperties;
 
-    public GerritClientComments(Configuration config, ChangeSetData changeSetData) {
-        super(config);
+    @VisibleForTesting
+    @Inject
+    public GerritClientComments(Configuration config, AccountCache accountCache, ChangeSetData changeSetData) {
+        super(config, accountCache);
         this.changeSetData = changeSetData;
         commentProperties = new ArrayList<>();
         commentMap = new HashMap<>();

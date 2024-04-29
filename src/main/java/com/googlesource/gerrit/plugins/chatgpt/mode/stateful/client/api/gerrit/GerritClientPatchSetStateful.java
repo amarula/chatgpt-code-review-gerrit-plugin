@@ -1,5 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.gerrit.server.account.AccountCache;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
@@ -16,9 +18,14 @@ public class GerritClientPatchSetStateful extends GerritClientPatchSet implement
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler pluginDataHandler;
 
+    @VisibleForTesting
     @Inject
-    public GerritClientPatchSetStateful(Configuration config, GitRepoFiles gitRepoFiles, PluginDataHandler pluginDataHandler) {
-        super(config);
+    public GerritClientPatchSetStateful(
+            Configuration config,
+            AccountCache accountCache,
+            GitRepoFiles gitRepoFiles,
+            PluginDataHandler pluginDataHandler) {
+        super(config, accountCache);
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandler = pluginDataHandler;
     }
