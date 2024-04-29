@@ -72,6 +72,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "4afb040f_93eba8b0",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-04-29T22:38:24Z",
+      "side": 1,
+      "message": "@chatgpt@gerritforge.com is this method name well chosen?",
+      "range": {
+        "startLine": 31,
+        "startChar": 19,
+        "endLine": 31,
+        "endChar": 34
+      },
+      "revId": "5a69f5d3d5e24b5da8584082cdd893abf22cc91c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "c8898461_343ab950",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientAccount.java",
         "patchSetId": 7
