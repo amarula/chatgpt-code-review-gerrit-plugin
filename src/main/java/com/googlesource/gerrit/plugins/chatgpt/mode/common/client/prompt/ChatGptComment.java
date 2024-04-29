@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessage;
@@ -28,9 +27,9 @@ public class ChatGptComment extends ClientBase {
             commentMessage.removeDebugMessages();
         }
         else {
-            commentMessage.removeMentions().parseRemoveCommands().removeHeadings();
+            commentMessage.removeMentions().parseRemoveCommands();
         }
-        return commentMessage.getMessage();
+        return commentMessage.removeHeadings().getMessage();
     }
 
     protected boolean isFromAssistant(GerritComment commentProperty) {
