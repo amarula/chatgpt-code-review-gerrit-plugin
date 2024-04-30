@@ -28,7 +28,7 @@ public class InlineCode {
             List<String> codeByRange = new ArrayList<>();
             range = commentProperty.getRange();
             for (int line_num = range.startLine; line_num <= range.endLine; line_num++) {
-                codeByRange.add(getLineSlice(line_num));
+                getLineSlice(line_num).ifPresent(codeByRange::add);
             }
             return joinWithNewLine(codeByRange);
         }
@@ -50,7 +50,11 @@ public class InlineCode {
         return Optional.ofNullable(codeFinder.findCommentedCode(replyItem, commentedLine));
     }
 
-    private String getLineSlice(int line_num) {
+    private Optional<String> getLineSlice(int line_num) {
+        if(line_num >= newContent.size()) {
+            log.debug("Requested line number {} is outside the new content range of {} lines", line_num, newContent.size());
+            return Optional.empty();
+        }
         String line = newContent.get(line_num);
         try {
             if (line_num == range.endLine) {
@@ -63,7 +67,7 @@ public class InlineCode {
         catch (StringIndexOutOfBoundsException e) {
             log.info("Could not extract a slice from line \"{}\". The whole line is returned", line, e);
         }
-        return line;
+        return Optional.of(line);
     }
 
     private String getLine(GerritComment commentProperty) {
