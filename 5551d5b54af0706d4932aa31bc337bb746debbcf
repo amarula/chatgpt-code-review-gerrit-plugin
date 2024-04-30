@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "afb87ea5_0e9b5f05",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/patch/code/InlineCode.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-04-30T08:06:49Z",
+      "side": 1,
+      "message": "@chatgpt@gerritforge.com is this the correct pattern to prevent an IndexOutOfBoundException?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 9
+      },
+      "revId": "5551d5b54af0706d4932aa31bc337bb746debbcf",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
