@@ -50,6 +50,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "ad6d3a7f_2aa3c6ef",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientComments.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1015244
+      },
+      "writtenOn": "2024-04-30T06:59:40Z",
+      "side": 1,
+      "message": "How about we also keep track of the timestamp associated with the current `latestChangeMessageId`.\n\nWhen looping through comments (that are at least 60s recent), we can compare their timestamp to void selecting any that was before that, as we know that would _not_ be the latest.\n\nWDYT?",
+      "range": {
+        "startLine": 134,
+        "startChar": 22,
+        "endLine": 134,
+        "endChar": 62
+      },
+      "revId": "09332877690d670c599fb5b248749255de14f0dd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3713a495_4f374dd1",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientComments.java",
         "patchSetId": 1
