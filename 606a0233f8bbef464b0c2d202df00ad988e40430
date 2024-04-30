@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d40f3cff_a255a1fe",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2024-04-30T09:12:24Z",
+      "side": 1,
+      "message": "@patrizio.gelosi@amarulasolutions.com we can drop here jira-id",
+      "revId": "606a0233f8bbef464b0c2d202df00ad988e40430",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
