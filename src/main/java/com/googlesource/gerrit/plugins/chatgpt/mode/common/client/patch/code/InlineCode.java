@@ -33,7 +33,7 @@ public class InlineCode {
             return joinWithNewLine(codeByRange);
         }
         else {
-            return getLine(commentProperty);
+            return getLineFromLineNumber(commentProperty.getLine());
         }
     }
 
@@ -51,7 +51,10 @@ public class InlineCode {
     }
 
     private String getLineSlice(int line_num) {
-        String line = newContent.get(line_num);
+        String line = getLineFromLineNumber(line_num);
+        if (line == null) {
+            throw new RuntimeException("Error retrieving line number from content");
+        }
         try {
             if (line_num == range.endLine) {
                 line = line.substring(0, range.endCharacter);
@@ -61,19 +64,27 @@ public class InlineCode {
             }
         }
         catch (StringIndexOutOfBoundsException e) {
-            log.info("Could not extract a slice from line \"{}\". The whole line is returned", line, e);
+            log.info("Could not extract a slice from line \"{}\". The whole line is returned", line);
         }
         return line;
     }
 
-    private String getLine(GerritComment commentProperty) {
+    private String getLineFromLineNumber(int line_num) {
+        String line = null;
         try {
-            return newContent.get(commentProperty.getLine());
+            line = newContent.get(line_num);
         }
         catch (IndexOutOfBoundsException e) {
-            log.warn("Could not extract line #{} from the code", commentProperty.getLine(), e);
-            return null;
+            // If the line number returned by ChatGPT exceeds the actual number of lines, return the last line
+            int lastLine = newContent.size() - 1;
+            if (line_num > lastLine) {
+                line = newContent.get(lastLine);
+            }
+            else {
+                log.warn("Could not extract line #{} from the code", line_num);
+            }
         }
+        return line;
     }
 
 }
