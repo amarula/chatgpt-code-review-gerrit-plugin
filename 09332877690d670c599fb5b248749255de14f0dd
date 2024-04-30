@@ -46,6 +46,29 @@
       },
       "revId": "09332877690d670c599fb5b248749255de14f0dd",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3713a495_4f374dd1",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/api/gerrit/GerritClientComments.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-04-30T06:50:34Z",
+      "side": 1,
+      "message": "This code addresses the question: \"How can we retrieve the comment(s) that triggered a comment event?\" We\u0027ve approached this by comparing timestamps; typically, the difference between the event and the related comment\u0027s timestamp is under one second (ideally zero). To be cautious, I\u0027ve set two seconds as the maximum allowable gap. However, I believe there could be a more efficient method to achieve this.\nIf anyone has a better solution, any input is welcome 😊",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 137,
+        "endChar": 0
+      },
+      "revId": "09332877690d670c599fb5b248749255de14f0dd",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
