@@ -118,6 +118,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "bd53a051_b57e0352",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/config/ConfigCreator.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:29:57Z",
+      "side": 1,
+      "message": "Upon reviewing the changes in the `ConfigCreator.java` file, specifically around the indicated lines, it is noted that while `ExternalId` and `Accounts` imports were removed, a new import `GerritApi` has been added. There are accompanying changes further in the file that suggest a refactoring, where direct calls to `GerritApi` are replacing previous functionality. This appears to be in-line with the refactor, hence no unresolved references or compilation errors are anticipated from this specific change, provided that all usages of the removed classes have been appropriately replaced or removed. Testing and further static analysis should be performed to ensure no issues remain.",
+      "parentUuid": "e8ce45c8_d7d03ff4",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 63
+      },
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "012b100a_fda8edf3",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatefulTest.java",
         "patchSetId": 10
