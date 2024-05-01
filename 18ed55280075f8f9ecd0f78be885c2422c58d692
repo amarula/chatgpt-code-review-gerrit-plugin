@@ -16,6 +16,126 @@
       "message": "@chatgpt@gerritforge.com /review",
       "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "70a0a844_11c20d77",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:20:37Z",
+      "side": 1,
+      "message": "The removal of `UriResourceLocator` import statement without a corresponding replacement or modification elsewhere in the code could potentially lead to unresolved references or compilation errors if the class is still in use.",
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bc3a5b33_afcd3001",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:20:37Z",
+      "side": 1,
+      "message": "The commit message lacks detail in explaining why certain changes were made, such as the removal of import statements. A more descriptive commit message would be helpful for understanding the context of the changes.",
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7bb4115c_04a026a8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:20:37Z",
+      "side": 1,
+      "message": "The removal of the import statement for `AccountManager` without a corresponding replacement or modification elsewhere in the code could potentially lead to unresolved references or compilation errors if the class is still in use.",
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "44d468e8_3f4f5b92",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/config/ConfigCreator.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:20:37Z",
+      "side": 1,
+      "message": "The removal of the import statement for `Accounts` and `ExternalId` classes without corresponding replacements or modifications elsewhere in the code could lead to unresolved references or compilation errors if these classes are still in use.",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 63
+      },
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "012b100a_fda8edf3",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatefulTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:20:37Z",
+      "side": 1,
+      "message": "The addition of the `throws RestApiException` clause to the `setupMockRequests` method signature without handling the exception in the method body or documenting the conditions under which it is thrown may lead to unexpected runtime errors.",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 45,
+        "endChar": 64
+      },
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a77b2990_5936446c",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatelessTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:20:37Z",
+      "side": 1,
+      "message": "The addition of the `throws RestApiException` clause to the `setupMockRequests` method signature in `ChatGptReviewStatelessTest` without handling the exception in the method body or documenting the conditions under which it is thrown may lead to unexpected runtime errors.",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 64
+      },
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
