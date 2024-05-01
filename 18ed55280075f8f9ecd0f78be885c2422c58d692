@@ -260,6 +260,29 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "d2384d5a_034bd3d5",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatefulTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-05-01T08:35:02Z",
+      "side": 1,
+      "message": "@chatgpt@gerritforge.com can you rewrite this function to handle the exception?",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 5
+      },
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a77b2990_5936446c",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatelessTest.java",
         "patchSetId": 10
