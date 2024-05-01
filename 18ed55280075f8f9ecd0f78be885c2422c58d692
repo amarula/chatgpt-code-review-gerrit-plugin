@@ -141,6 +141,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "69fae9a7_6fb37960",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatefulTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:27:53Z",
+      "side": 1,
+      "message": "To handle the potential `RestApiException` within the `setupMockRequests` method, we should either catch the exception and handle it or document the conditions in which it might throw. Since the previous review highlighted the omission of these measures, I would recommend adding a `try-catch` block around the code inside `setupMockRequests` that may throw the exception, logging an appropriate message, and perhaps rethrowing a runtime exception if it aligns with the method\u0027s intent. Alternatively, document the conditions leading to `RestApiException` if it\u0027s intended to be propagated up the call stack for handling elsewhere.",
+      "parentUuid": "0b507da8_62cf3a0b",
+      "range": {
+        "startLine": 45,
+        "startChar": 4,
+        "endLine": 45,
+        "endChar": 64
+      },
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a77b2990_5936446c",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatelessTest.java",
         "patchSetId": 10
