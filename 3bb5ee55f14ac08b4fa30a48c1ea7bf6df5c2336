@@ -16,6 +16,91 @@
       "message": "@chatgpt@gerritforge.com /review",
       "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7cb824dc_14ea30bb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:51:07Z",
+      "side": 1,
+      "message": "The commit message does not explain why the `SingletonManager` and `CustomClassLoader` are being removed. It should provide a rationale for the removal to give context to the change.",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e9181c2b_a0d97af2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:51:07Z",
+      "side": 1,
+      "message": "The commit message mentions that `SingletonManager`, `CustomClassLoader`, and `ClassUtils` are being removed, but it does not mention any testing or verification process to ensure that their removal does not affect existing functionalities.",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dccb0133_367bd832",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:51:07Z",
+      "side": 1,
+      "message": "The removal of `SingletonManager.java` could lead to issues if other parts of the codebase are still using its methods. Ensure that all references to this class have been updated or removed.",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4dd24f45_9dbe16d6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:51:07Z",
+      "side": 1,
+      "message": "The method `createNewInstanceWithArgs` in `ClassUtils.java` is being removed without a deprecation phase. Consider marking it as deprecated and providing an alternative before removal to maintain backward compatibility.",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e798d1fa_9d935693",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:51:07Z",
+      "side": 1,
+      "message": "The removal of `CustomClassLoader.java` should be accompanied by an analysis of whether any dynamic class loading functionality is still required and if so, how it will be handled after the removal.",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
