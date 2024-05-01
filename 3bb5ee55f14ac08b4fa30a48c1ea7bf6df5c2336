@@ -119,6 +119,23 @@
       "parentUuid": "7cb824dc_14ea30bb",
       "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cfef7b89_4067a46c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:52:25Z",
+      "side": 1,
+      "message": "To provide more context in the commit message, you could mention the rationale for removing the classes and explain the reliance on Guice for dependency injection. For example, \u0027Refactor dependency management: remove unused Singleton utilities. This change removes SingletonManager, ClassUtils, and CustomClassLoader as we now fully rely on Guice\u0027s bindings and injections for managing singleton instances and classloading. This streamlines the code and reduces complexity.\u0027",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
