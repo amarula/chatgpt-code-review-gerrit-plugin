@@ -54,6 +54,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "e03bcd17_34a04c6a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:00:04Z",
+      "side": 1,
+      "message": "The commit message provides a clear explanation of the issue being fixed but does not include information about how the fix was tested or verified. It would be beneficial to include details on the testing process to ensure the fix works as intended and does not introduce new issues.\n\n```\nDEBUGGING DETAILS\n\nhidden: false\nreply: The commit message provides a clear explanation of the issue being fixed but does not include information about how the fix was tested or verified. It would be beneficial to include details on the testing process to ensure the fix works as intended and does not introduce new issues.\nscore: -1\nrelevance: 0.7\nrepeated: false\nconflicting: false\n```\n",
+      "revId": "5551d5b54af0706d4932aa31bc337bb746debbcf",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "afb87ea5_0e9b5f05",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/patch/code/InlineCode.java",
         "patchSetId": 1
@@ -118,6 +135,29 @@
         "startChar": 0,
         "endLine": 57,
         "endChar": 9
+      },
+      "revId": "5551d5b54af0706d4932aa31bc337bb746debbcf",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "01671a8b_47f8173a",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/common/client/patch/code/InlineCode.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T08:00:04Z",
+      "side": 1,
+      "message": "The change to use Optional in getLineSlice method improves the handling of cases where the line number is outside the new content range. However, the method getLine still returns null in case of an IndexOutOfBoundsException, which is inconsistent with the new approach. It would be better to return an Optional from getLine as well for consistency and to avoid potential NullPointerExceptions.\n\n```\nDEBUGGING DETAILS\n\nhidden: true\nreply: The change to use Optional in getLineSlice method improves the handling of cases where the line number is outside the new content range. However, the method getLine still returns null in case of an IndexOutOfBoundsException, which is inconsistent with the new approach. It would be better to return an Optional from getLine as well for consistency and to avoid potential NullPointerExceptions.\nscore: 0\nrelevance: 0.9\nrepeated: false\nconflicting: false\n```\n",
+      "range": {
+        "startLine": 73,
+        "startChar": 4,
+        "endLine": 81,
+        "endChar": 5
       },
       "revId": "5551d5b54af0706d4932aa31bc337bb746debbcf",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
