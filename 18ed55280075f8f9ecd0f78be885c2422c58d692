@@ -427,6 +427,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "41310006_3918f4b7",
+        "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatefulTest.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T11:47:28Z",
+      "side": 1,
+      "message": "No, the code proposed with the generic `Exception` re-throw will not compile as the `setupMockRequests` method declares that it throws `RestApiException`. The Java compiler expects any exceptions thrown within a method to be declared in the method\u0027s `throws` clause. In this case, since `Exception` is broader than `RestApiException`, specifically throwing `Exception` would require you to declare it in the method signature, for example, as `throws Exception`. If you want to rethrow the caught exception and it is not an instance of `RestApiException`, you would need to wrap it into a new `RestApiException` or another appropriate exception type that is declared in the method\u0027s `throws` clause.",
+      "parentUuid": "576b1cbb_2fb5f297",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 5
+      },
+      "revId": "18ed55280075f8f9ecd0f78be885c2422c58d692",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a77b2990_5936446c",
         "filename": "src/test/java/com/googlesource/gerrit/plugins/chatgpt/ChatGptReviewStatelessTest.java",
         "patchSetId": 10
