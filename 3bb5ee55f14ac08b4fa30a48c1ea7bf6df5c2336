@@ -153,6 +153,91 @@
       "message": "@chatgpt@gerritforge.com /review --debug",
       "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "df7ee3e1_c5a52ec8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:54:04Z",
+      "side": 1,
+      "message": "The removal of the `SingletonManager` class without a deprecation phase might cause compatibility issues for any external consumers relying on this class. It would be beneficial to deprecate the class first and remove it in a subsequent release.\n\n```\nDEBUGGING DETAILS\n\nhidden: false\nreply: The removal of the `SingletonManager` class without a deprecation phase might cause compatibility issues for any external consumers relying on this class. It would be beneficial to deprecate the class first and remove it in a subsequent release.\nscore: -1\nrelevance: 0.9\nrepeated: false\nconflicting: false\n```\n",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d26eeaff_b5b32d80",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:54:04Z",
+      "side": 1,
+      "message": "The commit message lacks detail on the verification process that ensures no other parts of the application are affected by the removal of `SingletonManager`, `CustomClassLoader`, and `ClassUtils`.\n\n```\nDEBUGGING DETAILS\n\nhidden: false\nreply: The commit message lacks detail on the verification process that ensures no other parts of the application are affected by the removal of `SingletonManager`, `CustomClassLoader`, and `ClassUtils`.\nscore: -1\nrelevance: 0.7\nrepeated: false\nconflicting: false\n```\n",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f9440c96_155403c4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:54:04Z",
+      "side": 1,
+      "message": "The commit message should include a note about the potential impact on consumers of the `SingletonManager`, `CustomClassLoader`, and `ClassUtils` classes, and any necessary migration steps.\n\n```\nDEBUGGING DETAILS\n\nhidden: false\nreply: The commit message should include a note about the potential impact on consumers of the `SingletonManager`, `CustomClassLoader`, and `ClassUtils` classes, and any necessary migration steps.\nscore: -1\nrelevance: 0.8\nrepeated: false\nconflicting: false\n```\n",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a4a7e9da_04c5fc75",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:54:04Z",
+      "side": 1,
+      "message": "The `ClassUtils` class contains utility methods that may be used elsewhere in the codebase. The removal of this class should be validated to ensure that no other parts of the system are dependent on these utilities.\n\n```\nDEBUGGING DETAILS\n\nhidden: false\nreply: The `ClassUtils` class contains utility methods that may be used elsewhere in the codebase. The removal of this class should be validated to ensure that no other parts of the system are dependent on these utilities.\nscore: -1\nrelevance: 0.9\nrepeated: false\nconflicting: false\n```\n",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "946b810c_6abbce19",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-01T15:54:04Z",
+      "side": 1,
+      "message": "The removal of `CustomClassLoader` may have implications on how classes are loaded, especially if there were classes being loaded in a non-standard way. This change should be accompanied by thorough testing to ensure that class loading behavior remains consistent.\n\n```\nDEBUGGING DETAILS\n\nhidden: false\nreply: The removal of `CustomClassLoader` may have implications on how classes are loaded, especially if there were classes being loaded in a non-standard way. This change should be accompanied by thorough testing to ensure that class loading behavior remains consistent.\nscore: -1\nrelevance: 0.9\nrepeated: false\nconflicting: false\n```\n",
+      "revId": "3bb5ee55f14ac08b4fa30a48c1ea7bf6df5c2336",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
