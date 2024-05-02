@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "82996b6f_262c1ce7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-05-02T19:46:40Z",
+      "side": 1,
+      "message": "@chatgpt@gerritforge.com please suggest a better commit message",
+      "parentUuid": "d0536218_64b1ccd4",
+      "revId": "3de81b5be4bbe302efea576f8467130f3ca6f5ee",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "6320f87f_70f2f9e8",
         "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/stateful/client/api/UriResourceLocatorStateful.java",
         "patchSetId": 3
