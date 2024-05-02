@@ -16,6 +16,69 @@
       "message": "@chatgpt@gerritforge.com /review",
       "revId": "3de81b5be4bbe302efea576f8467130f3ca6f5ee",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0536218_64b1ccd4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-02T19:45:05Z",
+      "side": 1,
+      "message": "The commit message is vague and does not provide a clear explanation of the changes made. It should detail what functionality is being removed and why, as well as the impact on the existing codebase.",
+      "revId": "3de81b5be4bbe302efea576f8467130f3ca6f5ee",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6320f87f_70f2f9e8",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/stateful/client/api/UriResourceLocatorStateful.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-02T19:45:05Z",
+      "side": 1,
+      "message": "The class `UriResourceLocatorStateful` no longer extends `UriResourceLocator` which has been removed. Ensure that any functionality previously inherited is either no longer required or has been reimplemented within the class.",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 41
+      },
+      "revId": "3de81b5be4bbe302efea576f8467130f3ca6f5ee",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9eca9916_e98ffb74",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/mode/stateless/client/api/UriResourceLocatorStateless.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 1037955
+      },
+      "writtenOn": "2024-05-02T19:45:05Z",
+      "side": 1,
+      "message": "The class `UriResourceLocatorStateless` no longer extends `UriResourceLocator` which has been removed. Verify that the class still functions correctly without the inherited methods and properties, and if necessary, provide alternative implementations.",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 4,
+        "endChar": 42
+      },
+      "revId": "3de81b5be4bbe302efea576f8467130f3ca6f5ee",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
