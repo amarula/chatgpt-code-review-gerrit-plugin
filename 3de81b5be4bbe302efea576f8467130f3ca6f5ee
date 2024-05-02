@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "feee0a14_adb11f0a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-05-02T19:44:42Z",
+      "side": 1,
+      "message": "@chatgpt@gerritforge.com /review",
+      "revId": "3de81b5be4bbe302efea576f8467130f3ca6f5ee",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
