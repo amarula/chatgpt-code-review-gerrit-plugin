@@ -11,6 +11,7 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
     public static String DEFAULT_GPT_ASSISTANT_NAME;
     public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS;
+    public static String DEFAULT_GPT_MESSAGE_REVIEW;
 
     private final GerritChange change;
 
@@ -30,8 +31,12 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
 
     public String getDefaultGptAssistantInstructions() {
         return DEFAULT_GPT_SYSTEM_PROMPT + DOT +
-                String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName()) +
+                String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName()) + SPACE +
                 getPatchSetReviewUserPrompt();
+    }
+
+    public String getDefaultGptThreadReviewMessage(String patchSet) {
+        return String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
     }
 
 }

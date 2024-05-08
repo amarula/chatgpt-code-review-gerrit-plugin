@@ -374,7 +374,7 @@ public class ChatGptReviewTestBase {
 
     private IChatGptClient getChatGptClient() {
         return switch (config.getGptMode()) {
-            case stateful -> new ChatGptClientStateful();
+            case stateful -> new ChatGptClientStateful(pluginDataHandler);
             case stateless -> new ChatGptClientStateless();
         };
     }
