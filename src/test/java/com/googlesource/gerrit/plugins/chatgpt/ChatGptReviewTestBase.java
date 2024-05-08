@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
@@ -25,10 +24,8 @@ import com.google.gerrit.server.events.CommentAddedEvent;
 import com.google.gerrit.server.events.Event;
 import com.google.gerrit.server.events.PatchSetCreatedEvent;
 import com.google.gerrit.server.events.PatchSetEvent;
-import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.util.OneOffRequestContext;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -81,14 +78,12 @@ import static org.mockito.Mockito.when;
 
 public class ChatGptReviewTestBase {
     protected static final Path basePath = Paths.get("src/test/resources");
-    protected static final String GERRIT_AUTH_BASE_URL = "http://localhost:9527";
     protected static final int GERRIT_GPT_ACCOUNT_ID = 1000000;
     protected static final String GERRIT_GPT_USERNAME = "gpt";
     protected static final int GERRIT_USER_ACCOUNT_ID = 1000001;
     protected static final String GERRIT_USER_ACCOUNT_NAME = "Test";
     protected static final String GERRIT_USER_ACCOUNT_EMAIL = "test@example.com";
     protected static final String GERRIT_USER_USERNAME = "test";
-    protected static final String GERRIT_USER_PASSWORD = "test";
     protected static final String GERRIT_USER_GROUP = "Test";
     protected static final String GPT_TOKEN = "tk-test";
     protected static final String GPT_DOMAIN = "http://localhost:9527";
@@ -131,11 +126,10 @@ public class ChatGptReviewTestBase {
     protected GerritClient gerritClient;
     protected PatchSetReviewer patchSetReviewer;
     protected ConfigCreator mockConfigCreator;
-    protected List<LoggedRequest> loggedRequests;
-    protected JsonArray prompts;
+    protected JsonObject gptRequestBody;
 
     @Before
-    public void before() throws NoSuchProjectException, RestApiException {
+    public void before() throws RestApiException {
         initGlobalAndProjectConfig();
         initConfig();
         setupMockRequests();
@@ -165,6 +159,8 @@ public class ChatGptReviewTestBase {
         // Mock the Global Config values that differ from the ones provided by Default
         when(globalConfig.getString(Mockito.eq("gptDomain"), Mockito.anyString()))
                 .thenReturn(GPT_DOMAIN);
+        when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_GPT_USERNAME);
+
 
         projectConfig = mock(PluginConfig.class);
 
@@ -197,6 +193,9 @@ public class ChatGptReviewTestBase {
 
         // Mock the behavior of the gerrit Review request
         mockGerritReviewApiCall();
+
+        // Mock the GerritApi's revision API
+        when(changeApiMock.current()).thenReturn(revisionApiMock);
     }
 
     private Accounts mockGerritAccountsRestEndpoint() {
@@ -205,8 +204,7 @@ public class ChatGptReviewTestBase {
         return accountsMock;
     }
 
-    private void mockGerritAccountsQueryApiCall(
-        String username, int expectedAccountId) throws RestApiException {
+    private void mockGerritAccountsQueryApiCall(String username, int expectedAccountId) {
         AccountState accountStateMock = mock(AccountState.class);
         Account accountMock = mock(Account.class);
         when(accountStateMock.account()).thenReturn(accountMock);
@@ -295,9 +293,7 @@ public class ChatGptReviewTestBase {
     protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
         ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class); 
         verify(revisionApiMock).review(reviewInputCaptor.capture());
-        JsonObject gptRequestBody = getGson().fromJson(patchSetReviewer.getChatGptClient().getRequestBody(),
-                JsonObject.class);
-        prompts = gptRequestBody.get("messages").getAsJsonArray();
+        gptRequestBody = getGson().fromJson(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
         return reviewInputCaptor;
     }
 
