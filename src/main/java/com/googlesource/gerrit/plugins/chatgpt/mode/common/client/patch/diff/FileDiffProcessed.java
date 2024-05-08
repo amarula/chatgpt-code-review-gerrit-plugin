@@ -4,13 +4,13 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPatchSetFileDiff;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.code.CodeFinderDiff;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.diff.DiffContent;
+import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -19,14 +19,6 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithNe
 @Slf4j
 public class FileDiffProcessed {
     private static final int MIN_RANDOM_PLACEHOLDER_VARIABLE_LENGTH = 1;
-    private static final String[] COMMIT_MESSAGE_FILTER_OUT_PREFIXES = {
-            "Parent:",
-            "Author:",
-            "AuthorDate:",
-            "Commit:",
-            "CommitDate:",
-            "Change-Id:"
-    };
 
     private final Configuration config;
     private final boolean isCommitMessage;
@@ -85,7 +77,7 @@ public class FileDiffProcessed {
 
     private void filterCommitMessageContent(List<String> fieldValue) {
         fieldValue.removeIf(s ->
-                s.isEmpty() || Arrays.stream(COMMIT_MESSAGE_FILTER_OUT_PREFIXES).anyMatch(s::startsWith));
+                s.isEmpty() || Settings.COMMIT_MESSAGE_FILTER_OUT_PREFIXES.values().stream().anyMatch(s::startsWith));
     }
 
     private void updateCodeEntities(Field diffField, List<String> diffLines) throws IllegalAccessException {
