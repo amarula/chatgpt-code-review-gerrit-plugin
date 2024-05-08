@@ -35,6 +35,9 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         ChatGptRun chatGptRun = new ChatGptRun(threadId, config, pluginDataHandler);
         chatGptRun.createRun();
         chatGptRun.pollRun();
+        // Attribute `requestBody` is valued for testing purposes
+        requestBody = chatGptThread.getAddMessageRequestBody();
+        log.debug("ChatGPT request body: {}", requestBody);
 
         return getResponseContent(chatGptRun.getFirstStep());
     }
