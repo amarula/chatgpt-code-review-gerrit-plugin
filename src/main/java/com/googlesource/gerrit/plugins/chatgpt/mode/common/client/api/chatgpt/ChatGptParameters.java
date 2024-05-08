@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;

@@ -8,7 +8,7 @@ import java.util.Map;
 public class ChatGptHttpClient {
     private final HttpClient httpClient = new HttpClient();
 
-    public static final Map<String, String> BETA_VERSION_HEADER = Map.of("OpenAI-Beta", "assistants=v1");
+    public static final Map<String, String> BETA_VERSION_HEADER = Map.of("OpenAI-Beta", "assistants=v2");
 
     public String execute(Request request) {
         return httpClient.execute(request);
