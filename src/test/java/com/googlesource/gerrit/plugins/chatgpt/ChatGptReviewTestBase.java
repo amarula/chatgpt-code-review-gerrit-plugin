@@ -11,11 +11,8 @@ import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.extensions.api.GerritApi;
 import com.google.gerrit.extensions.api.accounts.AccountApi;
 import com.google.gerrit.extensions.api.accounts.Accounts;
-import com.google.gerrit.extensions.api.changes.ChangeApi;
+import com.google.gerrit.extensions.api.changes.*;
 import com.google.gerrit.extensions.api.changes.ChangeApi.CommentsRequest;
-import com.google.gerrit.extensions.api.changes.Changes;
-import com.google.gerrit.extensions.api.changes.ReviewInput;
-import com.google.gerrit.extensions.api.changes.RevisionApi;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.CommentInfo;
 import com.google.gerrit.extensions.common.GroupInfo;
@@ -122,6 +119,8 @@ public class ChatGptReviewTestBase {
     @Mock
     protected RevisionApi revisionApiMock;
     @Mock
+    protected ReviewResult reviewResult;
+    @Mock
     protected CommentsRequest commentsRequestMock;
     @Mock
     protected AccountCache accountCacheMock;
@@ -195,6 +194,9 @@ public class ChatGptReviewTestBase {
 
         // Mock the behavior of the gerritPatchSet comments request
         mockGerritChangeCommentsApiCall();
+
+        // Mock the behavior of the gerrit Review request
+        mockGerritReviewApiCall();
     }
 
     private Accounts mockGerritAccountsRestEndpoint() {
@@ -241,6 +243,11 @@ public class ChatGptReviewTestBase {
     private void mockGerritChangeApiRestEndpoint() throws RestApiException {
         when(gerritApi.changes()).thenReturn(changesMock);
         when(changesMock.id(PROJECT_NAME.get(), BRANCH_NAME.shortName(), CHANGE_ID.get())).thenReturn(changeApiMock);
+    }
+
+    private void mockGerritReviewApiCall() throws RestApiException {
+        ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
+        when(revisionApiMock.review(reviewInputCaptor.capture())).thenReturn(reviewResult);
     }
 
     protected void initComparisonContent() {}
