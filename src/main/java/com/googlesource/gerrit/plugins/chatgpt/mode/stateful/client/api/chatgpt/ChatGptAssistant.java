@@ -30,7 +30,7 @@ public class ChatGptAssistant extends ClientBase {
     public static final String KEY_ASSISTANT_ID = "assistantId";
     public static final String CODE_INTERPRETER_TOOL_TYPE = "code_interpreter";
 
-    private final HttpClient httpClient = new HttpClient();
+    private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler pluginDataHandler;
@@ -97,7 +97,7 @@ public class ChatGptAssistant extends ClientBase {
                 .tools(tools)
                 .build();
 
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody, additionalHeaders);
+        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
     }
 
 }
