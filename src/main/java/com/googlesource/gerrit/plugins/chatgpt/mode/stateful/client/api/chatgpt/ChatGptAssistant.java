@@ -5,7 +5,6 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http.HttpClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptTool;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
@@ -19,7 +18,6 @@ import okhttp3.Request;
 
 import java.net.URI;
 import java.nio.file.Path;
-import java.util.Map;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
@@ -30,7 +28,7 @@ public class ChatGptAssistant extends ClientBase {
     public static final String KEY_ASSISTANT_ID = "assistantId";
     public static final String CODE_INTERPRETER_TOOL_TYPE = "code_interpreter";
 
-    private final HttpClient httpClient = new HttpClient();
+    private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler pluginDataHandler;
@@ -80,7 +78,6 @@ public class ChatGptAssistant extends ClientBase {
     private Request createRequest(String fileId) {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.chatCreateAssistantsUri());
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
-        Map<String, String> additionalHeaders = Map.of("OpenAI-Beta", "assistants=v1");
         ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, change);
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
         ChatGptTool[] tools = new ChatGptTool[] {
@@ -97,7 +94,7 @@ public class ChatGptAssistant extends ClientBase {
                 .tools(tools)
                 .build();
 
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody, additionalHeaders);
+        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
     }
 
 }
