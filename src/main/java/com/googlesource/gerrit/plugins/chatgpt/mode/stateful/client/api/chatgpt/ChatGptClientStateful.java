@@ -1,7 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
@@ -9,23 +13,27 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Singleton
-public class ChatGptClientStateful implements IChatGptClient {
-    @Override
-    public String ask(Configuration config, ChangeSetData changeSetData, String changeId, String patchSet) throws Exception {
-        // Placeholder implementation, change to actual logic later.
-        throw new UnsupportedOperationException("Method not implemented yet.");
+public class ChatGptClientStateful extends ChatGptClient implements IChatGptClient {
+    private final PluginDataHandler pluginDataHandler;
+
+    @VisibleForTesting
+    @Inject
+    public ChatGptClientStateful(PluginDataHandler pluginDataHandler) {
+        super();
+        this.pluginDataHandler = pluginDataHandler;
     }
 
-    @Override
-    public String ask(Configuration config, ChangeSetData changeSetData, GerritChange change, String patchSet) throws Exception {
+    public String ask(Configuration config, ChangeSetData changeSetData, GerritChange change, String patchSet) {
+        isCommentEvent = change.getIsCommentEvent();
+        String changeId = change.getFullChangeId();
+        log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", changeId, patchSet);
+
+        ChatGptThread chatGptThread = new ChatGptThread(config, change, patchSet);
+        String threadId = chatGptThread.createThread();
+        chatGptThread.addMessage();
+
         // Placeholder implementation, change to actual logic later.
         throw new UnsupportedOperationException("Method not implemented yet.");
-    }
-
-    @Override
-    public String getRequestBody() {
-        // Placeholder implementation, change to actual logic later.
-        return "Method not implemented yet.";
     }
 
 }
