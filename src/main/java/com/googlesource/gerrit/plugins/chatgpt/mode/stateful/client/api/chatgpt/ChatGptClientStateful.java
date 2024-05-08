@@ -32,8 +32,11 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         String threadId = chatGptThread.createThread();
         chatGptThread.addMessage();
 
-        // Placeholder implementation, change to actual logic later.
-        throw new UnsupportedOperationException("Method not implemented yet.");
+        ChatGptRun chatGptRun = new ChatGptRun(threadId, config, pluginDataHandler);
+        chatGptRun.createRun();
+        chatGptRun.pollRun();
+
+        return getResponseContent(chatGptRun.getFirstStep());
     }
 
 }
