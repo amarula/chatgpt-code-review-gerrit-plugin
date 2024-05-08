@@ -44,7 +44,7 @@ public class ChatGptAssistant extends ClientBase {
 
     public void setupAssistant() {
         String assistantId = pluginDataHandler.getValue(KEY_ASSISTANT_ID);
-        if (assistantId == null) {
+        if (assistantId == null || config.getForceCreateAssistant()) {
             String fileId = uploadRepoFiles();
             pluginDataHandler.setValue(KEY_FILE_ID, fileId);
             assistantId = createAssistant(fileId);
