@@ -49,14 +49,10 @@ public class HttpClient {
     public Request createRequestFromJson(String uri, String bearer, Object requestObject,
                                          Map<String, String> additionalHeaders) {
         String bodyJson = getGson().toJson(requestObject);
-        log.info("ChatGPT request body: {}", bodyJson);
+        log.debug("Request body: {}", bodyJson);
         RequestBody body = RequestBody.create(bodyJson, MediaType.get("application/json"));
 
         return createRequest(uri, bearer, body, additionalHeaders);
-    }
-
-    public Request createRequestFromJson(String uri, String bearer, Object requestObject) {
-        return createRequestFromJson(uri, bearer, requestObject, null);
     }
 
 }
