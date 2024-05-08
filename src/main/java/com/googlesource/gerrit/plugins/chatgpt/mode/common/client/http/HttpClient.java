@@ -29,21 +29,23 @@ public class HttpClient {
     }
 
     public Request createRequest(String uri, String bearer, RequestBody body, Map<String, String> additionalHeaders) {
+        // If body is null, a GET request is initiated. Otherwise, a POST request is sent with the specified body.
         Request.Builder builder = new Request.Builder()
                 .url(uri)
-                .header("Authorization", "Bearer " + bearer)
-                .post(body);
+                .header("Authorization", "Bearer " + bearer);
 
+        if (body != null) {
+            builder.post(body);
+        }
+        else {
+            builder.get();
+        }
         if (additionalHeaders != null) {
             for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
                 builder.header(header.getKey(), header.getValue());
             }
         }
         return builder.build();
-    }
-
-    public Request createRequest(String uri, String bearer, RequestBody body) {
-        return createRequest(uri, bearer, body, null);
     }
 
     public Request createRequestFromJson(String uri, String bearer, Object requestObject,
