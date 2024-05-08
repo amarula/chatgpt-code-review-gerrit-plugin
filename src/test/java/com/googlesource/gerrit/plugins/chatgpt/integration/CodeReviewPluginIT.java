@@ -49,7 +49,7 @@ public class CodeReviewPluginIT {
         when(config.getGptModel()).thenReturn(Configuration.DEFAULT_GPT_MODEL);
         when(chatGptPromptStateless.getGptSystemPrompt()).thenReturn(ChatGptPromptStateless.DEFAULT_GPT_SYSTEM_PROMPT);
 
-        String answer = chatGptClient.ask(config, changeSetData, "", "hello");
+        String answer = chatGptClient.ask(config, changeSetData, new GerritChange(""), "hello");
         log.info("answer: {}", answer);
         assertNotNull(answer);
     }
