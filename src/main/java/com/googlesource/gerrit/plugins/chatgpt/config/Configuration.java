@@ -83,6 +83,7 @@ public class Configuration {
     private static final boolean DEFAULT_PATCH_SET_COMMENTS_AS_RESOLVED = false;
     private static final boolean DEFAULT_IGNORE_OUTDATED_INLINE_COMMENTS = false;
     private static final boolean DEFAULT_IGNORE_RESOLVED_CHAT_GPT_COMMENTS = true;
+    private static final boolean DEFAULT_FORCE_CREATE_ASSISTANT = false;
 
     // Config setting keys
     public static final String KEY_GPT_SYSTEM_PROMPT = "gptSystemPrompt";
@@ -122,6 +123,7 @@ public class Configuration {
     private static final String KEY_PATCH_SET_COMMENTS_AS_RESOLVED = "patchSetCommentsAsResolved";
     private static final String KEY_IGNORE_OUTDATED_INLINE_COMMENTS = "ignoreOutdatedInlineComments";
     private static final String KEY_IGNORE_RESOLVED_CHAT_GPT_COMMENTS = "ignoreResolvedChatGptComments";
+    private static final String KEY_FORCE_CREATE_ASSISTANT = "forceCreateAssistant";
 
     private final OneOffRequestContext context;
     @Getter
@@ -276,6 +278,10 @@ public class Configuration {
 
     public boolean getIgnoreResolvedChatGptComments() {
         return getBoolean(KEY_IGNORE_RESOLVED_CHAT_GPT_COMMENTS, DEFAULT_IGNORE_RESOLVED_CHAT_GPT_COMMENTS);
+    }
+
+    public boolean getForceCreateAssistant() {
+        return getBoolean(KEY_FORCE_CREATE_ASSISTANT, DEFAULT_FORCE_CREATE_ASSISTANT);
     }
 
     public boolean getIgnoreOutdatedInlineComments() {
