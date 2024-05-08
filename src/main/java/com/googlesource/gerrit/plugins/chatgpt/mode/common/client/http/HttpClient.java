@@ -29,11 +29,17 @@ public class HttpClient {
     }
 
     public Request createRequest(String uri, String bearer, RequestBody body, Map<String, String> additionalHeaders) {
+        // If body is null, a GET request is initiated. Otherwise, a POST request is sent with the specified body.
         Request.Builder builder = new Request.Builder()
                 .url(uri)
-                .header("Authorization", "Bearer " + bearer)
-                .post(body);
+                .header("Authorization", "Bearer " + bearer);
 
+        if (body != null) {
+            builder.post(body);
+        }
+        else {
+            builder.get();
+        }
         if (additionalHeaders != null) {
             for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
                 builder.header(header.getKey(), header.getValue());
@@ -42,17 +48,18 @@ public class HttpClient {
         return builder.build();
     }
 
-    public Request createRequest(String uri, String bearer, RequestBody body) {
-        return createRequest(uri, bearer, body, null);
-    }
-
     public Request createRequestFromJson(String uri, String bearer, Object requestObject,
                                          Map<String, String> additionalHeaders) {
-        String bodyJson = getGson().toJson(requestObject);
-        log.debug("Request body: {}", bodyJson);
-        RequestBody body = RequestBody.create(bodyJson, MediaType.get("application/json"));
+        if (requestObject != null) {
+            String bodyJson = getGson().toJson(requestObject);
+            log.debug("Request body: {}", bodyJson);
+            RequestBody body = RequestBody.create(bodyJson, MediaType.get("application/json"));
 
-        return createRequest(uri, bearer, body, additionalHeaders);
+            return createRequest(uri, bearer, body, additionalHeaders);
+        }
+        else {
+            return createRequest(uri, bearer, null, additionalHeaders);
+        }
     }
 
 }
