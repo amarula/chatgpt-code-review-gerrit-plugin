@@ -3,37 +3,35 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptParameters;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptTool;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptCreateAssistantResponse;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptFilesResponse;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptCreateAssistantRequestBody;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptParameters;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
 import java.net.URI;
 import java.nio.file.Path;
 
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptFiles.KEY_FILE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class ChatGptAssistant extends ClientBase {
-    public static final String KEY_FILE_ID = "fileId";
     public static final String KEY_ASSISTANT_ID = "assistantId";
-    public static final String CODE_INTERPRETER_TOOL_TYPE = "code_interpreter";
 
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler pluginDataHandler;
 
-    public ChatGptAssistant(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles, PluginDataHandler pluginDataHandler) {
+    public ChatGptAssistant(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles,
+                            PluginDataHandler pluginDataHandler) {
         super(config);
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
@@ -67,31 +65,29 @@ public class ChatGptAssistant extends ClientBase {
         Request request = createRequest(fileId);
         log.debug("ChatGPT Create Assistant request: {}", request);
 
-        ChatGptCreateAssistantResponse assistantResponse = getGson().fromJson(httpClient.execute(request),
-                ChatGptCreateAssistantResponse.class);
-
+        ChatGptResponse assistantResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
         log.debug("Assistant created: {}", assistantResponse);
 
         return assistantResponse.getId();
     }
 
     private Request createRequest(String fileId) {
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.chatCreateAssistantsUri());
+        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.assistantCreateUri());
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
         ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, change);
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
         ChatGptTool[] tools = new ChatGptTool[] {
-                new ChatGptTool(CODE_INTERPRETER_TOOL_TYPE),
                 ChatGptTools.retrieveFormatRepliesTool()
         };
+        ChatGptToolResources toolResources = new ChatGptToolResources(new ChatGptFileIds(new String[] {fileId}));
         ChatGptCreateAssistantRequestBody requestBody = ChatGptCreateAssistantRequestBody.builder()
                 .name(ChatGptPromptStateful.DEFAULT_GPT_ASSISTANT_NAME)
                 .description(chatGptPromptStateful.getDefaultGptAssistantDescription())
                 .instructions(chatGptPromptStateful.getDefaultGptAssistantInstructions())
                 .model(config.getGptModel())
                 .temperature(chatGptParameters.getGptTemperature())
-                .fileIds(new String[]{fileId})
                 .tools(tools)
+                .toolResources(toolResources)
                 .build();
 
         return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
