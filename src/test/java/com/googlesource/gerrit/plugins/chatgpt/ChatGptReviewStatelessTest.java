@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.common.net.HttpHeaders;
+import com.google.gson.JsonArray;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import com.google.gerrit.extensions.api.changes.FileApi;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
@@ -41,6 +42,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
     private String promptTagComments;
     private String diffContent;
     private ReviewInput gerritPatchSetReview;
+    private JsonArray prompts;
 
     private ChatGptPromptStateless chatGptPromptStateless;
 
@@ -51,7 +53,6 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                 .thenReturn(GPT_STREAM_OUTPUT);
         when(globalConfig.getBoolean(Mockito.eq("gptReviewCommitMessages"), Mockito.anyBoolean()))
                 .thenReturn(true);
-        when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_GPT_USERNAME);
 
         super.initConfig();
 
@@ -61,9 +62,6 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
 
     protected void setupMockRequests() throws RestApiException {
         super.setupMockRequests();
-
-        // Mock the GerritApi's revision API
-        when(changeApiMock.current()).thenReturn(revisionApiMock);
 
         // Mock the behavior of the gerritPatchSetFiles request
         Map<String, FileInfo> files =
@@ -100,6 +98,12 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         promptTagReview = readTestFile("__files/chatGptPromptTagReview.json");
         promptTagComments = readTestFile("__files/chatGptPromptTagRequests.json");
         expectedSystemPromptReview = ChatGptPromptStateless.getDefaultGptReviewSystemPrompt();
+    }
+
+    protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
+        ArgumentCaptor<ReviewInput> reviewInputCaptor = super.testRequestSent();
+        prompts = gptRequestBody.get("messages").getAsJsonArray();
+        return reviewInputCaptor;
     }
 
     private String getReviewUserPrompt() {
