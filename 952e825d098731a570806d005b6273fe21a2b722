@@ -46,6 +46,30 @@
       },
       "revId": "952e825d098731a570806d005b6273fe21a2b722",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7a58e36d_32ec51e7",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/listener/PluginLifecycleListener.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1021811
+      },
+      "writtenOn": "2024-05-11T13:16:25Z",
+      "side": 1,
+      "message": "I think we don\u0027t need this anymore, same as the whole `PluginLifecycleListener` is not needed.",
+      "parentUuid": "5d35725e_b3bdb431",
+      "range": {
+        "startLine": 22,
+        "startChar": 8,
+        "endLine": 22,
+        "endChar": 59
+      },
+      "revId": "952e825d098731a570806d005b6273fe21a2b722",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
