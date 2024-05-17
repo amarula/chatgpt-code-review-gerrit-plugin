@@ -26,6 +26,8 @@ public class GerritEventContextModule extends FactoryModule {
 
     @Override
     protected void configure() {
+        install(EventHandlerTask.MODULE);
+
         bind(IChatGptClient.class).to(getChatGptMode());
         bind(IGerritClientPatchSet.class).to(getClientPatchSet());
 

@@ -3,9 +3,12 @@ package com.googlesource.gerrit.plugins.chatgpt.listener;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.gerrit.extensions.client.ChangeKind;
+import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.server.data.ChangeAttribute;
 import com.google.gerrit.server.data.PatchSetAttribute;
+import com.google.gerrit.server.events.Event;
 import com.google.inject.Inject;
+import com.google.inject.Module;
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -21,6 +24,16 @@ import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
 
 @Slf4j
 public class EventHandlerTask implements Runnable {
+    public static final Module MODULE = new FactoryModule() {
+        @Override
+        protected void configure() {
+            factory(EventHandlerTask.Factory.class);
+        }
+    };
+    public interface Factory {
+        EventHandlerTask create(Event event);
+    }
+
     @VisibleForTesting
     public enum Result {
         OK, NOT_SUPPORTED, FAILURE
