@@ -64,20 +64,20 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         super.setupMockRequests();
 
         // Mock the behavior of the gerritPatchSetFiles request
-        Map<String, FileInfo> files =
-            readTestFileToType(
-                "__files/gerritPatchSetFiles.json",
-                new TypeLiteral<Map<String, FileInfo>>() {}.getType());
+        Map<String, FileInfo> files = readTestFileToType(
+                "__files/stateless/gerritPatchSetFiles.json",
+                new TypeLiteral<Map<String, FileInfo>>() {}.getType()
+        );
         when(revisionApiMock.files(0)).thenReturn(files);
 
         // Mock the behavior of the gerritPatchSet diff requests
         FileApi commitMsgFileMock = mock(FileApi.class);
         when(revisionApiMock.file("/COMMIT_MSG")).thenReturn(commitMsgFileMock);
-        DiffInfo commitMsgFileDiff = readTestFileToClass("__files/gerritPatchSetDiffCommitMsg.json", DiffInfo.class);
+        DiffInfo commitMsgFileDiff = readTestFileToClass("__files/stateless/gerritPatchSetDiffCommitMsg.json", DiffInfo.class);
         when(commitMsgFileMock.diff(0)).thenReturn(commitMsgFileDiff);
         FileApi testFileMock = mock(FileApi.class);
         when(revisionApiMock.file("test_file.py")).thenReturn(testFileMock);
-        DiffInfo testFileDiff = readTestFileToClass("__files/gerritPatchSetDiffTestFile.json", DiffInfo.class);
+        DiffInfo testFileDiff = readTestFileToClass("__files/stateless/gerritPatchSetDiffTestFile.json", DiffInfo.class);
         when(testFileMock.diff(0)).thenReturn(testFileDiff);
 
         // Mock the behavior of the askGpt request
@@ -93,10 +93,10 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         super.initComparisonContent();
 
         diffContent = readTestFile("reducePatchSet/patchSetDiffOutput.json");
-        gerritPatchSetReview = readTestFileToClass("__files/gerritPatchSetReview.json", ReviewInput.class);
-        expectedResponseStreamed = readTestFileToClass("__files/chatGptExpectedResponseStreamed.json", ReviewInput.class);
-        promptTagReview = readTestFile("__files/chatGptPromptTagReview.json");
-        promptTagComments = readTestFile("__files/chatGptPromptTagRequests.json");
+        gerritPatchSetReview = readTestFileToClass("__files/stateless/gerritPatchSetReview.json", ReviewInput.class);
+        expectedResponseStreamed = readTestFileToClass("__files/stateless/chatGptExpectedResponseStreamed.json", ReviewInput.class);
+        promptTagReview = readTestFile("__files/stateless/chatGptPromptTagReview.json");
+        promptTagComments = readTestFile("__files/stateless/chatGptPromptTagRequests.json");
         expectedSystemPromptReview = ChatGptPromptStateless.getDefaultGptReviewSystemPrompt();
     }
 
