@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 @Slf4j
 public class CodeFinder {
     private static final String PUNCTUATION_REGEX = "([()\\[\\]{}<>:;,?&+\\-*/%|=])";
+    private static final String BEGINNING_DIFF_REGEX = "(?:^|\n)[+\\-]";
     private static final String ENDING_ELLIPSIS_REGEX = "\\.\\.\\.\\W*$";
 
     private final String NON_PRINTING_REPLACEMENT;
@@ -58,7 +59,10 @@ public class CodeFinder {
     }
 
     private void updateCodePattern(ChatGptReplyItem replyItem) {
-        String commentedCode = replyItem.getCodeSnippet().replaceAll(ENDING_ELLIPSIS_REGEX, "").trim();
+        String commentedCode = replyItem.getCodeSnippet()
+                .replaceAll(BEGINNING_DIFF_REGEX, "")
+                .replaceAll(ENDING_ELLIPSIS_REGEX, "")
+                .trim();
         String commentedCodeRegex = Pattern.quote(commentedCode);
         // Generalize the regex to capture snippets where existing sequences of non-printing chars have been modified
         // from the original code
