@@ -69,7 +69,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         super.setupMockRequests();
 
         // Mock the behavior of the Git Repository Manager
-        String repoJson = readTestFile("__files/gitProjectFiles.json");
+        String repoJson = readTestFile("__files/stateful/gitProjectFiles.json");
         when(gitRepoFiles.getGitRepoFiles(any())).thenReturn(repoJson);
 
         // Mock the behavior of the ChatGPT create-file request
@@ -129,7 +129,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
                         .withBodyFile("chatGptRunStepsResponse.json")));
 
         // Mock the behavior of the formatted patch request
-        formattedPatchContent = readTestFile("__files/gerritFormattedPatch.txt");
+        formattedPatchContent = readTestFile("__files/stateful/gerritFormattedPatch.txt");
         ByteArrayInputStream inputStream = new ByteArrayInputStream(formattedPatchContent.getBytes());
         BinaryResult binaryResult = BinaryResult.create(inputStream)
                 .setContentType("text/plain")
