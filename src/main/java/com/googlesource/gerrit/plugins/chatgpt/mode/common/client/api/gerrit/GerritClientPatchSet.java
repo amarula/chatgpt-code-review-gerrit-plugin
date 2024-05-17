@@ -36,7 +36,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
                 Optional.ofNullable(changeInfo)
                     .map(info -> info.revisions)
                     .map(revisions -> revisions.size() - 1)
-                    .orElse(-1);
+                    .orElse(0);
         }
         catch (Exception e) {
             log.error("Could not retrieve revisions for PatchSet with fullChangeId: {}", change.getFullChangeId(), e);
