@@ -101,7 +101,8 @@ public class FileDiffProcessed {
         }
         // If the lines modified in the PatchSet are deleted, they are mapped in charToLineMapItem to current lineNum
         else {
-            charToLineMapItem.put(content.length(), lineNum);
+            int startingPosition = charToLineMapItem.isEmpty() ? 0 : content.length();
+            charToLineMapItem.put(startingPosition, lineNum);
         }
 
         if (config.getGptFullFileReview() || !diffType.equals("ab")) {
