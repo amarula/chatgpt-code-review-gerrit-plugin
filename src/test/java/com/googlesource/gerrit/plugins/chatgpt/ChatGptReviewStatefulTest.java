@@ -2,7 +2,9 @@ package com.googlesource.gerrit.plugins.chatgpt;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.common.net.HttpHeaders;
+import com.google.gerrit.extensions.api.changes.FileApi;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.common.DiffInfo;
 import com.google.gerrit.extensions.restapi.BinaryResult;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gson.JsonObject;
@@ -135,6 +137,11 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
                 .setContentType("text/plain")
                 .setContentLength(formattedPatchContent.length());
         when(revisionApiMock.patch()).thenReturn(binaryResult);
+
+        FileApi testFileMock = mock(FileApi.class);
+        when(revisionApiMock.file("test_file_1.py")).thenReturn(testFileMock);
+        DiffInfo testFileDiff = readTestFileToClass("__files/stateful/gerritPatchSetDiffTestFile.json", DiffInfo.class);
+        when(testFileMock.diff(0)).thenReturn(testFileDiff);
     }
 
     protected void initComparisonContent() {
