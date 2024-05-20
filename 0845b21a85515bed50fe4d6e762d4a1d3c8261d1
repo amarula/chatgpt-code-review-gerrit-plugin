@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "72f260d7_83fc2c13",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/chatgpt/Module.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2024-05-20T07:42:28Z",
+      "side": 0,
+      "message": "@darek",
+      "revId": "0845b21a85515bed50fe4d6e762d4a1d3c8261d1",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
