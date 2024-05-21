@@ -30,9 +30,13 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
     }
 
     public String getDefaultGptAssistantInstructions() {
-        return DEFAULT_GPT_SYSTEM_PROMPT + DOT +
+        String instructions = DEFAULT_GPT_SYSTEM_PROMPT + DOT +
                 String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName()) + SPACE +
                 getPatchSetReviewUserPrompt();
+        if (config.getGptReviewCommitMessages()) {
+            instructions += SPACE + getReviewPromptCommitMessages();
+        }
+        return instructions;
     }
 
     public String getDefaultGptThreadReviewMessage(String patchSet) {

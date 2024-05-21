@@ -14,6 +14,7 @@ public class Settings {
             "COMMIT_DATE", "CommitDate:",
             "CHANGE_ID", "Change-Id:"
     );
+    public static final String GERRIT_COMMIT_MESSAGE_PREFIX = "Subject: ";
 
     public static final String EMPTY_REVIEW_MESSAGE = "No update to show for this Change Set";
 

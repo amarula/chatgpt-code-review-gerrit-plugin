@@ -111,7 +111,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT,
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + " " +
                         chatGptPromptStateless.getPatchSetReviewUserPrompt(),
-                ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES,
+                ChatGptPromptStateless.getReviewPromptCommitMessages(),
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_DIFF,
                 diffContent,
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY,

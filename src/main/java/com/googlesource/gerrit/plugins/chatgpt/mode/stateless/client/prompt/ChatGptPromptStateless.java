@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +82,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
 
     private void loadStatelessPrompts() {
         // Avoid repeated loading of prompt constants
-        if (DEFAULT_GPT_REVIEW_PROMPT == null) {
+        if (DEFAULT_GPT_SYSTEM_PROMPT_INPUT_DESCRIPTION == null) {
             loadPrompts("promptsStateless");
         }
     }
@@ -92,7 +91,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
         List<String> steps = new ArrayList<>(){};
         steps.add(ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + SPACE + getPatchSetReviewUserPrompt());
         if (config.getGptReviewCommitMessages()) {
-            steps.add(DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES);
+            steps.add(getReviewPromptCommitMessages());
         }
         return steps;
     }

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_COMMIT_MESSAGE_PREFIX;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.COMMIT_MESSAGE_FILTER_OUT_PREFIXES;
 
 @Slf4j
@@ -74,6 +75,25 @@ public class GerritClientPatchSetStateful extends GerritClientPatchSet implement
     }
 
     private String filterPatch(String formattedPatch) {
+        if (config.getGptReviewCommitMessages()) {
+            return filterPatchWithCommitMessage(formattedPatch);
+        }
+        else {
+            return filterPatchWithoutCommitMessage(formattedPatch);
+        }
+    }
+
+    private String filterPatchWithCommitMessage(String formattedPatch) {
+        // Remove Patch heading up to the Date annotation, so that the commit message is included. Additionally, remove
+        // the change type between brackets
+        Pattern CONFIG_ID_HEADING_PATTERN = Pattern.compile(
+                "^.*?" + GERRIT_COMMIT_MESSAGE_PREFIX + "(?:\\[[^\\]]+\\] )?",
+                Pattern.DOTALL
+        );
+        return CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch).replaceAll(GERRIT_COMMIT_MESSAGE_PREFIX);
+    }
+
+    private String filterPatchWithoutCommitMessage(String formattedPatch) {
         // Remove Patch heading up to the Change-Id annotation
         Pattern CONFIG_ID_HEADING_PATTERN = Pattern.compile(
                 "^.*?" + COMMIT_MESSAGE_FILTER_OUT_PREFIXES.get("CHANGE_ID") + " " + change.getChangeKey().get(),

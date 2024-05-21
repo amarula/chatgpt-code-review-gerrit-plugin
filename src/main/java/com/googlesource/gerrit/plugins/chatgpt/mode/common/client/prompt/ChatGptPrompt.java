@@ -45,6 +45,7 @@ public class ChatGptPrompt {
     public static String DEFAULT_GPT_REQUEST_PROMPT_REQUESTS;
     public static String DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES;
     public static String DEFAULT_GPT_RELEVANCE_RULES;
+    public static String DEFAULT_GPT_HOW_TO_FIND_COMMIT_MESSAGE;
     public static Map<String, String> DEFAULT_GPT_REPLIES_ATTRIBUTES;
 
     protected final Configuration config;
@@ -69,6 +70,10 @@ public class ChatGptPrompt {
         return buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES) + SPACE +
                 DEFAULT_GPT_REPLIES_PROMPT_INLINE + SPACE +
                 String.format(DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize);
+    }
+
+    public static String getReviewPromptCommitMessages() {
+        return String.format(DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES, DEFAULT_GPT_HOW_TO_FIND_COMMIT_MESSAGE);
     }
 
     protected void loadPrompts(String promptFilename) {
@@ -125,7 +130,6 @@ public class ChatGptPrompt {
         return buildFieldSpecifications(attributes) + SPACE +
                 DEFAULT_GPT_REPLIES_PROMPT_INLINE;
     }
-
 
     private void updateScoreDescription() {
         String scoreDescription = DEFAULT_GPT_REPLIES_ATTRIBUTES.get(ATTRIBUTE_SCORE);

@@ -4,5 +4,6 @@
   "DEFAULT_GPT_REVIEW_PROMPT": "To conduct your review, follow these steps in the given order:",
   "DEFAULT_GPT_REVIEW_PROMPT_REVIEW": "Begin with examining the PatchSet Diff, focusing exclusively on the \"a\" and \"b\" items, and using the \"ab\" items solely as context to understand the changes better. Provide insights on any potential issues you foresee and suggestions for improvements if necessary, with each insight articulated as a separate reply. Concentrate exclusively on spotting and rectifying issues; avoid mentioning any positive elements. For instance, instead of saying \"this is good, but that needs improvement\", simply state \"that needs improvement\".",
   "DEFAULT_GPT_REVIEW_PROMPT_DIFF": "Here are the PatchSet Diffs:",
-  "DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY": "Here are the message histories:"
+  "DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY": "Here are the message histories:",
+  "DEFAULT_GPT_HOW_TO_FIND_COMMIT_MESSAGE": "the \"content\" field of \"/COMMIT_MSG\" in the same way as the file changes"
 }
