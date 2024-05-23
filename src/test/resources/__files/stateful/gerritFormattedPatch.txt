@@ -1,3 +1,6 @@
+Subject: Minor fixes
+
+Change-Id: myChangeId
 ---
 
 diff --git a/test_file_1.py b/test_file_1.py

@@ -44,7 +44,8 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     private static final String CHAT_GPT_RUN_ID = "run_TEST_RUN_ID";
 
     private String formattedPatchContent;
-    private String reviewMessage;
+    private String reviewMessageCode;
+    private String reviewMessageCommitMessage;
     private ChatGptPromptStateful chatGptPromptStateful;
     private JsonObject threadMessage;
 
@@ -147,7 +148,8 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     protected void initComparisonContent() {
         super.initComparisonContent();
 
-        reviewMessage = getReviewMessage();
+        reviewMessageCode = getReviewMessage(0);
+        reviewMessageCommitMessage = getReviewMessage(1);
     }
 
     protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
@@ -156,12 +158,12 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         return reviewInputCaptor;
     }
 
-    private String getReviewMessage() {
+    private String getReviewMessage(int tollCallId) {
         ChatGptListResponse reviewResponse = getGson().fromJson(readTestFile(
                 "__files/chatGptRunStepsResponse.json"
         ), ChatGptListResponse.class);
-        String reviewJsonResponse = reviewResponse.getData().get(0).getStepDetails().getToolCalls().get(0).getFunction()
-                .getArguments();
+        String reviewJsonResponse = reviewResponse.getData().get(0).getStepDetails().getToolCalls().get(tollCallId)
+                .getFunction().getArguments();
         return getGson().fromJson(reviewJsonResponse, ChatGptResponseContent.class).getReplies().get(0).getReply();
     }
 
@@ -175,7 +177,11 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         String userPrompt = threadMessage.get("content").getAsString();
         Assert.assertEquals(reviewUserPrompt, userPrompt);
         Assert.assertEquals(
-                reviewMessage,
+                reviewMessageCode,
+                captor.getAllValues().get(0).comments.get("test_file_1.py").get(0).message
+        );
+        Assert.assertEquals(
+                reviewMessageCommitMessage,
                 captor.getAllValues().get(0).comments.get(GERRIT_PATCH_SET_FILENAME).get(0).message
         );
     }

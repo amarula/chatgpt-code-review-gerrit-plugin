@@ -38,8 +38,7 @@ abstract public class ChatGptClient {
     }
 
     protected boolean validateResponse(String contentExtracted, String changeId, int attemptInd) {
-        ChatGptResponseContent chatGptResponseContent =
-                getGson().fromJson(contentExtracted, ChatGptResponseContent.class);
+        ChatGptResponseContent chatGptResponseContent = convertResponseContentFromJson(contentExtracted);
         String returnedChangeId = chatGptResponseContent.getChangeId();
         // A response is considered valid if either no changeId is returned or the changeId returned matches the one
         // provided in the request
@@ -52,7 +51,11 @@ abstract public class ChatGptClient {
     }
 
     protected String getResponseContent(List<ChatGptToolCall> toolCalls) {
-        return toolCalls.get(0).getFunction().getArguments();
+        if (toolCalls.size() > 1) {
+            return mergeToolCalls(toolCalls);
+        } else {
+            return getArgumentAtInd(toolCalls, 0);
+        }
     }
 
     protected Optional<String> extractContentFromLine(String line) {
@@ -69,6 +72,24 @@ abstract public class ChatGptClient {
         }
         String content = getResponseContent(delta.getToolCalls());
         return Optional.ofNullable(content);
+    }
+
+    private ChatGptResponseContent convertResponseContentFromJson(String content) {
+        return getGson().fromJson(content, ChatGptResponseContent.class);
+    }
+
+    private String getArgumentAtInd(List<ChatGptToolCall> toolCalls, int ind) {
+        return toolCalls.get(ind).getFunction().getArguments();
+    }
+
+    private String mergeToolCalls(List<ChatGptToolCall> toolCalls) {
+        ChatGptResponseContent responseContent = convertResponseContentFromJson(getArgumentAtInd(toolCalls, 0));
+        for (int ind = 1; ind < toolCalls.size(); ind++) {
+            responseContent.getReplies().addAll(
+                    convertResponseContentFromJson(getArgumentAtInd(toolCalls, ind)).getReplies()
+            );
+        }
+        return getGson().toJson(responseContent);
     }
 
 }
