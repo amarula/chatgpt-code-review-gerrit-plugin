@@ -15,7 +15,7 @@ public class Directives {
     }
 
     public void copyDirectiveToSettings() {
-        if (!directive.isEmpty()) {
+        if (directive != null && !directive.isEmpty()) {
             changeSetData.getDirectives().add(directive);
         }
     }

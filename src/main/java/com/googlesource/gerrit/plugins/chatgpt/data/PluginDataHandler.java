@@ -1,12 +1,17 @@
 package com.googlesource.gerrit.plugins.chatgpt.data;
 
+import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.Properties;
+
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Singleton
 public class PluginDataHandler {
@@ -28,8 +33,19 @@ public class PluginDataHandler {
         storeProperties();
     }
 
+    public synchronized void setJsonValue(String key, Object value) {
+        setValue(key, getGson().toJson(value));
+    }
+
     public String getValue(String key) {
         return configProperties.getProperty(key);
+    }
+
+    public <T> Map<String, T> getJsonValue(String key, Class<T> clazz) {
+        String value = getValue(key);
+        if (value == null || value.isEmpty()) return null;
+        Type typeOfMap = TypeToken.getParameterized(Map.class, String.class, clazz).getType();
+        return getGson().fromJson(value, typeOfMap);
     }
 
     public synchronized void removeValue(String key) {

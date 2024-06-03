@@ -1,6 +1,8 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.Directives;
@@ -20,9 +22,10 @@ public class ClientCommands extends ClientBase {
     private enum COMMAND_SET {
         REVIEW,
         REVIEW_LAST,
-        DIRECTIVE
+        DIRECTIVE,
+        CONFIGURE
     }
-    private enum OPTION_SET {
+    private enum REVIEW_OPTION_SET {
         FILTER,
         DEBUG
     }
@@ -30,11 +33,12 @@ public class ClientCommands extends ClientBase {
     private static final Map<String, COMMAND_SET> COMMAND_MAP = Map.of(
             "review", COMMAND_SET.REVIEW,
             "review_last", COMMAND_SET.REVIEW_LAST,
-            "directive", COMMAND_SET.DIRECTIVE
+            "directive", COMMAND_SET.DIRECTIVE,
+            "configure", COMMAND_SET.CONFIGURE
     );
-    private static final Map<String, OPTION_SET> OPTION_MAP = Map.of(
-            "filter", OPTION_SET.FILTER,
-            "debug", OPTION_SET.DEBUG
+    private static final Map<String, REVIEW_OPTION_SET> REVIEW_OPTION_MAP = Map.of(
+            "filter", REVIEW_OPTION_SET.FILTER,
+            "debug", REVIEW_OPTION_SET.DEBUG
     );
     private static final List<COMMAND_SET> REVIEW_COMMANDS = new ArrayList<>(List.of(
             COMMAND_SET.REVIEW,
@@ -44,22 +48,30 @@ public class ClientCommands extends ClientBase {
             COMMAND_SET.DIRECTIVE
     ));
     private static final Pattern COMMAND_PATTERN = Pattern.compile("/(" + String.join("|",
-            COMMAND_MAP.keySet()) + ")\\b((?:\\s+--\\w+(?:=\\w+)?)+)?");
-    private static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(\\w+))?");
+            COMMAND_MAP.keySet()) + ")\\b((?:\\s+--\\w+(?:=\\S+)?)+)?");
+    private static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(\\S+))?");
 
     private final ChangeSetData changeSetData;
-    @Getter
     private final Directives directives;
     private final Localizer localizer;
 
-    @Getter
+    private DynamicConfiguration dynamicConfiguration;
     private boolean containingHistoryCommand;
 
-    public ClientCommands(Configuration config, ChangeSetData changeSetData, Localizer localizer) {
+    public ClientCommands(
+            Configuration config,
+            ChangeSetData changeSetData,
+            PluginDataHandlerProvider pluginDataHandlerProvider,
+            Localizer localizer
+    ) {
         super(config);
         this.localizer = localizer;
         this.changeSetData = changeSetData;
         directives = new Directives(changeSetData);
+        // The `dynamicConfiguration` instance is utilized only for parsing current client messages, not the history
+        if (pluginDataHandlerProvider != null) {
+            dynamicConfiguration = new DynamicConfiguration(pluginDataHandlerProvider);
+        }
         containingHistoryCommand = false;
     }
 
@@ -67,10 +79,9 @@ public class ClientCommands extends ClientBase {
         boolean commandFound = false;
         Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(comment);
         while (reviewCommandMatcher.find()) {
-            parseCommand(comment, reviewCommandMatcher.group(1), isNotHistory);
-            if (reviewCommandMatcher.group(2) != null) {
-                parseOption(reviewCommandMatcher, isNotHistory);
-            }
+            COMMAND_SET command = COMMAND_MAP.get(reviewCommandMatcher.group(1));
+            parseOptions(command, reviewCommandMatcher, isNotHistory);
+            parseCommand(command, comment, isNotHistory);
             commandFound = true;
         }
         return commandFound;
@@ -88,52 +99,77 @@ public class ClientCommands extends ClientBase {
         return reviewCommandMatcher.replaceAll("");
     }
 
-    private void parseCommand(String comment, String commandString, boolean isNotHistory) {
-        COMMAND_SET command = COMMAND_MAP.get(commandString);
-        if (isNotHistory && REVIEW_COMMANDS.contains(command)) {
-            changeSetData.setForcedReview(true);
-            if (command == COMMAND_SET.REVIEW_LAST) {
-                log.info("Forced review command applied to the last Patch Set");
-                changeSetData.setForcedReviewLastPatchSet(true);
+    private void parseCommand(COMMAND_SET command, String comment, boolean isNotHistory) {
+        if (isNotHistory) {
+            if (REVIEW_COMMANDS.contains(command)) {
+                changeSetData.setForcedReview(true);
+                if (command == COMMAND_SET.REVIEW_LAST) {
+                    log.info("Forced review command applied to the last Patch Set");
+                    changeSetData.setForcedReviewLastPatchSet(true);
+                }
+                else {
+                    log.info("Forced review command applied to the entire Change Set");
+                }
             }
-            else {
-                log.info("Forced review command applied to the entire Change Set");
+            else if (command == COMMAND_SET.CONFIGURE) {
+                if (config.getEnableMessageDebugging()) {
+                    changeSetData.setHideChatGptReview(true);
+                    changeSetData.setForceDisplaySystemMessage(true);
+                    dynamicConfiguration.updateConfiguration();
+                }
+                else {
+                    changeSetData.setReviewSystemMessage(localizer.getText(
+                            "message.configure.from.messages.disabled"
+                    ));
+                    log.debug("Unable to change configuration from messages: `enableMessageDebugging` config must" +
+                            "be set to true");
+                }
             }
         }
         if (HISTORY_COMMANDS.contains(command)) {
             containingHistoryCommand = true;
-            directives.addDirective(removeCommands(comment));
+            if (command == COMMAND_SET.DIRECTIVE) {
+                directives.addDirective(removeCommands(comment));
+            }
         }
     }
 
-    private void parseOption(Matcher reviewCommandMatcher, boolean isNotHistory) {
-        COMMAND_SET command = COMMAND_MAP.get(reviewCommandMatcher.group(1));
+    private void parseOptions(COMMAND_SET command, Matcher reviewCommandMatcher, boolean isNotHistory) {
+        // Command options need to be parsed only when processing the current message, not the message history
+        if (reviewCommandMatcher.group(2) == null || !isNotHistory) return;
         Matcher reviewOptionsMatcher = OPTIONS_PATTERN.matcher(reviewCommandMatcher.group(2));
         while (reviewOptionsMatcher.find()) {
-            OPTION_SET option = OPTION_MAP.get(reviewOptionsMatcher.group(1));
-            if (isNotHistory && REVIEW_COMMANDS.contains(command)) {
-                switch (option) {
-                    case FILTER:
-                        boolean value = Boolean.parseBoolean(reviewOptionsMatcher.group(2));
-                        log.debug("Option 'replyFilterEnabled' set to {}", value);
-                        changeSetData.setReplyFilterEnabled(value);
-                        break;
-                    case DEBUG:
-                        if (config.getEnableMessageDebugging()) {
-                            log.debug("Response Mode set to Debug");
-                            changeSetData.setDebugMode(true);
-                            changeSetData.setReplyFilterEnabled(false);
-                        }
-                        else {
-                            changeSetData.setReviewSystemMessage(localizer.getText(
-                                    "message.debugging.functionalities.disabled"
-                            ));
-                            log.debug("Unable to set Response Mode to Debug: `enableMessageDebugging` config must be " +
-                                    "set to true");
-                        }
-                        break;
-                }
+            parseSingleOption(command, reviewOptionsMatcher);
+        }
+    }
+
+    private void parseSingleOption(COMMAND_SET command, Matcher reviewOptionsMatcher) {
+        String optionKey = reviewOptionsMatcher.group(1);
+        String optionValue = reviewOptionsMatcher.group(2);
+        if (REVIEW_COMMANDS.contains(command)) {
+            switch (REVIEW_OPTION_MAP.get(optionKey)) {
+                case FILTER:
+                    boolean value = Boolean.parseBoolean(optionValue);
+                    log.debug("Option 'replyFilterEnabled' set to {}", value);
+                    changeSetData.setReplyFilterEnabled(value);
+                    break;
+                case DEBUG:
+                    if (config.getEnableMessageDebugging()) {
+                        log.debug("Response Mode set to Debug");
+                        changeSetData.setDebugReviewMode(true);
+                        changeSetData.setReplyFilterEnabled(false);
+                    } else {
+                        changeSetData.setReviewSystemMessage(localizer.getText(
+                                "message.debugging.review.disabled"
+                        ));
+                        log.debug("Unable to set Response Mode to Debug: `enableMessageDebugging` config " +
+                                "must be set to true");
+                    }
+                    break;
             }
+        } else if (command == COMMAND_SET.CONFIGURE && config.getEnableMessageDebugging()) {
+            log.debug("Updating configuration setting '{}' to '{}'", optionKey, optionValue);
+            dynamicConfiguration.setConfig(optionKey, optionValue);
         }
     }
 }

@@ -3,10 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -46,6 +43,10 @@ public class TextUtils extends StringUtils {
         return String.join("\n", components);
     }
 
+    public static String joinWithDoubleNewLine(List<String> components) {
+        return String.join("\n\n", components);
+    }
+
     public static String joinWithComma(Set<String> components) {
         return String.join(COMMA, components);
     }
@@ -75,5 +76,13 @@ public class TextUtils extends StringUtils {
             }
         }
         return joinWithNewLine(lines);
+    }
+
+    public static String prettyStringifyMap(Map<String, String> map) {
+        return joinWithNewLine(
+                map.entrySet().stream()
+                        .map(entry -> entry.getKey() + ": " + entry.getValue())
+                        .collect(Collectors.toList())
+        );
     }
 }

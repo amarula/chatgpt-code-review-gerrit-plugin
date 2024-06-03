@@ -10,6 +10,7 @@ import java.nio.file.Path;
 @Singleton
 public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider implements Provider<PluginDataHandler> {
     private final String projectName;
+    private final String changeKey;
 
     @Inject
     public PluginDataHandlerProvider(
@@ -18,6 +19,7 @@ public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider imp
     ) {
         super(defaultPluginDataPath);
         projectName = change.getProjectName();
+        changeKey = change.getChangeKey().toString();
     }
 
     public PluginDataHandler getGlobalScope() {
@@ -26,5 +28,9 @@ public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider imp
 
     public PluginDataHandler getProjectScope() {
         return super.get(projectName);
+    }
+
+    public PluginDataHandler getChangeScope() {
+        return super.get(changeKey);
     }
 }
