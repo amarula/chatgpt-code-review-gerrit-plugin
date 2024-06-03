@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "997f6205_dcc69018",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2024-06-03T06:40:33Z",
+      "side": 1,
+      "message": "@luca.milanesio@gmail.com Is this approach for localizing text the standard approach for a Gerrit plugin?",
+      "revId": "64569e6c9a4926d48a43c2117f9bc82fd23fabf4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
