@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -47,9 +48,11 @@ public class ClientCommands extends ClientBase {
     private static final List<COMMAND_SET> HISTORY_COMMANDS = new ArrayList<>(List.of(
             COMMAND_SET.DIRECTIVE
     ));
+    // Option values can be either a sequence of chars enclosed in double quotes or a sequence of non-space chars.
+    private static final String OPTION_VALUES = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\\S+";
     private static final Pattern COMMAND_PATTERN = Pattern.compile("/(" + String.join("|",
-            COMMAND_MAP.keySet()) + ")\\b((?:\\s+--\\w+(?:=\\S+)?)+)?");
-    private static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(\\S+))?");
+            COMMAND_MAP.keySet()) + ")\\b((?:\\s+--\\w+(?:=(?:" + OPTION_VALUES + "))?)+)?");
+    private static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(" + OPTION_VALUES + "))?");
 
     private final ChangeSetData changeSetData;
     private final Directives directives;
@@ -145,7 +148,9 @@ public class ClientCommands extends ClientBase {
 
     private void parseSingleOption(COMMAND_SET command, Matcher reviewOptionsMatcher) {
         String optionKey = reviewOptionsMatcher.group(1);
-        String optionValue = reviewOptionsMatcher.group(2);
+        String optionValue = Optional.ofNullable(reviewOptionsMatcher.group(2))
+                .map(val -> val.replaceAll("^\"(.*)\"$", "$1"))
+                .orElse("");
         if (REVIEW_COMMANDS.contains(command)) {
             switch (REVIEW_OPTION_MAP.get(optionKey)) {
                 case FILTER:
