@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.integration;
 
 import com.google.gerrit.server.account.AccountCache;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
@@ -32,6 +33,9 @@ import static org.mockito.Mockito.when;
 public class CodeReviewPluginIT {
     @Mock
     private Configuration config;
+
+    @Mock
+    protected PluginDataHandlerProvider pluginDataHandlerProvider;
 
     @InjectMocks
     private GerritClient gerritClient;
@@ -72,10 +76,9 @@ public class CodeReviewPluginIT {
         when(config.getGerritUserName()).thenReturn("Your Gerrit username");
 
         List<ReviewBatch> reviewBatches = new ArrayList<>();
-        reviewBatches.add(new ReviewBatch());
-        reviewBatches.get(0).setContent("message");
+        reviewBatches.add(new ReviewBatch("message"));
 
-        GerritClientReview gerritClientReview = new GerritClientReview(config, accountCache, localizer);
+        GerritClientReview gerritClientReview = new GerritClientReview(config, accountCache, pluginDataHandlerProvider, localizer);
         gerritClientReview.setReview(new GerritChange("Your changeId"), reviewBatches, changeSetData);
     }
 }

@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.listener;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.server.config.GerritInstanceId;
 import com.google.gerrit.server.events.PatchSetEvent;
@@ -47,9 +48,10 @@ public class GerritListener implements EventListener {
         log.info("Processing event: {}", event);
         PatchSetEvent patchSetEvent = (PatchSetEvent) event;
         Project.NameKey projectNameKey = patchSetEvent.getProjectNameKey();
+        Change.Key changeKey = patchSetEvent.getChangeKey();
 
         try {
-            Configuration config = configCreator.createConfig(projectNameKey);
+            Configuration config = configCreator.createConfig(projectNameKey, changeKey);
             evenHandlerExecutor.execute(config, patchSetEvent);
         } catch (NoSuchProjectException e) {
             log.error("Project not found: {}", projectNameKey, e);

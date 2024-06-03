@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands.ClientCommands;
@@ -19,19 +20,26 @@ public class ClientMessage extends ClientBase {
     private final Pattern botMentionPattern;
     private final ClientCommands clientCommands;
     private final DebugCodeBlocksReview debugCodeBlocksReview;
+    private final DebugCodeBlocksDynamicSettings debugCodeBlocksDynamicSettings;
 
     @Getter
     private String message;
 
-    public ClientMessage(Configuration config, ChangeSetData changeSetData, Localizer localizer) {
+    public ClientMessage(
+            Configuration config,
+            ChangeSetData changeSetData,
+            PluginDataHandlerProvider pluginDataHandlerProvider,
+            Localizer localizer
+    ) {
         super(config);
         botMentionPattern = getBotMentionPattern();
-        clientCommands = new ClientCommands(config, changeSetData, localizer);
+        clientCommands = new ClientCommands(config, changeSetData, pluginDataHandlerProvider, localizer);
         debugCodeBlocksReview = new DebugCodeBlocksReview(localizer);
+        debugCodeBlocksDynamicSettings = new DebugCodeBlocksDynamicSettings(localizer);
     }
 
     public ClientMessage(Configuration config, ChangeSetData changeSetData, String message, Localizer localizer) {
-        this(config, changeSetData, localizer);
+        this(config, changeSetData, (PluginDataHandlerProvider) null, localizer);
         this.message = message;
     }
 
@@ -62,8 +70,13 @@ public class ClientMessage extends ClientBase {
         return this;
     }
 
-    public ClientMessage removeDebugCodeBlocks() {
+    public ClientMessage removeDebugCodeBlocksReview() {
         message = debugCodeBlocksReview.removeDebugCodeBlocks(message);
+        return this;
+    }
+
+    public ClientMessage removeDebugCodeBlocksDynamicSettings() {
+        message = debugCodeBlocksDynamicSettings.removeDebugCodeBlocks(message);
         return this;
     }
 

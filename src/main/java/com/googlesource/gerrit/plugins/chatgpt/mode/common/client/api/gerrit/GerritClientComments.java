@@ -7,6 +7,7 @@ import com.google.gerrit.server.events.CommentAddedEvent;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
@@ -32,6 +33,7 @@ public class GerritClientComments extends GerritClientAccount {
     private final ChangeSetData changeSetData;
     private final HashMap<String, GerritComment> commentMap;
     private final HashMap<String, GerritComment> patchSetCommentMap;
+    private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final Localizer localizer;
 
     private String authorUsername;
@@ -44,10 +46,12 @@ public class GerritClientComments extends GerritClientAccount {
             Configuration config,
             AccountCache accountCache,
             ChangeSetData changeSetData,
+            PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
     ) {
         super(config, accountCache);
         this.changeSetData = changeSetData;
+        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.localizer = localizer;
         commentProperties = new ArrayList<>();
         commentMap = new HashMap<>();
@@ -145,7 +149,7 @@ public class GerritClientComments extends GerritClientAccount {
     }
 
     private void addLastComments(GerritChange change) {
-        ClientMessage clientMessage = new ClientMessage(config, changeSetData, localizer);
+        ClientMessage clientMessage = new ClientMessage(config, changeSetData, pluginDataHandlerProvider, localizer);
         try {
             List<GerritComment> latestComments = retrieveComments(change);
             if (latestComments == null) {

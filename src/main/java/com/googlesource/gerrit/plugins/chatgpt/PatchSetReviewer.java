@@ -71,7 +71,7 @@ public class PatchSetReviewer {
         }
         ChangeSetDataHandler.update(config, change, gerritClient, changeSetData, localizer);
 
-        if (changeSetData.getReviewSystemMessage() == null) {
+        if (changeSetData.shouldRequestChatGptReview()) {
             ChatGptResponseContent reviewReply = getReviewReply(change, patchSet);
             log.debug("ChatGPT response: {}", reviewReply);
 
@@ -121,11 +121,10 @@ public class PatchSetReviewer {
             if (changeSetData.getReplyFilterEnabled() && isHidden) {
                 continue;
             }
-            if (changeSetData.getDebugMode()) {
+            if (changeSetData.getDebugReviewMode()) {
                 reply += debugCodeBlocksReview.getDebugCodeBlock(replyItem, isHidden);
             }
-            ReviewBatch batchMap = new ReviewBatch();
-            batchMap.setContent(reply);
+            ReviewBatch batchMap = new ReviewBatch(reply);
             if (change.getIsCommentEvent() && replyItem.getId() != null) {
                 setCommentBatchMap(batchMap, replyItem.getId());
             }

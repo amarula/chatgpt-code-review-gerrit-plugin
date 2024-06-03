@@ -11,7 +11,10 @@ import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksDynamicSettings;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
 import lombok.extern.slf4j.Slf4j;
@@ -22,17 +25,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration.KEY_DYNAMIC_CONFIG;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.MessageSanitizer.sanitizeChatGptMessage;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithDoubleNewLine;
 
 @Slf4j
 public class GerritClientReview extends GerritClientAccount {
+    private final PluginDataHandler pluginDataHandler;
     private final Localizer localizer;
+    private final DebugCodeBlocksDynamicSettings debugCodeBlocksDynamicSettings;
 
     @VisibleForTesting
     @Inject
-    public GerritClientReview(Configuration config, AccountCache accountCache, Localizer localizer) {
+    public GerritClientReview(
+            Configuration config,
+            AccountCache accountCache,
+            PluginDataHandlerProvider pluginDataHandlerProvider,
+            Localizer localizer
+    ) {
         super(config, accountCache);
+        this.pluginDataHandler = pluginDataHandlerProvider.getChangeScope();
         this.localizer = localizer;
+        debugCodeBlocksDynamicSettings = new DebugCodeBlocksDynamicSettings(localizer);
     }
 
     public void setReview(
@@ -77,19 +91,31 @@ public class GerritClientReview extends GerritClientAccount {
         if (changeSetData.getReviewSystemMessage() != null) {
             systemMessage = changeSetData.getReviewSystemMessage();
         }
-        else {
+        else if (!changeSetData.shouldHideChatGptReview()) {
             comments = getReviewComments(reviewBatches);
             if (reviewScore != null) {
                 reviewInput.label(LabelId.CODE_REVIEW, reviewScore);
             }
         }
-        if (comments.isEmpty()) {
-            reviewInput.message(localizer.getText("system.message.prefix") + ' ' + systemMessage);
-        }
-        else {
+        updateSystemMessage(reviewInput, comments.isEmpty(), systemMessage);
+        if (!comments.isEmpty()) {
             reviewInput.comments = comments;
         }
         return reviewInput;
+    }
+
+    private void updateSystemMessage(ReviewInput reviewInput, boolean emptyComments, String systemMessage) {
+        List<String> messages = new ArrayList<>();
+        Map<String, String> dynamicConfig = pluginDataHandler.getJsonValue(KEY_DYNAMIC_CONFIG, String.class);
+        if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
+            messages.add(debugCodeBlocksDynamicSettings.getDebugCodeBlock(dynamicConfig));
+        }
+        if (emptyComments) {
+            messages.add(localizer.getText("system.message.prefix") + ' ' + systemMessage);
+        }
+        if (!messages.isEmpty()) {
+            reviewInput.message(joinWithDoubleNewLine(messages));
+        }
     }
 
     private Map<String, List<CommentInput>> getReviewComments(List<ReviewBatch> reviewBatches) {

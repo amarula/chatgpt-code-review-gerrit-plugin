@@ -30,6 +30,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.util.Providers;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
@@ -97,6 +98,9 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected PluginDataHandlerProvider pluginDataHandlerProvider;
 
     @Mock
+    protected PluginDataHandler pluginDataHandler;
+
+    @Mock
     protected OneOffRequestContext context;
     @Mock
     protected GerritApi gerritApi;
@@ -157,7 +161,14 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     }
 
     protected void initConfig() {
-        config = new Configuration(context, gerritApi, globalConfig, projectConfig, "gpt@email.com", Account.id(1000000));
+        config = new Configuration(
+                context,
+                gerritApi,
+                globalConfig,
+                projectConfig,
+                "gpt@email.com",
+                Account.id(1000000)
+        );
     }
 
     protected void setupMockRequests() throws RestApiException {
@@ -184,6 +195,9 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
 
         // Mock the GerritApi's revision API
         when(changeApiMock.current()).thenReturn(revisionApiMock);
+
+        // Mock the pluginDataHandlerProvider to return the mocked Change pluginDataHandler
+        when(pluginDataHandlerProvider.getChangeScope()).thenReturn(pluginDataHandler);
     }
 
     private Accounts mockGerritAccountsRestEndpoint() {
@@ -297,14 +311,20 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                 new GerritClientFacade(
                     config,
                     changeSetData,
-                    new GerritClientComments(config, accountCacheMock, changeSetData, localizer),
+                    new GerritClientComments(
+                            config,
+                            accountCacheMock,
+                            changeSetData,
+                            pluginDataHandlerProvider,
+                            localizer
+                    ),
                     getGerritClientPatchSet()));
         patchSetReviewer =
             new PatchSetReviewer(
                 gerritClient,
                 config,
                 changeSetData,
-                Providers.of(new GerritClientReview(config, accountCacheMock, localizer)),
+                Providers.of(new GerritClientReview(config, accountCacheMock, pluginDataHandlerProvider, localizer)),
                 getChatGptClient(),
                 localizer
             );

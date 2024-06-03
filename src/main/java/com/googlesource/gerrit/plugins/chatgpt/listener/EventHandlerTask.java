@@ -90,7 +90,7 @@ public class EventHandlerTask implements Runnable {
         boolean isCommentEvent = EVENT_COMMENT_MAP.get(eventType);
         if (isCommentEvent) {
             if (!gerritClient.retrieveLastComments(change)) {
-                if (changeSetData.getForcedReview()) {
+                if (changeSetData.getForcedReview() || changeSetData.getForceDisplaySystemMessage()) {
                     isCommentEvent = false;
                 } else {
                     log.info("No comments found for review");

@@ -31,6 +31,7 @@ public class ChangeSetDataHandler {
 
         changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
         changeSetData.setDirectives(new HashSet<>());
+        changeSetData.setReviewSystemMessage(null);
         changeSetData.setGptRequestUserPrompt(chatGptUserPrompt.buildPrompt());
         if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
             GerritPermittedVotingRange permittedVotingRange = gerritClient.getPermittedVotingRange(change);

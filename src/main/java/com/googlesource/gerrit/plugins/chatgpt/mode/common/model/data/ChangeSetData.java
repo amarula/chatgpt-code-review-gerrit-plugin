@@ -24,8 +24,18 @@ public class ChangeSetData {
     // Command variables
     private Boolean forcedReview = false;
     private Boolean forcedReviewLastPatchSet = false;
+    private Boolean forceDisplaySystemMessage = false;
     private Boolean replyFilterEnabled = true;
-    private Boolean debugMode = false;
+    private Boolean debugReviewMode = false;
+    private Boolean hideChatGptReview = false;
     private Set<String> directives = new HashSet<>();
     private String reviewSystemMessage;
+
+    public Boolean shouldHideChatGptReview() {
+        return hideChatGptReview && !forcedReview;
+    }
+
+    public Boolean shouldRequestChatGptReview() {
+        return reviewSystemMessage == null && !shouldHideChatGptReview();
+    }
 }
