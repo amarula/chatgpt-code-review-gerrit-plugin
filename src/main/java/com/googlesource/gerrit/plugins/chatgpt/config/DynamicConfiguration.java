@@ -22,10 +22,22 @@ public class DynamicConfiguration {
         dynamicConfig.put(key, value);
     }
 
-    public void updateConfiguration() {
-        if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
+    public void updateConfiguration(boolean modifiedDynamicConfig, boolean shouldResetDynamicConfig) {
+        if (dynamicConfig == null || dynamicConfig.isEmpty()) return;
+        if (shouldResetDynamicConfig && !modifiedDynamicConfig) {
+            pluginDataHandler.removeValue(KEY_DYNAMIC_CONFIG);
+        }
+        else {
+            if (shouldResetDynamicConfig) {
+                resetDynamicConfig();
+            }
             log.info("Updating dynamic configuration with {}", dynamicConfig);
             pluginDataHandler.setJsonValue(KEY_DYNAMIC_CONFIG, dynamicConfig);
         }
+    }
+
+    private void resetDynamicConfig() {
+        // The keys with empty values are simply removed
+        dynamicConfig.entrySet().removeIf(entry -> entry.getValue() == null || entry.getValue().isEmpty());
     }
 }
