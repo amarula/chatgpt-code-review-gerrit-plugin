@@ -199,20 +199,55 @@ Please ensure **strict control over the access permissions of `refs/meta/config`
 
 ## Commands
 
-- `/directive <DIRECTIVE_CONTENT>`: This command, when included in a comment with a subsequent directive description
-  "<DIRECTIVE_CONTENT>", specifies a directive that ChatGPT must adhere to while reviewing the Patch/Change Set.
+### Review Commands
+
+Reviewing a Change Set or the last Patch Set can occur automatically upon submission or be manually triggered using the
+commands outlined in this section.
+
+#### Basic Syntax
 - `/review`: when used in a comment directed at ChatGPT on any Change Set, triggers a review of the full Change Set. A
   vote is cast on the Change Set if the voting feature is enabled and the ChatGPT Gerrit user is authorized to vote on
   it.
 - `/review_last`: when used in a comment directed at ChatGPT on any Change Set, triggers a review of the last Patch Set
   of the Change Set. Unlike `/review`, this command does not result in casting or updating votes.
 
-### Command Options
+#### Command Options
 
 - `--filter=[true/false]`: Controls the filtering of duplicate, conflicting and irrelevant comments, defaulting to
   "true" to apply filters.
 - `--debug`: When paired with `/review` or `/review_last` commands, this option displays useful debug information in
   each ChatGPT reply, showing all replies as though the filter setting were disabled.
+
+  **NOTE**: The usage of `--debug` option is disabled by default. To enable it, `enableMessageDebugging` setting must be
+  set to true.
+
+### Directives
+
+Directives are mandatory instructions written in plain English that ChatGPT must adhere to during its reviews. They can
+be specified using the following command.
+
+#### Basic Syntax
+`/directive <DIRECTIVE_CONTENT>`: This command, when included in a comment with a subsequent directive description
+"<DIRECTIVE_CONTENT>", specifies a directive that ChatGPT must adhere to.
+
+### Dynamic Configuration
+
+You can now dynamically alter the plugin configuration via messages sent to the ChatGPT user, primarily for testing and
+debugging purposes. This feature becomes available when the `enableMessageDebugging` configuration setting is enabled.
+
+#### Basic Syntax
+- `/configure` displays the current settings and their dynamically modified values in a response message.
+- `/configure --<CONFIG_KEY_1>=<CONFIG_VALUE_1> [... --<CONFIG_KEY_N>=<CONFIG_VALUE_N>]` assigns new values to one or
+  more configuration keys.
+
+  **NOTE**: Values that include spaces, such as `gptSystemPrompt`, must be enclosed in double quotes.
+
+#### Command Options
+
+The `reset` option can be employed to restore modified settings to their original defaults. Its usage is detailed below:
+- `/configure --reset` restores all modified settings to their default values.
+- `/configure --reset --<CONFIG_KEY_1> [... --<CONFIG_KEY_N>]` specifically restores the indicated key(s) to their
+  default values.
 
 ## Testing
 
