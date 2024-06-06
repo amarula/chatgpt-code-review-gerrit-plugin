@@ -30,6 +30,9 @@ public class ClientCommands extends ClientBase {
         FILTER,
         DEBUG
     }
+    private enum CONFIGURE_OPTION_SET {
+        RESET
+    }
 
     private static final Map<String, COMMAND_SET> COMMAND_MAP = Map.of(
             "review", COMMAND_SET.REVIEW,
@@ -48,6 +51,9 @@ public class ClientCommands extends ClientBase {
     private static final List<COMMAND_SET> HISTORY_COMMANDS = new ArrayList<>(List.of(
             COMMAND_SET.DIRECTIVE
     ));
+    private static final Map<String, CONFIGURE_OPTION_SET> CONFIGURE_OPTION_MAP = Map.of(
+            "reset", CONFIGURE_OPTION_SET.RESET
+    );
     // Option values can be either a sequence of chars enclosed in double quotes or a sequence of non-space chars.
     private static final String OPTION_VALUES = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\\S+";
     private static final Pattern COMMAND_PATTERN = Pattern.compile("/(" + String.join("|",
@@ -60,6 +66,8 @@ public class ClientCommands extends ClientBase {
 
     private DynamicConfiguration dynamicConfiguration;
     private boolean containingHistoryCommand;
+    private boolean modifiedDynamicConfig;
+    private boolean shouldResetDynamicConfig;
 
     public ClientCommands(
             Configuration config,
@@ -76,6 +84,8 @@ public class ClientCommands extends ClientBase {
             dynamicConfiguration = new DynamicConfiguration(pluginDataHandlerProvider);
         }
         containingHistoryCommand = false;
+        modifiedDynamicConfig = false;
+        shouldResetDynamicConfig = false;
     }
 
     public boolean parseCommands(String comment, boolean isNotHistory) {
@@ -118,7 +128,7 @@ public class ClientCommands extends ClientBase {
                 if (config.getEnableMessageDebugging()) {
                     changeSetData.setHideChatGptReview(true);
                     changeSetData.setForceDisplaySystemMessage(true);
-                    dynamicConfiguration.updateConfiguration();
+                    dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
                 }
                 else {
                     changeSetData.setReviewSystemMessage(localizer.getText(
@@ -173,8 +183,15 @@ public class ClientCommands extends ClientBase {
                     break;
             }
         } else if (command == COMMAND_SET.CONFIGURE && config.getEnableMessageDebugging()) {
-            log.debug("Updating configuration setting '{}' to '{}'", optionKey, optionValue);
-            dynamicConfiguration.setConfig(optionKey, optionValue);
+            if (CONFIGURE_OPTION_MAP.get(optionKey) == CONFIGURE_OPTION_SET.RESET) {
+                shouldResetDynamicConfig = true;
+                log.debug("Resetting configuration settings");
+            }
+            else {
+                modifiedDynamicConfig = true;
+                log.debug("Updating configuration setting '{}' to '{}'", optionKey, optionValue);
+                dynamicConfiguration.setConfig(optionKey, optionValue);
+            }
         }
     }
 }
