@@ -21,6 +21,10 @@ public class UriResourceLocatorStateful {
         return threadRetrieveUri(threadId) + "/messages";
     }
 
+    public static String threadMessageRetrieveUri(String threadId, String messageId) {
+        return threadMessagesUri(threadId) + "/" + messageId;
+    }
+
     public static String runsUri(String threadId) {
         return threadRetrieveUri(threadId) + "/runs";
     }

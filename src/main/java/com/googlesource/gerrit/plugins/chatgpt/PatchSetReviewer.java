@@ -109,6 +109,10 @@ public class PatchSetReviewer {
     }
 
     private void retrieveReviewBatches(ChatGptResponseContent reviewReply, GerritChange change) {
+        if (reviewReply.getMessageContent() != null && !reviewReply.getMessageContent().isEmpty()) {
+            reviewBatches.add(new ReviewBatch(reviewReply.getMessageContent()));
+            return;
+        }
         for (ChatGptReplyItem replyItem : reviewReply.getReplies()) {
             String reply = replyItem.getReply();
             Integer score = replyItem.getScore();

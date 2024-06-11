@@ -4,6 +4,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptToolCall;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
@@ -72,8 +73,12 @@ public class ChatGptRun extends ClientBase {
         log.info("Run executed after {} polling requests: {}", pollingCount, stepResponse);
     }
 
+    public ChatGptResponseMessage getFirstStepDetails() {
+        return stepResponse.getData().get(0).getStepDetails();
+    }
+
     public List<ChatGptToolCall> getFirstStep() {
-        return stepResponse.getData().get(0).getStepDetails().getToolCalls();
+        return getFirstStepDetails().getToolCalls();
     }
 
     private Request runCreateRequest() {

@@ -12,5 +12,5 @@ public class ChatGptResponseContent {
     private List<ChatGptReplyItem> replies;
     private String changeId;
     @NonNull
-    private String errorMessage;
+    private String messageContent;
 }

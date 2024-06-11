@@ -202,4 +202,30 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         Assert.assertEquals(promptTagComments, requestContent);
         Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
     }
+
+    @Test
+    public void gptMentionedInCommentMessageResponse() throws RestApiException {
+        String reviewMessageCommitMessage = getReviewMessage("__files/chatGptResponseRequestStateful.json", 0);
+
+        chatGptPromptStateful.setCommentEvent(true);
+        // Mock the behavior of the ChatGPT retrieve-run-steps request
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBodyFile("chatGptResponseRequestMessageStateful.json")));
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBodyFile("chatGptResponseThreadMessage.json")));
+
+        handleEventBasedOnType(true);
+
+        ArgumentCaptor<ReviewInput> captor = testRequestSent();
+        Assert.assertEquals(promptTagComments, requestContent);
+        Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
+    }
 }

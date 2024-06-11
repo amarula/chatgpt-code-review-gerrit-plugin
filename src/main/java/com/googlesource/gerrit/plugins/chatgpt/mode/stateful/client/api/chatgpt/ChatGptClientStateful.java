@@ -10,11 +10,15 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptThreadMessageResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Singleton
 public class ChatGptClientStateful extends ChatGptClient implements IChatGptClient {
+    private static final String TYPE_MESSAGE_CREATION = "message_creation";
+    private static final String TYPE_TOOL_CALLS = "tool_calls";
+
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
     @VisibleForTesting
@@ -29,23 +33,42 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         String changeId = change.getFullChangeId();
         log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", changeId, patchSet);
 
-        ChatGptThread chatGptThread = new ChatGptThread(
+        ChatGptThread chatGptThread = new ChatGptThread(config, pluginDataHandlerProvider);
+        String threadId = chatGptThread.createThread();
+
+        ChatGptThreadMessage chatGptThreadMessage = new ChatGptThreadMessage(
+                threadId,
                 config,
                 changeSetData,
                 change,
-                patchSet,
-                pluginDataHandlerProvider
+                patchSet
         );
-        String threadId = chatGptThread.createThread();
-        chatGptThread.addMessage();
+        chatGptThreadMessage.addMessage();
 
         ChatGptRun chatGptRun = new ChatGptRun(threadId, config, pluginDataHandlerProvider);
         chatGptRun.createRun();
         chatGptRun.pollRun();
         // Attribute `requestBody` is valued for testing purposes
-        requestBody = chatGptThread.getAddMessageRequestBody();
+        requestBody = chatGptThreadMessage.getAddMessageRequestBody();
         log.debug("ChatGPT request body: {}", requestBody);
 
-        return getResponseContent(chatGptRun.getFirstStep());
+        return getResponseContentStateful(threadId, chatGptRun);
+    }
+
+    private ChatGptResponseContent getResponseContentStateful(String threadId, ChatGptRun chatGptRun) {
+        return switch (chatGptRun.getFirstStepDetails().getType()) {
+            case TYPE_MESSAGE_CREATION -> retrieveThreadMessage(threadId, chatGptRun);
+            case TYPE_TOOL_CALLS -> getResponseContent(chatGptRun.getFirstStep());
+            default -> throw new IllegalStateException("Unexpected Step Type in stateful ChatGpt response: " +
+                    chatGptRun);
+        };
+    }
+
+    private ChatGptResponseContent retrieveThreadMessage(String threadId, ChatGptRun chatGptRun) {
+        ChatGptThreadMessage chatGptThreadMessage = new ChatGptThreadMessage(threadId, config);
+        ChatGptThreadMessageResponse threadMessageResponse = chatGptThreadMessage.retrieveMessage(
+                chatGptRun.getFirstStepDetails().getMessageCreation().getMessageId()
+        );
+        return new ChatGptResponseContent(threadMessageResponse.getContent().get(0).getText().getValue());
     }
 }

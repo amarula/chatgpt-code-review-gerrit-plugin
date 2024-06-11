@@ -1,0 +1,15 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "step_UKMPnSinQy6XjSWO7SFleu1v",
+      "object": "thread.run.step",
+      "step_details": {
+        "type": "message_creation",
+        "message_creation": {
+          "message_id": "msg_TEST_MESSAGE_ID"
+        }
+      }
+    }
+  ]
+}
