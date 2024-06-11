@@ -16,6 +16,9 @@ public class Settings {
     );
     public static final String GERRIT_COMMIT_MESSAGE_PREFIX = "Subject: ";
 
+    public static final String CHAT_GPT_ROLE_USER = "user";
+    public static final String CHAT_GPT_ROLE_ASSISTANT = "assistant";
+
     public enum MODES {
         stateless,
         stateful

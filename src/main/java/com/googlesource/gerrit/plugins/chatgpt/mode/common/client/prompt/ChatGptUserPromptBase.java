@@ -63,9 +63,9 @@ public abstract class ChatGptUserPromptBase implements IChatGptUserPrompt {
         return messageItem;
     }
 
-    protected void setHistories(ChatGptMessageItem messageItem, List<ChatGptRequestMessage> messageHistories) {
-        if (!messageHistories.isEmpty()) {
-            messageItem.setHistory(messageHistories);
+    protected void setHistory(ChatGptMessageItem messageItem, List<ChatGptRequestMessage> messageHistory) {
+        if (!messageHistory.isEmpty()) {
+            messageItem.setHistory(messageHistory);
         }
     }
 }

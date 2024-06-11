@@ -16,9 +16,6 @@ import java.util.stream.Stream;
 
 @Slf4j
 public class ChatGptHistory extends ChatGptComment {
-    private static final String ROLE_USER = "user";
-    private static final String ROLE_ASSISTANT = "assistant";
-
     private final Set<String> messagesExcludedFromHistory;
     private final HashMap<String, GerritComment> commentMap;
     private final HashMap<String, GerritComment> patchSetCommentMap;
@@ -89,7 +86,7 @@ public class ChatGptHistory extends ChatGptComment {
     }
 
     private String getRoleFromComment(GerritComment currentComment) {
-        return isFromAssistant(currentComment) ? ROLE_ASSISTANT : ROLE_USER;
+        return isFromAssistant(currentComment) ? Settings.CHAT_GPT_ROLE_ASSISTANT : Settings.CHAT_GPT_ROLE_USER;
     }
 
     private List<ChatGptRequestMessage> retrieveMessageHistory(GerritComment currentComment) {

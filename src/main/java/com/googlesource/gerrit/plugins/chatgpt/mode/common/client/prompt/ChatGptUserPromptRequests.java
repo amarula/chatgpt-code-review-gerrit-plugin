@@ -10,10 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.CHAT_GPT_ROLE_USER;
+
 @Slf4j
 public class ChatGptUserPromptRequests extends ChatGptUserPromptBase {
     protected ChatGptMessageItem messageItem;
-    protected List<ChatGptRequestMessage> messageHistories;
+    protected List<ChatGptRequestMessage> messageHistory;
 
     public ChatGptUserPromptRequests(
             Configuration config,
@@ -33,10 +35,20 @@ public class ChatGptUserPromptRequests extends ChatGptUserPromptBase {
 
     protected ChatGptMessageItem getMessageItem(int i) {
         messageItem = super.getMessageItem(i);
-        messageHistories = gptMessageHistory.retrieveHistory(commentProperties.get(i));
-        ChatGptRequestMessage request = messageHistories.remove(messageHistories.size() -1);
+        messageHistory = gptMessageHistory.retrieveHistory(commentProperties.get(i));
+        ChatGptRequestMessage request = extractLastUserMessageFromHistory();
         messageItem.setRequest(request.getContent());
 
         return messageItem;
+    }
+
+    private ChatGptRequestMessage extractLastUserMessageFromHistory() {
+        for (int i = messageHistory.size() - 1; i >= 0; i--) {
+            if (CHAT_GPT_ROLE_USER.equals(messageHistory.get(i).getRole())) {
+                return messageHistory.remove(i);
+            }
+        }
+        throw new RuntimeException("Error extracting request from message history: no user message found in " +
+                messageHistory);
     }
 }

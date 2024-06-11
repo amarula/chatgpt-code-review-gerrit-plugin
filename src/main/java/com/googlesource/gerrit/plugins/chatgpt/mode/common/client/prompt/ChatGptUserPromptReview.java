@@ -33,9 +33,9 @@ public class ChatGptUserPromptReview extends ChatGptUserPromptBase implements IC
 
     protected ChatGptMessageItem getMessageItem(int i) {
         ChatGptMessageItem messageItem = super.getMessageItem(i);
-        List<ChatGptRequestMessage> messageHistories = gptMessageHistory.retrieveHistory(commentProperties.get(i),
+        List<ChatGptRequestMessage> messageHistory = gptMessageHistory.retrieveHistory(commentProperties.get(i),
                 true);
-        setHistories(messageItem, messageHistories);
+        setHistory(messageItem, messageHistory);
 
         return messageItem;
     }

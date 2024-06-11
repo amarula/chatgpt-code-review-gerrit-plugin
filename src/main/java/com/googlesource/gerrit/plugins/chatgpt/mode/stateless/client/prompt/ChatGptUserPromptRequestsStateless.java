@@ -22,7 +22,7 @@ public class ChatGptUserPromptRequestsStateless extends ChatGptUserPromptRequest
 
     protected ChatGptMessageItem getMessageItem(int i) {
         super.getMessageItem(i);
-        setHistories(messageItem, messageHistories);
+        setHistory(messageItem, messageHistory);
 
         return messageItem;
     }

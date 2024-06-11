@@ -187,7 +187,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                 ChatGptPromptStateless.DEFAULT_GPT_REQUEST_PROMPT_DIFF,
                 diffContent,
                 ChatGptPromptStateless.DEFAULT_GPT_REQUEST_PROMPT_REQUESTS,
-                promptTagComments,
+                readTestFile("__files/stateless/chatGptExpectedRequestMessage.json"),
                 ChatGptPromptStateless.getCommentRequestUserPrompt(commentPropertiesSize)
         ));
         testRequestSent();
