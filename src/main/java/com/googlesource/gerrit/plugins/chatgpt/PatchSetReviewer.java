@@ -17,6 +17,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.Gerr
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,7 +66,7 @@ public class PatchSetReviewer {
         commentProperties = gerritClient.getClientData(change).getCommentProperties();
         gerritCommentRange = new GerritCommentRange(gerritClient, change);
         String patchSet = gerritClient.getPatchSet(change);
-        if (patchSet.isEmpty()) {
+        if (patchSet.isEmpty() && config.getGptMode() == Settings.MODES.stateless) {
             log.info("No file to review has been found in the PatchSet");
             return;
         }

@@ -120,6 +120,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected PluginConfig globalConfig;
     protected PluginConfig projectConfig;
     protected Configuration config;
+    protected ChangeSetData changeSetData;
     protected GerritClient gerritClient;
     protected PatchSetReviewer patchSetReviewer;
     protected ConfigCreator mockConfigCreator;
@@ -300,8 +301,8 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
         return reviewInputCaptor;
     }
 
-    private void initTest() {
-        ChangeSetData changeSetData = new ChangeSetData(
+    protected void initTest() {
+        changeSetData = new ChangeSetData(
                 GPT_USER_ACCOUNT_ID,
                 config.getVotingMinScore(),
                 config.getMaxReviewFileSize()
@@ -386,14 +387,14 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
 
     private IChatGptClient getChatGptClient() {
         return switch (config.getGptMode()) {
-            case stateful -> new ChatGptClientStateful(config, pluginDataHandlerProvider);
+            case stateful -> new ChatGptClientStateful(config, gitRepoFiles, pluginDataHandlerProvider);
             case stateless -> new ChatGptClientStateless(config);
         };
     }
 
     private IGerritClientPatchSet getGerritClientPatchSet() {
         return switch (config.getGptMode()) {
-            case stateful -> new GerritClientPatchSetStateful(config, accountCacheMock, gitRepoFiles, pluginDataHandlerProvider);
+            case stateful -> new GerritClientPatchSetStateful(config, accountCacheMock);
             case stateless -> new GerritClientPatchSetStateless(config, accountCacheMock);
         };
     }

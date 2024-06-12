@@ -5,13 +5,10 @@ import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -27,27 +24,17 @@ public class GerritClientPatchSetStateful extends GerritClientPatchSet implement
     private static final Pattern EXTRACT_B_FILENAMES_FROM_PATCH_SET = Pattern.compile("^diff --git .*? b/(.*)$",
             Pattern.MULTILINE);
 
-    private final GitRepoFiles gitRepoFiles;
-    private final PluginDataHandlerProvider pluginDataHandlerProvider;
-
     private GerritChange change;
 
     @VisibleForTesting
     @Inject
-    public GerritClientPatchSetStateful(
-            Configuration config,
-            AccountCache accountCache,
-            GitRepoFiles gitRepoFiles,
-            PluginDataHandlerProvider pluginDataHandlerProvider) {
+    public GerritClientPatchSetStateful(Configuration config, AccountCache accountCache) {
         super(config, accountCache);
-        this.gitRepoFiles = gitRepoFiles;
-        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
     }
 
     public String getPatchSet(ChangeSetData changeSetData, GerritChange change) throws Exception {
+        if (change.getIsCommentEvent()) return "";
         this.change = change;
-        ChatGptAssistant chatGptAssistant = new ChatGptAssistant(config, change, gitRepoFiles, pluginDataHandlerProvider);
-        chatGptAssistant.setupAssistant();
 
         String formattedPatch = getPatchFromGerrit();
         List<String> files = extractFilesFromPatch(formattedPatch);

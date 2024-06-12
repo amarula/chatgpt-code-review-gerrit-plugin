@@ -10,6 +10,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptThreadMessageResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,12 +20,18 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
     private static final String TYPE_MESSAGE_CREATION = "message_creation";
     private static final String TYPE_TOOL_CALLS = "tool_calls";
 
+    private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
     @VisibleForTesting
     @Inject
-    public ChatGptClientStateful(Configuration config, PluginDataHandlerProvider pluginDataHandlerProvider) {
+    public ChatGptClientStateful(
+            Configuration config,
+            GitRepoFiles gitRepoFiles,
+            PluginDataHandlerProvider pluginDataHandlerProvider
+    ) {
         super(config);
+        this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
     }
 
@@ -45,7 +52,15 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         );
         chatGptThreadMessage.addMessage();
 
-        ChatGptRun chatGptRun = new ChatGptRun(threadId, config, pluginDataHandlerProvider);
+        ChatGptRun chatGptRun = new ChatGptRun(
+                threadId,
+                config,
+                changeSetData,
+                change,
+                gitRepoFiles,
+                pluginDataHandlerProvider,
+                isCommentEvent
+        );
         chatGptRun.createRun();
         chatGptRun.pollRun();
         // Attribute `requestBody` is valued for testing purposes

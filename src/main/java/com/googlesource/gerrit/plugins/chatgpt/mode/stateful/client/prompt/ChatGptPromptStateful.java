@@ -6,20 +6,25 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGpt
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Slf4j
 public class ChatGptPromptStateful extends ChatGptPrompt {
     public static String DEFAULT_GPT_ASSISTANT_NAME;
     public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS;
     public static String DEFAULT_GPT_MESSAGE_REVIEW;
 
+    private final ChangeSetData changeSetData;
     private final GerritChange change;
 
-    private ChangeSetData changeSetData;
-
-    public ChatGptPromptStateful(Configuration config, GerritChange change) {
+    public ChatGptPromptStateful(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config);
+        this.changeSetData = changeSetData;
         this.change = change;
         this.isCommentEvent = change.getIsCommentEvent();
         // Avoid repeated loading of prompt constants
@@ -28,23 +33,31 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
         }
     }
 
-    public ChatGptPromptStateful(Configuration config, ChangeSetData changeSetData, GerritChange change) {
-        this(config, change);
-        this.changeSetData = changeSetData;
-    }
-
     public String getDefaultGptAssistantDescription() {
         return String.format(DEFAULT_GPT_ASSISTANT_DESCRIPTION, change.getProjectName());
     }
 
     public String getDefaultGptAssistantInstructions() {
-        String instructions = DEFAULT_GPT_SYSTEM_PROMPT + DOT +
-                String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName()) + SPACE +
-                getPatchSetReviewUserPrompt();
-        if (config.getGptReviewCommitMessages()) {
-            instructions += SPACE + getReviewPromptCommitMessages();
+        List<String> instructions = new ArrayList<>(List.of(
+                DEFAULT_GPT_SYSTEM_PROMPT + DOT,
+                String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName())
+        ));
+        if (change.getIsCommentEvent()) {
+            instructions.addAll(List.of(
+                    DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS,
+                    getCommentRequestUserPrompt(changeSetData.getCommentPropertiesSize())
+            ));
         }
-        return instructions;
+        else {
+            instructions.addAll(List.of(
+                    DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW,
+                    getPatchSetReviewUserPrompt()
+            ));
+            if (config.getGptReviewCommitMessages()) {
+                instructions.add(getReviewPromptCommitMessages());
+            }
+        }
+        return String.join(SPACE, instructions);
     }
 
     public String getDefaultGptThreadReviewMessage(String patchSet) {

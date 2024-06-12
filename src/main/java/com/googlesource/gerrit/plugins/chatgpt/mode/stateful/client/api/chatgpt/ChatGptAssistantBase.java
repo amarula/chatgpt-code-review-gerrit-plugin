@@ -8,10 +8,12 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.Ch
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptTool;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
@@ -23,33 +25,38 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTemp
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
-public class ChatGptAssistant extends ClientBase {
-    public static final String KEY_ASSISTANT_ID = "assistantId";
+public class ChatGptAssistantBase extends ClientBase {
+    @Getter
+    protected String keyAssistantId;
 
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
+    private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler projectDataHandler;
 
-    public ChatGptAssistant(
+    public ChatGptAssistantBase(
             Configuration config,
+            ChangeSetData changeSetData,
             GerritChange change,
             GitRepoFiles gitRepoFiles,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         super(config);
+        this.changeSetData = changeSetData;
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
         this.projectDataHandler = pluginDataHandlerProvider.getProjectScope();
     }
 
     public void setupAssistant() {
-        String assistantId = projectDataHandler.getValue(KEY_ASSISTANT_ID);
+        String assistantId = projectDataHandler.getValue(keyAssistantId);
         if (assistantId == null || config.getForceCreateAssistant()) {
+            log.debug("Setup Assistant for project {}", change.getProjectNameKey());
             String fileId = uploadRepoFiles();
             projectDataHandler.setValue(KEY_FILE_ID, fileId);
             assistantId = createAssistant(fileId);
-            projectDataHandler.setValue(KEY_ASSISTANT_ID, assistantId);
+            projectDataHandler.setValue(keyAssistantId, assistantId);
             log.info("Project assistant created with ID: {}", assistantId);
         }
         else {
@@ -79,7 +86,7 @@ public class ChatGptAssistant extends ClientBase {
     private Request createRequest(String fileId) {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.assistantCreateUri());
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
-        ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, change);
+        ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, change);
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
         ChatGptTool[] tools = new ChatGptTool[] {
                 ChatGptTools.retrieveFormatRepliesTool()
@@ -94,6 +101,7 @@ public class ChatGptAssistant extends ClientBase {
                 .tools(tools)
                 .toolResources(toolResources)
                 .build();
+        log.debug("ChatGPT Create Assistant request body: {}", requestBody);
 
         return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
     }

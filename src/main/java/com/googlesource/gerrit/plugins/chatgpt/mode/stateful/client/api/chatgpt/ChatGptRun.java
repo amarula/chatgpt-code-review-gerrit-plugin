@@ -4,9 +4,12 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptToolCall;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
@@ -14,7 +17,6 @@ import okhttp3.Request;
 import java.net.URI;
 import java.util.*;
 
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant.KEY_ASSISTANT_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
@@ -28,19 +30,43 @@ public class ChatGptRun extends ClientBase {
     public static final String COMPLETED_STATUS = "completed";
 
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
+    private final ChangeSetData changeSetData;
+    private final GerritChange change;
     private final String threadId;
-    private final PluginDataHandler projectDataHandler;
+    private final GitRepoFiles gitRepoFiles;
+    private final PluginDataHandlerProvider pluginDataHandlerProvider;
+    private final boolean isCommentEvent;
 
     private ChatGptResponse runResponse;
     private ChatGptListResponse stepResponse;
+    private String keyAssistantId;
 
-    public ChatGptRun(String threadId, Configuration config, PluginDataHandlerProvider pluginDataHandlerProvider) {
+    public ChatGptRun(
+            String threadId,
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change,
+            GitRepoFiles gitRepoFiles,
+            PluginDataHandlerProvider pluginDataHandlerProvider,
+            boolean isCommentEvent
+    ) {
         super(config);
+        this.changeSetData = changeSetData;
+        this.change = change;
         this.threadId = threadId;
-        this.projectDataHandler = pluginDataHandlerProvider.getProjectScope();
+        this.gitRepoFiles = gitRepoFiles;
+        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+        this.isCommentEvent = isCommentEvent;
     }
 
     public void createRun() {
+        ChatGptAssistantBase chatGptAssistant = isCommentEvent ?
+             new ChatGptAssistantRequests(config, changeSetData, change, gitRepoFiles, pluginDataHandlerProvider) :
+             new ChatGptAssistantReview(config, changeSetData, change, gitRepoFiles, pluginDataHandlerProvider);
+
+        chatGptAssistant.setupAssistant();
+        keyAssistantId = chatGptAssistant.getKeyAssistantId();
+
         Request request = runCreateRequest();
         log.info("ChatGPT Create Run request: {}", request);
 
@@ -85,8 +111,9 @@ public class ChatGptRun extends ClientBase {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.runsUri(threadId));
         log.debug("ChatGPT Create Run request URI: {}", uri);
 
+        PluginDataHandler projectDataHandler = pluginDataHandlerProvider.getProjectScope();
         ChatGptCreateRunRequest requestBody = ChatGptCreateRunRequest.builder()
-                .assistantId(projectDataHandler.getValue(KEY_ASSISTANT_ID))
+                .assistantId(projectDataHandler.getValue(keyAssistantId))
                 .build();
 
         return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);

@@ -61,11 +61,11 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         when(pluginDataHandlerProvider.getProjectScope()).thenReturn(pluginDataHandler);
     }
 
-    protected void initConfig() {
-        super.initConfig();
+    protected void initTest() {
+        super.initTest();
 
         // Load the prompts
-        chatGptPromptStateful = new ChatGptPromptStateful(config, getGerritChange());
+        chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, getGerritChange());
     }
 
     protected void setupMockRequests() throws RestApiException {
