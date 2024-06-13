@@ -14,6 +14,10 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitR
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptThreadMessageResponse;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.isJsonString;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.unwrapJsonCode;
+
 @Slf4j
 @Singleton
 public class ChatGptClientStateful extends ChatGptClient implements IChatGptClient {
@@ -87,6 +91,17 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         ChatGptThreadMessageResponse threadMessageResponse = chatGptThreadMessage.retrieveMessage(
                 chatGptRun.getFirstStepDetails().getMessageCreation().getMessageId()
         );
-        return new ChatGptResponseContent(threadMessageResponse.getContent().get(0).getText().getValue());
+        String responseText = threadMessageResponse.getContent().get(0).getText().getValue();
+        if (responseText == null) {
+            throw new RuntimeException("ChatGPT thread message response content is null");
+        }
+        if (isJsonString(responseText)) {
+            return extractResponseContent(responseText);
+        }
+        return new ChatGptResponseContent(responseText);
+    }
+
+    private ChatGptResponseContent extractResponseContent(String responseText) {
+        return getGson().fromJson(unwrapJsonCode(responseText), ChatGptResponseContent.class);
     }
 }
