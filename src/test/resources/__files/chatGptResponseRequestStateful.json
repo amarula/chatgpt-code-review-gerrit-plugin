@@ -4,6 +4,7 @@
     {
       "id": "step_UKMPny6XSinQjSWOhSFleu1v",
       "object": "thread.run.step",
+      "status": "completed",
       "step_details": {
         "type": "tool_calls",
         "tool_calls": [

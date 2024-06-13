@@ -36,4 +36,8 @@ public class UriResourceLocatorStateful {
     public static String runStepsUri(String threadId, String runId) {
         return runRetrieveUri(threadId, runId) + "/steps";
     }
+
+    public static String runCancelUri(String threadId, String runId) {
+        return runRetrieveUri(threadId, runId) + "/cancel";
+    }
 }

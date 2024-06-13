@@ -4,6 +4,7 @@
     {
       "id": "step_UKMPnSinQy6XjSWO7SFleu1v",
       "object": "thread.run.step",
+      "status": "completed",
       "step_details": {
         "type": "message_creation",
         "message_creation": {

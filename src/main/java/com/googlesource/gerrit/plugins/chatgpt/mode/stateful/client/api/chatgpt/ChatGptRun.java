@@ -28,6 +28,7 @@ public class ChatGptRun extends ClientBase {
             "cancelling"
     ));
     public static final String COMPLETED_STATUS = "completed";
+    public static final String CANCELLED_STATUS = "cancelled";
 
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final ChangeSetData changeSetData;
@@ -100,11 +101,33 @@ public class ChatGptRun extends ClientBase {
     }
 
     public ChatGptResponseMessage getFirstStepDetails() {
-        return stepResponse.getData().get(0).getStepDetails();
+        return getFirstStep().getStepDetails();
     }
 
-    public List<ChatGptToolCall> getFirstStep() {
+    public List<ChatGptToolCall> getFirstStepToolCalls() {
         return getFirstStepDetails().getToolCalls();
+    }
+
+    public void cancelRun() {
+        if (getFirstStep().getStatus().equals(COMPLETED_STATUS)) return;
+
+        Request cancelRequest = getCancelRequest();
+        log.debug("ChatGPT Cancel Run request: {}", cancelRequest);
+        try {
+            String fullResponse = httpClient.execute(cancelRequest);
+            log.debug("ChatGPT Cancel Run Full response: {}", fullResponse);
+            ChatGptResponse response = getGson().fromJson(fullResponse, ChatGptResponse.class);
+            if (!response.getStatus().equals(CANCELLED_STATUS)) {
+                log.error("Unable to cancel run. Run cancel response: {}", fullResponse);
+            }
+        }
+        catch (Exception e) {
+            log.error("Error cancelling run", e);
+        }
+    }
+
+    private ChatGptRunStepsResponse getFirstStep() {
+        return stepResponse.getData().get(0);
     }
 
     private Request runCreateRequest() {
@@ -133,6 +156,14 @@ public class ChatGptRun extends ClientBase {
         log.debug("ChatGPT Run Steps request URI: {}", uri);
 
         return getRunPollRequest(uri);
+    }
+
+    private Request getCancelRequest() {
+        URI uri = URI.create(config.getGptDomain()
+                + UriResourceLocatorStateful.runCancelUri(threadId, runResponse.getId()));
+        log.debug("ChatGPT Run Cancel request URI: {}", uri);
+
+        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), new Object());
     }
 
     private Request getRunPollRequest(URI uri) {

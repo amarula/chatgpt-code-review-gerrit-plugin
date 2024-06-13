@@ -67,13 +67,16 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         requestBody = chatGptThreadMessage.getAddMessageRequestBody();
         log.debug("ChatGPT request body: {}", requestBody);
 
-        return getResponseContentStateful(threadId, chatGptRun);
+        ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
+        chatGptRun.cancelRun();
+
+        return chatGptResponseContent;
     }
 
     private ChatGptResponseContent getResponseContentStateful(String threadId, ChatGptRun chatGptRun) {
         return switch (chatGptRun.getFirstStepDetails().getType()) {
             case TYPE_MESSAGE_CREATION -> retrieveThreadMessage(threadId, chatGptRun);
-            case TYPE_TOOL_CALLS -> getResponseContent(chatGptRun.getFirstStep());
+            case TYPE_TOOL_CALLS -> getResponseContent(chatGptRun.getFirstStepToolCalls());
             default -> throw new IllegalStateException("Unexpected Step Type in stateful ChatGpt response: " +
                     chatGptRun);
         };
