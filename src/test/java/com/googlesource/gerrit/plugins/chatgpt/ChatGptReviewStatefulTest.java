@@ -37,6 +37,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     private static final String CHAT_GPT_FILE_ID = "file-TEST_FILE_ID";
+    private static final String CHAT_GPT_VECTOR_ID = "file-TEST_VECTOR_ID";
     private static final String CHAT_GPT_ASSISTANT_ID = "asst_TEST_ASSISTANT_ID";
     private static final String CHAT_GPT_THREAD_ID = "thread_TEST_THREAD_ID";
     private static final String CHAT_GPT_MESSAGE_ID = "msg_TEST_MESSAGE_ID";
@@ -82,6 +83,14 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBody("{\"id\": " + CHAT_GPT_FILE_ID + "}")));
+
+        // Mock the behavior of the ChatGPT create-vector-store request
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.vectorStoreCreateUri()).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBody("{\"id\": " + CHAT_GPT_VECTOR_ID + "}")));
 
         // Mock the behavior of the ChatGPT create-assistant request
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()

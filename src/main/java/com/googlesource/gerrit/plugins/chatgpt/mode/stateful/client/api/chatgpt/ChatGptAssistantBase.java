@@ -20,7 +20,7 @@ import okhttp3.Request;
 import java.net.URI;
 import java.nio.file.Path;
 
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptFiles.KEY_FILE_ID;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
@@ -54,8 +54,9 @@ public class ChatGptAssistantBase extends ClientBase {
         if (assistantId == null || config.getForceCreateAssistant()) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
             String fileId = uploadRepoFiles();
-            projectDataHandler.setValue(KEY_FILE_ID, fileId);
-            assistantId = createAssistant(fileId);
+            String vectorStoreId = createVectorStore(fileId);
+            projectDataHandler.setValue(KEY_VECTOR_STORE_ID, vectorStoreId);
+            assistantId = createAssistant(vectorStoreId);
             projectDataHandler.setValue(keyAssistantId, assistantId);
             log.info("Project assistant created with ID: {}", assistantId);
         }
@@ -73,8 +74,15 @@ public class ChatGptAssistantBase extends ClientBase {
         return chatGptFilesResponse.getId();
     }
 
-    private String createAssistant(String fileId) {
-        Request request = createRequest(fileId);
+    private String createVectorStore(String fileId) {
+        ChatGptVectorStore vectorStore = new ChatGptVectorStore(fileId, config, change);
+        ChatGptResponse createVectorStoreResponse = vectorStore.createVectorStore();
+
+        return createVectorStoreResponse.getId();
+    }
+
+    private String createAssistant(String vectorStoreId) {
+        Request request = createRequest(vectorStoreId);
         log.debug("ChatGPT Create Assistant request: {}", request);
 
         ChatGptResponse assistantResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
@@ -83,15 +91,20 @@ public class ChatGptAssistantBase extends ClientBase {
         return assistantResponse.getId();
     }
 
-    private Request createRequest(String fileId) {
+    private Request createRequest(String vectorStoreId) {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.assistantCreateUri());
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
         ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, change);
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
         ChatGptTool[] tools = new ChatGptTool[] {
+                new ChatGptTool("file_search"),
                 ChatGptTools.retrieveFormatRepliesTool()
         };
-        ChatGptToolResources toolResources = new ChatGptToolResources(new ChatGptFileIds(new String[] {fileId}));
+        ChatGptToolResources toolResources = new ChatGptToolResources(
+                new ChatGptToolResources.VectorStoreIds(
+                        new String[] {vectorStoreId}
+                )
+        );
         ChatGptCreateAssistantRequestBody requestBody = ChatGptCreateAssistantRequestBody.builder()
                 .name(ChatGptPromptStateful.DEFAULT_GPT_ASSISTANT_NAME)
                 .description(chatGptPromptStateful.getDefaultGptAssistantDescription())
