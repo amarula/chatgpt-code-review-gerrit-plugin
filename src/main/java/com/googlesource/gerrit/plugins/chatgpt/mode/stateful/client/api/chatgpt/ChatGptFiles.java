@@ -16,8 +16,6 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class ChatGptFiles extends ClientBase {
-    public static final String KEY_FILE_ID = "fileId";
-
     private final HttpClient httpClient = new HttpClient();
 
     public ChatGptFiles(Configuration config) {
