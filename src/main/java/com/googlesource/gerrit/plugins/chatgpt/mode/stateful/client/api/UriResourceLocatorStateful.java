@@ -1,16 +1,18 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api;
 
 public class UriResourceLocatorStateful {
+    private static final String VERSION_URI = "/v1";
+
     public static String filesCreateUri() {
-        return "/v1/files";
+        return VERSION_URI + "/files";
     }
 
     public static String assistantCreateUri() {
-        return "/v1/assistants";
+        return VERSION_URI + "/assistants";
     }
 
     public static String threadsUri() {
-        return "/v1/threads";
+        return VERSION_URI + "/threads";
     }
 
     public static String threadRetrieveUri(String threadId) {
