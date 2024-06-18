@@ -74,7 +74,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
             }
             if (!changeSetData.getDirectives().isEmpty()) {
                 prompt.add(DEFAULT_GPT_REVIEW_PROMPT_DIRECTIVES);
-                prompt.add(getNumberedListString(new ArrayList<>(changeSetData.getDirectives())));
+                prompt.add(getNumberedListString(new ArrayList<>(changeSetData.getDirectives()), null, null));
             }
         }
         return joinWithNewLine(prompt);
@@ -89,7 +89,11 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
 
     private List<String> getReviewSteps() {
         List<String> steps = new ArrayList<>(){};
-        steps.add(ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + SPACE + getPatchSetReviewUserPrompt());
+        steps.add(
+                DEFAULT_GPT_REVIEW_PROMPT_REVIEW + SPACE +
+                DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT + SPACE +
+                getPatchSetReviewUserPrompt()
+        );
         if (config.getGptReviewCommitMessages()) {
             steps.add(getReviewPromptCommitMessages());
         }

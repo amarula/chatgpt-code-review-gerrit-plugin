@@ -109,6 +109,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         return joinWithNewLine(Arrays.asList(
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT,
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + " " +
+                        ChatGptPromptStateless.DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT + " " +
                         chatGptPromptStateless.getPatchSetReviewUserPrompt(),
                 ChatGptPromptStateless.getReviewPromptCommitMessages(),
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_DIFF,

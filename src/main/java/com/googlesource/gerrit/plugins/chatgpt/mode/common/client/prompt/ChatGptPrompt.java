@@ -38,7 +38,8 @@ public class ChatGptPrompt {
     // Prompt constants loaded from JSON file
     public static String DEFAULT_GPT_SYSTEM_PROMPT;
     public static String DEFAULT_GPT_REVIEW_PROMPT_DIRECTIVES;
-    public static String DEFAULT_GPT_REPLIES_PROMPT;
+    public static String DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT;
+    public static String DEFAULT_GPT_REPLIES_PROMPT_SPECS;
     public static String DEFAULT_GPT_REPLIES_PROMPT_INLINE;
     public static String DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK;
     public static String DEFAULT_GPT_REQUEST_PROMPT_DIFF;
@@ -67,7 +68,8 @@ public class ChatGptPrompt {
     }
 
     public static String getCommentRequestUserPrompt(int commentPropertiesSize) {
-        return buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES) + SPACE +
+        return DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT + SPACE +
+                buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES) + SPACE +
                 DEFAULT_GPT_REPLIES_PROMPT_INLINE + SPACE +
                 String.format(DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize);
     }
@@ -112,7 +114,7 @@ public class ChatGptPrompt {
                 .map(entry -> entry.getKey() + SPACE + entry.getValue())
                 .collect(Collectors.toList());
 
-        return String.format(DEFAULT_GPT_REPLIES_PROMPT,
+        return String.format(DEFAULT_GPT_REPLIES_PROMPT_SPECS,
                 joinWithComma(attributes.keySet()),
                 joinWithSemicolon(fieldDescription)
         );
