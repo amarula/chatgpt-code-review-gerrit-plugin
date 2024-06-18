@@ -63,7 +63,7 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
                 instructions.add(getReviewPromptCommitMessages());
             }
         }
-        return String.join(SPACE, instructions);
+        return joinWithSpace(instructions);
     }
 
     public String getDefaultGptThreadReviewMessage(String patchSet) {
@@ -89,7 +89,7 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
                         DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE,
                         DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY
                 )),
-                RULE_NUMBER_PREFIX, COLON
+                RULE_NUMBER_PREFIX, COLON_SPACE
         )));
     }
 }
