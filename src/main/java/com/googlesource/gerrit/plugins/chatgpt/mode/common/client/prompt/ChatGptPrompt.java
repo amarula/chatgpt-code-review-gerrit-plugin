@@ -17,9 +17,6 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 @Slf4j
 public class ChatGptPrompt {
-    public static final String SPACE = " ";
-    public static final String DOT = ". ";
-
     // Reply attributes
     public static final String ATTRIBUTE_ID = "id";
     public static final String ATTRIBUTE_REPLY = "reply";
@@ -68,10 +65,12 @@ public class ChatGptPrompt {
     }
 
     public static String getCommentRequestUserPrompt(int commentPropertiesSize) {
-        return DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT + SPACE +
-                buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES) + SPACE +
-                DEFAULT_GPT_REPLIES_PROMPT_INLINE + SPACE +
-                String.format(DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize);
+        return joinWithSpace(new ArrayList<>(List.of(
+                DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
+                buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES),
+                DEFAULT_GPT_REPLIES_PROMPT_INLINE,
+                String.format(DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize)
+        )));
     }
 
     public static String getReviewPromptCommitMessages() {
@@ -129,8 +128,7 @@ public class ChatGptPrompt {
             attributes.remove(ATTRIBUTE_SCORE);
         }
         updateRelevanceDescription();
-        return buildFieldSpecifications(attributes) + SPACE +
-                DEFAULT_GPT_REPLIES_PROMPT_INLINE;
+        return buildFieldSpecifications(attributes) + SPACE + DEFAULT_GPT_REPLIES_PROMPT_INLINE;
     }
 
     private void updateScoreDescription() {

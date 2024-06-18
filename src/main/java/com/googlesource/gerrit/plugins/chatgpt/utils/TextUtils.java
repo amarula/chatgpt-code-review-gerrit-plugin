@@ -14,10 +14,11 @@ public class TextUtils extends StringUtils {
     public static final String CODE_DELIMITER = "```";
     public static final String CODE_DELIMITER_BEGIN ="\n\n" + CODE_DELIMITER + "\n";
     public static final String CODE_DELIMITER_END ="\n" + CODE_DELIMITER + "\n";
-    public static final String COLON = ": ";
-
-    private static final String COMMA = ", ";
-    private static final String SEMICOLON = "; ";
+    public static final String SPACE = " ";
+    public static final String DOT = ".";
+    public static final String COMMA_SPACE = ", ";
+    public static final String COLON_SPACE = ": ";
+    public static final String SEMICOLON_SPACE = "; ";
 
     public static String parseOutOfDelimiters(String body, String splitDelim, Function<String, String> processMessage,
                                               String leftDelimReplacement, String rightDelimReplacement) {
@@ -48,12 +49,16 @@ public class TextUtils extends StringUtils {
         return String.join("\n\n", components);
     }
 
+    public static String joinWithSpace(List<String> components) {
+        return String.join(SPACE, components);
+    }
+
     public static String joinWithComma(Set<String> components) {
-        return String.join(COMMA, components);
+        return String.join(COMMA_SPACE, components);
     }
 
     public static String joinWithSemicolon(List<String> components) {
-        return String.join(SEMICOLON, components);
+        return String.join(SEMICOLON_SPACE, components);
     }
 
     public static List<String> getNumberedList(List<String> components, String prefix, String postfix) {
