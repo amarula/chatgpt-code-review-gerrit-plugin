@@ -78,7 +78,7 @@ public class PatchSetReviewer {
 
             retrieveReviewBatches(reviewReply, change);
         }
-        clientReviewProvider.get().setReview(change, reviewBatches, changeSetData, getReviewScore());
+        clientReviewProvider.get().setReview(change, reviewBatches, changeSetData, getReviewScore(change));
     }
 
     private void setCommentBatchMap(ReviewBatch batchMap, Integer batchID) {
@@ -121,6 +121,7 @@ public class PatchSetReviewer {
             boolean isIrrelevant = isIrrelevantReply(replyItem);
             boolean isHidden = replyItem.isRepeated() || replyItem.isConflicting() || isIrrelevant || isNotNegative;
             if (!replyItem.isConflicting() && !isIrrelevant && score != null) {
+                log.debug("Score added: {}", score);
                 reviewScores.add(score);
             }
             if (changeSetData.getReplyFilterEnabled() && isHidden) {
@@ -150,9 +151,11 @@ public class PatchSetReviewer {
         return chatGptClient.ask(changeSetData, change, patchSet);
     }
 
-    private Integer getReviewScore() {
+    private Integer getReviewScore(GerritChange change) {
         if (config.isVotingEnabled()) {
-            return reviewScores.isEmpty() ? 0 : Collections.min(reviewScores);
+            return reviewScores.isEmpty() ?
+                    (change.getIsCommentEvent() ? null : 0) :
+                    Collections.min(reviewScores);
         }
         else {
             return null;
