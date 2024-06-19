@@ -65,7 +65,7 @@ public class ChatGptAssistantBase extends ClientBase {
     }
 
     private String uploadRepoFiles() {
-        String repoFiles = gitRepoFiles.getGitRepoFiles(change);
+        String repoFiles = gitRepoFiles.getGitRepoFiles(config, change);
         Path repoPath = createTempFileWithContent(change.getProjectName(), ".json", repoFiles);
         ChatGptFiles chatGptFiles = new ChatGptFiles(config);
         ChatGptFilesResponse chatGptFilesResponse = chatGptFiles.uploadFiles(repoPath);
