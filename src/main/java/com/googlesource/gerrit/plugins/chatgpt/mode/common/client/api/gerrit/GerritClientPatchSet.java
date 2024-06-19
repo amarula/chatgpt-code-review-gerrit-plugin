@@ -18,6 +18,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetD
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.matchesExtensionList;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getNoEscapedGson;
 import static java.util.stream.Collectors.toList;
 
@@ -67,8 +68,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
         try (ManualRequestContext requestContext = config.openRequestContext()) {
             for (String filename : files) {
                 isCommitMessage = filename.equals("/COMMIT_MSG");
-                if (!isCommitMessage && (filename.lastIndexOf(".") < 1 ||
-                        !enabledFileExtensions.contains(filename.substring(filename.lastIndexOf("."))))) {
+                if (!isCommitMessage && !matchesExtensionList(filename, enabledFileExtensions)) {
                     continue;
                 }
                 DiffInfo diff =
