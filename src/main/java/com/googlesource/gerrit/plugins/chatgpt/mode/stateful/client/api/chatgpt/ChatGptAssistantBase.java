@@ -22,6 +22,7 @@ import java.nio.file.Path;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFilename;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
@@ -67,7 +68,7 @@ public class ChatGptAssistantBase extends ClientBase {
 
     private String uploadRepoFiles() {
         String repoFiles = gitRepoFiles.getGitRepoFiles(config, change);
-        Path repoPath = createTempFileWithContent(change.getProjectName(), ".json", repoFiles);
+        Path repoPath = createTempFileWithContent(sanitizeFilename(change.getProjectName()), ".json", repoFiles);
         ChatGptFiles chatGptFiles = new ChatGptFiles(config);
         ChatGptFilesResponse chatGptFilesResponse = chatGptFiles.uploadFiles(repoPath);
 

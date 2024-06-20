@@ -7,6 +7,8 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 
 import java.nio.file.Path;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFilename;
+
 @Singleton
 public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider implements Provider<PluginDataHandler> {
     private final String projectName;
@@ -18,7 +20,7 @@ public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider imp
             GerritChange change
     ) {
         super(defaultPluginDataPath);
-        projectName = change.getProjectName();
+        projectName = sanitizeFilename(change.getProjectName());
         changeKey = change.getChangeKey().toString();
     }
 
