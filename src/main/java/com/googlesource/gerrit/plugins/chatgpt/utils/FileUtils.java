@@ -31,4 +31,9 @@ public class FileUtils {
         int extIndex = filename.lastIndexOf('.');
         return extIndex >= 1 && extensions.contains(filename.substring(extIndex));
     }
+
+    public static String sanitizeFilename (String filename) {
+        // Replace any characters that are invalid in filenames (especially slashes) with a "+"
+        return filename.replaceAll("[^-_a-zA-Z0-9]", "+");
+    }
 }
