@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptUserPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.code.InlineCode;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
@@ -10,7 +11,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.Gerr
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.CommentData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.prompt.IChatGptUserPrompt;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 

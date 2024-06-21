@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.prompt;
+package com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptMessageItem;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
