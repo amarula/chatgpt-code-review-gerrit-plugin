@@ -6,10 +6,10 @@ import com.google.gerrit.extensions.common.FileInfo;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
 import lombok.extern.slf4j.Slf4j;
 
 import static java.util.stream.Collectors.toList;

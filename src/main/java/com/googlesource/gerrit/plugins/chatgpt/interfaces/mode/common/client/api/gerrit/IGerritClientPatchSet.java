@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit;
+package com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit;
 
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;

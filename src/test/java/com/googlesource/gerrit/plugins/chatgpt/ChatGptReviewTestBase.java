@@ -32,6 +32,8 @@ import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
@@ -39,8 +41,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientFacade;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.chatgpt.IChatGptClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.interfaces.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
