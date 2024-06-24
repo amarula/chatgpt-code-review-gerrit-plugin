@@ -17,10 +17,7 @@ import com.google.gerrit.json.OutputFormat;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.data.AccountAttribute;
 import com.google.gerrit.server.data.PatchSetAttribute;
-import com.google.gerrit.server.events.CommentAddedEvent;
-import com.google.gerrit.server.events.Event;
-import com.google.gerrit.server.events.PatchSetCreatedEvent;
-import com.google.gerrit.server.events.PatchSetEvent;
+import com.google.gerrit.server.events.*;
 import com.google.gerrit.server.util.OneOffRequestContext;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -67,6 +64,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
+import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.EVENT_CLASS_MAP;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -272,9 +270,9 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
         }
     }
 
-    protected EventHandlerTask.Result handleEventBasedOnType(boolean isCommentEvent) {
-        Consumer<Event> typeSpecificSetup = getTypeSpecificSetup(isCommentEvent);
-        Event event = isCommentEvent ? mock(CommentAddedEvent.class) : mock(PatchSetCreatedEvent.class);
+    protected EventHandlerTask.Result handleEventBasedOnType(EventHandlerTask.SupportedEvents triggeredEvent) {
+        Consumer<Event> typeSpecificSetup = getTypeSpecificSetup(triggeredEvent);
+        Event event = getMockedEvent(triggeredEvent);
         setupCommonEventMocks((PatchSetEvent) event); // Apply common mock configurations
         typeSpecificSetup.accept(event);
 
@@ -295,7 +293,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     }
 
     protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
-        ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class); 
+        ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
         verify(revisionApiMock).review(reviewInputCaptor.capture());
         gptRequestBody = getGson().fromJson(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
         return reviewInputCaptor;
@@ -349,25 +347,29 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     }
 
     @NonNull
-    private Consumer<Event> getTypeSpecificSetup(boolean isCommentEvent) {
-        Consumer<Event> typeSpecificSetup;
-
-        if (isCommentEvent) {
-            typeSpecificSetup = event -> {
+    private Consumer<Event> getTypeSpecificSetup(EventHandlerTask.SupportedEvents triggeredEvent) {
+        return switch (triggeredEvent) {
+            case COMMENT_ADDED -> event -> {
                 CommentAddedEvent commentEvent = (CommentAddedEvent) event;
                 commentEvent.author = this::createTestAccountAttribute;
                 commentEvent.patchSet = this::createPatchSetAttribute;
                 commentEvent.eventCreatedOn = TEST_TIMESTAMP;
                 when(commentEvent.getType()).thenReturn("comment-added");
             };
-        } else {
-            typeSpecificSetup = event -> {
+            case PATCH_SET_CREATED -> event -> {
                 PatchSetCreatedEvent patchEvent = (PatchSetCreatedEvent) event;
                 patchEvent.patchSet = this::createPatchSetAttribute;
                 when(patchEvent.getType()).thenReturn("patchset-created");
             };
-        }
-        return typeSpecificSetup;
+            case CHANGE_MERGED -> event -> {
+                ChangeMergedEvent mergedEvent = (ChangeMergedEvent) event;
+                when(mergedEvent.getType()).thenReturn("change-merged");
+            };
+        };
+    }
+
+    private Event getMockedEvent(EventHandlerTask.SupportedEvents triggeredEvent) {
+        return (Event) mock(EVENT_CLASS_MAP.get(triggeredEvent));
     }
 
     private void setupCommonEventMocks(PatchSetEvent event) {

@@ -2,22 +2,24 @@ package com.googlesource.gerrit.plugins.chatgpt.listener;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
-import com.google.gerrit.extensions.client.ChangeKind;
 import com.google.gerrit.server.data.ChangeAttribute;
-import com.google.gerrit.server.data.PatchSetAttribute;
+import com.google.gerrit.server.events.ChangeMergedEvent;
+import com.google.gerrit.server.events.CommentAddedEvent;
+import com.google.gerrit.server.events.PatchSetCreatedEvent;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
 
 @Slf4j
 public class EventHandlerTask implements Runnable {
@@ -25,10 +27,22 @@ public class EventHandlerTask implements Runnable {
     public enum Result {
         OK, NOT_SUPPORTED, FAILURE
     }
+    public enum SupportedEvents {
+        PATCH_SET_CREATED,
+        COMMENT_ADDED,
+        CHANGE_MERGED
+    }
 
-    private final static Map<String, Boolean> EVENT_COMMENT_MAP = Map.of(
-            "patchset-created", false,
-            "comment-added", true
+    public static final Map<SupportedEvents, Class<?>> EVENT_CLASS_MAP = Map.of(
+            SupportedEvents.PATCH_SET_CREATED, PatchSetCreatedEvent.class,
+            SupportedEvents.COMMENT_ADDED, CommentAddedEvent.class,
+            SupportedEvents.CHANGE_MERGED, ChangeMergedEvent.class
+    );
+
+    private static final Map<String, SupportedEvents> EVENT_TYPE_MAP = Map.of(
+        "patchset-created", SupportedEvents.PATCH_SET_CREATED,
+        "comment-added", SupportedEvents.COMMENT_ADDED,
+        "change-merged", SupportedEvents.CHANGE_MERGED
     );
 
     private final Configuration config;
@@ -36,6 +50,11 @@ public class EventHandlerTask implements Runnable {
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final PatchSetReviewer reviewer;
+    private final GitRepoFiles gitRepoFiles;
+    private final PluginDataHandlerProvider pluginDataHandlerProvider;
+
+    private SupportedEvents processing_event_type;
+    private IEventHandlerType eventHandlerType;
 
     @Inject
     EventHandlerTask(
@@ -43,13 +62,17 @@ public class EventHandlerTask implements Runnable {
             ChangeSetData changeSetData,
             GerritChange change,
             PatchSetReviewer reviewer,
-            GerritClient gerritClient
+            GerritClient gerritClient,
+            GitRepoFiles gitRepoFiles,
+            PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         this.changeSetData = changeSetData;
         this.change = change;
         this.reviewer = reviewer;
         this.gerritClient = gerritClient;
         this.config = config;
+        this.gitRepoFiles = gitRepoFiles;
+        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
     }
 
     @Override
@@ -59,13 +82,13 @@ public class EventHandlerTask implements Runnable {
 
     @VisibleForTesting
     public Result execute() {
-        if (!preProcessEvent(change, changeSetData)) {
+        if (!preProcessEvent()) {
             return Result.NOT_SUPPORTED;
         }
 
         try {
             log.info("Processing change: {}", change.getFullChangeId());
-            reviewer.review(change);
+            eventHandlerType.processEvent();
             log.info("Finished processing change: {}", change.getFullChangeId());
         } catch (Exception e) {
             log.error("Error while processing change: {}", change.getFullChangeId(), e);
@@ -77,39 +100,41 @@ public class EventHandlerTask implements Runnable {
         return Result.OK;
     }
 
-    private boolean preProcessEvent(GerritChange change, ChangeSetData changeSetData) {
+    private boolean preProcessEvent() {
         String eventType = Optional.ofNullable(change.getEventType()).orElse("");
         log.info("Event type {}", eventType);
-        if (!EVENT_COMMENT_MAP.containsKey(eventType)) {
+        processing_event_type = EVENT_TYPE_MAP.get(eventType);
+        if (processing_event_type == null) {
             return false;
         }
 
         if (!isReviewEnabled(change)) {
             return false;
         }
-        boolean isCommentEvent = EVENT_COMMENT_MAP.get(eventType);
-        if (isCommentEvent) {
-            if (!gerritClient.retrieveLastComments(change)) {
-                if (changeSetData.getForcedReview() || changeSetData.getForceDisplaySystemMessage()) {
-                    isCommentEvent = false;
-                } else {
-                    log.info("No comments found for review");
+
+        while (true) {
+            eventHandlerType = getEventHandlerType();
+            switch (eventHandlerType.preprocessEvent()) {
+                case EXIT -> {
                     return false;
                 }
+                case SWITCH_TO_PATCH_SET_CREATED -> {
+                    processing_event_type = SupportedEvents.PATCH_SET_CREATED;
+                    continue;
+                }
             }
-        } else {
-            if (!isPatchSetReviewEnabled(change)) {
-                log.debug("Patch Set review disabled");
-                return false;
-            }
-        }
-        log.debug("Flag `isCommentEvent` set to {}", isCommentEvent);
-        change.setIsCommentEvent(isCommentEvent);
-        if (!isCommentEvent) {
-            gerritClient.retrievePatchSetInfo(change);
+            break;
         }
 
         return true;
+    }
+
+    private IEventHandlerType getEventHandlerType() {
+        return switch (processing_event_type) {
+            case PATCH_SET_CREATED -> new EventHandlerTypePatchSetReview(config, change, reviewer, gerritClient);
+            case COMMENT_ADDED -> new EventHandlerTypeCommentAdded(changeSetData, change, reviewer, gerritClient);
+            case CHANGE_MERGED -> new EventHandlerTypeChangeMerged(config, changeSetData, change, gitRepoFiles, pluginDataHandlerProvider);
+        };
     }
 
     private boolean isReviewEnabled(GerritChange change) {
@@ -129,34 +154,6 @@ public class EventHandlerTask implements Runnable {
             return false;
         }
 
-        return true;
-    }
-
-    private boolean isPatchSetReviewEnabled(GerritChange change) {
-        if (!config.getGptReviewPatchSet()) {
-            log.debug("Disabled review function for created or updated PatchSets.");
-            return false;
-        }
-        Optional<PatchSetAttribute> patchSetAttributeOptional = change.getPatchSetAttribute();
-        if (patchSetAttributeOptional.isEmpty()) {
-            log.info("PatchSetAttribute event properties not retrieved");
-            return false;
-        }
-        PatchSetAttribute patchSetAttribute = patchSetAttributeOptional.get();
-        ChangeKind patchSetEventKind = patchSetAttribute.kind;
-        if (patchSetEventKind != REWORK) {
-            log.debug("Change kind '{}' not processed", patchSetEventKind);
-            return false;
-        }
-        String authorUsername = patchSetAttribute.author.username;
-        if (gerritClient.isDisabledUser(authorUsername)) {
-            log.info("Review of PatchSets from user '{}' is disabled.", authorUsername);
-            return false;
-        }
-        if (gerritClient.isWorkInProgress(change)) {
-            log.debug("Skipping Patch Set processing due to its WIP status.");
-            return false;
-        }
         return true;
     }
 

@@ -27,6 +27,9 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class ChatGptAssistantBase extends ClientBase {
+    protected static final String KEY_REVIEW_ASSISTANT_ID = "reviewAssistantId";
+    protected static final String KEY_REQUESTS_ASSISTANT_ID = "requestsAssistantId";
+
     @Getter
     protected String keyAssistantId;
 
@@ -54,8 +57,7 @@ public class ChatGptAssistantBase extends ClientBase {
         String assistantId = projectDataHandler.getValue(keyAssistantId);
         if (assistantId == null || config.getForceCreateAssistant()) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
-            String fileId = uploadRepoFiles();
-            String vectorStoreId = createVectorStore(fileId);
+            String vectorStoreId = createVectorStore();
             assistantId = createAssistant(vectorStoreId);
             projectDataHandler.setValue(keyAssistantId, assistantId);
             log.info("Project assistant created with ID: {}", assistantId);
@@ -65,6 +67,28 @@ public class ChatGptAssistantBase extends ClientBase {
         }
     }
 
+    public String createVectorStore() {
+        String vectorStoreId = projectDataHandler.getValue(KEY_VECTOR_STORE_ID);
+        if (vectorStoreId == null) {
+            String fileId = uploadRepoFiles();
+            ChatGptVectorStore vectorStore = new ChatGptVectorStore(fileId, config, change);
+            ChatGptResponse createVectorStoreResponse = vectorStore.createVectorStore();
+            vectorStoreId = createVectorStoreResponse.getId();
+            projectDataHandler.setValue(KEY_VECTOR_STORE_ID, vectorStoreId);
+            log.info("Vector Store created with ID: {}", vectorStoreId);
+        }
+        else {
+            log.info("Vector Store found for the project. Vector Store ID: {}", vectorStoreId);
+        }
+        return vectorStoreId;
+    }
+
+    public void flushAssistantIds() {
+        projectDataHandler.removeValue(KEY_VECTOR_STORE_ID);
+        projectDataHandler.removeValue(KEY_REVIEW_ASSISTANT_ID);
+        projectDataHandler.removeValue(KEY_REQUESTS_ASSISTANT_ID);
+    }
+
     private String uploadRepoFiles() {
         String repoFiles = gitRepoFiles.getGitRepoFiles(config, change);
         Path repoPath = createTempFileWithContent(sanitizeFilename(change.getProjectName()), ".json", repoFiles);
@@ -72,21 +96,6 @@ public class ChatGptAssistantBase extends ClientBase {
         ChatGptFilesResponse chatGptFilesResponse = chatGptFiles.uploadFiles(repoPath);
 
         return chatGptFilesResponse.getId();
-    }
-
-    private String createVectorStore(String fileId) {
-        String vectorStoreId = projectDataHandler.getValue(KEY_VECTOR_STORE_ID);
-        if (vectorStoreId == null) {
-            ChatGptVectorStore vectorStore = new ChatGptVectorStore(fileId, config, change);
-            ChatGptResponse createVectorStoreResponse = vectorStore.createVectorStore();
-            vectorStoreId = createVectorStoreResponse.getId();
-            projectDataHandler.setValue(KEY_VECTOR_STORE_ID, vectorStoreId);
-            log.info("Vector store created with ID: {}", vectorStoreId);
-        }
-        else {
-            log.info("Vector store found for the project. Assistant ID: {}", vectorStoreId);
-        }
-        return vectorStoreId;
     }
 
     private String createAssistant(String vectorStoreId) {

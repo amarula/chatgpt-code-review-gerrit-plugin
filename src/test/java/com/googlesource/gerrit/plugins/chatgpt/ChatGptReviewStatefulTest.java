@@ -7,6 +7,8 @@ import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.common.DiffInfo;
 import com.google.gerrit.extensions.restapi.BinaryResult;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
@@ -25,8 +27,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 
-
+import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptRun.COMPLETED_STATUS;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -46,6 +49,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     private String formattedPatchContent;
     private ChatGptPromptStateful chatGptPromptStateful;
     private String requestContent;
+    private PluginDataHandler projectHandler;
 
     public ChatGptReviewStatefulTest() {
         MockitoAnnotations.openMocks(this);
@@ -58,8 +62,11 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         when(globalConfig.getString(Mockito.eq("gptMode"), Mockito.anyString()))
                 .thenReturn(MODES.stateful.name());
 
+        setupPluginData();
+        PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
+        projectHandler = provider.getProjectScope();
         // Mock the pluginDataHandlerProvider to return the mocked project pluginDataHandler
-        when(pluginDataHandlerProvider.getProjectScope()).thenReturn(pluginDataHandler);
+        when(pluginDataHandlerProvider.getProjectScope()).thenReturn(projectHandler);
     }
 
     protected void initTest() {
@@ -184,7 +191,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
 
         String reviewUserPrompt = chatGptPromptStateful.getDefaultGptThreadReviewMessage(formattedPatchContent);
 
-        handleEventBasedOnType(false);
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
         Assert.assertEquals(reviewUserPrompt, requestContent);
@@ -205,7 +212,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseRequestStateful.json")));
 
-        handleEventBasedOnType(true);
+        handleEventBasedOnType(SupportedEvents.COMMENT_ADDED);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
         Assert.assertEquals(promptTagComments, requestContent);
@@ -231,7 +238,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseThreadMessageText.json")));
 
-        handleEventBasedOnType(true);
+        handleEventBasedOnType(SupportedEvents.COMMENT_ADDED);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
         Assert.assertEquals(promptTagComments, requestContent);
@@ -257,10 +264,18 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseThreadMessageJson.json")));
 
-        handleEventBasedOnType(true);
+        handleEventBasedOnType(SupportedEvents.COMMENT_ADDED);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
         Assert.assertEquals(promptTagComments, requestContent);
         Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
+    }
+
+    @Test
+    public void gerritMergedCommits() {
+        projectHandler.removeValue(KEY_VECTOR_STORE_ID);
+        handleEventBasedOnType(SupportedEvents.CHANGE_MERGED);
+
+        Assert.assertEquals(CHAT_GPT_VECTOR_ID, projectHandler.getValue(KEY_VECTOR_STORE_ID));
     }
 }
