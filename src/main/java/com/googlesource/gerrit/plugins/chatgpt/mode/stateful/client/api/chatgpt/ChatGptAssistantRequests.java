@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ChatGptAssistantRequests extends ChatGptAssistantBase {
-    public static final String KEY_REQUESTS_ASSISTANT_ID = "requestsAssistantId";
-
     public ChatGptAssistantRequests(
             Configuration config,
             ChangeSetData changeSetData,

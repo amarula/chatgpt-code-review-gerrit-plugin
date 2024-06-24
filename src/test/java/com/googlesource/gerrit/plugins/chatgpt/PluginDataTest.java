@@ -1,40 +1,26 @@
 package com.googlesource.gerrit.plugins.chatgpt;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PluginDataTest extends ChatGptTestBase {
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
-
-    @Mock
-    private Path mockPluginDataPath;
-
-    private Path realPluginDataPath;
 
     @Before
     public void setUp() {
-        // Setup temporary folder for tests
-        realPluginDataPath = tempFolder.getRoot().toPath().resolve("global.data");
-        Path realProjectDataPath = tempFolder.getRoot().toPath().resolve(PROJECT_NAME + ".data");
+        setupPluginData();
 
-        // Mock the PluginData annotation behavior
+        // Mock the PluginData annotation global behavior
         when(mockPluginDataPath.resolve("global.data")).thenReturn(realPluginDataPath);
-        when(mockPluginDataPath.resolve(PROJECT_NAME + ".data")).thenReturn(realProjectDataPath);
     }
 
     @Test

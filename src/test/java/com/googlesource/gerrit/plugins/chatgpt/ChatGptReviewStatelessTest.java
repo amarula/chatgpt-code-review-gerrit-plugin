@@ -28,6 +28,7 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 
+import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithNewLine;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.mockito.Mockito.mock;
@@ -124,7 +125,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         String reviewUserPrompt = getReviewUserPrompt();
         chatGptPromptStateless.setCommentEvent(false);
 
-        handleEventBasedOnType(false);
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
         String systemPrompt = prompts.get(0).getAsJsonObject().get("content").getAsString();
@@ -152,7 +153,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseReview.json")));
 
-        handleEventBasedOnType(false);
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
         String userPrompt = prompts.get(1).getAsJsonObject().get("content").getAsString();
@@ -167,7 +168,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         when(globalConfig.getString(Mockito.eq("disabledGroups"), Mockito.anyString()))
                 .thenReturn(GERRIT_USER_GROUP);
 
-        Assert.assertEquals(EventHandlerTask.Result.NOT_SUPPORTED, handleEventBasedOnType(false));
+        Assert.assertEquals(EventHandlerTask.Result.NOT_SUPPORTED, handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED));
     }
 
     @Test
@@ -181,7 +182,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseRequestStateless.json")));
 
-        handleEventBasedOnType(true);
+        handleEventBasedOnType(SupportedEvents.COMMENT_ADDED);
         int commentPropertiesSize = gerritClient.getClientData(getGerritChange()).getCommentProperties().size();
 
         String commentUserPrompt = joinWithNewLine(Arrays.asList(
