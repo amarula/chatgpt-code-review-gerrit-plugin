@@ -25,6 +25,10 @@ public class DynamicConfiguration {
         dynamicConfig.put(key, value);
     }
 
+    public boolean hasConfig() {
+        return !dynamicConfig.isEmpty();
+    }
+
     public void updateConfiguration(boolean modifiedDynamicConfig, boolean shouldResetDynamicConfig) {
         if (dynamicConfig == null || dynamicConfig.isEmpty()) return;
         if (shouldResetDynamicConfig && !modifiedDynamicConfig) {
