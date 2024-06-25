@@ -11,7 +11,7 @@ import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksDynamicSettings;
@@ -25,13 +25,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration.KEY_DYNAMIC_CONFIG;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.MessageSanitizer.sanitizeChatGptMessage;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithDoubleNewLine;
 
 @Slf4j
 public class GerritClientReview extends GerritClientAccount {
-    private final PluginDataHandler pluginDataHandler;
+    private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final Localizer localizer;
     private final DebugCodeBlocksDynamicSettings debugCodeBlocksDynamicSettings;
 
@@ -44,7 +43,7 @@ public class GerritClientReview extends GerritClientAccount {
             Localizer localizer
     ) {
         super(config, accountCache);
-        this.pluginDataHandler = pluginDataHandlerProvider.getChangeScope();
+        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.localizer = localizer;
         debugCodeBlocksDynamicSettings = new DebugCodeBlocksDynamicSettings(localizer);
     }
@@ -106,7 +105,7 @@ public class GerritClientReview extends GerritClientAccount {
 
     private void updateSystemMessage(ReviewInput reviewInput, boolean emptyComments, String systemMessage) {
         List<String> messages = new ArrayList<>();
-        Map<String, String> dynamicConfig = pluginDataHandler.getJsonValue(KEY_DYNAMIC_CONFIG, String.class);
+        Map<String, String> dynamicConfig = new DynamicConfiguration(pluginDataHandlerProvider).getDynamicConfig();
         if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
             messages.add(debugCodeBlocksDynamicSettings.getDebugCodeBlock(dynamicConfig));
         }
