@@ -66,7 +66,7 @@ public class PatchSetReviewer {
         commentProperties = gerritClient.getClientData(change).getCommentProperties();
         gerritCommentRange = new GerritCommentRange(gerritClient, change);
         String patchSet = gerritClient.getPatchSet(change);
-        if (patchSet.isEmpty() && config.getGptMode() == Settings.MODES.stateless) {
+        if (patchSet.isEmpty() && config.getGptMode() == Settings.Modes.stateless) {
             log.info("No file to review has been found in the PatchSet");
             return;
         }

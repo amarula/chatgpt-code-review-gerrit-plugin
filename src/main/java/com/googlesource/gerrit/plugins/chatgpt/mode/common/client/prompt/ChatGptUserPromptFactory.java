@@ -22,7 +22,7 @@ public class ChatGptUserPromptFactory {
             Localizer localizer
     ) {
         if (change.getIsCommentEvent()) {
-            if ((config.getGptMode() == Settings.MODES.stateless)) {
+            if ((config.getGptMode() == Settings.Modes.stateless)) {
                 log.info("ChatGptUserPromptFactory: Returned ChatGptUserPromptRequestsStateless");
                 return new ChatGptUserPromptRequestsStateless(config, changeSetData, gerritClientData, localizer);
             } else {
