@@ -66,7 +66,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
                 isCommentEvent
         );
         chatGptRun.createRun();
-        chatGptRun.pollRun();
+        chatGptRun.pollRunStep();
         // Attribute `requestBody` is valued for testing purposes
         requestBody = chatGptThreadMessage.getAddMessageRequestBody();
         log.debug("ChatGPT request body: {}", requestBody);

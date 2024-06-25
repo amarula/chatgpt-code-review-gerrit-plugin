@@ -18,10 +18,13 @@ import java.net.URI;
 import java.util.*;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils.threadSleep;
 
 @Slf4j
 public class ChatGptRun extends ClientBase {
     private static final int RUN_POLLING_INTERVAL = 1000;
+    private static final int STEP_RETRIEVAL_INTERVAL = 10000;
+    private static final int MAX_STEP_RETRIEVAL_RETRIES = 3;
     private static final Set<String> UNCOMPLETED_STATUSES = new HashSet<>(Arrays.asList(
             "queued",
             "in_progress",
@@ -75,29 +78,23 @@ public class ChatGptRun extends ClientBase {
         log.info("Run created: {}", runResponse);
     }
 
-    public void pollRun() {
-        int pollingCount = 0;
+    public void pollRunStep() {
+        for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
+            int pollingCount = pollRun();
 
-        while (UNCOMPLETED_STATUSES.contains(runResponse.getStatus())) {
-            pollingCount++;
-            log.debug("Polling request #{}", pollingCount);
-            try {
-                Thread.sleep(RUN_POLLING_INTERVAL);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw new RuntimeException("Thread was interrupted", e);
+            Request stepsRequest = getStepsRequest();
+            log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
+
+            String response = httpClient.execute(stepsRequest);
+            stepResponse = getGson().fromJson(response, ChatGptListResponse.class);
+            log.info("Run executed after {} polling requests: {}", pollingCount, stepResponse);
+            if (stepResponse.getData().isEmpty()) {
+                log.warn("Empty response from ChatGPT");
+                threadSleep(STEP_RETRIEVAL_INTERVAL);
+                continue;
             }
-            Request pollRequest = getPollRequest();
-            log.debug("ChatGPT Poll Run request: {}", pollRequest);
-            runResponse = getGson().fromJson(httpClient.execute(pollRequest), ChatGptResponse.class);
-            log.debug("ChatGPT Run response: {}", runResponse);
+            return;
         }
-        Request stepsRequest = getStepsRequest();
-        log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
-
-        String response = httpClient.execute(stepsRequest);
-        stepResponse = getGson().fromJson(response, ChatGptListResponse.class);
-        log.info("Run executed after {} polling requests: {}", pollingCount, stepResponse);
     }
 
     public ChatGptResponseMessage getFirstStepDetails() {
@@ -124,6 +121,21 @@ public class ChatGptRun extends ClientBase {
         catch (Exception e) {
             log.error("Error cancelling run", e);
         }
+    }
+
+    private int pollRun() {
+        int pollingCount = 0;
+
+        while (UNCOMPLETED_STATUSES.contains(runResponse.getStatus())) {
+            pollingCount++;
+            log.debug("Polling request #{}", pollingCount);
+            threadSleep(RUN_POLLING_INTERVAL);
+            Request pollRequest = getPollRequest();
+            log.debug("ChatGPT Poll Run request: {}", pollRequest);
+            runResponse = getGson().fromJson(httpClient.execute(pollRequest), ChatGptResponse.class);
+            log.debug("ChatGPT Run response: {}", runResponse);
+        }
+        return pollingCount;
     }
 
     private ChatGptRunStepsResponse getFirstStep() {
