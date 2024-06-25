@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.MODES;
+import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
 
 @Slf4j
 public class Configuration {
@@ -173,10 +173,10 @@ public class Configuration {
         return getBoolean(KEY_REVIEW_PATCH_SET, DEFAULT_REVIEW_PATCH_SET);
     }
 
-    public MODES getGptMode() {
+    public Modes getGptMode() {
         String mode = getString(KEY_GPT_MODE, DEFAULT_GPT_MODE);
         try {
-            return Enum.valueOf(MODES.class, mode);
+            return Enum.valueOf(Modes.class, mode);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException("Illegal mode: " + mode, e);
         }
