@@ -11,8 +11,11 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFi
 
 @Singleton
 public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider implements Provider<PluginDataHandler> {
+    private static final String PATH_ASSISTANTS = ".assistants";
+
     private final String projectName;
     private final String changeKey;
+    private final String assistantsWorkspace;
 
     @Inject
     public PluginDataHandlerProvider(
@@ -22,6 +25,7 @@ public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider imp
         super(defaultPluginDataPath);
         projectName = sanitizeFilename(change.getProjectName());
         changeKey = change.getChangeKey().toString();
+        assistantsWorkspace = projectName + PATH_ASSISTANTS;
     }
 
     public PluginDataHandler getGlobalScope() {
@@ -34,5 +38,9 @@ public class PluginDataHandlerProvider extends PluginDataHandlerBaseProvider imp
 
     public PluginDataHandler getChangeScope() {
         return super.get(changeKey);
+    }
+
+    public PluginDataHandler getAssistantsWorkspace() {
+        return super.get(assistantsWorkspace);
     }
 }

@@ -62,8 +62,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
                 changeSetData,
                 change,
                 gitRepoFiles,
-                pluginDataHandlerProvider,
-                isCommentEvent
+                pluginDataHandlerProvider
         );
         chatGptRun.createRun();
         chatGptRun.pollRunStep();

@@ -55,6 +55,14 @@ public class PluginDataHandler {
         }
     }
 
+    public synchronized void destroy() {
+        try {
+            Files.deleteIfExists(configFile);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete the config file: " + configFile, e);
+        }
+    }
+
     private void storeProperties() {
         try (var output = Files.newOutputStream(configFile)) {
             configProperties.store(output, null);

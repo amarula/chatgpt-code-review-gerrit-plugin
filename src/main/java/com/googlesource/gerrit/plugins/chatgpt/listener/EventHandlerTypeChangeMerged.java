@@ -5,8 +5,7 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistantBase;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistantReview;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +38,7 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
 
     @Override
     public void processEvent() {
-        ChatGptAssistantBase chatGptAssistant = new ChatGptAssistantBase(
+        ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
                 config,
                 changeSetData,
                 change,

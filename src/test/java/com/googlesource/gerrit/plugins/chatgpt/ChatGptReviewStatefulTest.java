@@ -69,6 +69,8 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         projectHandler = provider.getProjectScope();
         // Mock the pluginDataHandlerProvider to return the mocked project pluginDataHandler
         when(pluginDataHandlerProvider.getProjectScope()).thenReturn(projectHandler);
+        // Mock the pluginDataHandlerProvider to return the mocked assistant pluginDataHandler
+        when(pluginDataHandlerProvider.getAssistantsWorkspace()).thenReturn(projectHandler);
     }
 
     protected void initTest() {

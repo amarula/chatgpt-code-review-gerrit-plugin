@@ -13,12 +13,14 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResou
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
-import lombok.Getter;
+import com.googlesource.gerrit.plugins.chatgpt.utils.HashUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
 import java.net.URI;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
@@ -26,20 +28,20 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFi
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
-public class ChatGptAssistantBase extends ClientBase {
-    protected static final String KEY_REVIEW_ASSISTANT_ID = "reviewAssistantId";
-    protected static final String KEY_REQUESTS_ASSISTANT_ID = "requestsAssistantId";
-
-    @Getter
-    protected String keyAssistantId;
-
+public class ChatGptAssistant extends ClientBase {
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler projectDataHandler;
+    private final PluginDataHandler assistantsDataHandler;
 
-    public ChatGptAssistantBase(
+    private String description;
+    private String instructions;
+    private String model;
+    private Double temperature;
+
+    public ChatGptAssistant(
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
@@ -51,20 +53,25 @@ public class ChatGptAssistantBase extends ClientBase {
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
         this.projectDataHandler = pluginDataHandlerProvider.getProjectScope();
+        this.assistantsDataHandler = pluginDataHandlerProvider.getAssistantsWorkspace();
     }
 
-    public void setupAssistant() {
-        String assistantId = projectDataHandler.getValue(keyAssistantId);
+    public String setupAssistant() {
+        setupAssistantParameters();
+        String assistantIdHashKey = calculateAssistantIdHashKey();
+        log.info("Calculated assistant id hash key: {}", assistantIdHashKey);
+        String assistantId = assistantsDataHandler.getValue(assistantIdHashKey);
         if (assistantId == null || config.getForceCreateAssistant()) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
             String vectorStoreId = createVectorStore();
             assistantId = createAssistant(vectorStoreId);
-            projectDataHandler.setValue(keyAssistantId, assistantId);
+            assistantsDataHandler.setValue(assistantIdHashKey, assistantId);
             log.info("Project assistant created with ID: {}", assistantId);
         }
         else {
             log.info("Project assistant found for the project. Assistant ID: {}", assistantId);
         }
+        return assistantId;
     }
 
     public String createVectorStore() {
@@ -85,8 +92,7 @@ public class ChatGptAssistantBase extends ClientBase {
 
     public void flushAssistantIds() {
         projectDataHandler.removeValue(KEY_VECTOR_STORE_ID);
-        projectDataHandler.removeValue(KEY_REVIEW_ASSISTANT_ID);
-        projectDataHandler.removeValue(KEY_REQUESTS_ASSISTANT_ID);
+        assistantsDataHandler.destroy();
     }
 
     private String uploadRepoFiles() {
@@ -111,8 +117,6 @@ public class ChatGptAssistantBase extends ClientBase {
     private Request createRequest(String vectorStoreId) {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.assistantCreateUri());
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
-        ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, change);
-        ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
         ChatGptTool[] tools = new ChatGptTool[] {
                 new ChatGptTool("file_search"),
                 ChatGptTools.retrieveFormatRepliesTool()
@@ -124,15 +128,34 @@ public class ChatGptAssistantBase extends ClientBase {
         );
         ChatGptCreateAssistantRequestBody requestBody = ChatGptCreateAssistantRequestBody.builder()
                 .name(ChatGptPromptStateful.DEFAULT_GPT_ASSISTANT_NAME)
-                .description(chatGptPromptStateful.getDefaultGptAssistantDescription())
-                .instructions(chatGptPromptStateful.getDefaultGptAssistantInstructions())
-                .model(config.getGptModel())
-                .temperature(chatGptParameters.getGptTemperature())
+                .description(description)
+                .instructions(instructions)
+                .model(model)
+                .temperature(temperature)
                 .tools(tools)
                 .toolResources(toolResources)
                 .build();
         log.debug("ChatGPT Create Assistant request body: {}", requestBody);
 
         return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
+    }
+
+    private void setupAssistantParameters() {
+        ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, change);
+        ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
+
+        description = chatGptPromptStateful.getDefaultGptAssistantDescription();
+        instructions = chatGptPromptStateful.getDefaultGptAssistantInstructions();
+        model = config.getGptModel();
+        temperature = chatGptParameters.getGptTemperature();
+    }
+
+    private String calculateAssistantIdHashKey() {
+        return HashUtils.hashData(new ArrayList<>(List.of(
+                description,
+                instructions,
+                model,
+                temperature.toString()
+        )));
     }
 }
