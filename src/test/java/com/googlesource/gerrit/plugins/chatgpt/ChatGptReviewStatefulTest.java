@@ -13,7 +13,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.Cha
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptListResponse;
-import com.googlesource.gerrit.plugins.chatgpt.settings.Settings.MODES;
+import com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
 import com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -62,7 +62,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
 
         // Mock the Global Config values that differ from the ones provided by Default
         when(globalConfig.getString(Mockito.eq("gptMode"), Mockito.anyString()))
-                .thenReturn(MODES.stateful.name());
+                .thenReturn(Modes.stateful.name());
 
         setupPluginData();
         PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
