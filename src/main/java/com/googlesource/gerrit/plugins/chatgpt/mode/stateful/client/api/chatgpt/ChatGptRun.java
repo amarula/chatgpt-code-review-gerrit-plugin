@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -43,7 +42,7 @@ public class ChatGptRun extends ClientBase {
 
     private ChatGptResponse runResponse;
     private ChatGptListResponse stepResponse;
-    private String keyAssistantId;
+    private String assistantId;
 
     public ChatGptRun(
             String threadId,
@@ -68,8 +67,7 @@ public class ChatGptRun extends ClientBase {
              new ChatGptAssistantRequests(config, changeSetData, change, gitRepoFiles, pluginDataHandlerProvider) :
              new ChatGptAssistantReview(config, changeSetData, change, gitRepoFiles, pluginDataHandlerProvider);
 
-        chatGptAssistant.setupAssistant();
-        keyAssistantId = chatGptAssistant.getKeyAssistantId();
+        assistantId = chatGptAssistant.setupAssistant();
 
         Request request = runCreateRequest();
         log.info("ChatGPT Create Run request: {}", request);
@@ -145,10 +143,8 @@ public class ChatGptRun extends ClientBase {
     private Request runCreateRequest() {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.runsUri(threadId));
         log.debug("ChatGPT Create Run request URI: {}", uri);
-
-        PluginDataHandler projectDataHandler = pluginDataHandlerProvider.getProjectScope();
         ChatGptCreateRunRequest requestBody = ChatGptCreateRunRequest.builder()
-                .assistantId(projectDataHandler.getValue(keyAssistantId))
+                .assistantId(assistantId)
                 .build();
 
         return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);

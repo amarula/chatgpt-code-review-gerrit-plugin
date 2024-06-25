@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
@@ -13,7 +14,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResou
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
@@ -30,13 +30,13 @@ public class ChatGptAssistantBase extends ClientBase {
     protected static final String KEY_REVIEW_ASSISTANT_ID = "reviewAssistantId";
     protected static final String KEY_REQUESTS_ASSISTANT_ID = "requestsAssistantId";
 
-    @Getter
     protected String keyAssistantId;
 
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
+    private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final PluginDataHandler projectDataHandler;
 
     public ChatGptAssistantBase(
@@ -50,21 +50,26 @@ public class ChatGptAssistantBase extends ClientBase {
         this.changeSetData = changeSetData;
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
+        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.projectDataHandler = pluginDataHandlerProvider.getProjectScope();
     }
 
-    public void setupAssistant() {
+    public String setupAssistant() {
         String assistantId = projectDataHandler.getValue(keyAssistantId);
-        if (assistantId == null || config.getForceCreateAssistant()) {
+        boolean isTemporaryAssistant = new DynamicConfiguration(pluginDataHandlerProvider).hasConfig();
+        if (assistantId == null || config.getForceCreateAssistant() || isTemporaryAssistant) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
             String vectorStoreId = createVectorStore();
             assistantId = createAssistant(vectorStoreId);
-            projectDataHandler.setValue(keyAssistantId, assistantId);
+            if (!isTemporaryAssistant) {
+                projectDataHandler.setValue(keyAssistantId, assistantId);
+            }
             log.info("Project assistant created with ID: {}", assistantId);
         }
         else {
             log.info("Project assistant found for the project. Assistant ID: {}", assistantId);
         }
+        return assistantId;
     }
 
     public String createVectorStore() {
