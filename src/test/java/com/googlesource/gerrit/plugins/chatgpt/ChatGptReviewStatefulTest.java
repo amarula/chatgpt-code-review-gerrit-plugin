@@ -14,12 +14,14 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResou
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptListResponse;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings.MODES;
+import com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -139,13 +141,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBody("{\"status\": " + COMPLETED_STATUS + "}")));
 
-        // Mock the behavior of the ChatGPT retrieve-run-steps request
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("chatGptRunStepsResponse.json")));
+        mockRetrieveRunSteps("chatGptRunStepsResponse.json");
 
         // Mock the behavior of the formatted patch request
         formattedPatchContent = readTestFile("__files/stateful/gerritFormattedPatch.txt");
@@ -184,6 +180,16 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         return captor.getAllValues().get(0).comments.get(filename).get(0).message;
     }
 
+    private void mockRetrieveRunSteps(String bodyFile) {
+        // Mock the behavior of the ChatGPT retrieve-run-steps request
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBodyFile(bodyFile)));
+    }
+
     @Test
     public void patchSetCreatedOrUpdated() throws Exception {
         String reviewMessageCode = getReviewMessage( "__files/chatGptRunStepsResponse.json", 0);
@@ -200,17 +206,38 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     }
 
     @Test
+    public void initialEmptyResponse() throws Exception {
+        // To effectively test how an initial empty response from ChatGPT is managed, the following approach is adopted:
+        // 1. the ChatGPT run-steps request is initially mocked to return an empty data field, and
+        // 2. the sleep function is mocked to replace the empty response with a valid one, instead of pausing execution
+        mockRetrieveRunSteps("chatGptRunStepsEmptyResponse.json");
+
+        try (MockedStatic<ThreadUtils> mocked = Mockito.mockStatic(ThreadUtils.class)) {
+            mocked.when(() -> ThreadUtils.threadSleep(Mockito.anyLong())).thenAnswer(invocation -> {
+                mockRetrieveRunSteps("chatGptRunStepsResponse.json");
+                return null;
+            });
+
+            String reviewMessageCode = getReviewMessage("__files/chatGptRunStepsResponse.json", 0);
+            String reviewMessageCommitMessage = getReviewMessage("__files/chatGptRunStepsResponse.json", 1);
+
+            String reviewUserPrompt = chatGptPromptStateful.getDefaultGptThreadReviewMessage(formattedPatchContent);
+
+            handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+            ArgumentCaptor<ReviewInput> captor = testRequestSent();
+            Assert.assertEquals(reviewUserPrompt, requestContent);
+            Assert.assertEquals(reviewMessageCode, getCapturedMessage(captor, "test_file_1.py"));
+            Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
+        }
+    }
+
+    @Test
     public void gptMentionedInComment() throws RestApiException {
         String reviewMessageCommitMessage = getReviewMessage("__files/chatGptResponseRequestStateful.json", 0);
 
         chatGptPromptStateful.setCommentEvent(true);
-        // Mock the behavior of the ChatGPT retrieve-run-steps request
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("chatGptResponseRequestStateful.json")));
+        mockRetrieveRunSteps("chatGptResponseRequestStateful.json");
 
         handleEventBasedOnType(SupportedEvents.COMMENT_ADDED);
 
@@ -224,13 +251,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         String reviewMessageCommitMessage = getReviewMessage("__files/chatGptResponseRequestStateful.json", 0);
 
         chatGptPromptStateful.setCommentEvent(true);
-        // Mock the behavior of the ChatGPT retrieve-run-steps request
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("chatGptResponseRequestMessageStateful.json")));
+        mockRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
         WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
                         + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
                 .willReturn(WireMock.aResponse()
@@ -250,13 +271,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         String reviewMessageCommitMessage = getReviewMessage("__files/chatGptResponseRequestStateful.json", 0);
 
         chatGptPromptStateful.setCommentEvent(true);
-        // Mock the behavior of the ChatGPT retrieve-run-steps request
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile("chatGptResponseRequestMessageStateful.json")));
+        mockRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
         WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
                         + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
                 .willReturn(WireMock.aResponse()
