@@ -157,14 +157,14 @@ public class GerritClientComments extends GerritClientAccount {
             }
             for (GerritComment latestComment : latestComments) {
                 String commentMessage = latestComment.getMessage();
-                if (clientMessage.parseCommands(commentMessage, true)) {
-                    if (clientMessage.isContainingHistoryCommand()) {
-                        clientMessage.processHistoryCommand();
-                    }
-                    commentProperties.clear();
-                    return;
-                }
                 if (clientMessage.isBotAddressed(commentMessage)) {
+                    if (clientMessage.parseCommands(commentMessage, true)) {
+                        if (clientMessage.isContainingHistoryCommand()) {
+                            clientMessage.processHistoryCommand();
+                        }
+                        commentProperties.clear();
+                        return;
+                    }
                     commentProperties.add(latestComment);
                 }
             }
