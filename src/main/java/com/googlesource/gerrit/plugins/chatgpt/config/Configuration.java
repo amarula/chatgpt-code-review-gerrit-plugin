@@ -24,7 +24,7 @@ public class Configuration {
 
     // Default Config values
     public static final String OPENAI_DOMAIN = "https://api.openai.com";
-    public static final String DEFAULT_GPT_MODEL = "gpt-3.5-turbo";
+    public static final String DEFAULT_GPT_MODEL = "gpt-4o";
     public static final double DEFAULT_GPT_REVIEW_TEMPERATURE = 0.2;
     public static final double DEFAULT_GPT_COMMENT_TEMPERATURE = 1.0;
 
