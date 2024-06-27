@@ -40,7 +40,7 @@ Reviews can be also triggered by directing a comment with the `/review` command 
 4. **Verify:** After restarting Gerrit, you can see the following information in Gerrit's logs:
 
    ```bash
-   INFO com.google.gerrit.server.plugins.PluginLoader : Loaded plugin chatgpt-code-review-gerrit-plugin, version 1.0.0
+   INFO com.google.gerrit.server.plugins.PluginLoader : Loaded plugin chatgpt-code-review-gerrit-plugin, version ...
    ```
 
    You can also check the status of the chatgpt-code-review-gerrit-plugin on Gerrit's plugin page as Enabled.
@@ -122,9 +122,38 @@ To add the following content, please edit the `project.config` file in `refs/met
 Please ensure **strict control over the access permissions of `refs/meta/config`** since sensitive information such as
 `gptToken` is configured in the `project.config` file within `refs/meta/config`.
 
+## Stateful and Stateless modes
+
+Starting from version 3, the plugin introduces a new Stateful interaction mode with ChatGPT is available alongside the
+traditional Stateless mode.
+
+### Stateless Mode
+
+In Stateless mode, each request to ChatGPT must include all contextual information and instructions necessary for
+ChatGPT to provide insights, utilizing the **Chat Completion** API calls made available by OpenAI.
+
+### Stateful Mode:
+
+Conversely, Stateful mode uses the **Assistant** resource, recently made available in beta by OpenAI, to maintain a
+richer interaction context. This mode is designed to:
+
+- Leverage ChatGPT Threads to preserve the memory of conversations related to each Change Set.
+- Link these Threads with ChatGPT Assistants that are specialized according to the response needed.
+- Associate the Assistants with the complete Codebase of the Git project related to the Change, which is updated
+each time commits are merged in Gerrit.
+
+The advantages of the Stateful mode over the Stateless are twofold:
+1. To minimize the payload sent to ChatGPT, as it eliminates the need to send contextual information and instructions
+with every single request.
+2. To enhance the quality of responses from ChatGPT by expanding the context to encompass the entire project and
+allowing for the preprocessing of this context along with instructions. This enables ChatGPT to focus more effectively
+on the specific requests made.
+
 ### Optional Parameters
 
-- `gptModel`: The default model is gpt-3.5-turbo. You can also configure it to gpt-3.5-turbo-16k, gpt-4 or gpt-4-32k.
+- `gptMode`: Select whether requests are processed in Stateless or Stateful mode. For backward compatibility, the
+default value is `stateless`. To enable Stateful mode, set this parameter to `stateful`.
+- `gptModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
 - `gptDomain`: The default ChatGPT domain is `https://api.openai.com`.
 - `gptSystemPrompt`: You can modify the default system prompt ("Act as a PatchSet Reviewer") to your preferred prompt.
 - `gptReviewTemperature`: Specifies the temperature setting for ChatGPT when reviewing a Patch Set, with a default
@@ -183,7 +212,12 @@ Please ensure **strict control over the access permissions of `refs/meta/config`
   default, this is set to false, meaning all inline comments are used for generating new responses and identifying
   repetitions. If enabled (true), inline comments from previous Patch Sets are excluded from these considerations.
 - `enableMessageDebugging`: This setting controls the activation of debugging functionalities through messages (default
-  value is false). When set to true, it enables commands and options like `--debug` for users.
+value is false). When set to true, it enables commands and options like `--debug` for users as well as the Dynamic
+Configuration commands.
+- `forceCreateAssistant`: In Stateful mode, forces the creation of a new assistant with each request instead of only
+when configuration settings change or Changes are merged.
+
+  **NOTE**: This option may increase OpenAI API usage and should be used for **testing or debugging purposes only**.
 
 #### Optional Parameters for Global Configuration only
 
