@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptUserPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptDataPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptMessageItem;
@@ -14,17 +14,17 @@ import java.util.List;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
-public class ChatGptUserPrompt {
-    private final IChatGptUserPrompt chatGptUserPromptHandler;
+public class ChatGptDataPrompt {
+    private final IChatGptDataPrompt chatGptDataPromptHandler;
 
-    public ChatGptUserPrompt(
+    public ChatGptDataPrompt(
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
             GerritClientData gerritClientData,
             Localizer localizer
     ) {
-        chatGptUserPromptHandler = ChatGptUserPromptFactory.getChatGptUserPrompt(
+        chatGptDataPromptHandler = ChatGptPromptFactory.getChatGptDataPrompt(
                 config,
                 changeSetData,
                 change,
@@ -34,10 +34,10 @@ public class ChatGptUserPrompt {
     }
 
     public String buildPrompt() {
-        for (int i = 0; i < chatGptUserPromptHandler.getCommentProperties().size(); i++) {
-            chatGptUserPromptHandler.addMessageItem(i);
+        for (int i = 0; i < chatGptDataPromptHandler.getCommentProperties().size(); i++) {
+            chatGptDataPromptHandler.addMessageItem(i);
         }
-        List<ChatGptMessageItem> messageItems = chatGptUserPromptHandler.getMessageItems();
+        List<ChatGptMessageItem> messageItems = chatGptDataPromptHandler.getMessageItems();
         return messageItems.isEmpty() ? "" : getGson().toJson(messageItems);
     }
 }

@@ -51,16 +51,16 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
 
     public String getGptUserPrompt(ChangeSetData changeSetData, String patchSet) {
         List<String> prompt = new ArrayList<>();
-        String gptRequestUserPrompt = changeSetData.getGptRequestUserPrompt();
-        boolean isValidRequestUserPrompt = gptRequestUserPrompt != null && !gptRequestUserPrompt.isEmpty();
-        if (isCommentEvent && isValidRequestUserPrompt) {
-            log.debug("Request User Prompt retrieved: {}", gptRequestUserPrompt);
+        String gptRequestDataPrompt = changeSetData.getGptDataPrompt();
+        boolean isValidRequestDataPrompt = gptRequestDataPrompt != null && !gptRequestDataPrompt.isEmpty();
+        if (isCommentEvent && isValidRequestDataPrompt) {
+            log.debug("Request User Prompt retrieved: {}", gptRequestDataPrompt);
             prompt.addAll(Arrays.asList(
                     DEFAULT_GPT_REQUEST_PROMPT_DIFF,
                     patchSet,
                     DEFAULT_GPT_REQUEST_PROMPT_REQUESTS,
-                    gptRequestUserPrompt,
-                    getCommentRequestUserPrompt(changeSetData.getCommentPropertiesSize())
+                    gptRequestDataPrompt,
+                    getCommentRequestPrompt(changeSetData.getCommentPropertiesSize())
             ));
         }
         else {
@@ -68,9 +68,9 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
             prompt.addAll(getReviewSteps());
             prompt.add(ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_DIFF);
             prompt.add(patchSet);
-            if (isValidRequestUserPrompt) {
+            if (isValidRequestDataPrompt) {
                 prompt.add(ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY);
-                prompt.add(gptRequestUserPrompt);
+                prompt.add(gptRequestDataPrompt);
             }
             if (!changeSetData.getDirectives().isEmpty()) {
                 prompt.add(DEFAULT_GPT_REVIEW_PROMPT_DIRECTIVES);
@@ -83,7 +83,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
     private void loadStatelessPrompts() {
         // Avoid repeated loading of prompt constants
         if (DEFAULT_GPT_SYSTEM_PROMPT_INPUT_DESCRIPTION == null) {
-            loadPrompts("promptsStateless");
+            loadDefaultPrompts("promptsStateless");
         }
     }
 
@@ -92,7 +92,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
                 joinWithSpace(new ArrayList<>(List.of(
                         DEFAULT_GPT_REVIEW_PROMPT_REVIEW,
                         DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
-                        getPatchSetReviewUserPrompt()
+                        getPatchSetReviewPrompt()
                 )))
         ));
         if (config.getGptReviewCommitMessages()) {

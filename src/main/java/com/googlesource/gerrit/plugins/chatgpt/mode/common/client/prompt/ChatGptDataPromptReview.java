@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptUserPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptDataPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptMessageItem;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptRequestMessage;
@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class ChatGptUserPromptReview extends ChatGptUserPromptBase implements IChatGptUserPrompt {
-    public ChatGptUserPromptReview(
+public class ChatGptDataPromptReview extends ChatGptDataPromptBase implements IChatGptDataPrompt {
+    public ChatGptDataPromptReview(
             Configuration config,
             ChangeSetData changeSetData,
             GerritClientData gerritClientData,

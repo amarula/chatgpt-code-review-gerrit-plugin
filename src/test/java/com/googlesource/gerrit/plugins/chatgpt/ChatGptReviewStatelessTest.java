@@ -111,7 +111,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT,
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_REVIEW + " " +
                         ChatGptPromptStateless.DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT + " " +
-                        chatGptPromptStateless.getPatchSetReviewUserPrompt(),
+                        chatGptPromptStateless.getPatchSetReviewPrompt(),
                 ChatGptPromptStateless.getReviewPromptCommitMessages(),
                 ChatGptPromptStateless.DEFAULT_GPT_REVIEW_PROMPT_DIFF,
                 diffContent,
@@ -190,7 +190,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
                 diffContent,
                 ChatGptPromptStateless.DEFAULT_GPT_REQUEST_PROMPT_REQUESTS,
                 readTestFile("__files/stateless/chatGptExpectedRequestMessage.json"),
-                ChatGptPromptStateless.getCommentRequestUserPrompt(commentPropertiesSize)
+                ChatGptPromptStateless.getCommentRequestPrompt(commentPropertiesSize)
         ));
         testRequestSent();
         String userPrompt = prompts.get(1).getAsJsonObject().get("content").getAsString();

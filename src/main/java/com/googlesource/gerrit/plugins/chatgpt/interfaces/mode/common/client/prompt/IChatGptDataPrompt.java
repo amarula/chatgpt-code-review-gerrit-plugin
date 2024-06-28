@@ -5,7 +5,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.Gerr
 
 import java.util.List;
 
-public interface IChatGptUserPrompt {
+public interface IChatGptDataPrompt {
     void addMessageItem(int i);
     List<GerritComment> getCommentProperties();
     List<ChatGptMessageItem> getMessageItems();

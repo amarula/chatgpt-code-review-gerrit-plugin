@@ -4,7 +4,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptUserPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptDataPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
@@ -22,7 +22,7 @@ public class ChangeSetDataHandler {
             Localizer localizer
     ) {
         GerritClientData gerritClientData = gerritClient.getClientData(change);
-        ChatGptUserPrompt chatGptUserPrompt = new ChatGptUserPrompt(
+        ChatGptDataPrompt chatGptDataPrompt = new ChatGptDataPrompt(
                 config,
                 changeSetData,
                 change,
@@ -32,7 +32,7 @@ public class ChangeSetDataHandler {
         changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
         changeSetData.setDirectives(new HashSet<>());
         changeSetData.setReviewSystemMessage(null);
-        changeSetData.setGptRequestUserPrompt(chatGptUserPrompt.buildPrompt());
+        changeSetData.setGptDataPrompt(chatGptDataPrompt.buildPrompt());
         if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
             GerritPermittedVotingRange permittedVotingRange = gerritClient.getPermittedVotingRange(change);
             if (permittedVotingRange != null) {

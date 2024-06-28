@@ -55,7 +55,7 @@ public class ChatGptPrompt {
         this.config = config;
         // Avoid repeated loading of prompt constants
         if (DEFAULT_GPT_SYSTEM_PROMPT == null) {
-            loadPrompts("prompts");
+            loadDefaultPrompts("prompts");
         }
     }
 
@@ -64,7 +64,7 @@ public class ChatGptPrompt {
         this.isCommentEvent = isCommentEvent;
     }
 
-    public static String getCommentRequestUserPrompt(int commentPropertiesSize) {
+    public static String getCommentRequestPrompt(int commentPropertiesSize) {
         return joinWithSpace(new ArrayList<>(List.of(
                 DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
                 buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES),
@@ -77,7 +77,7 @@ public class ChatGptPrompt {
         return String.format(DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES, DEFAULT_GPT_HOW_TO_FIND_COMMIT_MESSAGE);
     }
 
-    protected void loadPrompts(String promptFilename) {
+    protected void loadDefaultPrompts(String promptFilename) {
         String promptFile = String.format("config/%s.json", promptFilename);
         Class<? extends ChatGptPrompt> me = this.getClass();
         try (InputStreamReader reader = FileUtils.getInputStreamReader(promptFile)) {
@@ -119,7 +119,7 @@ public class ChatGptPrompt {
         );
     }
 
-    public String getPatchSetReviewUserPrompt() {
+    public String getPatchSetReviewPrompt() {
         List<String> attributes = new ArrayList<>(PATCH_SET_REVIEW_REPLY_ATTRIBUTES);
         if (config.isVotingEnabled() || config.getFilterNegativeComments()) {
             updateScoreDescription();

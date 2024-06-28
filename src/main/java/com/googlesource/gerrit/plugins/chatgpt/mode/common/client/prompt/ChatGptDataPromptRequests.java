@@ -13,11 +13,11 @@ import java.util.List;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.CHAT_GPT_ROLE_USER;
 
 @Slf4j
-public class ChatGptUserPromptRequests extends ChatGptUserPromptBase {
+public class ChatGptDataPromptRequests extends ChatGptDataPromptBase {
     protected ChatGptMessageItem messageItem;
     protected List<ChatGptRequestMessage> messageHistory;
 
-    public ChatGptUserPromptRequests(
+    public ChatGptDataPromptRequests(
             Configuration config,
             ChangeSetData changeSetData,
             GerritClientData gerritClientData,

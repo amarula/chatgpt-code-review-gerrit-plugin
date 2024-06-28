@@ -35,7 +35,7 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
         this.isCommentEvent = change.getIsCommentEvent();
         // Avoid repeated loading of prompt constants
         if (DEFAULT_GPT_ASSISTANT_NAME == null) {
-            loadPrompts("promptsStateful");
+            loadDefaultPrompts("promptsStateful");
         }
     }
 
@@ -51,13 +51,13 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
         if (change.getIsCommentEvent()) {
             instructions.addAll(List.of(
                     DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS,
-                    getCommentRequestUserPrompt(changeSetData.getCommentPropertiesSize())
+                    getCommentRequestPrompt(changeSetData.getCommentPropertiesSize())
             ));
         }
         else {
             instructions.addAll(List.of(
                     getGptAssistantInstructionsReview(),
-                    getPatchSetReviewUserPrompt()
+                    getPatchSetReviewPrompt()
             ));
             if (config.getGptReviewCommitMessages()) {
                 instructions.add(getReviewPromptCommitMessages());
@@ -67,19 +67,19 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
     }
 
     public String getDefaultGptThreadReviewMessage(String patchSet) {
-        String gptRequestUserPrompt = getGptRequestUserPrompt();
-        if (gptRequestUserPrompt != null && !gptRequestUserPrompt.isEmpty()) {
-            log.debug("Request User Prompt retrieved: {}", gptRequestUserPrompt);
-            return gptRequestUserPrompt;
+        String gptRequestDataPrompt = getGptRequestDataPrompt();
+        if (gptRequestDataPrompt != null && !gptRequestDataPrompt.isEmpty()) {
+            log.debug("Request User Prompt retrieved: {}", gptRequestDataPrompt);
+            return gptRequestDataPrompt;
         }
         else {
             return String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
         }
     }
 
-    private String getGptRequestUserPrompt() {
+    private String getGptRequestDataPrompt() {
         if (changeSetData == null || !isCommentEvent) return null;
-        return changeSetData.getGptRequestUserPrompt();
+        return changeSetData.getGptDataPrompt();
     }
 
     private String getGptAssistantInstructionsReview() {

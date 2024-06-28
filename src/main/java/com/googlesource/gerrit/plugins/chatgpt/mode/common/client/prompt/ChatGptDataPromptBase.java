@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptUserPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptDataPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.code.InlineCode;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Slf4j
-public abstract class ChatGptUserPromptBase implements IChatGptUserPrompt {
+public abstract class ChatGptDataPromptBase implements IChatGptDataPrompt {
     protected final GerritClientData gerritClientData;
     protected final HashMap<String, FileDiffProcessed> fileDiffsProcessed;
     protected final CommentData commentData;
@@ -30,7 +30,7 @@ public abstract class ChatGptUserPromptBase implements IChatGptUserPrompt {
     @Getter
     protected List<GerritComment> commentProperties;
 
-    public ChatGptUserPromptBase(
+    public ChatGptDataPromptBase(
             Configuration config,
             ChangeSetData changeSetData,
             GerritClientData gerritClientData,

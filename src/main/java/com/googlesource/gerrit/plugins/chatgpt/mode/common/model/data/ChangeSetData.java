@@ -14,7 +14,7 @@ import java.util.Set;
 public class ChangeSetData {
     @NonNull
     private Integer gptAccountId;
-    private String gptRequestUserPrompt;
+    private String gptDataPrompt;
     private Integer commentPropertiesSize;
     @NonNull
     private Integer votingMinScore;

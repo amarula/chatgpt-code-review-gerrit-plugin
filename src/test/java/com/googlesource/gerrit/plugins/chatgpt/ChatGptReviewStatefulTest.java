@@ -197,12 +197,12 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         String reviewMessageCode = getReviewMessage( "__files/chatGptRunStepsResponse.json", 0);
         String reviewMessageCommitMessage = getReviewMessage( "__files/chatGptRunStepsResponse.json", 1);
 
-        String reviewUserPrompt = chatGptPromptStateful.getDefaultGptThreadReviewMessage(formattedPatchContent);
+        String reviewPrompt = chatGptPromptStateful.getDefaultGptThreadReviewMessage(formattedPatchContent);
 
         handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
-        Assert.assertEquals(reviewUserPrompt, requestContent);
+        Assert.assertEquals(reviewPrompt, requestContent);
         Assert.assertEquals(reviewMessageCode, getCapturedMessage(captor, "test_file_1.py"));
         Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
     }
@@ -223,12 +223,12 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
             String reviewMessageCode = getReviewMessage("__files/chatGptRunStepsResponse.json", 0);
             String reviewMessageCommitMessage = getReviewMessage("__files/chatGptRunStepsResponse.json", 1);
 
-            String reviewUserPrompt = chatGptPromptStateful.getDefaultGptThreadReviewMessage(formattedPatchContent);
+            String reviewPrompt = chatGptPromptStateful.getDefaultGptThreadReviewMessage(formattedPatchContent);
 
             handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
             ArgumentCaptor<ReviewInput> captor = testRequestSent();
-            Assert.assertEquals(reviewUserPrompt, requestContent);
+            Assert.assertEquals(reviewPrompt, requestContent);
             Assert.assertEquals(reviewMessageCode, getCapturedMessage(captor, "test_file_1.py"));
             Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
         }
