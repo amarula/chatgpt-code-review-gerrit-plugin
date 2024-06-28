@@ -1,12 +1,12 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptRequestMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptThreadMessageResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import okhttp3.Request;
 
 import java.net.URI;
 
+import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
@@ -78,7 +79,7 @@ public class ChatGptThreadMessage extends ClientBase {
     private Request addMessageRequest() {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.threadMessagesUri(threadId));
         log.debug("ChatGPT Add Message request URI: {}", uri);
-        ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, change);
+        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, change);
         addMessageRequestBody = ChatGptRequestMessage.builder()
                 .role("user")
                 .content(chatGptPromptStateful.getDefaultGptThreadReviewMessage(patchSet))

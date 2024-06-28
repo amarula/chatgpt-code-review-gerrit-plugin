@@ -9,9 +9,9 @@ import com.google.gerrit.extensions.restapi.BinaryResult;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptListResponse;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
 import com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils;
@@ -30,6 +30,7 @@ import java.io.ByteArrayInputStream;
 import java.net.URI;
 
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptRun.COMPLETED_STATUS;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
@@ -49,7 +50,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
     private static final String CHAT_GPT_RUN_ID = "run_TEST_RUN_ID";
 
     private String formattedPatchContent;
-    private ChatGptPromptStateful chatGptPromptStateful;
+    private IChatGptPromptStateful chatGptPromptStateful;
     private String requestContent;
     private PluginDataHandler projectHandler;
 
@@ -77,7 +78,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         super.initTest();
 
         // Load the prompts
-        chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, getGerritChange());
+        chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, getGerritChange());
     }
 
     protected void setupMockRequests() throws RestApiException {

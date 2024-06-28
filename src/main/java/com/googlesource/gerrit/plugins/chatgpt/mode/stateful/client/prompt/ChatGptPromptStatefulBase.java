@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -11,24 +12,18 @@ import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
-
 @Slf4j
-public class ChatGptPromptStateful extends ChatGptPrompt {
-    private static final String RULE_NUMBER_PREFIX = "RULE #";
-
+public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements IChatGptPromptStateful {
     public static String DEFAULT_GPT_ASSISTANT_NAME;
     public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY;
     public static String DEFAULT_GPT_MESSAGE_REVIEW;
 
-    private final ChangeSetData changeSetData;
+    protected final ChangeSetData changeSetData;
+
     private final GerritChange change;
 
-    public ChatGptPromptStateful(Configuration config, ChangeSetData changeSetData, GerritChange change) {
+    public ChatGptPromptStatefulBase(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config);
         this.changeSetData = changeSetData;
         this.change = change;
@@ -43,26 +38,17 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
         return String.format(DEFAULT_GPT_ASSISTANT_DESCRIPTION, change.getProjectName());
     }
 
+    public abstract void addGptAssistantInstructions(List<String> instructions);
+
+    public abstract String getGptRequestDataPrompt();
+
     public String getDefaultGptAssistantInstructions() {
         List<String> instructions = new ArrayList<>(List.of(
                 DEFAULT_GPT_SYSTEM_PROMPT + DOT,
                 String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName())
         ));
-        if (change.getIsCommentEvent()) {
-            instructions.addAll(List.of(
-                    DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS,
-                    getCommentRequestPrompt(changeSetData.getCommentPropertiesSize())
-            ));
-        }
-        else {
-            instructions.addAll(List.of(
-                    getGptAssistantInstructionsReview(),
-                    getPatchSetReviewPrompt()
-            ));
-            if (config.getGptReviewCommitMessages()) {
-                instructions.add(getReviewPromptCommitMessages());
-            }
-        }
+        addGptAssistantInstructions(instructions);
+
         return joinWithSpace(instructions);
     }
 
@@ -75,21 +61,5 @@ public class ChatGptPromptStateful extends ChatGptPrompt {
         else {
             return String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
         }
-    }
-
-    private String getGptRequestDataPrompt() {
-        if (changeSetData == null || !isCommentEvent) return null;
-        return changeSetData.getGptDataPrompt();
-    }
-
-    private String getGptAssistantInstructionsReview() {
-        return String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW, joinWithNewLine(getNumberedList(
-                new ArrayList<>(List.of(
-                        DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE,
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY
-                )),
-                RULE_NUMBER_PREFIX, COLON_SPACE
-        )));
     }
 }

@@ -3,6 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptParameters;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
@@ -11,7 +12,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.Cha
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStatefulBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
 import com.googlesource.gerrit.plugins.chatgpt.utils.HashUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFilename;
@@ -127,7 +129,7 @@ public class ChatGptAssistant extends ClientBase {
                 )
         );
         ChatGptCreateAssistantRequestBody requestBody = ChatGptCreateAssistantRequestBody.builder()
-                .name(ChatGptPromptStateful.DEFAULT_GPT_ASSISTANT_NAME)
+                .name(ChatGptPromptStatefulBase.DEFAULT_GPT_ASSISTANT_NAME)
                 .description(description)
                 .instructions(instructions)
                 .model(model)
@@ -141,7 +143,7 @@ public class ChatGptAssistant extends ClientBase {
     }
 
     private void setupAssistantParameters() {
-        ChatGptPromptStateful chatGptPromptStateful = new ChatGptPromptStateful(config, changeSetData, change);
+        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, change);
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
 
         description = chatGptPromptStateful.getDefaultGptAssistantDescription();

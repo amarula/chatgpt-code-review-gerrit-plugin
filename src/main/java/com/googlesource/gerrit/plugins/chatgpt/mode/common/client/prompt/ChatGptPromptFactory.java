@@ -2,17 +2,34 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptDataPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptDataPromptRequestsStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStatefulRequests;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStatefulReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptDataPromptRequestsStateless;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ChatGptPromptFactory {
+
+    public static IChatGptPromptStateful getChatGptPromptStateful(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change
+    ) {
+        if (change.getIsCommentEvent()) {
+            log.info("ChatGptPromptFactory: Returned ChatGptPromptStatefulRequests");
+            return new ChatGptPromptStatefulRequests(config, changeSetData, change);
+        } else {
+            log.info("ChatGptPromptFactory: Returned ChatGptPromptStatefulReview");
+            return new ChatGptPromptStatefulReview(config, changeSetData, change);
+        }
+    }
 
     public static IChatGptDataPrompt getChatGptDataPrompt(
             Configuration config,
