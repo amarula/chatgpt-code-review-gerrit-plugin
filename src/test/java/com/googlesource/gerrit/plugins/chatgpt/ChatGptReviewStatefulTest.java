@@ -28,7 +28,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
+import java.util.Collections;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptRun.COMPLETED_STATUS;
@@ -131,6 +133,7 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         // Mock the behavior of the ChatGPT create-run request
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
                         + UriResourceLocatorStateful.runsUri(CHAT_GPT_THREAD_ID)).getPath()))
+                .withRequestBody(equalToJson(getJsonAssistantId(CHAT_GPT_ASSISTANT_ID), true, true))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -170,6 +173,10 @@ public class ChatGptReviewStatefulTest extends ChatGptReviewTestBase {
         ArgumentCaptor<ReviewInput> reviewInputCaptor = super.testRequestSent();
         requestContent = gptRequestBody.getAsJsonObject().get("content").getAsString();
         return reviewInputCaptor;
+    }
+
+    private String getJsonAssistantId(String assistantId) {
+        return getGson().toJson(Collections.singletonMap("assistant_id", assistantId));
     }
 
     private String getReviewMessage(String responseFile, int tollCallId) {
