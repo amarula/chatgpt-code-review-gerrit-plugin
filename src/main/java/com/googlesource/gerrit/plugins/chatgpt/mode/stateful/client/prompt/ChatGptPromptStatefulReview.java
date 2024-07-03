@@ -23,6 +23,7 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET;
 
     public ChatGptPromptStatefulReview(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config, changeSetData, change);
@@ -59,7 +60,8 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
         ArrayList<String> rules = new ArrayList<>(List.of(
                 DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE,
-                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY,
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET
         ));
         return joinWithNewLine(getNumberedList(
                 IntStream.range(0, rules.size())

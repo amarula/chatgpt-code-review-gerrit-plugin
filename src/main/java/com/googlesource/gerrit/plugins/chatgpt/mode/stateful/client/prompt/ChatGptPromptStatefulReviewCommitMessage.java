@@ -27,7 +27,7 @@ public class ChatGptPromptStatefulReviewCommitMessage extends ChatGptPromptState
         instructions.addAll(List.of(
                 joinWithNewLine(new ArrayList<>(List.of(
                         DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES,
-                        getGptAssistantInstructionsReview(true, false, true),
+                        getGptAssistantInstructionsReview(true, false, true, false),
                         DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES
                 ))),
                 DEFAULT_GPT_REVIEW_PROMPT_INSTRUCTIONS_COMMIT_MESSAGES,
