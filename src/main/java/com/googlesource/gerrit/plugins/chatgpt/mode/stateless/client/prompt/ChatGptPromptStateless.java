@@ -81,10 +81,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
     }
 
     private void loadStatelessPrompts() {
-        // Avoid repeated loading of prompt constants
-        if (DEFAULT_GPT_SYSTEM_PROMPT_INPUT_DESCRIPTION == null) {
-            loadDefaultPrompts("promptsStateless");
-        }
+        loadDefaultPrompts("promptsStateless");
     }
 
     private List<String> getReviewSteps() {

@@ -203,6 +203,13 @@ default value is `stateless`. To enable Stateful mode, set this parameter to `st
   inviting further discussion. If activated, it marks ChatGPT's Patch Set comments as resolved.
 - `inlineCommentsAsResolved`: Initially set to false, this option leaves ChatGPT's inline comments as unresolved,
   inviting further discussion. If activated, it marks ChatGPT's inline comments as resolved.
+- `taskSpecificAssistants`: In `stateful` mode, this option allows for dividing the Patch Set review between two
+  specialized assistants: one focused to the Patch's code and another to the commit message. When this option is set to
+  false (default value), the Patch Set review is unified into one single request processed by one assistant instructed for
+  both tasks.
+
+  **NOTE**: Enabling this feature may result in duplicate requests to ChatGPT, potentially increasing the usage costs of
+  the OpenAI API.
 - `votingMinScore`: The lowest possible score that can be given to a Patch Set (Default value: -1).
 - `votingMaxScore`: The highest possible score that can be given to a Patch Set (Default value: +1).
 - `ignoreResolvedChatGptComments`: Determines if resolved comments from ChatGPT should be disregarded. The default

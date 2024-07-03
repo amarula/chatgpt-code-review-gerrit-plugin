@@ -15,14 +15,13 @@ import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_C
 public class GerritClientPatchSetHelper {
     private static final Pattern EXTRACT_B_FILENAMES_FROM_PATCH_SET = Pattern.compile("^diff --git .*? b/(.*)$",
             Pattern.MULTILINE);
+    private static final String GERRIT_COMMIT_MESSAGE_PATTERN = "^.*?" + GERRIT_COMMIT_MESSAGE_PREFIX +
+            "(?:\\[[^\\]]+\\] )?";
 
     public static String filterPatchWithCommitMessage(String formattedPatch) {
         // Remove Patch heading up to the Date annotation, so that the commit message is included. Additionally, remove
         // the change type between brackets
-        Pattern CONFIG_ID_HEADING_PATTERN = Pattern.compile(
-                "^.*?" + GERRIT_COMMIT_MESSAGE_PREFIX + "(?:\\[[^\\]]+\\] )?",
-                Pattern.DOTALL
-        );
+        Pattern CONFIG_ID_HEADING_PATTERN = Pattern.compile(GERRIT_COMMIT_MESSAGE_PATTERN, Pattern.DOTALL);
         return CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch).replaceAll(GERRIT_COMMIT_MESSAGE_PREFIX);
     }
 
@@ -33,6 +32,21 @@ public class GerritClientPatchSetHelper {
                 Pattern.DOTALL
         );
         return CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch).replaceAll("");
+    }
+
+    public static String filterCommitMessage(String formattedPatch) {
+        // Extract commit message from formatted patch
+        Pattern CONFIG_ID_HEADING_PATTERN = Pattern.compile(GERRIT_COMMIT_MESSAGE_PATTERN + "(.*?)" +
+                        COMMIT_MESSAGE_FILTER_OUT_PREFIXES.get("CHANGE_ID"),
+                Pattern.DOTALL
+        );
+        Matcher commitMessageMatcher = CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch);
+        if (commitMessageMatcher.find()) {
+            return commitMessageMatcher.group(1).trim();
+        }
+        else {
+            throw new RuntimeException("Commit message not found in patch set: " + formattedPatch);
+        }
     }
 
     public static List<String> extractFilesFromPatch(String formattedPatch) {

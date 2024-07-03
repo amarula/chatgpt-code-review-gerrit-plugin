@@ -39,6 +39,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStatefulTaskSpecific;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptClientStateless;
@@ -389,7 +390,9 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
 
     private IChatGptClient getChatGptClient() {
         return switch (config.getGptMode()) {
-            case stateful -> new ChatGptClientStateful(config, gitRepoFiles, pluginDataHandlerProvider);
+            case stateful -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
+                    new ChatGptClientStatefulTaskSpecific(config, gitRepoFiles, pluginDataHandlerProvider):
+                    new ChatGptClientStateful(config, gitRepoFiles, pluginDataHandlerProvider);
             case stateless -> new ChatGptClientStateless(config);
         };
     }
