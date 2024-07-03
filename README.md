@@ -32,10 +32,10 @@ Reviews can be also triggered by directing a comment with the `/review` command 
 - `gptToken`: OpenAI GPT token.
 - `gerritUserName`: Gerrit username of ChatGPT user.
 - `globalEnable`: Default value is false. The plugin will only review specified repositories. If set to true, the plugin
-   will by default review all pull requests.
+  will by default review all pull requests.
 
-   For enhanced security, consider storing sensitive information like gptToken in a secure location
-   or file. Detailed instructions on how to do this will be provided later in this document.
+  For enhanced security, consider storing sensitive information like gptToken in a secure location
+  or file. Detailed instructions on how to do this will be provided later in this document.
 
 4. **Verify:** After restarting Gerrit, you can see the following information in Gerrit's logs:
 
@@ -140,19 +140,23 @@ richer interaction context. This mode is designed to:
 - Leverage ChatGPT Threads to preserve the memory of conversations related to each Change Set.
 - Link these Threads with ChatGPT Assistants that are specialized according to the response needed.
 - Associate the Assistants with the complete Codebase of the Git project related to the Change, which is updated
-each time commits are merged in Gerrit.
+  each time commits are merged in Gerrit.
 
 The advantages of the Stateful mode over the Stateless are twofold:
-1. To minimize the payload sent to ChatGPT, as it eliminates the need to send contextual information and instructions
-with every single request.
-2. To enhance the quality of responses from ChatGPT by expanding the context to encompass the entire project and
-allowing for the preprocessing of this context along with instructions. This enables ChatGPT to focus more effectively
-on the specific requests made.
 
-### Optional Parameters
+1. To minimize the payload sent to ChatGPT, as it eliminates the need to send contextual information and instructions
+   with every single request.
+2. To enhance the quality of responses from ChatGPT by expanding the context to encompass the entire project and
+   allowing for the preprocessing of this context along with instructions. This enables ChatGPT to focus more
+   effectively
+   on the specific requests made.
+
+## Optional Parameters
+
+### Optional Parameters Common to Both Modes
 
 - `gptMode`: Select whether requests are processed in Stateless or Stateful mode. For backward compatibility, the
-default value is `stateless`. To enable Stateful mode, set this parameter to `stateful`.
+  default value is `stateless`. To enable Stateful mode, set this parameter to `stateful`.
 - `gptModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
 - `gptDomain`: The default ChatGPT domain is `https://api.openai.com`.
 - `gptSystemPrompt`: You can modify the default system prompt ("Act as a PatchSet Reviewer") to your preferred prompt.
@@ -165,13 +169,6 @@ default value is `stateless`. To enable Stateful mode, set this parameter to `st
   they are created or updated.
 - `gptReviewCommitMessages`: The default value is true. When enabled, this option also verifies if the commit message
   matches with the content of the Change Set.
-- `gptFullFileReview`: Enabled by default. Activating this option sends both unchanged lines and changes to ChatGPT for
-  review, offering additional context information. Deactivating it (set to false) results in only the changed lines
-  being submitted for review.
-- `gptStreamOutput`: The default value is false. Whether the response is expected in stream output mode or not.
-- `maxReviewLines`: The default value is 1000. This sets a limit on the number of lines of code included in the review.
-- `maxReviewFileSize`: Set with a default value of 10000, this parameter establishes a cap on the file size that can be
-  included in reviews.
 - `enabledUsers`: By default, every user is enabled to have their Patch Sets and comments reviewed. To limit review
   capabilities to specific users, list their usernames in this setting, separated by commas.
 - `disabledUsers`: Functions oppositely to enabledUsers.
@@ -188,6 +185,8 @@ default value is `stateless`. To enable Stateful mode, set this parameter to `st
   .sh, .vb, .bat".
 - `enabledVoting`: Initially disabled (false). If set to true, allows ChatGPT to cast a vote on each reviewed Patch Set
   by assigning a score.
+- `votingMinScore`: The lowest possible score that can be given to a Patch Set (Default value: -1).
+- `votingMaxScore`: The highest possible score that can be given to a Patch Set (Default value: +1).
 - `filterNegativeComments`: Activated by default (true), ensuring only negative review comments (scored below the
   `filterCommentsBelowScore` threshold outlined further) are displayed. Disabling this setting (false) will
   also show positive and neutral comments.
@@ -203,30 +202,41 @@ default value is `stateless`. To enable Stateful mode, set this parameter to `st
   inviting further discussion. If activated, it marks ChatGPT's Patch Set comments as resolved.
 - `inlineCommentsAsResolved`: Initially set to false, this option leaves ChatGPT's inline comments as unresolved,
   inviting further discussion. If activated, it marks ChatGPT's inline comments as resolved.
-- `taskSpecificAssistants`: In `stateful` mode, this option allows for dividing the Patch Set review between two
-  specialized assistants: one focused to the Patch's code and another to the commit message. When this option is set to
-  false (default value), the Patch Set review is unified into one single request processed by one assistant instructed for
-  both tasks.
+- `enableMessageDebugging`: This setting controls the activation of debugging functionalities through messages (default
+  value is false). When set to true, it enables commands and options like `--debug` for users as well as the Dynamic
+  Configuration commands.
 
-  **NOTE**: Enabling this feature may result in duplicate requests to ChatGPT, potentially increasing the usage costs of
-  the OpenAI API.
-- `votingMinScore`: The lowest possible score that can be given to a Patch Set (Default value: -1).
-- `votingMaxScore`: The highest possible score that can be given to a Patch Set (Default value: +1).
+### Optional Parameters Specific to Stateless Mode
+
+- `gptFullFileReview`: Enabled by default. Activating this option sends both unchanged lines and changes to ChatGPT for
+  review, offering additional context information. Deactivating it (set to false) results in only the changed lines
+  being submitted for review.
+- `gptStreamOutput`: The default value is false. Whether the response is expected in stream output mode or not.
 - `ignoreResolvedChatGptComments`: Determines if resolved comments from ChatGPT should be disregarded. The default
   setting is true, which means resolved ChatGPT comments are not used for generating new comments or identifying
   duplicate content. If set to false, resolved ChatGPT comments are factored into these processes.
 - `ignoreOutdatedInlineComments`: Determines if inline comments made on non-latest Patch Sets should be disregarded. By
   default, this is set to false, meaning all inline comments are used for generating new responses and identifying
   repetitions. If enabled (true), inline comments from previous Patch Sets are excluded from these considerations.
-- `enableMessageDebugging`: This setting controls the activation of debugging functionalities through messages (default
-value is false). When set to true, it enables commands and options like `--debug` for users as well as the Dynamic
-Configuration commands.
-- `forceCreateAssistant`: In Stateful mode, forces the creation of a new assistant with each request instead of only
-when configuration settings change or Changes are merged.
+- `maxReviewLines`: The default value is 1000. This sets a limit on the number of lines of code included in the review.
+- `maxReviewFileSize`: Set with a default value of 10000, this parameter establishes a cap on the file size that can be
+  included in reviews.
 
-  **NOTE**: This option may increase OpenAI API usage and should be used for **testing or debugging purposes only**.
+### Optional Parameters Specific to Stateful Mode
 
-#### Optional Parameters for Global Configuration only
+- `taskSpecificAssistants`: This option allows for dividing the Patch Set review between two specialized assistants: one
+  focused to the Patch's code and another to the commit message. When this option is set to false (default value), the
+  Patch Set review is unified into one single request processed by one assistant instructed for both tasks.
+
+  **NOTE**: Enabling this feature may result in duplicate requests to ChatGPT, potentially increasing the usage costs of
+  the OpenAI API.
+- `forceCreateAssistant`: Forces the creation of a new assistant with each request instead of only when configuration
+  settings change or Changes are merged.
+
+  **NOTE**: Enabling this feature may increase OpenAI API usage and should be used for **testing or debugging purposes
+  only**.
+
+### Optional Parameters for Global Configuration only
 
 - `globalEnable`: Set to false by default, meaning the plugin will review only designated repositories. If enabled, the
   plugin will automatically review all pull requests by default (not recommended in production environments).
@@ -234,7 +244,7 @@ when configuration settings change or Changes are merged.
   the repositories specified here. The value should be a comma-separated list of repository names, for example:
   "project1,project2,project3".
 
-#### Optional Parameters for Project Configuration only
+### Optional Parameters for Project Configuration only
 
 - `isEnabled`: The default is false. If set to true, the plugin will review the Patch Set of this project.
 
@@ -246,6 +256,7 @@ Reviewing a Change Set or the last Patch Set can occur automatically upon submis
 commands outlined in this section.
 
 #### Basic Syntax
+
 - `/review`: when used in a comment directed at ChatGPT on any Change Set, triggers a review of the full Change Set. A
   vote is cast on the Change Set if the voting feature is enabled and the ChatGPT Gerrit user is authorized to vote on
   it.
@@ -268,6 +279,7 @@ Directives are mandatory instructions written in plain English that ChatGPT must
 be specified using the following command.
 
 #### Basic Syntax
+
 `/directive <DIRECTIVE_CONTENT>`: This command, when included in a comment with a subsequent directive description
 "<DIRECTIVE_CONTENT>", specifies a directive that ChatGPT must adhere to.
 
@@ -277,6 +289,7 @@ You can now dynamically alter the plugin configuration via messages sent to the 
 debugging purposes. This feature becomes available when the `enableMessageDebugging` configuration setting is enabled.
 
 #### Basic Syntax
+
 - `/configure` displays the current settings and their dynamically modified values in a response message.
 - `/configure --<CONFIG_KEY_1>=<CONFIG_VALUE_1> [... --<CONFIG_KEY_N>=<CONFIG_VALUE_N>]` assigns new values to one or
   more configuration keys.
@@ -286,6 +299,7 @@ debugging purposes. This feature becomes available when the `enableMessageDebugg
 #### Command Options
 
 The `reset` option can be employed to restore modified settings to their original defaults. Its usage is detailed below:
+
 - `/configure --reset` restores all modified settings to their default values.
 - `/configure --reset --<CONFIG_KEY_1> [... --<CONFIG_KEY_N>]` specifically restores the indicated key(s) to their
   default values.
