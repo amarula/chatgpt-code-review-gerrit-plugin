@@ -7,9 +7,7 @@ import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptDataPromptRequestsStateful;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStatefulRequests;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStatefulReview;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.*;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptDataPromptRequestsStateless;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +21,26 @@ public class ChatGptPromptFactory {
             GerritChange change
     ) {
         if (change.getIsCommentEvent()) {
-            log.info("ChatGptPromptFactory: Returned ChatGptPromptStatefulRequests");
+            log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulRequests");
             return new ChatGptPromptStatefulRequests(config, changeSetData, change);
-        } else {
-            log.info("ChatGptPromptFactory: Returned ChatGptPromptStatefulReview");
-            return new ChatGptPromptStatefulReview(config, changeSetData, change);
+        }
+        else {
+            if (config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants()) {
+                return switch (changeSetData.getReviewAssistantStage()) {
+                    case REVIEW_CODE -> {
+                        log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCode");
+                        yield new ChatGptPromptStatefulReviewCode(config, changeSetData, change);
+                    }
+                    case REVIEW_COMMIT_MESSAGE -> {
+                        log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCommitMessage");
+                        yield new ChatGptPromptStatefulReviewCommitMessage(config, changeSetData, change);
+                    }
+                };
+            }
+            else {
+                log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReview for Unified Review");
+                return new ChatGptPromptStatefulReview(config, changeSetData, change);
+            }
         }
     }
 
@@ -40,14 +53,16 @@ public class ChatGptPromptFactory {
     ) {
         if (change.getIsCommentEvent()) {
             if ((config.getGptMode() == Settings.Modes.stateless)) {
-                log.info("ChatGptPromptFactory: Returned ChatGptDataPromptRequestsStateless");
+                log.info("ChatGptPromptFactory: Return ChatGptDataPromptRequestsStateless");
                 return new ChatGptDataPromptRequestsStateless(config, changeSetData, gerritClientData, localizer);
-            } else {
-                log.info("ChatGptPromptFactory: Returned ChatGptDataPromptRequestsStateful");
+            }
+            else {
+                log.info("ChatGptPromptFactory: Return ChatGptDataPromptRequestsStateful");
                 return new ChatGptDataPromptRequestsStateful(config, changeSetData, gerritClientData, localizer);
             }
-        } else {
-            log.info("ChatGptPromptFactory: Returned ChatGptDataPromptReview");
+        }
+        else {
+            log.info("ChatGptPromptFactory: Return ChatGptDataPromptReview");
             return new ChatGptDataPromptReview(config, changeSetData, gerritClientData, localizer);
         }
     }

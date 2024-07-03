@@ -8,30 +8,30 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithNewLine;
 
 @Slf4j
 public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase implements IChatGptPromptStateful {
     private static final String RULE_NUMBER_PREFIX = "RULE #";
 
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_TASKS;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY;
 
     public ChatGptPromptStatefulReview(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config, changeSetData, change);
-        if (DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW == null) {
-            loadDefaultPrompts("promptsStatefulReview");
-        }
+        loadDefaultPrompts("promptsStatefulReview");
     }
 
     @Override
     public void addGptAssistantInstructions(List<String> instructions) {
-        instructions.addAll(List.of(
-                getGptAssistantInstructionsReview(),
-                getPatchSetReviewPrompt()
-        ));
+        addReviewInstructions(instructions);
         if (config.getGptReviewCommitMessages()) {
             instructions.add(getReviewPromptCommitMessages());
         }
@@ -42,14 +42,31 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
         return null;
     }
 
-    private String getGptAssistantInstructionsReview() {
-        return String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW, joinWithNewLine(getNumberedList(
-                new ArrayList<>(List.of(
-                        DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE,
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY
-                )),
+    protected void addReviewInstructions(List<String> instructions) {
+        instructions.addAll(List.of(
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_TASKS,
+                joinWithNewLine(new ArrayList<>(List.of(
+                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES,
+                        getGptAssistantInstructionsReview(),
+                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES
+                ))),
+                getPatchSetReviewPrompt()
+        ));
+    }
+
+    protected String getGptAssistantInstructionsReview(boolean... ruleFilter) {
+        // Rules are applied by default unless the corresponding ruleFilter values is set to false
+        ArrayList<String> rules = new ArrayList<>(List.of(
+                DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE,
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY
+        ));
+        return joinWithNewLine(getNumberedList(
+                IntStream.range(0, rules.size())
+                        .filter(i -> i >= ruleFilter.length || ruleFilter[i])
+                        .mapToObj(rules::get)
+                        .collect(Collectors.toList()),
                 RULE_NUMBER_PREFIX, COLON_SPACE
-        )));
+        ));
     }
 }

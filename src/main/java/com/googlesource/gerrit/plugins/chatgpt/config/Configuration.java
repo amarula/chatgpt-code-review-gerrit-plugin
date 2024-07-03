@@ -84,6 +84,7 @@ public class Configuration {
     private static final boolean DEFAULT_IGNORE_OUTDATED_INLINE_COMMENTS = false;
     private static final boolean DEFAULT_IGNORE_RESOLVED_CHAT_GPT_COMMENTS = true;
     private static final boolean DEFAULT_FORCE_CREATE_ASSISTANT = false;
+    private static final boolean DEFAULT_TASK_SPECIFIC_ASSISTANTS = false;
     private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
 
     // Config setting keys
@@ -125,6 +126,7 @@ public class Configuration {
     private static final String KEY_IGNORE_OUTDATED_INLINE_COMMENTS = "ignoreOutdatedInlineComments";
     private static final String KEY_IGNORE_RESOLVED_CHAT_GPT_COMMENTS = "ignoreResolvedChatGptComments";
     private static final String KEY_FORCE_CREATE_ASSISTANT = "forceCreateAssistant";
+    private static final String KEY_TASK_SPECIFIC_ASSISTANTS = "taskSpecificAssistants";
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
 
     private final OneOffRequestContext context;
@@ -288,6 +290,10 @@ public class Configuration {
 
     public boolean getForceCreateAssistant() {
         return getBoolean(KEY_FORCE_CREATE_ASSISTANT, DEFAULT_FORCE_CREATE_ASSISTANT);
+    }
+
+    public boolean getTaskSpecificAssistants() {
+        return getBoolean(KEY_TASK_SPECIFIC_ASSISTANTS, DEFAULT_TASK_SPECIFIC_ASSISTANTS);
     }
 
     public boolean getEnableMessageDebugging() {

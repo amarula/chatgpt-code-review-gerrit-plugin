@@ -14,9 +14,7 @@ public class ChatGptPromptStatefulRequests extends ChatGptPromptStatefulBase imp
 
     public ChatGptPromptStatefulRequests(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config, changeSetData, change);
-        if (DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS == null) {
-            loadDefaultPrompts("promptsStatefulRequests");
-        }
+        loadDefaultPrompts("promptsStatefulRequests");
     }
 
     @Override

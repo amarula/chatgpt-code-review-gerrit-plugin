@@ -12,6 +12,7 @@ import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStatefulTaskSpecific;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptClientStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit.GerritClientPatchSetStateless;
@@ -40,7 +41,8 @@ public class GerritEventContextModule extends FactoryModule {
 
     private Class<? extends IChatGptClient> getChatGptMode() {
         return switch (config.getGptMode()){
-            case stateful -> ChatGptClientStateful.class;
+            case stateful -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
+                    ChatGptClientStatefulTaskSpecific.class : ChatGptClientStateful.class;
             case stateless -> ChatGptClientStateless.class;
         };
     }

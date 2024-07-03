@@ -20,18 +20,14 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
     public static String DEFAULT_GPT_MESSAGE_REVIEW;
 
     protected final ChangeSetData changeSetData;
-
-    private final GerritChange change;
+    protected final GerritChange change;
 
     public ChatGptPromptStatefulBase(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config);
         this.changeSetData = changeSetData;
         this.change = change;
         this.isCommentEvent = change.getIsCommentEvent();
-        // Avoid repeated loading of prompt constants
-        if (DEFAULT_GPT_ASSISTANT_NAME == null) {
-            loadDefaultPrompts("promptsStateful");
-        }
+        loadDefaultPrompts("promptsStateful");
     }
 
     public String getDefaultGptAssistantDescription() {
