@@ -6,13 +6,15 @@ import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.gerrit.server.util.OneOffRequestContext;
 
+import com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public class Configuration {
@@ -70,6 +72,7 @@ public class Configuration {
             ".bat"
     });
     private static final boolean DEFAULT_PROJECT_ENABLE = false;
+    private static final String DEFAULT_DIRECTIVES = "";
     private static final int DEFAULT_MAX_REVIEW_LINES = 1000;
     private static final int DEFAULT_MAX_REVIEW_FILE_SIZE = 10000;
     private static final boolean DEFAULT_ENABLED_VOTING = false;
@@ -106,6 +109,7 @@ public class Configuration {
     private static final String KEY_FULL_FILE_REVIEW = "gptFullFileReview";
     private static final String KEY_PROJECT_ENABLE = "isEnabled";
     private static final String KEY_GLOBAL_ENABLE = "globalEnable";
+    private static final String KEY_DIRECTIVES = "directives";
     private static final String KEY_DISABLED_USERS = "disabledUsers";
     private static final String KEY_ENABLED_USERS = "enabledUsers";
     private static final String KEY_DISABLED_GROUPS = "disabledGroups";
@@ -244,6 +248,14 @@ public class Configuration {
         return splitConfig(globalConfig.getString(KEY_ENABLED_FILE_EXTENSIONS, DEFAULT_ENABLED_FILE_EXTENSIONS));
     }
 
+    public List<String> getDirectives() {
+        return splitConfig(getString(KEY_DIRECTIVES, DEFAULT_DIRECTIVES), TextUtils.QUOTED_ITEM_COMMA_DELIMITED)
+                .stream()
+                .filter(s -> !s.isEmpty())
+                .map(s -> StringUtils.appendIfMissing(StringUtils.strip(s, "\""), "."))
+                .collect(toList());
+    }
+
     public boolean isVotingEnabled() {
         return getBoolean(KEY_ENABLED_VOTING, DEFAULT_ENABLED_VOTING);
     }
@@ -347,7 +359,10 @@ public class Configuration {
     }
 
     private List<String> splitConfig(String value) {
-        Pattern separator=Pattern.compile("\\s*,\\s*");
-        return Arrays.asList(separator.split(value));
+        return TextUtils.splitString(value);
+    }
+
+    private List<String> splitConfig(String value, String delimiter) {
+        return TextUtils.splitString(value, delimiter);
     }
 }

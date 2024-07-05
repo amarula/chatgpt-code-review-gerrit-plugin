@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -19,6 +20,8 @@ public class TextUtils extends StringUtils {
     public static final String COMMA_SPACE = ", ";
     public static final String COLON_SPACE = ": ";
     public static final String SEMICOLON_SPACE = "; ";
+    public static final String ITEM_COMMA_DELIMITED = "\\s*,\\s*";
+    public static final String QUOTED_ITEM_COMMA_DELIMITED = "(?<!\\\\)\"" + ITEM_COMMA_DELIMITED + "\"";
 
     public static String parseOutOfDelimiters(String body, String splitDelim, Function<String, String> processMessage,
                                               String leftDelimReplacement, String rightDelimReplacement) {
@@ -94,5 +97,14 @@ public class TextUtils extends StringUtils {
                         .map(entry -> entry.getKey() + ": " + entry.getValue())
                         .collect(Collectors.toList())
         );
+    }
+
+    public static List<String> splitString(String value) {
+        return splitString(value, ITEM_COMMA_DELIMITED);
+    }
+
+    public static List<String> splitString(String value, String delimiter) {
+        Pattern separator = Pattern.compile(delimiter);
+        return Arrays.asList(separator.split(value));
     }
 }

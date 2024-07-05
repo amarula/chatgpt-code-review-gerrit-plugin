@@ -63,6 +63,10 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET
         ));
+        if (config.getDirectives() != null) {
+            rules.addAll(config.getDirectives());
+        }
+        log.debug("Rules used in the assistant: {}", rules);
         return joinWithNewLine(getNumberedList(
                 IntStream.range(0, rules.size())
                         .filter(i -> i >= ruleFilter.length || ruleFilter[i])
