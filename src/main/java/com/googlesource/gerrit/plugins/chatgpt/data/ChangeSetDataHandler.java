@@ -10,8 +10,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetD
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-
 @Slf4j
 public class ChangeSetDataHandler {
     public static void update(
@@ -30,7 +28,6 @@ public class ChangeSetDataHandler {
                 localizer);
 
         changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
-        changeSetData.setDirectives(new HashSet<>());
         changeSetData.setReviewSystemMessage(null);
         changeSetData.setGptDataPrompt(chatGptDataPrompt.buildPrompt());
         if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
