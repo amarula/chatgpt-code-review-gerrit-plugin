@@ -5,7 +5,6 @@ import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.Directives;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +22,7 @@ public class ClientCommands extends ClientBase {
     private enum CommandSet {
         REVIEW,
         REVIEW_LAST,
-        DIRECTIVE,
+        DIRECTIVES,
         CONFIGURE
     }
     private enum ReviewOptionSet {
@@ -37,7 +36,7 @@ public class ClientCommands extends ClientBase {
     private static final Map<String, CommandSet> COMMAND_MAP = Map.of(
             "review", CommandSet.REVIEW,
             "review_last", CommandSet.REVIEW_LAST,
-            "directive", CommandSet.DIRECTIVE,
+            "directives", CommandSet.DIRECTIVES,
             "configure", CommandSet.CONFIGURE
     );
     private static final Map<String, ReviewOptionSet> REVIEW_OPTION_MAP = Map.of(
@@ -48,9 +47,6 @@ public class ClientCommands extends ClientBase {
             CommandSet.REVIEW,
             CommandSet.REVIEW_LAST
     ));
-    private static final List<CommandSet> HISTORY_COMMANDS = new ArrayList<>(List.of(
-            CommandSet.DIRECTIVE
-    ));
     private static final Map<String, ConfigureOptionSet> CONFIGURE_OPTION_MAP = Map.of(
             "reset", ConfigureOptionSet.RESET
     );
@@ -59,13 +55,13 @@ public class ClientCommands extends ClientBase {
     private static final Pattern COMMAND_PATTERN = Pattern.compile("/(" + String.join("|",
             COMMAND_MAP.keySet()) + ")\\b((?:\\s+--\\w+(?:=(?:" + OPTION_VALUES + "))?)+)?");
     private static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(" + OPTION_VALUES + "))?");
+    private static final String PREPROCESS_REGEX = "/directives\\s+\"?(.*[^\"])\"?";
+    private static final String PREPROCESS_REPLACEMENT = "/configure --directives=\"$1\"";
 
     private final ChangeSetData changeSetData;
-    private final Directives directives;
     private final Localizer localizer;
 
     private DynamicConfiguration dynamicConfiguration;
-    private boolean containingHistoryCommand;
     private boolean modifiedDynamicConfig;
     private boolean shouldResetDynamicConfig;
 
@@ -78,43 +74,38 @@ public class ClientCommands extends ClientBase {
         super(config);
         this.localizer = localizer;
         this.changeSetData = changeSetData;
-        directives = new Directives(changeSetData);
         // The `dynamicConfiguration` instance is utilized only for parsing current client messages, not the history
         if (pluginDataHandlerProvider != null) {
             dynamicConfiguration = new DynamicConfiguration(pluginDataHandlerProvider);
         }
-        containingHistoryCommand = false;
         modifiedDynamicConfig = false;
         shouldResetDynamicConfig = false;
     }
 
-    public boolean parseCommands(String comment, boolean isNotHistory) {
+    public boolean parseCommands(String comment) {
         boolean commandFound = false;
-        Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(comment);
+        Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(preprocessCommands(comment));
         while (reviewCommandMatcher.find()) {
             CommandSet command = COMMAND_MAP.get(reviewCommandMatcher.group(1));
-            parseOptions(command, reviewCommandMatcher, isNotHistory);
-            parseCommand(command, comment, isNotHistory);
+            parseOptions(command, reviewCommandMatcher);
+            parseCommand(command);
             commandFound = true;
         }
         return commandFound;
     }
 
-    public String parseRemoveCommands(String comment) {
-        if (parseCommands(comment, false)) {
-            return removeCommands(comment);
-        }
-        return comment;
-    }
-
-    private String removeCommands(String comment) {
+    public String removeCommands(String comment) {
         Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(comment);
         return reviewCommandMatcher.replaceAll("");
     }
 
-    private void parseCommand(CommandSet command, String comment, boolean isNotHistory) {
-        if (isNotHistory) {
-            if (REVIEW_COMMANDS.contains(command)) {
+    private String preprocessCommands(String comment) {
+        return comment.replaceAll(PREPROCESS_REGEX, PREPROCESS_REPLACEMENT);
+    }
+
+    private void parseCommand(CommandSet command) {
+        switch (command) {
+            case REVIEW, REVIEW_LAST -> {
                 changeSetData.setForcedReview(true);
                 if (command == CommandSet.REVIEW_LAST) {
                     log.info("Forced review command applied to the last Patch Set");
@@ -124,7 +115,7 @@ public class ClientCommands extends ClientBase {
                     log.info("Forced review command applied to the entire Change Set");
                 }
             }
-            else if (command == CommandSet.CONFIGURE) {
+            case CONFIGURE -> {
                 if (config.getEnableMessageDebugging()) {
                     changeSetData.setHideChatGptReview(true);
                     dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
@@ -138,17 +129,10 @@ public class ClientCommands extends ClientBase {
                 }
             }
         }
-        if (HISTORY_COMMANDS.contains(command)) {
-            containingHistoryCommand = true;
-            if (command == CommandSet.DIRECTIVE) {
-                directives.addDirective(removeCommands(comment));
-            }
-        }
     }
 
-    private void parseOptions(CommandSet command, Matcher reviewCommandMatcher, boolean isNotHistory) {
-        // Command options need to be parsed only when processing the current message, not the message history
-        if (reviewCommandMatcher.group(2) == null || !isNotHistory) return;
+    private void parseOptions(CommandSet command, Matcher reviewCommandMatcher) {
+        if (reviewCommandMatcher.group(2) == null) return;
         Matcher reviewOptionsMatcher = OPTIONS_PATTERN.matcher(reviewCommandMatcher.group(2));
         while (reviewOptionsMatcher.find()) {
             parseSingleOption(command, reviewOptionsMatcher);
@@ -162,26 +146,28 @@ public class ClientCommands extends ClientBase {
                 .orElse("");
         if (REVIEW_COMMANDS.contains(command)) {
             switch (REVIEW_OPTION_MAP.get(optionKey)) {
-                case FILTER:
+                case FILTER -> {
                     boolean value = Boolean.parseBoolean(optionValue);
                     log.debug("Option 'replyFilterEnabled' set to {}", value);
                     changeSetData.setReplyFilterEnabled(value);
-                    break;
-                case DEBUG:
+                }
+                case DEBUG -> {
                     if (config.getEnableMessageDebugging()) {
                         log.debug("Response Mode set to Debug");
                         changeSetData.setDebugReviewMode(true);
                         changeSetData.setReplyFilterEnabled(false);
-                    } else {
+                    }
+                    else {
                         changeSetData.setReviewSystemMessage(localizer.getText(
                                 "message.debugging.review.disabled"
                         ));
                         log.debug("Unable to set Response Mode to Debug: `enableMessageDebugging` config " +
                                 "must be set to true");
                     }
-                    break;
+                }
             }
-        } else if (command == CommandSet.CONFIGURE && config.getEnableMessageDebugging()) {
+        }
+        else if (command == CommandSet.CONFIGURE && config.getEnableMessageDebugging()) {
             if (CONFIGURE_OPTION_MAP.get(optionKey) == ConfigureOptionSet.RESET) {
                 shouldResetDynamicConfig = true;
                 log.debug("Resetting configuration settings");

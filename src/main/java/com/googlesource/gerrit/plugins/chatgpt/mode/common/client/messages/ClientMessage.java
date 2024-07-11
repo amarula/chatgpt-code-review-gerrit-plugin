@@ -65,8 +65,8 @@ public class ClientMessage extends ClientBase {
         return this;
     }
 
-    public ClientMessage parseRemoveCommands() {
-        message = clientCommands.parseRemoveCommands(message);
+    public ClientMessage removeCommands() {
+        message = clientCommands.removeCommands(message);
         return this;
     }
 
@@ -80,16 +80,8 @@ public class ClientMessage extends ClientBase {
         return this;
     }
 
-    public boolean isContainingHistoryCommand() {
-        return clientCommands.isContainingHistoryCommand();
-    }
-
-    public boolean parseCommands(String comment, boolean isNotHistory) {
-        return clientCommands.parseCommands(comment, isNotHistory);
-    }
-
-    public void processHistoryCommand() {
-        clientCommands.getDirectives().copyDirectiveToSettings();
+    public boolean parseCommands(String comment) {
+        return clientCommands.parseCommands(comment);
     }
 
     private Pattern getBotMentionPattern() {
