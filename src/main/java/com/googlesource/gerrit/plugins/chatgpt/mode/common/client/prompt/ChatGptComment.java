@@ -27,7 +27,7 @@ public class ChatGptComment extends ClientBase {
             commentMessage.removeDebugCodeBlocksReview().removeDebugCodeBlocksDynamicSettings();
         }
         else {
-            commentMessage.removeMentions().parseRemoveCommands();
+            commentMessage.removeMentions().removeCommands();
         }
         return commentMessage.removeHeadings().getMessage();
     }

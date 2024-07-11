@@ -180,6 +180,15 @@ The advantages of the Stateful mode over the Stateless are twofold:
   in the topic are reviewed.
 - `disabledTopicFilter`: Works in contrast to enabledTopicFilter, excluding Patch Sets and comments from review if their
   topics contain specified keywords.
+- `directives`: Directives are mandatory instructions written in plain English that ChatGPT must adhere to during its
+  reviews. You can provide a single directive or multiple directives, each enclosed in double quotes and separated by
+  commas. Examples:
+
+```
+directives = <DIRECTIVE_CONTENT>
+directives = "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
+```
+
 - `enabledFileExtensions`: This limits the reviewed files to the given types. Default file extensions are ".py, .java,
   .js, .ts, .html, .css, .cs, .cpp, .c, .h, .php, .rb, .swift, .kt, .r, .jl, .go, .scala, .pl, .pm, .rs, .dart, .lua,
   .sh, .vb, .bat".
@@ -273,16 +282,6 @@ commands outlined in this section.
   **NOTE**: The usage of `--debug` option is disabled by default. To enable it, `enableMessageDebugging` setting must be
   set to true.
 
-### Directives
-
-Directives are mandatory instructions written in plain English that ChatGPT must adhere to during its reviews. They can
-be specified using the following command.
-
-#### Basic Syntax
-
-`/directive <DIRECTIVE_CONTENT>`: This command, when included in a comment with a subsequent directive description
-"<DIRECTIVE_CONTENT>", specifies a directive that ChatGPT must adhere to.
-
 ### Dynamic Configuration
 
 You can now dynamically alter the plugin configuration via messages sent to the ChatGPT user, primarily for testing and
@@ -303,6 +302,18 @@ The `reset` option can be employed to restore modified settings to their origina
 - `/configure --reset` restores all modified settings to their default values.
 - `/configure --reset --<CONFIG_KEY_1> [... --<CONFIG_KEY_N>]` specifically restores the indicated key(s) to their
   default values.
+
+### Directives
+
+Directives are mandatory instructions written in plain English that ChatGPT must adhere to during its reviews. They can
+be specified using the `/directives` command, which serves as a shortcut for `/configure --directives=`.
+
+#### Basic Syntax
+
+```
+/directives <DIRECTIVE_CONTENT>
+/directives "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
+```
 
 ## Testing
 
