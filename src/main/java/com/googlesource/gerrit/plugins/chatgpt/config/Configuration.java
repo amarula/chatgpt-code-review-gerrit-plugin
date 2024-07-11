@@ -209,27 +209,27 @@ public class Configuration {
     }
 
     public List<String> getDisabledUsers() {
-        return splitConfig(globalConfig.getString(KEY_DISABLED_USERS, DEFAULT_DISABLED_USERS));
+        return splitConfig(getString(KEY_DISABLED_USERS, DEFAULT_DISABLED_USERS));
     }
 
     public List<String> getEnabledUsers() {
-        return splitConfig(globalConfig.getString(KEY_ENABLED_USERS, DEFAULT_ENABLED_USERS));
+        return splitConfig(getString(KEY_ENABLED_USERS, DEFAULT_ENABLED_USERS));
     }
 
     public List<String> getDisabledGroups() {
-        return splitConfig(globalConfig.getString(KEY_DISABLED_GROUPS, DEFAULT_DISABLED_GROUPS));
+        return splitConfig(getString(KEY_DISABLED_GROUPS, DEFAULT_DISABLED_GROUPS));
     }
 
     public List<String> getEnabledGroups() {
-        return splitConfig(globalConfig.getString(KEY_ENABLED_GROUPS, DEFAULT_ENABLED_GROUPS));
+        return splitConfig(getString(KEY_ENABLED_GROUPS, DEFAULT_ENABLED_GROUPS));
     }
 
     public List<String> getDisabledTopicFilter() {
-        return splitConfig(globalConfig.getString(KEY_DISABLED_TOPIC_FILTER, DEFAULT_DISABLED_TOPIC_FILTER));
+        return splitConfig(getString(KEY_DISABLED_TOPIC_FILTER, DEFAULT_DISABLED_TOPIC_FILTER));
     }
 
     public List<String> getEnabledTopicFilter() {
-        return splitConfig(globalConfig.getString(KEY_ENABLED_TOPIC_FILTER, DEFAULT_ENABLED_TOPIC_FILTER));
+        return splitConfig(getString(KEY_ENABLED_TOPIC_FILTER, DEFAULT_ENABLED_TOPIC_FILTER));
     }
 
     public String getEnabledProjects() {
@@ -245,7 +245,7 @@ public class Configuration {
     }
 
     public List<String> getEnabledFileExtensions() {
-        return splitConfig(globalConfig.getString(KEY_ENABLED_FILE_EXTENSIONS, DEFAULT_ENABLED_FILE_EXTENSIONS));
+        return splitConfig(getString(KEY_ENABLED_FILE_EXTENSIONS, DEFAULT_ENABLED_FILE_EXTENSIONS));
     }
 
     public List<String> getDirectives() {
