@@ -158,10 +158,7 @@ public class GerritClientComments extends GerritClientAccount {
             for (GerritComment latestComment : latestComments) {
                 String commentMessage = latestComment.getMessage();
                 if (clientMessage.isBotAddressed(commentMessage)) {
-                    if (clientMessage.parseCommands(commentMessage, true)) {
-                        if (clientMessage.isContainingHistoryCommand()) {
-                            clientMessage.processHistoryCommand();
-                        }
+                    if (clientMessage.parseCommands(commentMessage)) {
                         commentProperties.clear();
                         return;
                     }

@@ -131,14 +131,11 @@ public class ChatGptHistory extends ChatGptComment {
                 patchSetCommentAdded.contains(messageContent) ||
                 filterActive && isInactiveComment(comment);
 
-        if (shouldNotProcessComment && !commentMessage.isContainingHistoryCommand()) {
+        if (shouldNotProcessComment) {
             return;
         }
         patchSetCommentAdded.add(messageContent);
-        if (commentMessage.isContainingHistoryCommand()) {
-            commentMessage.processHistoryCommand();
-            return;
-        }
+
         ChatGptRequestMessage message = ChatGptRequestMessage.builder()
                 .role(getRoleFromComment(comment))
                 .content(messageContent)
