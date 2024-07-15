@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 
 @Slf4j
 public class TextUtils extends StringUtils {
+    public static final String DOUBLE_QUOTES = "\"";
     public static final String INLINE_CODE_DELIMITER = "`";
     public static final String CODE_DELIMITER = "```";
     public static final String CODE_DELIMITER_BEGIN ="\n\n" + CODE_DELIMITER + "\n";
@@ -21,7 +22,9 @@ public class TextUtils extends StringUtils {
     public static final String COLON_SPACE = ": ";
     public static final String SEMICOLON_SPACE = "; ";
     public static final String ITEM_COMMA_DELIMITED = "\\s*,\\s*";
-    public static final String QUOTED_ITEM_COMMA_DELIMITED = "(?<!\\\\)\"" + ITEM_COMMA_DELIMITED + "\"";
+    public static final String QUOTED_ENTIRE_ITEM = "^" + DOUBLE_QUOTES + "(.*)" + DOUBLE_QUOTES + "$";
+    public static final String QUOTED_ITEM_COMMA_DELIMITED = "(?<!\\\\)" + DOUBLE_QUOTES + ITEM_COMMA_DELIMITED +
+            DOUBLE_QUOTES;
 
     public static String parseOutOfDelimiters(String body, String splitDelim, Function<String, String> processMessage,
                                               String leftDelimReplacement, String rightDelimReplacement) {
@@ -83,7 +86,7 @@ public class TextUtils extends StringUtils {
         for (Field field : object.getClass().getDeclaredFields()) {
             field.setAccessible(true);
             try {
-                lines.add(field.getName() + ": " + field.get(object));
+                lines.add(field.getName() + COLON_SPACE + field.get(object));
             } catch (IllegalAccessException e) {
                 log.debug("Error while accessing field {} in {}", field.getName(), object, e);
             }
@@ -94,7 +97,7 @@ public class TextUtils extends StringUtils {
     public static String prettyStringifyMap(Map<String, String> map) {
         return joinWithNewLine(
                 map.entrySet().stream()
-                        .map(entry -> entry.getKey() + ": " + entry.getValue())
+                        .map(entry -> entry.getKey() + COLON_SPACE + entry.getValue())
                         .collect(Collectors.toList())
         );
     }
@@ -106,5 +109,18 @@ public class TextUtils extends StringUtils {
     public static List<String> splitString(String value, String delimiter) {
         Pattern separator = Pattern.compile(delimiter);
         return Arrays.asList(separator.split(value));
+    }
+
+    public static String unwrapQuotes(String input) {
+        return input.replaceAll(QUOTED_ENTIRE_ITEM, "$1");
+    }
+
+    public static String unwrapDeSlashQuotes(String input) {
+        String unwrappedInput = unwrapQuotes(input);
+        return unwrappedInput.equals(input) ? input : deSlash(unwrappedInput, DOUBLE_QUOTES);
+    }
+
+    public static String wrapQuotes(String input) {
+        return DOUBLE_QUOTES + input + DOUBLE_QUOTES;
     }
 }
