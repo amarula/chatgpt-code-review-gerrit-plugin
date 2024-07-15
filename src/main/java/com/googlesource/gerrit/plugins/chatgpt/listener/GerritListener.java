@@ -9,6 +9,8 @@ import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerBaseProvider;
+import com.googlesource.gerrit.plugins.chatgpt.logging.LoggingConfiguration;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
@@ -20,15 +22,18 @@ public class GerritListener implements EventListener {
     private final String myInstanceId;
     private final ConfigCreator configCreator;
     private final EventHandlerExecutor evenHandlerExecutor;
+    private final PluginDataHandlerBaseProvider pluginDataHandlerBaseProvider;
 
     @Inject
     public GerritListener(
             ConfigCreator configCreator,
             EventHandlerExecutor evenHandlerExecutor,
+            PluginDataHandlerBaseProvider pluginDataHandlerBaseProvider,
             @GerritInstanceId @Nullable String myInstanceId
     ) {
         this.configCreator = configCreator;
         this.evenHandlerExecutor = evenHandlerExecutor;
+        this.pluginDataHandlerBaseProvider = pluginDataHandlerBaseProvider;
         this.myInstanceId = myInstanceId;
     }
 
@@ -50,6 +55,7 @@ public class GerritListener implements EventListener {
 
         try {
             Configuration config = configCreator.createConfig(projectNameKey, changeKey);
+            LoggingConfiguration.configure(config, pluginDataHandlerBaseProvider);
             evenHandlerExecutor.execute(config, patchSetEvent);
         } catch (NoSuchProjectException e) {
             log.error("Project not found: {}", projectNameKey, e);
