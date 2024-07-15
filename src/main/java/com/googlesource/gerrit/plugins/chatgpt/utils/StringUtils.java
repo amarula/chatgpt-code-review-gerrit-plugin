@@ -15,6 +15,11 @@ public class StringUtils {
         return slashedBody.toString();
     }
 
+    public static String deSlash(String target, String deSlashChars) {
+        log.info("De-slashing " + target + " to " + deSlashChars);
+        return target.replaceAll("\\\\([" + deSlashChars + "])", "$1");
+    }
+
     public static String concatenate(List<String> components) {
         return String.join("", components);
     }

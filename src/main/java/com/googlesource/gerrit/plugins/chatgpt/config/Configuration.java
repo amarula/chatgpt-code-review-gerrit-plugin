@@ -12,8 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -89,6 +92,7 @@ public class Configuration {
     private static final boolean DEFAULT_FORCE_CREATE_ASSISTANT = false;
     private static final boolean DEFAULT_TASK_SPECIFIC_ASSISTANTS = false;
     private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
+    private static final String DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = "";
 
     // Config setting keys
     public static final String KEY_GPT_SYSTEM_PROMPT = "gptSystemPrompt";
@@ -132,6 +136,7 @@ public class Configuration {
     private static final String KEY_FORCE_CREATE_ASSISTANT = "forceCreateAssistant";
     private static final String KEY_TASK_SPECIFIC_ASSISTANTS = "taskSpecificAssistants";
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
+    private static final String KEY_SELECTIVE_LOG_LEVEL_OVERRIDE = "selectiveLogLevelOverride";
 
     private final OneOffRequestContext context;
     @Getter
@@ -252,7 +257,7 @@ public class Configuration {
         return splitConfig(getString(KEY_DIRECTIVES, DEFAULT_DIRECTIVES), TextUtils.QUOTED_ITEM_COMMA_DELIMITED)
                 .stream()
                 .filter(s -> !s.isEmpty())
-                .map(s -> StringUtils.appendIfMissing(StringUtils.strip(s, "\""), "."))
+                .map(s -> StringUtils.appendIfMissing(StringUtils.strip(s, TextUtils.DOUBLE_QUOTES), "."))
                 .collect(toList());
     }
 
@@ -316,12 +321,29 @@ public class Configuration {
         return getBoolean(KEY_IGNORE_OUTDATED_INLINE_COMMENTS, DEFAULT_IGNORE_OUTDATED_INLINE_COMMENTS);
     }
 
+    public String getSelectiveLogLevelOverride() {
+        return getProjectGlobalString(KEY_SELECTIVE_LOG_LEVEL_OVERRIDE, DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE);
+    }
+
     public String getString(String key, String defaultValue) {
         String value = projectConfig.getString(key);
         if (value != null) {
             return value;
         }
         return globalConfig.getString(key, defaultValue);
+    }
+
+    public String getProjectGlobalString(String key, String defaultValue) {
+        String globalValue = globalConfig.getString(key, defaultValue);
+        String projectValue = projectConfig.getString(key, defaultValue);
+        log.debug("Get project global string - globalConfig: {}, projectConfig: {}", globalValue, projectValue);
+
+        return wrapQuotes(joinWithComma(
+                Stream.of(globalValue, projectValue)
+                        .filter(s -> !s.isEmpty())
+                        .map(TextUtils::unwrapQuotes)
+                        .collect(Collectors.toSet())
+        ));
     }
 
     private String getValidatedOrThrow(String key) {
