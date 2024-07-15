@@ -214,6 +214,9 @@ directives = "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
 - `enableMessageDebugging`: This setting controls the activation of debugging functionalities through messages (default
   value is false). When set to true, it enables commands and options like `--debug` for users as well as the Dynamic
   Configuration commands.
+- `selectiveLogLevelOverride`: This setting allows for overriding the log level of specific messages, ensuring they are
+  logged even if their level is above the current setting. This is useful for debugging without the need to set the
+  overall log level to DEBUG, which could result in excessive DEBUG messages from sources like gerrit and other plugins.
 
 ### Optional Parameters Specific to Stateless Mode
 

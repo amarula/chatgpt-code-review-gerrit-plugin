@@ -6,6 +6,7 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -143,7 +144,7 @@ public class ClientCommands extends ClientBase {
     private void parseSingleOption(CommandSet command, Matcher reviewOptionsMatcher) {
         String optionKey = reviewOptionsMatcher.group(1);
         String optionValue = Optional.ofNullable(reviewOptionsMatcher.group(2))
-                .map(val -> val.replaceAll("^\"(.*)\"$", "$1"))
+                .map(TextUtils::unwrapDeSlashQuotes)
                 .orElse("");
         if (REVIEW_COMMANDS.contains(command)) {
             switch (REVIEW_OPTION_MAP.get(optionKey)) {
