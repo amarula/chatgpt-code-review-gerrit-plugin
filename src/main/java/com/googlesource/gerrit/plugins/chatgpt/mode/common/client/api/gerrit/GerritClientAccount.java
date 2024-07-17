@@ -19,30 +19,37 @@ public class GerritClientAccount extends GerritClientBase {
     public GerritClientAccount(Configuration config, AccountCache accountCache) {
         super(config);
         this.accountCache = accountCache;
+        log.debug("GerritClientAccount initialized.");
     }
 
     public boolean isDisabledUser(String authorUsername) {
         List<String> enabledUsers = config.getEnabledUsers();
         List<String> disabledUsers = config.getDisabledUsers();
-        return !enabledUsers.contains(Configuration.ENABLED_USERS_ALL)
+        boolean isDisabled = !enabledUsers.contains(Configuration.ENABLED_USERS_ALL)
                 && !enabledUsers.contains(authorUsername)
                 || disabledUsers.contains(authorUsername)
                 || isDisabledUserGroup(authorUsername);
+        log.debug("Checking if user '{}' is disabled: {}", authorUsername, isDisabled);
+        return isDisabled;
     }
 
     public boolean isDisabledTopic(String topic) {
         List<String> enabledTopicFilter = config.getEnabledTopicFilter();
         List<String> disabledTopicFilter = config.getDisabledTopicFilter();
-        return !enabledTopicFilter.contains(Configuration.ENABLED_TOPICS_ALL)
+        boolean isDisabled = !enabledTopicFilter.contains(Configuration.ENABLED_TOPICS_ALL)
                 && enabledTopicFilter.stream().noneMatch(topic::contains)
                 || !topic.isEmpty() && disabledTopicFilter.stream().anyMatch(topic::contains);
+        log.debug("Checking if topic '{}' is disabled: {}", topic, isDisabled);
+        return isDisabled;
     }
 
     protected Optional<Integer> getAccountId(String authorUsername) {
         try {
-            return accountCache
-                .getByUsername(authorUsername)
-                .map(accountState -> accountState.account().id().get());
+            Optional<Integer> accountId = accountCache
+                    .getByUsername(authorUsername)
+                    .map(accountState -> accountState.account().id().get());
+            log.debug("Retrieved account ID for username '{}': {}", authorUsername, accountId);
+            return accountId;
         }
         catch (Exception e) {
             log.error("Could not find account ID for username '{}'", authorUsername);
@@ -51,6 +58,7 @@ public class GerritClientAccount extends GerritClientBase {
     }
 
     public Integer getNotNullAccountId(String authorUsername) {
+        log.debug("Getting not null account ID for username '{}'", authorUsername);
         return getAccountId(authorUsername).orElseThrow(() -> new NoSuchElementException(
                 String.format("Error retrieving '%s' account ID in Gerrit", authorUsername)));
     }
@@ -58,6 +66,7 @@ public class GerritClientAccount extends GerritClientBase {
     private List<String> getAccountGroups(Integer accountId) {
         try (ManualRequestContext requestContext = config.openRequestContext()) {
             List<GroupInfo> groups = config.getGerritApi().accounts().id(accountId).getGroups();
+            log.debug("Retrieved groups for account ID {}: {}", accountId, groups);
             return groups.stream().map(g -> g.name).collect(toList());
         }
         catch (Exception e) {
@@ -74,14 +83,18 @@ public class GerritClientAccount extends GerritClientBase {
         }
         Optional<Integer> accountId = getAccountId(authorUsername);
         if (accountId.isEmpty()) {
+            log.debug("No account ID found for username '{}', cannot determine group status.", authorUsername);
             return false;
         }
         List<String> accountGroups = getAccountGroups(accountId.orElse(-1));
         if (accountGroups == null || accountGroups.isEmpty()) {
+            log.debug("No groups found for account ID of username '{}', assuming not disabled.", authorUsername);
             return false;
         }
-        return !enabledGroups.contains(Configuration.ENABLED_GROUPS_ALL)
+        boolean isDisabled = !enabledGroups.contains(Configuration.ENABLED_GROUPS_ALL)
                 && enabledGroups.stream().noneMatch(accountGroups::contains)
                 || disabledGroups.stream().anyMatch(accountGroups::contains);
+        log.debug("User group status for username '{}': disabled={}", authorUsername, isDisabled);
+        return isDisabled;
     }
 }

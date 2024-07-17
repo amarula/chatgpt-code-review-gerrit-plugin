@@ -31,13 +31,18 @@ public class ChatGptDataPrompt {
                 gerritClientData,
                 localizer
         );
+        log.debug("ChatGptDataPrompt initialized for change: {}", change.getFullChangeId());
     }
 
     public String buildPrompt() {
+        log.debug("Building data prompt for ChatGPT.");
         for (int i = 0; i < chatGptDataPromptHandler.getCommentProperties().size(); i++) {
             chatGptDataPromptHandler.addMessageItem(i);
+            log.debug("Added message item to prompt for comment index: {}", i);
         }
         List<ChatGptMessageItem> messageItems = chatGptDataPromptHandler.getMessageItems();
-        return messageItems.isEmpty() ? "" : getGson().toJson(messageItems);
+        String promptJson = messageItems.isEmpty() ? "" : getGson().toJson(messageItems);
+        log.debug("Final chatGPT prompt JSON: {}", promptJson);
+        return promptJson;
     }
 }

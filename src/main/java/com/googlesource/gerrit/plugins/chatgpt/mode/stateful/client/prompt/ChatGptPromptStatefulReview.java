@@ -28,6 +28,7 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
     public ChatGptPromptStatefulReview(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config, changeSetData, change);
         loadDefaultPrompts("promptsStatefulReview");
+        log.debug("ChatGptPromptStatefulReview initialized for change ID: {}", change.getFullChangeId());
     }
 
     @Override
@@ -36,10 +37,12 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
         if (config.getGptReviewCommitMessages()) {
             instructions.add(getReviewPromptCommitMessages());
         }
+        log.debug("GPT Assistant Review Instructions added: {}", instructions);
     }
 
     @Override
     public String getGptRequestDataPrompt() {
+        log.debug("No specific request data prompt for reviews.");
         return null;
     }
 
@@ -53,6 +56,7 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
                 ))),
                 getPatchSetReviewPrompt()
         ));
+        log.debug("Review instructions formed: {}", instructions);
     }
 
     protected String getGptAssistantInstructionsReview(boolean... ruleFilter) {
