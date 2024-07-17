@@ -37,6 +37,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         super(config);
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+        log.debug("Initialized ChatGptClientStateful.");
     }
 
     public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet) {
@@ -46,6 +47,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
 
         ChatGptThread chatGptThread = new ChatGptThread(config, pluginDataHandlerProvider);
         String threadId = chatGptThread.createThread();
+        log.debug("Created ChatGPT thread with ID: {}", threadId);
 
         ChatGptThreadMessage chatGptThreadMessage = new ChatGptThreadMessage(
                 threadId,
@@ -66,8 +68,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         );
         chatGptRun.createRun();
         chatGptRun.pollRunStep();
-        // Attribute `requestBody` is valued for testing purposes
-        requestBody = chatGptThreadMessage.getAddMessageRequestBody();
+        requestBody = chatGptThreadMessage.getAddMessageRequestBody();  // Valued for testing purposes
         log.debug("ChatGPT request body: {}", requestBody);
 
         ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
@@ -78,29 +79,43 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
 
     private ChatGptResponseContent getResponseContentStateful(String threadId, ChatGptRun chatGptRun) {
         return switch (chatGptRun.getFirstStepDetails().getType()) {
-            case TYPE_MESSAGE_CREATION -> retrieveThreadMessage(threadId, chatGptRun);
-            case TYPE_TOOL_CALLS -> getResponseContent(chatGptRun.getFirstStepToolCalls());
-            default -> throw new IllegalStateException("Unexpected Step Type in stateful ChatGpt response: " +
-                    chatGptRun);
+            case TYPE_MESSAGE_CREATION -> {
+                log.debug("Retrieving thread message for thread ID: {}", threadId);
+                yield retrieveThreadMessage(threadId, chatGptRun);
+            }
+            case TYPE_TOOL_CALLS -> {
+                log.debug("Processing tool calls from ChatGPT run.");
+                yield getResponseContent(chatGptRun.getFirstStepToolCalls());
+            }
+            default -> throw new IllegalStateException("Unexpected Step Type in stateful ChatGpt response: " + chatGptRun);
         };
     }
 
     private ChatGptResponseContent retrieveThreadMessage(String threadId, ChatGptRun chatGptRun) {
         ChatGptThreadMessage chatGptThreadMessage = new ChatGptThreadMessage(threadId, config);
-        ChatGptThreadMessageResponse threadMessageResponse = chatGptThreadMessage.retrieveMessage(
-                chatGptRun.getFirstStepDetails().getMessageCreation().getMessageId()
-        );
+        String messageId = chatGptRun.getFirstStepDetails().getMessageCreation().getMessageId();
+        log.debug("Retrieving message with ID: {}", messageId);
+
+        ChatGptThreadMessageResponse threadMessageResponse = chatGptThreadMessage.retrieveMessage(messageId);
         String responseText = threadMessageResponse.getContent().get(0).getText().getValue();
         if (responseText == null) {
+            log.error("ChatGPT thread message response content is null for message ID: {}", messageId);
             throw new RuntimeException("ChatGPT thread message response content is null");
         }
+
+        log.debug("Response text received: {}", responseText);
         if (isJsonString(responseText)) {
+            log.debug("Response text is JSON, extracting content.");
             return extractResponseContent(responseText);
         }
+
+        log.debug("Response text is not JSON, returning as is.");
         return new ChatGptResponseContent(responseText);
     }
 
+
     private ChatGptResponseContent extractResponseContent(String responseText) {
+        log.debug("Extracting response content from JSON.");
         return getGson().fromJson(unwrapJsonCode(responseText), ChatGptResponseContent.class);
     }
 }

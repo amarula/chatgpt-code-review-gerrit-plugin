@@ -58,9 +58,11 @@ public class PatchSetReviewer {
         this.chatGptClient = chatGptClient;
         this.localizer = localizer;
         debugCodeBlocksReview = new DebugCodeBlocksReview(localizer);
+        log.debug("PatchSetReviewer initialized.");
     }
 
     public void review(GerritChange change) throws Exception {
+        log.debug("Starting review process for change: {}", change.getFullChangeId());
         reviewBatches = new ArrayList<>();
         reviewScores = new ArrayList<>();
         commentProperties = gerritClient.getClientData(change).getCommentProperties();
@@ -110,8 +112,10 @@ public class PatchSetReviewer {
     }
 
     private void retrieveReviewBatches(ChatGptResponseContent reviewReply, GerritChange change) {
+        log.debug("Retrieving review batches for change: {}", change.getFullChangeId());
         if (reviewReply.getMessageContent() != null && !reviewReply.getMessageContent().isEmpty()) {
             reviewBatches.add(new ReviewBatch(reviewReply.getMessageContent()));
+            log.debug("Added single message content to review batches.");
             return;
         }
         for (ChatGptReplyItem replyItem : reviewReply.getReplies()) {
@@ -138,13 +142,16 @@ public class PatchSetReviewer {
                 setPatchSetReviewBatchMap(batchMap, replyItem);
             }
             reviewBatches.add(batchMap);
+            log.debug("Added review batch from reply item: {}", batchMap);
         }
     }
 
     private ChatGptResponseContent getReviewReply(GerritChange change, String patchSet) throws Exception {
+        log.debug("Generating review reply for patch set.");
         List<String> patchLines = Arrays.asList(patchSet.split("\n"));
         if (patchLines.size() > config.getMaxReviewLines()) {
-            log.warn("Patch set too large. Skipping review. changeId: {}", change.getFullChangeId());
+            log.warn("Patch set too large for review, size: {}, max allowed: {}", patchLines.size(),
+                    config.getMaxReviewLines());
             return new ChatGptResponseContent(String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines()));
         }
 
@@ -152,6 +159,7 @@ public class PatchSetReviewer {
     }
 
     private Integer getReviewScore(GerritChange change) {
+        log.debug("Calculating review score for change ID: {}", change.getFullChangeId());
         if (config.isVotingEnabled()) {
             return reviewScores.isEmpty() ?
                     (change.getIsCommentEvent() ? null : 0) :

@@ -14,15 +14,21 @@ public class HttpClient {
 
     public String execute(Request request) {
         try (Response response = client.newCall(request).execute()) {
-            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-            log.debug("HttpClient Response body: {}", response.body());
+            if (!response.isSuccessful()) {
+                log.error("HTTP request failed with status code: {}", response.code());
+                throw new IOException("Unexpected code " + response);
+            }
+            log.debug("HTTP response successfully received for request URL: {}", request.url());
             if (response.body() != null) {
-                return response.body().string();
+                String responseBody = response.body().string();
+                log.debug("HTTP Response body for request URL {}: {}", request.url(), responseBody);
+                return responseBody;
             }
             else {
-                log.error("Request {} returned an empty string", request);
+                log.error("Request {} returned an empty response body", request);
             }
         } catch (IOException e) {
+            log.error("HTTP request execution failed for request URL: {}", request.url(), e);
             throw new RuntimeException(e);
         }
         return null;
@@ -36,13 +42,16 @@ public class HttpClient {
 
         if (body != null) {
             builder.post(body);
+            log.debug("Creating POST request for URI: {} with body", uri);
         }
         else {
             builder.get();
+            log.debug("Creating GET request for URI: {}", uri);
         }
         if (additionalHeaders != null) {
             for (Map.Entry<String, String> header : additionalHeaders.entrySet()) {
                 builder.header(header.getKey(), header.getValue());
+                log.debug("Added header {} : {}", header.getKey(), header.getValue());
             }
         }
         return builder.build();
@@ -52,12 +61,13 @@ public class HttpClient {
                                          Map<String, String> additionalHeaders) {
         if (requestObject != null) {
             String bodyJson = getGson().toJson(requestObject);
-            log.debug("Request body: {}", bodyJson);
+            log.debug("Creating JSON request body: {}", bodyJson);
             RequestBody body = RequestBody.create(bodyJson, MediaType.get("application/json"));
 
             return createRequest(uri, bearer, body, additionalHeaders);
         }
         else {
+            log.debug("Creating request without a body for URI: {}", uri);
             return createRequest(uri, bearer, null, additionalHeaders);
         }
     }

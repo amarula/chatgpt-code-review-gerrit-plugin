@@ -42,6 +42,7 @@ public class FileDiffProcessed {
 
         updateContent(gerritPatchSetFileDiff);
         updateRandomPlaceholder(gerritPatchSetFileDiff);
+        log.debug("FileDiffProcessed initialized for {}", (isCommitMessage ? "commit message" : "file diff"));
     }
 
     private void updateContent(GerritPatchSetFileDiff gerritPatchSetFileDiff) {
@@ -52,6 +53,7 @@ public class FileDiffProcessed {
         reviewDiffContent = new ArrayList<>();
         codeFinderDiffs = new ArrayList<>();
         List<GerritPatchSetFileDiff.Content> patchSetDiffContent = gerritPatchSetFileDiff.getContent();
+        log.debug("Updating content from patch set diff content.");
         // Iterate over the items of the diff content
         for (GerritPatchSetFileDiff.Content patchSetContentItem : patchSetDiffContent) {
             diffContentItem = new DiffContent();
@@ -73,17 +75,20 @@ public class FileDiffProcessed {
             placeholderVariableLength++;
         }
         while (gerritPatchSetFileDiff.toString().contains(randomPlaceholder));
+        log.debug("Generated random placeholder: {}", randomPlaceholder);
     }
 
     private void filterCommitMessageContent(List<String> fieldValue) {
         fieldValue.removeIf(s ->
                 s.isEmpty() || Settings.COMMIT_MESSAGE_FILTER_OUT_PREFIXES.values().stream().anyMatch(s::startsWith));
+        log.debug("Filtered commit message content.");
     }
 
     private void updateCodeEntities(Field diffField, List<String> diffLines) throws IllegalAccessException {
         String diffType = diffField.getName();
         String content = joinWithNewLine(diffLines);
         diffField.set(diffContentItem, content);
+        log.debug("Updated code entities for field: {}", diffType);
         // If the lines modified in the PatchSet are not deleted, they are utilized to populate newContent and
         // charToLineMapItem
         if (diffType.contains("b")) {
@@ -127,7 +132,7 @@ public class FileDiffProcessed {
             updateCodeEntities(diffField, diffLines);
 
         } catch (IllegalAccessException | NoSuchFieldException e) {
-            log.error("Error while processing file difference (diff type: {})", patchSetDiffField.getName(), e);
+            log.error("Error processing file diff item (field: {})", patchSetDiffField.getName(), e);
         }
     }
 }

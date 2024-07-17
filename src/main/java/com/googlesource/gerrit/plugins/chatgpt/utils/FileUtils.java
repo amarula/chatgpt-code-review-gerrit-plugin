@@ -1,5 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -8,10 +10,18 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
 
+@Slf4j
 public class FileUtils {
     public static InputStreamReader getInputStreamReader(String filename) {
-        return new InputStreamReader(Objects.requireNonNull(
-                FileUtils.class.getClassLoader().getResourceAsStream(filename)), StandardCharsets.UTF_8);
+        try {
+            InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(
+                    FileUtils.class.getClassLoader().getResourceAsStream(filename)), StandardCharsets.UTF_8);
+            log.debug("Input stream reader created for file: {}", filename);
+            return reader;
+        } catch (NullPointerException e) {
+            log.error("File not found or error reading the file: {}", filename, e);
+            throw new RuntimeException("File not found or error reading the file: " + filename, e);
+        }
     }
 
     public static Path createTempFileWithContent(String prefix, String suffix, String content) {
@@ -19,7 +29,9 @@ public class FileUtils {
         try {
             tempFile = Files.createTempFile(prefix, suffix);
             Files.write(tempFile, content.getBytes(StandardCharsets.UTF_8));
+            log.debug("Temporary file created: {}", tempFile);
         } catch (IOException e) {
+            log.error("Failed to create or write to temporary file: {}", e.getMessage(), e);
             throw new RuntimeException(e);
         }
         tempFile.toFile().deleteOnExit();
@@ -29,11 +41,14 @@ public class FileUtils {
 
     public static boolean matchesExtensionList(String filename, List<String> extensions) {
         int extIndex = filename.lastIndexOf('.');
-        return extIndex >= 1 && extensions.contains(filename.substring(extIndex));
+        boolean matches = extIndex >= 1 && extensions.contains(filename.substring(extIndex));
+        log.debug("Filename '{}' matches extension list: {}", filename, matches);
+        return matches;
     }
 
     public static String sanitizeFilename (String filename) {
-        // Replace any characters that are invalid in filenames (especially slashes) with a "+"
-        return filename.replaceAll("[^-_a-zA-Z0-9]", "+");
+        String sanitized = filename.replaceAll("[^-_a-zA-Z0-9]", "+");
+        log.debug("Original filename: '{}', Sanitized filename: '{}'", filename, sanitized);
+        return sanitized;
     }
 }
