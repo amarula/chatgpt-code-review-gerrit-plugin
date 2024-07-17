@@ -31,23 +31,27 @@ public class ChatGptClientStatefulTaskSpecific extends ChatGptClientStateful imp
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         super(config, gitRepoFiles, pluginDataHandlerProvider);
+        log.debug("Initialized ChatGptClientStatefulTaskSpecific.");
     }
 
     public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet) {
+        log.debug("Task-specific ChatGPT ask method called with changeId: {}", change.getFullChangeId());
         if (change.getIsCommentEvent()) {
             return super.ask(changeSetData, change, patchSet);
         }
         List<ChatGptResponseContent> chatGptResponseContents = new ArrayList<>();
-        for(ReviewAssistantStages assistantStage : ReviewAssistantStages.values()) {
+        for (ReviewAssistantStages assistantStage : ReviewAssistantStages.values()) {
             changeSetData.setReviewAssistantStage(assistantStage);
+            log.debug("Processing stage: {}", assistantStage);
             chatGptResponseContents.add(super.ask(changeSetData, change, patchSet));
         }
         return mergeResponses(chatGptResponseContents);
     }
 
     private ChatGptResponseContent mergeResponses(List<ChatGptResponseContent> chatGptResponseContents) {
+        log.debug("Merging responses from different task-specific stages.");
         ChatGptResponseContent mergedResponse = chatGptResponseContents.remove(0);
-        for(ChatGptResponseContent chatGptResponseContent : chatGptResponseContents) {
+        for (ChatGptResponseContent chatGptResponseContent : chatGptResponseContents) {
             List<ChatGptReplyItem> replies = chatGptResponseContent.getReplies();
             if (replies != null) {
                 mergedResponse.getReplies().addAll(replies);
@@ -56,6 +60,7 @@ public class ChatGptClientStatefulTaskSpecific extends ChatGptClientStateful imp
                 mergedResponse.setMessageContent(chatGptResponseContent.getMessageContent());
             }
         }
+        log.debug("Merged response content: {}", mergedResponse.getMessageContent());
         return mergedResponse;
     }
 }

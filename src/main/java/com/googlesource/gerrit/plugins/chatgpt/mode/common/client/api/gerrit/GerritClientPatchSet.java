@@ -34,24 +34,27 @@ public class GerritClientPatchSet extends GerritClientAccount {
     public GerritClientPatchSet(Configuration config, AccountCache accountCache) {
         super(config, accountCache);
         diffs = new ArrayList<>();
+        log.debug("Initialized GerritClientPatchSet.");
     }
 
     public void retrieveRevisionBase(GerritChange change) {
+        log.debug("Retrieving revision base for change: {}", change.getFullChangeId());
         try (ManualRequestContext requestContext = config.openRequestContext()) {
             ChangeInfo changeInfo =
-                config
-                    .getGerritApi()
-                    .changes()
-                    .id(
-                        change.getProjectName(),
-                        change.getBranchNameKey().shortName(),
-                        change.getChangeKey().get())
-                    .get(ListChangesOption.ALL_REVISIONS);
+                    config
+                            .getGerritApi()
+                            .changes()
+                            .id(
+                                    change.getProjectName(),
+                                    change.getBranchNameKey().shortName(),
+                                    change.getChangeKey().get())
+                            .get(ListChangesOption.ALL_REVISIONS);
             revisionBase =
-                Optional.ofNullable(changeInfo)
-                    .map(info -> info.revisions)
-                    .map(revisions -> revisions.size() - 1)
-                    .orElse(0);
+                    Optional.ofNullable(changeInfo)
+                            .map(info -> info.revisions)
+                            .map(revisions -> revisions.size() - 1)
+                            .orElse(0);
+            log.debug("Retrieved revision base for change: {} is {}", change.getFullChangeId(), revisionBase);
         }
         catch (Exception e) {
             log.error("Could not retrieve revisions for PatchSet with fullChangeId: {}", change.getFullChangeId(), e);
@@ -60,11 +63,14 @@ public class GerritClientPatchSet extends GerritClientAccount {
     }
 
     protected int getChangeSetRevisionBase(ChangeSetData changeSetData) {
-        return isChangeSetBased(changeSetData) ? 0 : revisionBase;
+        int base = isChangeSetBased(changeSetData) ? 0 : revisionBase;
+        log.debug("Determined ChangeSet revision base as {}", base);
+        return base;
     }
 
     protected void retrieveFileDiff(GerritChange change, List<String> files, int revisionBase) throws Exception {
         List<String> enabledFileExtensions = config.getEnabledFileExtensions();
+        log.debug("Retrieving file diff for change: {}", change.getFullChangeId());
         try (ManualRequestContext requestContext = config.openRequestContext()) {
             for (String filename : files) {
                 isCommitMessage = filename.equals("/COMMIT_MSG");
@@ -83,6 +89,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
                                 .file(filename)
                                 .diff(revisionBase);
                 processFileDiff(filename, diff);
+                log.debug("Processed file diff for file: {}", filename);
             }
         }
     }
@@ -92,7 +99,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
     }
 
     private void processFileDiff(String filename, DiffInfo diff) {
-        log.debug("FileDiff content processed: {}", filename);
+        log.debug("Processing file diff for filename: {}", filename);
 
         GerritPatchSetFileDiff gerritPatchSetFileDiff = new GerritPatchSetFileDiff();
         Optional.ofNullable(diff.metaA)
@@ -116,6 +123,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
         fileDiffsProcessed.put(filename, fileDiffProcessed);
         gerritReviewFileDiff.setContent(fileDiffProcessed.getReviewDiffContent());
         diffs.add(getNoEscapedGson().toJson(gerritReviewFileDiff));
+        log.debug("Completed processing for file: {}", filename);
     }
 
     protected static GerritFileDiff.Meta toMeta(DiffInfo.FileMeta input) {

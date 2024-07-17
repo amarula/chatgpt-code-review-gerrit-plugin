@@ -84,6 +84,7 @@ public class ChatGptRun extends ClientBase {
             log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
 
             String response = httpClient.execute(stepsRequest);
+            log.debug("ChatGPT Response: {}", response);
             stepResponse = getGson().fromJson(response, ChatGptListResponse.class);
             log.info("Run executed after {} polling requests: {}", pollingCount, stepResponse);
             if (stepResponse.getData().isEmpty()) {
