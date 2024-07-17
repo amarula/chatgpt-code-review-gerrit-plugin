@@ -52,17 +52,15 @@ public class ConfigCreator {
         this.context = context;
         this.gerritApi = gerritApi;
         this.pluginDataHandlerBaseProvider = pluginDataHandlerBaseProvider;
+        log.debug("ConfigCreator initialized for plugin: {}", pluginName);
     }
 
     public Configuration createConfig(Project.NameKey projectName, Change.Key changeKey) throws NoSuchProjectException {
+        log.debug("Creating configuration for project: {} and change: {}", projectName, changeKey);
         PluginConfig globalConfig = configFactory.getFromGerritConfig(pluginName);
-        log.debug(
-            "These configuration items have been set in the global configuration: {}",
-            globalConfig.getNames());
+        log.debug("Global configuration loaded with items: {}", globalConfig.getNames());
         PluginConfig projectConfig = configFactory.getFromProjectConfig(projectName, pluginName);
-        log.debug(
-            "These configuration items have been set in the project configuration: {}",
-            projectConfig.getNames());
+        log.debug("Project configuration loaded with items: {}", projectConfig.getNames());
         // `PluginDataHandlerProvider` cannot be injected because `GerritChange` is not initialized at this stage:
         // instead of using `PluginDataHandlerProvider.getChangeScope`, `PluginDataHandlerBaseProvider.get` is employed
         Map<String, String> dynamicConfig = pluginDataHandlerBaseProvider.get(changeKey.toString())
@@ -87,6 +85,7 @@ public class ConfigCreator {
 
     private Optional<AccountState> getAccount(PluginConfig globalConfig) {
         String gptUser = globalConfig.getString(Configuration.KEY_GERRIT_USERNAME);
+        log.debug("Retrieving account for username: {}", gptUser);
         return accountCache.getByUsername(gptUser);
     }
 
@@ -95,6 +94,7 @@ public class ConfigCreator {
             String pluginName,
             Map<String, String> dynamicConfig
     ) {
+        log.debug("Updating dynamic configuration for plugin: {}", pluginName);
         // Retrieve all current configuration values
         Set<String> keys = projectConfig.getNames();
         Map<String, String> currentConfigValues = new HashMap<>();
@@ -109,7 +109,7 @@ public class ConfigCreator {
     }
 
     private PluginConfig.@NonNull Update getProjectUpdate(String pluginName, Map<String, String> currentConfigValues) {
-        // Use PluginConfig.Update to apply merged configuration
+        log.debug("Applying merged configuration for plugin: {}", pluginName);
         PluginConfig.Update configUpdater = new PluginConfig.Update(
                 pluginName,
                 new Config(),

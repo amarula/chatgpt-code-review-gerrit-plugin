@@ -46,6 +46,7 @@ public class GerritClientReview extends GerritClientAccount {
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.localizer = localizer;
         debugCodeBlocksDynamicSettings = new DebugCodeBlocksDynamicSettings(localizer);
+        log.debug("GerritClientReview initialized.");
     }
 
     public void setReview(
@@ -54,23 +55,25 @@ public class GerritClientReview extends GerritClientAccount {
             ChangeSetData changeSetData,
             Integer reviewScore
     ) throws Exception {
+        log.debug("Setting review for change ID: {}", change.getFullChangeId());
         ReviewInput reviewInput = buildReview(reviewBatches, changeSetData, reviewScore);
         if (reviewInput.comments == null && reviewInput.message == null) {
+            log.debug("No comments or messages to post for review.");
             return;
         }
         try (ManualRequestContext requestContext = config.openRequestContext()) {
             ReviewResult result = config
-                .getGerritApi()
-                .changes()
-                .id(
-                    change.getProjectName(),
-                    change.getBranchNameKey().shortName(),
-                    change.getChangeKey().get())
-                .current()
-                .review(reviewInput);
+                    .getGerritApi()
+                    .changes()
+                    .id(
+                            change.getProjectName(),
+                            change.getBranchNameKey().shortName(),
+                            change.getChangeKey().get())
+                    .current()
+                    .review(reviewInput);
 
             if (!Strings.isNullOrEmpty(result.error)) {
-              log.error("Review setting failed with status code: {}", result.error);
+                log.error("Review setting failed with status code: {}", result.error);
             }
         }
     }
@@ -84,6 +87,7 @@ public class GerritClientReview extends GerritClientAccount {
     }
 
     private ReviewInput buildReview(List<ReviewBatch> reviewBatches, ChangeSetData changeSetData, Integer reviewScore) {
+        log.debug("Building review input.");
         ReviewInput reviewInput = ReviewInput.create();
         Map<String, List<CommentInput>> comments = new HashMap<>();
         String systemMessage = localizer.getText("message.empty.review");
@@ -115,14 +119,16 @@ public class GerritClientReview extends GerritClientAccount {
         if (!messages.isEmpty()) {
             reviewInput.message(joinWithDoubleNewLine(messages));
         }
+        log.debug("System message for review set.");
     }
 
     private Map<String, List<CommentInput>> getReviewComments(List<ReviewBatch> reviewBatches) {
+        log.debug("Getting review comments.");
         Map<String, List<CommentInput>> comments = new HashMap<>();
         for (ReviewBatch reviewBatch : reviewBatches) {
             String message = sanitizeChatGptMessage(reviewBatch.getContent());
             if (message.trim().isEmpty()) {
-                log.info("Empty message from review not submitted.");
+                log.info("Empty message from review not submitted for batch with ID: {}", reviewBatch.getId());
                 continue;
             }
             boolean unresolved;
@@ -133,25 +139,29 @@ public class GerritClientReview extends GerritClientAccount {
             if (reviewBatch.getLine() != null || reviewBatch.getRange() != null) {
                 filenameComment.line = reviewBatch.getLine();
                 Optional.ofNullable(reviewBatch.getRange())
-                        .ifPresent(
-                                r -> {
-                                    Comment.Range range = new Comment.Range();
-                                    range.startLine = r.startLine;
-                                    range.startCharacter = r.startCharacter;
-                                    range.endLine = r.endLine;
-                                    range.endCharacter = r.endCharacter;
-                                    filenameComment.range = range;
-                                });
+                        .ifPresent(r -> {
+                            Comment.Range range = new Comment.Range();
+                            range.startLine = r.startLine;
+                            range.startCharacter = r.startCharacter;
+                            range.endLine = r.endLine;
+                            range.endCharacter = r.endCharacter;
+                            filenameComment.range = range;
+                            log.debug("Setting range for comment on file '{}': startLine {}, endLine {}",
+                                    filename, range.startLine, range.endLine);
+                        });
                 filenameComment.inReplyTo = reviewBatch.getId();
                 unresolved = !config.getInlineCommentsAsResolved();
+                log.debug("Comment for file '{}' is marked as unresolved: {}", filename, unresolved);
             }
             else {
                 unresolved = !config.getPatchSetCommentsAsResolved();
+                log.debug("Patch set comment for file '{}' is marked as unresolved: {}", filename, unresolved);
             }
             filenameComment.unresolved = unresolved;
             filenameComments.add(filenameComment);
             comments.putIfAbsent(filename, filenameComments);
         }
+        log.debug("Review comments processed.");
         return comments;
     }
 }

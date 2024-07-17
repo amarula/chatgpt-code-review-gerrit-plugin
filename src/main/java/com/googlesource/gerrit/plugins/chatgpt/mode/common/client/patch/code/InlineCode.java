@@ -21,15 +21,18 @@ public class InlineCode {
     public InlineCode(FileDiffProcessed fileDiffProcessed) {
         codeFinder = new CodeFinder(fileDiffProcessed.getCodeFinderDiffs(), fileDiffProcessed.getRandomPlaceholder());
         newContent = fileDiffProcessed.getNewContent();
+        log.debug("InlineCode initialized with file diff processed content.");
     }
 
     public String getInlineCode(GerritComment commentProperty) {
+        log.debug("Retrieving inline code for comment property.");
         if (commentProperty.getRange() != null) {
             List<String> codeByRange = new ArrayList<>();
             range = commentProperty.getRange();
             for (int line_num = range.startLine; line_num <= range.endLine; line_num++) {
                 codeByRange.add(getLineSlice(line_num));
             }
+            log.debug("Extracted code by range: {}", codeByRange);
             return joinWithNewLine(codeByRange);
         }
         else {
@@ -38,6 +41,7 @@ public class InlineCode {
     }
 
     public Optional<GerritCodeRange> findCommentRange(ChatGptReplyItem replyItem) {
+        log.debug("Finding comment range for ChatGPT reply.");
         int commentedLine;
         try {
             commentedLine = replyItem.getLineNumber();
@@ -45,6 +49,7 @@ public class InlineCode {
         catch (NumberFormatException ex){
             // If the line number is not passed, a line in the middle of the code is used as best guess
             commentedLine = newContent.size() / 2;
+            log.debug("Using middle line as best guess for commented line due to exception: {}", ex.getMessage());
         }
 
         return Optional.ofNullable(codeFinder.findCommentedCode(replyItem, commentedLine));
@@ -79,6 +84,7 @@ public class InlineCode {
             int lastLine = newContent.size() - 1;
             if (line_num > lastLine) {
                 line = newContent.get(lastLine);
+                log.info("Returning the last line due to index out of bounds: {} > {}", line_num, lastLine);
             }
             else {
                 log.warn("Could not extract line #{} from the code", line_num);

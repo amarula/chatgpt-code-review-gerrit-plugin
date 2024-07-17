@@ -125,8 +125,7 @@ public class GerritClientComments extends GerritClientAccount {
                     String commentId = commentObject.getId();
                     String changeMessageId = commentObject.getChangeMessageId();
                     String commentAuthorUsername = commentObject.getAuthor().getUsername();
-                    log.debug(
-                        "Change Message Id: {} - Author: {}", latestChangeMessageId, commentAuthorUsername);
+                    log.debug("Change Message Object: {}", commentObject);
                     long updatedTimeStamp = getTimeStamp(commentObject.getUpdated());
                     if (commentAuthorUsername.equals(authorUsername)
                         && updatedTimeStamp
@@ -149,6 +148,7 @@ public class GerritClientComments extends GerritClientAccount {
     }
 
     private void addLastComments(GerritChange change) {
+        log.debug("Adding last comments for change: {}", change.getFullChangeId());
         ClientMessage clientMessage = new ClientMessage(config, changeSetData, pluginDataHandlerProvider, localizer);
         try {
             List<GerritComment> latestComments = retrieveComments(change);
@@ -157,6 +157,7 @@ public class GerritClientComments extends GerritClientAccount {
             }
             for (GerritComment latestComment : latestComments) {
                 String commentMessage = latestComment.getMessage();
+                log.debug("Processing comment: {}", commentMessage);
                 if (clientMessage.isBotAddressed(commentMessage)) {
                     if (clientMessage.parseCommands(commentMessage)) {
                         commentProperties.clear();

@@ -28,10 +28,13 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
         this.change = change;
         this.isCommentEvent = change.getIsCommentEvent();
         loadDefaultPrompts("promptsStateful");
+        log.debug("Initialized ChatGptPromptStatefulBase with change ID: {}", change.getFullChangeId());
     }
 
     public String getDefaultGptAssistantDescription() {
-        return String.format(DEFAULT_GPT_ASSISTANT_DESCRIPTION, change.getProjectName());
+        String description = String.format(DEFAULT_GPT_ASSISTANT_DESCRIPTION, change.getProjectName());
+        log.debug("Generated GPT Assistant Description: {}", description);
+        return description;
     }
 
     public abstract void addGptAssistantInstructions(List<String> instructions);
@@ -44,8 +47,9 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
                 String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName())
         ));
         addGptAssistantInstructions(instructions);
-
-        return joinWithSpace(instructions);
+        String compiledInstructions = joinWithSpace(instructions);
+        log.debug("Compiled GPT Assistant Instructions: {}", compiledInstructions);
+        return compiledInstructions;
     }
 
     public String getDefaultGptThreadReviewMessage(String patchSet) {
@@ -55,7 +59,9 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
             return gptRequestDataPrompt;
         }
         else {
-            return String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
+            String defaultMessage = String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
+            log.debug("Default Thread Review Message used: {}", defaultMessage);
+            return defaultMessage;
         }
     }
 }
