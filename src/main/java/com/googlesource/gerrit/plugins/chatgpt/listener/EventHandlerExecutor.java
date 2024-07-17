@@ -12,8 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ScheduledExecutorService;
 
-@Slf4j
 @Singleton
+@Slf4j
 public class EventHandlerExecutor {
     private final Injector injector;
     private final ScheduledExecutorService executor;
@@ -29,12 +29,15 @@ public class EventHandlerExecutor {
         int maximumPoolSize = pluginConfigFactory.getFromGerritConfig(pluginName)
                 .getInt("maximumPoolSize", 2);
         this.executor = workQueue.createQueue(maximumPoolSize, "ChatGPT request executor");
+        log.debug("EventHandlerExecutor initialized with maximum pool size: {}", maximumPoolSize);
     }
 
     public void execute(Configuration config, Event event) {
+        log.debug("Executing event handler for event: {}", event);
         GerritEventContextModule contextModule = new GerritEventContextModule(config, event);
         EventHandlerTask task = injector.createChildInjector(contextModule)
                 .getInstance(EventHandlerTask.class);
         executor.execute(task);
+        log.debug("Task submitted to executor for event: {}", event);
     }
 }

@@ -81,10 +81,12 @@ public class ClientCommands extends ClientBase {
         }
         modifiedDynamicConfig = false;
         shouldResetDynamicConfig = false;
+        log.debug("ClientCommands initialized.");
     }
 
     public boolean parseCommands(String comment) {
         boolean commandFound = false;
+        log.debug("Parsing commands from comment: {}", comment);
         Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(preprocessCommands(comment));
         while (reviewCommandMatcher.find()) {
             CommandSet command = COMMAND_MAP.get(reviewCommandMatcher.group(1));
@@ -96,15 +98,18 @@ public class ClientCommands extends ClientBase {
     }
 
     public String removeCommands(String comment) {
+        log.debug("Removing commands from comment: {}", comment);
         Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(comment);
         return reviewCommandMatcher.replaceAll("");
     }
 
     private String preprocessCommands(String comment) {
+        log.debug("Preprocessing commands: {}", comment);
         return comment.replaceAll(PREPROCESS_REGEX, PREPROCESS_REPLACEMENT);
     }
 
     private void parseCommand(CommandSet command) {
+        log.debug("Parsing command: {}", command);
         switch (command) {
             case REVIEW, REVIEW_LAST -> {
                 changeSetData.setForcedReview(true);
@@ -133,6 +138,7 @@ public class ClientCommands extends ClientBase {
     }
 
     private void parseOptions(CommandSet command, Matcher reviewCommandMatcher) {
+        log.debug("Parsing options for command {}", command);
         if (reviewCommandMatcher.group(2) == null) return;
         Matcher reviewOptionsMatcher = OPTIONS_PATTERN.matcher(reviewCommandMatcher.group(2));
         while (reviewOptionsMatcher.find()) {
@@ -145,6 +151,7 @@ public class ClientCommands extends ClientBase {
         String optionValue = Optional.ofNullable(reviewOptionsMatcher.group(2))
                 .map(TextUtils::unwrapDeSlashQuotes)
                 .orElse("");
+        log.debug("Parsed option - Key: {} - Value: {}", optionKey, optionValue);
         if (REVIEW_COMMANDS.contains(command)) {
             switch (REVIEW_OPTION_MAP.get(optionKey)) {
                 case FILTER -> {
