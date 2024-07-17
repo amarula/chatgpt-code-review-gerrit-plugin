@@ -21,19 +21,26 @@ public class DynamicConfiguration {
         this.pluginDataHandler = pluginDataHandlerProvider.getChangeScope();
         dynamicConfig = Optional.ofNullable(pluginDataHandler.getJsonValue(KEY_DYNAMIC_CONFIG, String.class))
                 .orElse(new HashMap<>());
+        log.debug("Loaded dynamic configuration: {}", dynamicConfig);
     }
 
     public void setConfig(String key, String value) {
+        log.debug("Setting config key: {} with value: {}", key, value);
         dynamicConfig.put(key, value);
     }
 
     public void updateConfiguration(boolean modifiedDynamicConfig, boolean shouldResetDynamicConfig) {
-        if (dynamicConfig == null || dynamicConfig.isEmpty()) return;
+        if (dynamicConfig == null || dynamicConfig.isEmpty()) {
+            log.debug("Dynamic configuration is empty or null, skipping update.");
+            return;
+        }
         if (shouldResetDynamicConfig && !modifiedDynamicConfig) {
+            log.debug("Resetting dynamic configuration without modification.");
             pluginDataHandler.removeValue(KEY_DYNAMIC_CONFIG);
         }
         else {
             if (shouldResetDynamicConfig) {
+                log.debug("Resetting dynamic configuration.");
                 resetDynamicConfig();
             }
             log.info("Updating dynamic configuration with {}", dynamicConfig);
@@ -43,6 +50,8 @@ public class DynamicConfiguration {
 
     private void resetDynamicConfig() {
         // The keys with empty values are simply removed
+        log.debug("Resetting dynamic configuration by removing empty or null values.");
         dynamicConfig.entrySet().removeIf(entry -> entry.getValue() == null || entry.getValue().isEmpty());
+        log.debug("Dynamic configuration after reset: {}", dynamicConfig);
     }
 }

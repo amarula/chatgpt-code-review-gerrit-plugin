@@ -22,9 +22,11 @@ abstract public class ChatGptClient extends ClientBase {
 
     public ChatGptClient(Configuration config) {
         super(config);
+        log.debug("ChatGptClient initialized with configuration.");
     }
 
     protected ChatGptResponseContent extractContent(Configuration config, String body) throws Exception {
+        log.debug("Extracting content with streaming enabled: {}", config.getGptStreamOutput());
         if (config.getGptStreamOutput() && !isCommentEvent) {
             StringBuilder finalContent = new StringBuilder();
             try (BufferedReader reader = new BufferedReader(new StringReader(body))) {
@@ -43,6 +45,7 @@ abstract public class ChatGptClient extends ClientBase {
     }
 
     protected boolean validateResponse(ChatGptResponseContent chatGptResponseContent, String changeId, int attemptInd) {
+        log.debug("Validating response for change ID: {}, attempt: {}", changeId, attemptInd);
         String returnedChangeId = chatGptResponseContent.getChangeId();
         // A response is considered valid if either no changeId is returned or the changeId returned matches the one
         // provided in the request
@@ -55,6 +58,7 @@ abstract public class ChatGptClient extends ClientBase {
     }
 
     protected ChatGptResponseContent getResponseContent(List<ChatGptToolCall> toolCalls) {
+        log.debug("Getting response content from tool calls: {}", toolCalls);
         if (toolCalls.size() > 1) {
             return mergeToolCalls(toolCalls);
         } else {
@@ -63,6 +67,7 @@ abstract public class ChatGptClient extends ClientBase {
     }
 
     protected Optional<String> extractContentFromLine(String line) {
+        log.debug("Extracting content from line \"{}\".", line);
         String dataPrefix = "data: {\"id\"";
 
         if (!line.startsWith(dataPrefix)) {
@@ -91,6 +96,7 @@ abstract public class ChatGptClient extends ClientBase {
     }
 
     private ChatGptResponseContent mergeToolCalls(List<ChatGptToolCall> toolCalls) {
+        log.debug("Merging responses from multiple tool calls.");
         ChatGptResponseContent responseContent = getArgumentAsResponse(toolCalls, 0);
         for (int ind = 1; ind < toolCalls.size(); ind++) {
             responseContent.getReplies().addAll(

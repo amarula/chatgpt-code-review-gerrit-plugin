@@ -55,14 +55,17 @@ public class ChatGptPrompt {
     public ChatGptPrompt(Configuration config) {
         this.config = config;
         loadDefaultPrompts("prompts");
+        log.debug("ChatGptPrompt initialized.");
     }
 
     public ChatGptPrompt(Configuration config, boolean isCommentEvent) {
         this(config);
         this.isCommentEvent = isCommentEvent;
+        log.debug("ChatGptPrompt initialized with isCommentEvent: {}", isCommentEvent);
     }
 
     public static String getCommentRequestPrompt(int commentPropertiesSize) {
+        log.debug("Constructing comment request prompt for {} comment properties.", commentPropertiesSize);
         return joinWithSpace(new ArrayList<>(List.of(
                 DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
                 buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES),
@@ -72,6 +75,7 @@ public class ChatGptPrompt {
     }
 
     public static String getReviewPromptCommitMessages() {
+        log.debug("Constructing review prompt for commit messages.");
         return joinWithSpace(new ArrayList<>(List.of(
                 String.format(DEFAULT_GPT_REVIEW_PROMPT_COMMIT_MESSAGES, DEFAULT_GPT_HOW_TO_FIND_COMMIT_MESSAGE),
                 DEFAULT_GPT_REVIEW_PROMPT_INSTRUCTIONS_COMMIT_MESSAGES
@@ -88,12 +92,14 @@ public class ChatGptPrompt {
                     Field field = me.getField(entry.getKey());
                     field.setAccessible(true);
                     field.set(null, entry.getValue());
+                    log.debug("Loaded prompt attribute: {} with value: {}", entry.getKey(), entry.getValue());
                 } catch (NoSuchFieldException | IllegalAccessException e) {
                     log.error("Error setting prompt '{}'", entry.getKey(), e);
                     throw new IOException();
                 }
             }
         } catch (IOException e) {
+            log.error("Failed to load prompts from file: {}", promptFile, e);
             throw new RuntimeException("Failed to load prompts", e);
         }
         // Keep the given order of attributes
@@ -101,6 +107,7 @@ public class ChatGptPrompt {
     }
 
     protected static String buildFieldSpecifications(List<String> filterFields) {
+        log.debug("Building field specifications for filter fields: {}", filterFields);
         Set<String> orderedFilterFields = new LinkedHashSet<>(filterFields);
         Map<String, String> attributes = DEFAULT_GPT_REPLIES_ATTRIBUTES.entrySet().stream()
                 .filter(entry -> orderedFilterFields.contains(entry.getKey()))
@@ -121,6 +128,7 @@ public class ChatGptPrompt {
     }
 
     public String getPatchSetReviewPromptInstructions() {
+        log.debug("Getting patch set review prompt instructions.");
         List<String> attributes = new ArrayList<>(PATCH_SET_REVIEW_REPLY_ATTRIBUTES);
         if (config.isVotingEnabled() || config.getFilterNegativeComments()) {
             updateScoreDescription();
@@ -133,24 +141,29 @@ public class ChatGptPrompt {
     }
 
     public String getPatchSetReviewPrompt() {
+        log.debug("Getting patch set review prompt.");
         return getPatchSetReviewPromptInstructions() + SPACE + DEFAULT_GPT_REPLIES_PROMPT_INLINE;
     }
 
     private void updateScoreDescription() {
+        log.debug("Updating score description.");
         String scoreDescription = DEFAULT_GPT_REPLIES_ATTRIBUTES.get(ATTRIBUTE_SCORE);
         if (scoreDescription.contains("%d")) {
             scoreDescription = String.format(scoreDescription, config.getVotingMinScore(), config.getVotingMaxScore());
             DEFAULT_GPT_REPLIES_ATTRIBUTES.put(ATTRIBUTE_SCORE, scoreDescription);
+            log.debug("Updated score description to: {}", scoreDescription);
         }
     }
 
     private void updateRelevanceDescription() {
+        log.debug("Updating relevance description.");
         String relevanceDescription = DEFAULT_GPT_REPLIES_ATTRIBUTES.get(ATTRIBUTE_RELEVANCE);
         if (relevanceDescription.contains("%s")) {
             String defaultGptRelevanceRules = config.getString(Configuration.KEY_GPT_RELEVANCE_RULES,
                     DEFAULT_GPT_RELEVANCE_RULES);
             relevanceDescription = String.format(relevanceDescription, defaultGptRelevanceRules);
             DEFAULT_GPT_REPLIES_ATTRIBUTES.put(ATTRIBUTE_RELEVANCE, relevanceDescription);
+            log.debug("Updated relevance description to: {}", relevanceDescription);
         }
     }
 }

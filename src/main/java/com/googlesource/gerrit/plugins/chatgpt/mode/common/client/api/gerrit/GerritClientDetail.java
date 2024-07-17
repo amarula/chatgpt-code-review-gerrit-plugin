@@ -37,15 +37,18 @@ public class GerritClientDetail {
     public GerritClientDetail(Configuration config, ChangeSetData changeSetData) {
         this.gptAccountId = changeSetData.getGptAccountId();
         this.config = config;
+        log.debug("Initialized GerritClientDetail for GPT account ID: {}", gptAccountId);
     }
 
     public List<GerritComment> getMessages(GerritChange change) {
         loadPatchSetDetail(change);
+        log.debug("Retrieving messages for change ID: {}", change.getFullChangeId());
         return gerritPatchSetDetail.getMessages();
     }
 
     public boolean isWorkInProgress(GerritChange change) {
         loadPatchSetDetail(change);
+        log.debug("Checking if change ID: {} is work in progress", change.getFullChangeId());
         return gerritPatchSetDetail.getWorkInProgress() != null && gerritPatchSetDetail.getWorkInProgress();
     }
 
@@ -53,7 +56,7 @@ public class GerritClientDetail {
         loadPatchSetDetail(change);
         List<GerritPatchSetDetail.Permission> permissions = gerritPatchSetDetail.getLabels().getCodeReview().getAll();
         if (permissions == null) {
-            log.debug("No limitations on the ChatGPT voting range were detected");
+            log.debug("No limitations on the ChatGPT voting range were detected for change ID: {}", change.getFullChangeId());
             return null;
         }
         for (GerritPatchSetDetail.Permission permission : permissions) {
@@ -69,48 +72,50 @@ public class GerritClientDetail {
         if (gerritPatchSetDetail != null) {
             return;
         }
+        log.debug("Loading patch set detail for change ID: {}", change.getFullChangeId());
         try {
             gerritPatchSetDetail = getReviewDetail(change);
         }
         catch (Exception e) {
-            log.error("Error retrieving PatchSet details", e);
+            log.error("Error retrieving PatchSet details for change ID: {}", change.getFullChangeId(), e);
         }
     }
 
     private GerritPatchSetDetail getReviewDetail(GerritChange change) throws Exception {
         try (ManualRequestContext requestContext = config.openRequestContext()) {
-          ChangeInfo info =
-              config
-                  .getGerritApi()
-                  .changes()
-                  .id(change.getProjectName(), change.getBranchNameKey().shortName(), change.getChangeKey().get())
-                  .get();
+            ChangeInfo info =
+                    config
+                            .getGerritApi()
+                            .changes()
+                            .id(change.getProjectName(), change.getBranchNameKey().shortName(), change.getChangeKey().get())
+                            .get();
+            log.debug("Retrieved change info for change ID: {}", change.getFullChangeId());
 
-          GerritPatchSetDetail detail = new GerritPatchSetDetail();
-          detail.setWorkInProgress(info.workInProgress);
-          Optional.ofNullable(info.labels)
-              .map(Map::entrySet)
-              .map(Set::stream)
-              .flatMap(
-                  labels ->
-                      labels
-                          .filter(label -> LabelId.CODE_REVIEW.equals(label.getKey()))
-                          .map(GerritClientDetail::toLabels)
-                          .findAny())
-              .ifPresent(detail::setLabels);
-          Optional.ofNullable(info.messages)
-              .map(messages -> messages.stream().map(GerritClientDetail::toComment).collect(toList()))
-              .ifPresent(detail::setMessages);
+            GerritPatchSetDetail detail = new GerritPatchSetDetail();
+            detail.setWorkInProgress(info.workInProgress);
+            Optional.ofNullable(info.labels)
+                    .map(Map::entrySet)
+                    .map(Set::stream)
+                    .flatMap(
+                            labels ->
+                                    labels
+                                            .filter(label -> LabelId.CODE_REVIEW.equals(label.getKey()))
+                                            .map(GerritClientDetail::toLabels)
+                                            .findAny())
+                    .ifPresent(detail::setLabels);
+            Optional.ofNullable(info.messages)
+                    .map(messages -> messages.stream().map(GerritClientDetail::toComment).collect(toList()))
+                    .ifPresent(detail::setMessages);
 
-          return detail;
+            return detail;
         }
     }
 
     private static GerritPatchSetDetail.Labels toLabels(Entry<String, LabelInfo> label) {
         List<GerritPatchSetDetail.Permission> permissions =
-            Optional.ofNullable(label.getValue().all)
-                .map(all -> all.stream().map(GerritClientDetail::toPermission).collect(toList()))
-                .orElse(emptyList());
+                Optional.ofNullable(label.getValue().all)
+                        .map(all -> all.stream().map(GerritClientDetail::toPermission).collect(toList()))
+                        .orElse(emptyList());
         GerritPatchSetDetail.CodeReview codeReview = new GerritPatchSetDetail.CodeReview();
         codeReview.setAll(permissions);
         GerritPatchSetDetail.Labels labels = new GerritPatchSetDetail.Labels();
@@ -123,13 +128,13 @@ public class GerritClientDetail {
         permission.setValue(value.value);
         Optional.ofNullable(value.date).ifPresent(date -> permission.setDate(toDateString(date)));
         Optional.ofNullable(value.permittedVotingRange)
-            .ifPresent(
-                permittedVotingRange -> {
-                  GerritPermittedVotingRange range = new GerritPermittedVotingRange();
-                  range.setMin(permittedVotingRange.min);
-                  range.setMax(permittedVotingRange.max);
-                  permission.setPermittedVotingRange(range);
-                });
+                .ifPresent(
+                        permittedVotingRange -> {
+                            GerritPermittedVotingRange range = new GerritPermittedVotingRange();
+                            range.setMin(permittedVotingRange.min);
+                            range.setMax(permittedVotingRange.max);
+                            permission.setPermittedVotingRange(range);
+                        });
         permission.setAccountId(value._accountId);
         return permission;
     }

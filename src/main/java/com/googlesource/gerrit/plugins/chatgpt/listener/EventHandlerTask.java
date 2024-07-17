@@ -40,9 +40,9 @@ public class EventHandlerTask implements Runnable {
     );
 
     private static final Map<String, SupportedEvents> EVENT_TYPE_MAP = Map.of(
-        "patchset-created", SupportedEvents.PATCH_SET_CREATED,
-        "comment-added", SupportedEvents.COMMENT_ADDED,
-        "change-merged", SupportedEvents.CHANGE_MERGED
+            "patchset-created", SupportedEvents.PATCH_SET_CREATED,
+            "comment-added", SupportedEvents.COMMENT_ADDED,
+            "change-merged", SupportedEvents.CHANGE_MERGED
     );
 
     private final Configuration config;
@@ -73,25 +73,30 @@ public class EventHandlerTask implements Runnable {
         this.config = config;
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+        log.debug("EventHandlerTask initialized for change ID: {}", change.getFullChangeId());
     }
 
     @Override
     public void run() {
-        execute();
+        log.debug("EventHandlerTask started for event type: {}", change.getEventType());
+        Result result = execute();
+        log.debug("EventHandlerTask execution completed with result: {}", result);
     }
 
     @VisibleForTesting
     public Result execute() {
+        log.debug("Starting event processing for change ID: {}", change.getFullChangeId());
         if (!preProcessEvent()) {
+            log.debug("Preprocessing event not supported or failed for event type: {}", change.getEventType());
             return Result.NOT_SUPPORTED;
         }
 
         try {
-            log.info("Processing change: {}", change.getFullChangeId());
+            log.info("Processing event for change ID:: {}", change.getFullChangeId());
             eventHandlerType.processEvent();
-            log.info("Finished processing change: {}", change.getFullChangeId());
+            log.info("Finished processing event for change ID: {}", change.getFullChangeId());
         } catch (Exception e) {
-            log.error("Error while processing change: {}", change.getFullChangeId(), e);
+            log.error("Error while processing event for change ID: {}", change.getFullChangeId(), e);
             if (e instanceof InterruptedException) {
                 Thread.currentThread().interrupt();
             }
@@ -102,30 +107,34 @@ public class EventHandlerTask implements Runnable {
 
     private boolean preProcessEvent() {
         String eventType = Optional.ofNullable(change.getEventType()).orElse("");
-        log.info("Event type {}", eventType);
         processing_event_type = EVENT_TYPE_MAP.get(eventType);
         if (processing_event_type == null) {
+            log.debug("Event type not supported: {}", eventType);
             return false;
         }
 
         if (!isReviewEnabled(change)) {
+            log.debug("Review not enabled for event type: {}", eventType);
             return false;
         }
 
         while (true) {
             eventHandlerType = getEventHandlerType();
+            log.debug("Event handler type resolved for event: {}", eventType);
             switch (eventHandlerType.preprocessEvent()) {
                 case EXIT -> {
+                    log.debug("Exiting event handler preprocessing for event type: {}", eventType);
                     return false;
                 }
                 case SWITCH_TO_PATCH_SET_CREATED -> {
+                    log.debug("Switching to patch set created event type");
                     processing_event_type = SupportedEvents.PATCH_SET_CREATED;
                     continue;
                 }
             }
             break;
         }
-
+        log.debug("Preprocessing completed successfully for event type: {}", eventType);
         return true;
     }
 
@@ -150,10 +159,9 @@ public class EventHandlerTask implements Runnable {
         String topic = getTopic(change).orElse("");
         log.debug("PatchSet Topic retrieved: '{}'", topic);
         if (gerritClient.isDisabledTopic(topic)) {
-            log.info("Disabled review for PatchSets with Topic '{}'", topic);
+            log.info("Review disabled for topic: '{}'", topic);
             return false;
         }
-
         return true;
     }
 
@@ -162,6 +170,7 @@ public class EventHandlerTask implements Runnable {
             ChangeAttribute changeAttribute = change.getPatchSetEvent().change.get();
             return Optional.ofNullable(changeAttribute.topic);
         } catch (NullPointerException e) {
+            log.debug("Failed to retrieve topic for change ID: {}", change.getFullChangeId());
             return Optional.empty();
         }
     }
