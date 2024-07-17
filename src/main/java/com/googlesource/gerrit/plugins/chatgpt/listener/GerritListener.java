@@ -35,16 +35,18 @@ public class GerritListener implements EventListener {
         this.evenHandlerExecutor = evenHandlerExecutor;
         this.pluginDataHandlerBaseProvider = pluginDataHandlerBaseProvider;
         this.myInstanceId = myInstanceId;
+        log.debug("GerritListener initialized with instance ID: {}", myInstanceId);
     }
 
     @Override
     public void onEvent(Event event) {
+        log.debug("Received event: {}", event.getType());
         if (!Objects.equals(event.instanceId, myInstanceId)) {
-            log.debug("Ignore event from another instance");
+            log.debug("Ignore event from another instance: {}", event.instanceId);
             return;
         }
         if (!EVENT_CLASS_MAP.containsValue(event.getClass())) {
-            log.debug("The event {} is not managed by the plugin", event);
+            log.debug("The event {} is not managed by the plugin", event.getType());
             return;
         }
 
@@ -54,8 +56,11 @@ public class GerritListener implements EventListener {
         Change.Key changeKey = patchSetEvent.getChangeKey();
 
         try {
+            log.debug("Creating configuration for project: {} and change: {}", projectNameKey, changeKey);
             Configuration config = configCreator.createConfig(projectNameKey, changeKey);
+            log.debug("Configuration created, configuring logging...");
             LoggingConfiguration.configure(config, pluginDataHandlerBaseProvider);
+            log.debug("Configuration and logging set, executing event handler...");
             evenHandlerExecutor.execute(config, patchSetEvent);
         } catch (NoSuchProjectException e) {
             log.error("Project not found: {}", projectNameKey, e);

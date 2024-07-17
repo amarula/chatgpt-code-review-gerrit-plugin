@@ -30,43 +30,36 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
         log.debug("Revision base: {}", revisionBase);
 
         List<String> files = getAffectedFiles(change, revisionBase);
-        log.debug("Patch files: {}", files);
+        log.debug("Affected files for Patch Set: {}", files);
 
         String fileDiffsJson = getFileDiffsJson(change, files, revisionBase);
-        log.debug("File diffs: {}", fileDiffsJson);
+        log.debug("File diffs JSON: {}", fileDiffsJson);
 
         return fileDiffsJson;
     }
 
     private List<String> getAffectedFiles(GerritChange change, int revisionBase) throws Exception {
         try (ManualRequestContext requestContext = config.openRequestContext()) {
-            Map<String, FileInfo> files =
-                config
-                    .getGerritApi()
+            Map<String, FileInfo> files = config.getGerritApi()
                     .changes()
-                    .id(
-                        change.getProjectName(),
-                        change.getBranchNameKey().shortName(),
-                        change.getChangeKey().get())
+                    .id(change.getProjectName(), change.getBranchNameKey().shortName(), change.getChangeKey().get())
                     .current()
                     .files(revisionBase);
             return files.entrySet().stream()
-                .filter(
-                    fileEntry -> {
-                      String filename = fileEntry.getKey();
-                      if (!filename.equals("/COMMIT_MSG") || config.getGptReviewCommitMessages()) {
-                        if (fileEntry.getValue().size > config.getMaxReviewFileSize()) {
-                          log.info(
-                              "File '{}' not reviewed because its size exceeds the fixed maximum allowable size.",
-                              filename);
-                        } else {
-                          return true;
+                    .filter(fileEntry -> {
+                        String filename = fileEntry.getKey();
+                        if (!filename.equals("/COMMIT_MSG") || config.getGptReviewCommitMessages()) {
+                            if (fileEntry.getValue().size > config.getMaxReviewFileSize()) {
+                                log.info("File '{}' not reviewed due to its size exceeding the maximum allowable size" +
+                                                " of {} bytes.", filename, config.getMaxReviewFileSize());
+                                return false;
+                            }
+                            return true;
                         }
-                      }
-                      return false;
+                        return false;
                     })
-                .map(Map.Entry::getKey)
-                .collect(toList());
+                    .map(Map.Entry::getKey)
+                    .collect(toList());
         }
     }
 

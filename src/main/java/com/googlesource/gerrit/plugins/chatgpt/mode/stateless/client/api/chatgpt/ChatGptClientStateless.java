@@ -47,21 +47,26 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
         log.info("Processing STATELESS ChatGPT Request with changeId: {}, Patch Set: {}", changeId, patchSet);
         for (int attemptInd = 0; attemptInd < REVIEW_ATTEMPT_LIMIT; attemptInd++) {
             HttpRequest request = createRequest(config, changeSetData, patchSet);
-            log.debug("ChatGPT request: {}", request.toString());
+            log.debug("ChatGPT request attempt #{}: {}", attemptInd, request);
 
             HttpResponse<String> response = httpClientWithRetry.execute(request);
 
             String body = response.body();
-            log.debug("ChatGPT response body: {}", body);
+            log.debug("ChatGPT response body attempt #{}: {}", attemptInd, body);
             if (body == null) {
                 throw new IOException("ChatGPT response body is null");
             }
 
             ChatGptResponseContent contentExtracted = extractContent(config, body);
             if (validateResponse(contentExtracted, changeId, attemptInd)) {
+                log.info("Valid ChatGPT response received on attempt #{}", attemptInd);
                 return contentExtracted;
             }
+            else {
+                log.warn("Invalid ChatGPT response on attempt #{}", attemptInd);
+            }
         }
+        log.error("Failed to receive valid ChatGPT response after {} attempts", REVIEW_ATTEMPT_LIMIT);
         throw new RuntimeException("Failed to receive valid ChatGPT response");
     }
 
@@ -89,6 +94,9 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
                 .role("user")
                 .content(chatGptPromptStateless.getGptUserPrompt(changeSetData, patchSet))
                 .build();
+
+        log.debug("System message for ChatGPT: {}", systemMessage.getContent());
+        log.debug("User message for ChatGPT: {}", userMessage.getContent());
 
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, isCommentEvent);
         ChatGptTool[] tools = new ChatGptTool[] {

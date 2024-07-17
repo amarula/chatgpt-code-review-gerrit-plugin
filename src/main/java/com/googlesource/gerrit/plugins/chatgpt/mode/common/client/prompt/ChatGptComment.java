@@ -19,20 +19,28 @@ public class ChatGptComment extends ClientBase {
         super(config);
         this.changeSetData = changeSetData;
         this.localizer = localizer;
+        log.debug("ChatGptComment initialized");
     }
 
     protected String getCleanedMessage(GerritComment commentProperty) {
+        log.debug("Cleaning message for comment property: {}", commentProperty);
         commentMessage = new ClientMessage(config, changeSetData, commentProperty.getMessage(), localizer);
         if (isFromAssistant(commentProperty)) {
+            log.debug("Comment from assistant detected. Removing debug code blocks.");
             commentMessage.removeDebugCodeBlocksReview().removeDebugCodeBlocksDynamicSettings();
         }
         else {
+            log.debug("Comment not from assistant. Removing mentions and commands.");
             commentMessage.removeMentions().removeCommands();
         }
-        return commentMessage.removeHeadings().getMessage();
+        String cleanedMessage = commentMessage.removeHeadings().getMessage();
+        log.debug("Cleaned message: {}", cleanedMessage);
+        return cleanedMessage;
     }
 
     protected boolean isFromAssistant(GerritComment commentProperty) {
-        return commentProperty.getAuthor().getAccountId() == changeSetData.getGptAccountId();
+        boolean fromAssistant = commentProperty.getAuthor().getAccountId() == changeSetData.getGptAccountId();
+        log.debug("Checking if comment is from assistant: {}", fromAssistant);
+        return fromAssistant;
     }
 }

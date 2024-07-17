@@ -43,5 +43,6 @@ public class ChangeSetDataHandler {
                 }
             }
         }
+        log.debug("ChangeSetData updated: {}", changeSetData);
     }
 }
