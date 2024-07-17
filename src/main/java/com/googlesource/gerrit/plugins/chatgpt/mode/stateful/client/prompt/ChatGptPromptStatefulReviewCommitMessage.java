@@ -20,6 +20,7 @@ public class ChatGptPromptStatefulReviewCommitMessage extends ChatGptPromptState
     public ChatGptPromptStatefulReviewCommitMessage(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config, changeSetData, change);
         loadDefaultPrompts("promptsStatefulReviewCommitMessage");
+        log.debug("Initialized ChatGptPromptStatefulReviewCommitMessage for project: {}", change.getProjectName());
     }
 
     @Override
@@ -34,10 +35,13 @@ public class ChatGptPromptStatefulReviewCommitMessage extends ChatGptPromptState
                 getPatchSetReviewPromptInstructions(),
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES_GUIDELINES
         ));
+        log.debug("Commit Message Review specific GPT Assistant Instructions added: {}", instructions);
     }
 
     @Override
     public String getDefaultGptThreadReviewMessage(String patchSet) {
-        return super.getDefaultGptThreadReviewMessage(filterCommitMessage(patchSet));
+        String filteredPatchSet = filterCommitMessage(patchSet);
+        log.debug("Filtered Commit Message for Patch Set: {}", filteredPatchSet);
+        return super.getDefaultGptThreadReviewMessage(filteredPatchSet);
     }
 }

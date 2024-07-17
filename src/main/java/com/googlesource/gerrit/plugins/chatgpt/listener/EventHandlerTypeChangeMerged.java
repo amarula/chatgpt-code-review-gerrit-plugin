@@ -29,15 +29,18 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+        log.debug("Initialized EventHandlerTypeChangeMerged for change ID: {}", change.getFullChangeId());
     }
 
     @Override
     public PreprocessResult preprocessEvent() {
+        log.debug("Preprocessing event for change merged: {}", change.getFullChangeId());
         return PreprocessResult.OK;
     }
 
     @Override
     public void processEvent() {
+        log.debug("Starting processing event for change merged: {}", change.getFullChangeId());
         ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
                 config,
                 changeSetData,
@@ -46,6 +49,8 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
                 pluginDataHandlerProvider
         );
         chatGptAssistant.flushAssistantIds();
+        log.debug("Flushed assistant IDs for change merged: {}", change.getFullChangeId());
         chatGptAssistant.createVectorStore();
+        log.debug("Created vector store for change merged: {}", change.getFullChangeId());
     }
 }

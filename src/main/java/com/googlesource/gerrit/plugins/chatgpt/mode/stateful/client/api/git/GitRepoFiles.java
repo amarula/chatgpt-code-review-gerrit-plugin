@@ -33,7 +33,7 @@ public class GitRepoFiles {
         String repoPath = String.format(REPO_PATTERN, change.getProjectNameKey().toString());
         try {
             Repository repository = openRepository(repoPath);
-            log.debug("Open Repo path {}", repoPath);
+            log.debug("Open Repo path: {}", repoPath);
             Map<String, String> filesWithContent = listFilesWithContent(repository);
 
             return getGson().toJson(filesWithContent);

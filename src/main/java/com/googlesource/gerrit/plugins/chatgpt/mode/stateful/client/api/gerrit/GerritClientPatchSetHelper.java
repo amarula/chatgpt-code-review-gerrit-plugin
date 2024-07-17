@@ -22,7 +22,9 @@ public class GerritClientPatchSetHelper {
         // Remove Patch heading up to the Date annotation, so that the commit message is included. Additionally, remove
         // the change type between brackets
         Pattern CONFIG_ID_HEADING_PATTERN = Pattern.compile(GERRIT_COMMIT_MESSAGE_PATTERN, Pattern.DOTALL);
-        return CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch).replaceAll(GERRIT_COMMIT_MESSAGE_PREFIX);
+        String result = CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch).replaceAll(GERRIT_COMMIT_MESSAGE_PREFIX);
+        log.debug("Patch filtered with commit message: {}", result);
+        return result;
     }
 
     public static String filterPatchWithoutCommitMessage(GerritChange change, String formattedPatch) {
@@ -31,7 +33,9 @@ public class GerritClientPatchSetHelper {
                 "^.*?" + COMMIT_MESSAGE_FILTER_OUT_PREFIXES.get("CHANGE_ID") + " " + change.getChangeKey().get(),
                 Pattern.DOTALL
         );
-        return CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch).replaceAll("");
+        String result = CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch).replaceAll("");
+        log.debug("Patch filtered without commit message: {}", result);
+        return result;
     }
 
     public static String filterCommitMessage(String formattedPatch) {
@@ -42,9 +46,12 @@ public class GerritClientPatchSetHelper {
         );
         Matcher commitMessageMatcher = CONFIG_ID_HEADING_PATTERN.matcher(formattedPatch);
         if (commitMessageMatcher.find()) {
-            return commitMessageMatcher.group(1).trim();
+            String commitMessage = commitMessageMatcher.group(1).trim();
+            log.debug("Commit message extracted: {}", commitMessage);
+            return commitMessage;
         }
         else {
+            log.error("Commit message not found in patch set: {}", formattedPatch);
             throw new RuntimeException("Commit message not found in patch set: " + formattedPatch);
         }
     }
@@ -54,7 +61,9 @@ public class GerritClientPatchSetHelper {
         List<String> files = new ArrayList<>();
         while (extractFilenameMatcher.find()) {
             files.add(extractFilenameMatcher.group(1));
+            log.debug("File extracted from patch: {}", extractFilenameMatcher.group(1));
         }
+        log.debug("Total files extracted from patch: {}", files.size());
         return files;
     }
 }

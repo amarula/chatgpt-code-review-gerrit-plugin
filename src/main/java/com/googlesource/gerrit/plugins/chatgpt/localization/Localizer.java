@@ -13,9 +13,12 @@ public class Localizer {
     @Inject
     public Localizer(Configuration config) {
         this.resourceBundle = ResourceBundle.getBundle("localization.localTexts", config.getLocaleDefault());
+        log.debug("ResourceBundle initialized with locale: {}", config.getLocaleDefault());
     }
 
     public String getText(String key) {
-        return resourceBundle.getString(key);
+        String text = resourceBundle.getString(key);
+        log.debug("Retrieved text for key '{}': {}", key, text);
+        return text;
     }
 }
