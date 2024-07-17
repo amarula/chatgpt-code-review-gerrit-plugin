@@ -24,26 +24,34 @@ public class EventHandlerTypeCommentAdded implements IEventHandlerType {
         this.change = change;
         this.reviewer = reviewer;
         this.gerritClient = gerritClient;
-
+        log.debug("Initialized EventHandlerTypeCommentAdded for full change ID: {}", change.getFullChangeId());
     }
 
     @Override
     public PreprocessResult preprocessEvent() {
+        log.debug("Starting preprocessing event for comment added on change ID: {}", change.getFullChangeId());
         if (!gerritClient.retrieveLastComments(change)) {
+            log.debug("No new comments found for full change ID: {}", change.getFullChangeId());
             if (changeSetData.getForcedReview()) {
+                log.info("Forcing review due to settings for full change ID: {}", change.getFullChangeId());
                 return PreprocessResult.SWITCH_TO_PATCH_SET_CREATED;
             } else {
-                log.info("No comments found for review");
+                log.info("Exiting preprocessing as no comments require action for full change ID: {}",
+                        change.getFullChangeId());
                 return PreprocessResult.EXIT;
             }
         }
+        else {
+            log.debug("Comments retrieved during preprocessing for full change ID: {}", change.getFullChangeId());
+        }
         change.setIsCommentEvent(true);
-
         return PreprocessResult.OK;
     }
 
     @Override
     public void processEvent() throws Exception {
+        log.debug("Processing event to review comments on full change ID: {}", change.getFullChangeId());
         reviewer.review(change);
+        log.debug("Completed processing event for reviewing comments on full change ID: {}", change.getFullChangeId());
     }
 }

@@ -20,8 +20,10 @@ public class ChatGptDataPromptRequestsStateless extends ChatGptDataPromptRequest
         super(config, changeSetData, gerritClientData, localizer);
     }
 
+    @Override
     protected ChatGptMessageItem getMessageItem(int i) {
         super.getMessageItem(i);
+        log.debug("Retrieving history for message item {}", messageItem);
         setHistory(messageItem, messageHistory);
 
         return messageItem;

@@ -9,8 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;
 
-@Slf4j
 @Singleton
+@Slf4j
 public class GerritClient {
     private final GerritClientFacade gerritClientFacade;
 
