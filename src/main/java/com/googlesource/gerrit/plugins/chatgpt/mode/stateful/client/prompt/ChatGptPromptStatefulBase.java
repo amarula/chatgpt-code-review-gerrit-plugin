@@ -17,6 +17,7 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
     public static String DEFAULT_GPT_ASSISTANT_NAME;
     public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT;
     public static String DEFAULT_GPT_MESSAGE_REVIEW;
 
     protected final ChangeSetData changeSetData;

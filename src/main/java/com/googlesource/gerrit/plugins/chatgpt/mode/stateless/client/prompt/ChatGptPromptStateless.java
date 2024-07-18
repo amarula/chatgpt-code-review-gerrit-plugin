@@ -38,6 +38,16 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
         )));
     }
 
+    public static String getCommentRequestPrompt(int commentPropertiesSize) {
+        log.debug("Constructing Stateless comment request prompt for {} comment properties.", commentPropertiesSize);
+        return joinWithSpace(new ArrayList<>(List.of(
+                DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
+                buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES),
+                DEFAULT_GPT_REPLIES_PROMPT_INLINE,
+                String.format(DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize)
+        )));
+    }
+
     public String getGptSystemPrompt() {
         List<String> prompt = new ArrayList<>(Arrays.asList(
                 config.getString(Configuration.KEY_GPT_SYSTEM_PROMPT, DEFAULT_GPT_SYSTEM_PROMPT) + DOT,
