@@ -217,6 +217,7 @@ directives = "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
 - `selectiveLogLevelOverride`: This setting allows for overriding the log level of specific messages, ensuring they are
   logged even if their level is above the current setting. This is useful for debugging without the need to set the
   overall log level to DEBUG, which could result in excessive DEBUG messages from sources like gerrit and other plugins.
+  Some usage examples can be found at [Selective Log Level Override](#selective-log-level-override) section.
 
 ### Optional Parameters Specific to Stateless Mode
 
