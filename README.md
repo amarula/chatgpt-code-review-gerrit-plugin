@@ -247,6 +247,7 @@ directives = "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
 - `selectiveLogLevelOverride`: This setting allows for overriding the log level of specific messages, ensuring they are
   logged even if their level is above the current setting. This is useful for debugging without the need to set the
   overall log level to DEBUG, which could result in excessive DEBUG messages from sources like gerrit and other plugins.
+  Some usage examples can be found at [Selective Log Level Override](#selective-log-level-override) section.
 
 ### Optional Parameters for Global Configuration only
 
@@ -323,6 +324,104 @@ be specified using the `/directives` command, which serves as a shortcut for `/c
 - You can run the unit tests in the project to familiarize yourself with the plugin's source code.
 - If you want to individually test the Gerrit API or the ChatGPT API, you can refer to the test cases in
   CodeReviewPluginIT.
+
+## Debugging
+
+In addition to standard testing tools, we provide additional resources to assist with live debugging of the ChatGPT
+plugin when running on a Gerrit instance. These tools can be managed through both static configurations (such as
+modifying `gerrit.config` and `project.config`) and dynamic configurations (using the `/configure` command in a message
+addressed to ChatGPT).
+
+### Enabling Message Debugging Tools
+
+To enable the debugging tools, use the `enableMessageDebugging` static configuration setting. Due to its nature, this
+setting cannot be enabled dynamically through Message Debugging and must be set statically.
+
+```
+[plugin "chatgpt-code-review-gerrit-plugin"]
+    ...
+    enableMessageDebugging = true
+```
+
+### Using the Review Debug Command
+
+Once `enableMessageDebugging` is enabled, you can obtain additional useful debug information in each ChatGPT reply, such
+as relevance and scores, by using the `--debug` command option. For example:
+
+```
+@gpt /review --debug
+```
+
+### Selective Log Level Override
+
+Setting the overall log level to DEBUG might cause an overload of DEBUG messages from various sources in the Gerrit log
+file. The `selectiveLogLevelOverride` configuration option allows you to specify log messages specific log messages for
+logging, even if their level is below the current log level threshold. If assigned one or more filter items, each item
+filters the log messages. For instance, to log all DEBUG messages from the `ClientMessage` class for all projects, add
+the following to `global.config`:
+
+```
+selectiveLogLevelOverride = ClientMessage
+```
+
+This effect can also be achieved for actions performed on a specific Change Set using the command:
+
+```
+@gpt /configure --selectiveLogLevelOverride=ClientMessage
+```
+
+The `selectiveLogLevelOverride` option uses the following syntax:
+
+```
+selectiveLogLevelOverride = "[<class_name_1>]#[<message_1>], ..., [<class_name_N>]#[<message_N>]"
+```
+
+Note that it's mandatory to enclose the `selectiveLogLevelOverride` global value in double quotes when specifying
+multiple filter items.
+
+Each item's filter may consist of a `className` and a `message` filter. Since the filter uses the "contain" criterion,
+multiple items with a common substring can be selected by setting that substring. For example, all DEBUG messages in
+classes whose names contains `EventHandler` can be elevated with:
+
+```
+@gpt /configure --selectiveLogLevelOverride=EventHandler
+```
+
+To select log messages containing the word "Found," you can use:
+
+```
+@gpt /configure --selectiveLogLevelOverride=#Found
+```
+
+For multiple items, enclose the settings string in double quotes:
+
+```
+@gpt /configure --selectiveLogLevelOverride="#Found, ChatGptRun#\"ChatGPT Retrieve Run\""
+```
+
+Note that, if the message filters contain spaces, they must also be enclosed in double quotes. When the global value
+itself is quoted, any double quotes around the message filters should be escaped with backslashes.
+
+### Dynamically Changing Settings for Testing/Debugging
+
+Settings can be locally modified for the current Change Set using the `/configure` command. For instance, to set the
+review temperature to "1.0," you can use:
+
+```
+@gpt /configure --gptReviewTemperature=1.0
+```
+
+Following this configuration, a new Change Set review can be initiated with:
+
+```
+@gpt /review
+```
+
+It's also possible to make multiple changes at once:
+
+```
+@gpt /configure --gptMode=stateful, --gptModel=gpt-4-turbo
+```
 
 ## License
 
