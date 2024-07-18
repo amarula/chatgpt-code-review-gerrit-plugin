@@ -10,4 +10,8 @@ import java.util.List;
 public class ChatGptMessageItem extends ChatGptDialogueItem {
     private String request;
     private List<ChatGptRequestMessage> history;
+
+    public void appendToRequest(String appended) {
+        request += appended;
+    }
 }
