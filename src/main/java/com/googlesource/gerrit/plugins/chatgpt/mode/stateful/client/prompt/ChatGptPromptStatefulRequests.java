@@ -6,7 +6,10 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithSpace;
 
 @Slf4j
 public class ChatGptPromptStatefulRequests extends ChatGptPromptStatefulBase implements IChatGptPromptStateful {
@@ -36,5 +39,16 @@ public class ChatGptPromptStatefulRequests extends ChatGptPromptStatefulBase imp
         String requestDataPrompt = changeSetData.getGptDataPrompt();
         log.debug("GPT Request Data Prompt retrieved: {}", requestDataPrompt);
         return requestDataPrompt;
+    }
+
+    private String getCommentRequestPrompt(int commentPropertiesSize) {
+        log.debug("Constructing Stateful comment request prompt for {} comment properties.", commentPropertiesSize);
+        return joinWithSpace(new ArrayList<>(List.of(
+                buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES),
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES,
+                DEFAULT_GPT_REPLIES_PROMPT_INLINE,
+                String.format(DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize)
+        )));
     }
 }
