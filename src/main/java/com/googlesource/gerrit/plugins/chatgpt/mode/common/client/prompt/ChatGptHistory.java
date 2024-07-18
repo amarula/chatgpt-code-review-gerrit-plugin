@@ -8,6 +8,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetD
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.CommentData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -17,6 +18,7 @@ import java.util.stream.Stream;
 @Slf4j
 public class ChatGptHistory extends ChatGptComment {
     private final Set<String> messagesExcludedFromHistory;
+    @Getter
     private final HashMap<String, GerritComment> commentMap;
     private final HashMap<String, GerritComment> patchSetCommentMap;
     private final Set<String> patchSetCommentAdded;

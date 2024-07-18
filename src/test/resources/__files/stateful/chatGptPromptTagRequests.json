@@ -1,1 +1,1 @@
-[{"request":"can you suggest an alternative commit message?","id":0},{"request":"message","id":1}]
+[{"request":"can you suggest an alternative commit message? (Ref. message \"message from gpt\")","id":0},{"request":"message","id":1}]

@@ -22,7 +22,7 @@ public class ChatGptComment extends ClientBase {
         log.debug("ChatGptComment initialized");
     }
 
-    protected String getCleanedMessage(GerritComment commentProperty) {
+    public String getCleanedMessage(GerritComment commentProperty) {
         log.debug("Cleaning message for comment property: {}", commentProperty);
         commentMessage = new ClientMessage(config, changeSetData, commentProperty.getMessage(), localizer);
         if (isFromAssistant(commentProperty)) {
