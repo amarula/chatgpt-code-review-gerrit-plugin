@@ -52,7 +52,9 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
                 joinWithNewLine(new ArrayList<>(List.of(
                         DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES,
                         getGptAssistantInstructionsReview(),
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES
+                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES,
+                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
+                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES
                 ))),
                 getPatchSetReviewPrompt()
         ));
@@ -62,7 +64,6 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
     protected String getGptAssistantInstructionsReview(boolean... ruleFilter) {
         // Rules are applied by default unless the corresponding ruleFilter values is set to false
         ArrayList<String> rules = new ArrayList<>(List.of(
-                DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET
