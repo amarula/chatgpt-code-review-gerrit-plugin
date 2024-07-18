@@ -64,16 +64,6 @@ public class ChatGptPrompt {
         log.debug("ChatGptPrompt initialized with isCommentEvent: {}", isCommentEvent);
     }
 
-    public static String getCommentRequestPrompt(int commentPropertiesSize) {
-        log.debug("Constructing comment request prompt for {} comment properties.", commentPropertiesSize);
-        return joinWithSpace(new ArrayList<>(List.of(
-                DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT,
-                buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES),
-                DEFAULT_GPT_REPLIES_PROMPT_INLINE,
-                String.format(DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize)
-        )));
-    }
-
     public static String getReviewPromptCommitMessages() {
         log.debug("Constructing review prompt for commit messages.");
         return joinWithSpace(new ArrayList<>(List.of(
