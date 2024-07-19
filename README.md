@@ -321,9 +321,157 @@ be specified using the `/directives` command, which serves as a shortcut for `/c
 
 ## Testing
 
+### Overview
+
 - You can run the unit tests in the project to familiarize yourself with the plugin's source code.
 - If you want to individually test the Gerrit API or the ChatGPT API, you can refer to the test cases in
   CodeReviewPluginIT.
+
+### Log Level Override
+
+During tests, the default log level is set to DEBUG, which may result in a surplus of DEBUG messages. To manage this,
+adjust the log level by setting the `GERRIT_CHATGPT_TEST_FILTER_LEVEL` environment variable. For instance, to set the
+testing log level to INFO on a Linux-based OS:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_LEVEL=INFO
+```
+
+### Selective Log Level Override
+
+To continue receiving certain DEBUG-leveled messages after elevating the test log level, use
+the `GERRIT_CHATGPT_TEST_FILTER_VALUE` environment variable. For example, to keep seeing DEBUG messages from the
+class `ClientMessage` even with the log level set to INFO:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=ClientMessage
+```
+
+The syntax for the filter value is as follows:
+
+```
+export GERRIT_CHATGPT_TEST_FILTER_VALUE="[<class_name_1>]#[<message_1>], ..., [<class_name_N>]#[<message_N>]"
+```
+
+Double quotes are required when specifying multiple filter items. Each filter item can include a `className` and
+a `message` filter. Since the filter uses a "contain" criterion, you can select multiple items with a common substring,
+such as all DEBUG messages in classes containing `EventHandler`:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=EventHandler
+```
+
+To filter messages containing the word "Found":
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=#Found
+```
+
+For multiple items with spaces, enclose the settings string in double quotes and escape any internal double quotes:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE="#Found, ChatGptRun#\"ChatGPT Retrieve Run\""
+```
+
+## Debugging
+
+In addition to standard testing tools, we provide additional resources to assist with live debugging of the ChatGPT
+plugin when running on a Gerrit instance. These tools can be managed through both static configurations (such as
+modifying `gerrit.config` and `project.config`) and dynamic configurations (using the `/configure` command in a message
+addressed to ChatGPT).
+
+### Enabling Message Debugging Tools
+
+To enable the debugging tools, use the `enableMessageDebugging` static configuration setting. Due to its nature, this
+setting cannot be enabled dynamically through Message Debugging and must be set statically.
+
+```
+[plugin "chatgpt-code-review-gerrit-plugin"]
+    ...
+    enableMessageDebugging = true
+```
+
+### Using the Review Debug Command
+
+Once `enableMessageDebugging` is enabled, you can obtain additional useful debug information in each ChatGPT reply, such
+as relevance and scores, by using the `--debug` command option. For example:
+
+```
+@gpt /review --debug
+```
+
+### Selective Log Level Override
+
+As with testing, setting the general log level to DEBUG in operational environments can lead to an excess of DEBUG
+messages from various sources in the Gerrit log file. The `selectiveLogLevelOverride` configuration option functions
+similarly to the `GERRIT_CHATGPT_TEST_FILTER_VALUE`, permitting the logging of specific messages below the current log
+level threshold.
+
+For instance, to log all DEBUG messages from the `ClientMessage` class for all projects, add the following
+to `global.config`:
+
+```
+selectiveLogLevelOverride = ClientMessage
+```
+
+This effect can also be achieved for actions performed on a specific Change Set using the command:
+
+```
+@gpt /configure --selectiveLogLevelOverride=ClientMessage
+```
+
+The `selectiveLogLevelOverride` option uses the following syntax:
+
+```
+selectiveLogLevelOverride = "[<class_name_1>]#[<message_1>], ..., [<class_name_N>]#[<message_N>]"
+```
+
+Note that it's mandatory to enclose the `selectiveLogLevelOverride` global value in double quotes when specifying
+multiple filter items.
+
+Each item's filter may consist of a `className` and a `message` filter. Since the filter uses the "contain" criterion,
+multiple items with a common substring can be selected by setting that substring. For example, all DEBUG messages in
+classes whose names contains `EventHandler` can be elevated with:
+
+```
+@gpt /configure --selectiveLogLevelOverride=EventHandler
+```
+
+To select log messages containing the word "Found," you can use:
+
+```
+@gpt /configure --selectiveLogLevelOverride=#Found
+```
+
+For multiple items, enclose the settings string in double quotes:
+
+```
+@gpt /configure --selectiveLogLevelOverride="#Found, ChatGptRun#\"ChatGPT Retrieve Run\""
+```
+
+Note that, if the message filters contain spaces, they must also be enclosed in double quotes. When the global value
+itself is quoted, any double quotes around the message filters should be escaped with backslashes.
+
+### Dynamically Changing Settings for Testing/Debugging
+
+Settings can be locally modified for the current Change Set using the `/configure` command. For instance, to set the
+review temperature to "1.0," you can use:
+
+```
+@gpt /configure --gptReviewTemperature=1.0
+```
+
+Following this configuration, a new Change Set review can be initiated with:
+
+```
+@gpt /review
+```
+
+It's also possible to make multiple changes at once:
+
+```
+@gpt /configure --gptMode=stateful, --gptModel=gpt-4-turbo
+```
 
 ## License
 
