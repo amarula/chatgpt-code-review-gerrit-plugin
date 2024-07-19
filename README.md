@@ -321,9 +321,57 @@ be specified using the `/directives` command, which serves as a shortcut for `/c
 
 ## Testing
 
+### Overview
+
 - You can run the unit tests in the project to familiarize yourself with the plugin's source code.
 - If you want to individually test the Gerrit API or the ChatGPT API, you can refer to the test cases in
   CodeReviewPluginIT.
+
+### Log Level Override
+
+During tests, the default log level is set to DEBUG, which may result in a surplus of DEBUG messages. To manage this,
+adjust the log level by setting the `GERRIT_CHATGPT_TEST_FILTER_LEVEL` environment variable. For instance, to set the
+testing log level to INFO on a Linux-based OS:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_LEVEL=INFO
+```
+
+### Selective Log Level Override
+
+To continue receiving certain DEBUG-leveled messages after elevating the test log level, use
+the `GERRIT_CHATGPT_TEST_FILTER_VALUE` environment variable. For example, to keep seeing DEBUG messages from the
+class `ClientMessage` even with the log level set to INFO:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=ClientMessage
+```
+
+The syntax for the filter value is as follows:
+
+```
+export GERRIT_CHATGPT_TEST_FILTER_VALUE="[<class_name_1>]#[<message_1>], ..., [<class_name_N>]#[<message_N>]"
+```
+
+Double quotes are required when specifying multiple filter items. Each filter item can include a `className` and
+a `message` filter. Since the filter uses a "contain" criterion, you can select multiple items with a common substring,
+such as all DEBUG messages in classes containing `EventHandler`:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=EventHandler
+```
+
+To filter messages containing the word "Found":
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=#Found
+```
+
+For multiple items with spaces, enclose the settings string in double quotes and escape any internal double quotes:
+
+```
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE="#Found, ChatGptRun#\"ChatGPT Retrieve Run\""
+```
 
 ## Debugging
 
@@ -354,11 +402,13 @@ as relevance and scores, by using the `--debug` command option. For example:
 
 ### Selective Log Level Override
 
-Setting the overall log level to DEBUG might cause an overload of DEBUG messages from various sources in the Gerrit log
-file. The `selectiveLogLevelOverride` configuration option allows you to specify log messages specific log messages for
-logging, even if their level is below the current log level threshold. If assigned one or more filter items, each item
-filters the log messages. For instance, to log all DEBUG messages from the `ClientMessage` class for all projects, add
-the following to `global.config`:
+As with testing, setting the general log level to DEBUG in operational environments can lead to an excess of DEBUG
+messages from various sources in the Gerrit log file. The `selectiveLogLevelOverride` configuration option functions
+similarly to the `GERRIT_CHATGPT_TEST_FILTER_VALUE`, permitting the logging of specific messages below the current log
+level threshold.
+
+For instance, to log all DEBUG messages from the `ClientMessage` class for all projects, add the following
+to `global.config`:
 
 ```
 selectiveLogLevelOverride = ClientMessage

@@ -8,7 +8,7 @@ import org.apache.log4j.*;
 
 @Slf4j
 @SuppressWarnings("UnstableApiUsage")
-public class LoggingConfiguration {
+public class LoggingConfigurationDeployed {
     private static final String ORIGINAL_LOG_LEVEL = "originalLogLevel";
 
     public static void configure(Configuration config, PluginDataHandlerBaseProvider pluginDataHandlerBaseProvider) {
@@ -42,7 +42,7 @@ public class LoggingConfiguration {
             originalLogLevel = Level.toLevel(originalLogLevelStr);
         }
         appender.clearFilters();
-        LoggerFilter filter = new LoggerFilter(selectiveLogLevelOverride, originalLogLevel);
+        LoggerFilterDeployed filter = new LoggerFilterDeployed(selectiveLogLevelOverride, originalLogLevel);
         appender.addFilter(filter);
         log.debug("Log Filters added ({}). Current Level: {}", selectiveLogLevelOverride, currentLevel);
         logger.setLevel(Level.DEBUG);
