@@ -10,7 +10,7 @@ import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerBaseProvider;
-import com.googlesource.gerrit.plugins.chatgpt.logging.LoggingConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.logging.LoggingConfigurationDeployed;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Objects;
@@ -59,7 +59,7 @@ public class GerritListener implements EventListener {
             log.debug("Creating configuration for project: {} and change: {}", projectNameKey, changeKey);
             Configuration config = configCreator.createConfig(projectNameKey, changeKey);
             log.debug("Configuration created, configuring logging...");
-            LoggingConfiguration.configure(config, pluginDataHandlerBaseProvider);
+            LoggingConfigurationDeployed.configure(config, pluginDataHandlerBaseProvider);
             log.debug("Configuration and logging set, executing event handler...");
             evenHandlerExecutor.execute(config, patchSetEvent);
         } catch (NoSuchProjectException e) {
