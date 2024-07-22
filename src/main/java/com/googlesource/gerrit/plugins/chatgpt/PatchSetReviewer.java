@@ -128,7 +128,7 @@ public class PatchSetReviewer {
                 log.debug("Score added: {}", score);
                 reviewScores.add(score);
             }
-            if (changeSetData.getReplyFilterEnabled() && isHidden) {
+            if (!change.getIsCommentEvent() && changeSetData.getReplyFilterEnabled() && isHidden) {
                 continue;
             }
             if (changeSetData.getDebugReviewMode()) {
