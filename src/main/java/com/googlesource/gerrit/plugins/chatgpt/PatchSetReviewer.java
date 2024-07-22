@@ -161,9 +161,8 @@ public class PatchSetReviewer {
     private Integer getReviewScore(GerritChange change) {
         log.debug("Calculating review score for change ID: {}", change.getFullChangeId());
         if (config.isVotingEnabled()) {
-            return reviewScores.isEmpty() ?
-                    (change.getIsCommentEvent() ? null : 0) :
-                    Collections.min(reviewScores);
+            return change.getIsCommentEvent() ? null :
+                    (reviewScores.isEmpty() ? 0 : Collections.min(reviewScores));
         }
         else {
             return null;
