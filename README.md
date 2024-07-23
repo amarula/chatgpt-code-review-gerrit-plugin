@@ -319,6 +319,18 @@ be specified using the `/directives` command, which serves as a shortcut for `/c
 /directives "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
 ```
 
+### Forgetting Thread History
+
+Threads capture all prior interactions and evaluations involving ChatGPT within each Change Set. The history stored in
+these threads can be removed with the `/forget_thread` command. This functionality is crucial for preventing ChatGPT
+from merely recycling old responses in stateful mode, particularly following modifications to configuration parameters.
+
+#### Basic Syntax
+
+```
+/forget_thread
+```
+
 ## Testing
 
 ### Overview
