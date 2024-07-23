@@ -29,12 +29,14 @@ public class ChatGptDataPromptRequestsStateful extends ChatGptDataPromptRequests
     @Override
     protected ChatGptMessageItem getMessageItem(int i) {
         log.debug("Getting stateful Message Item");
-        super.getMessageItem(i);
+        ChatGptMessageItem messageItem = new ChatGptMessageItem();
+        setRequestFromCommentProperty(messageItem, i);
         String inReplyToMessage = getReferenceToLastMessage(i);
         if (inReplyToMessage != null) {
             log.debug("In-reply-to message found: {}", inReplyToMessage);
             messageItem.appendToRequest(inReplyToMessage);
         }
+        log.debug("Returned Message Item: {}", messageItem);
         return messageItem;
     }
 
