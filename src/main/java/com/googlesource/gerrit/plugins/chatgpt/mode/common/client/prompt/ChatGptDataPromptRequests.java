@@ -4,6 +4,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptMessageItem;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptRequestMessage;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +43,21 @@ public class ChatGptDataPromptRequests extends ChatGptDataPromptBase {
         log.debug("Retrieving extended message item for index: {}", i);
         messageHistory = gptMessageHistory.retrieveHistory(commentProperties.get(i));
         ChatGptRequestMessage request = extractLastUserMessageFromHistory();
-        messageItem.setRequest(request.getContent());
+        if (request != null) {
+            messageItem.setRequest(request.getContent());
+        }
+        else {
+            setRequestFromCommentProperty(messageItem, i);
+        }
         log.debug("Message item after setting request content: {}", messageItem);
         return messageItem;
+    }
+
+    protected void setRequestFromCommentProperty(ChatGptMessageItem messageItem, int i) {
+        GerritComment gerritComment = commentProperties.get(i);
+        String cleanedMessage = gptMessageHistory.getCleanedMessage(gerritComment);
+        log.debug("Getting cleaned Message: {}", cleanedMessage);
+        messageItem.setRequest(cleanedMessage);
     }
 
     private ChatGptRequestMessage extractLastUserMessageFromHistory() {
@@ -56,8 +69,7 @@ public class ChatGptDataPromptRequests extends ChatGptDataPromptBase {
                 return request;
             }
         }
-        log.error("Error extracting request from message history: no user message found.");
-        throw new RuntimeException("Error extracting request from message history: no user message found in " +
-                messageHistory);
+        log.warn("Error extracting request from message history: no user message found in {}", messageHistory);
+        return null;
     }
 }
