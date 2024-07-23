@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
@@ -17,6 +18,8 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptThread.KEY_THREAD_ID;
+
 @Slf4j
 @Getter
 public class ClientCommands extends ClientBase {
@@ -24,6 +27,7 @@ public class ClientCommands extends ClientBase {
         REVIEW,
         REVIEW_LAST,
         DIRECTIVES,
+        FORGET_THREAD,
         CONFIGURE
     }
     private enum ReviewOptionSet {
@@ -38,6 +42,7 @@ public class ClientCommands extends ClientBase {
             "review", CommandSet.REVIEW,
             "review_last", CommandSet.REVIEW_LAST,
             "directives", CommandSet.DIRECTIVES,
+            "forget_thread", CommandSet.FORGET_THREAD,
             "configure", CommandSet.CONFIGURE
     );
     private static final Map<String, ReviewOptionSet> REVIEW_OPTION_MAP = Map.of(
@@ -62,6 +67,7 @@ public class ClientCommands extends ClientBase {
     private final ChangeSetData changeSetData;
     private final Localizer localizer;
 
+    private PluginDataHandlerProvider pluginDataHandlerProvider;
     private DynamicConfiguration dynamicConfiguration;
     private boolean modifiedDynamicConfig;
     private boolean shouldResetDynamicConfig;
@@ -78,6 +84,7 @@ public class ClientCommands extends ClientBase {
         // The `dynamicConfiguration` instance is utilized only from GerritClientComments, not from ClientMessage (from
         // which is used only for cleaning messages).
         if (pluginDataHandlerProvider != null) {
+            this.pluginDataHandlerProvider = pluginDataHandlerProvider;
             dynamicConfiguration = new DynamicConfiguration(pluginDataHandlerProvider);
         }
         modifiedDynamicConfig = false;
@@ -112,29 +119,42 @@ public class ClientCommands extends ClientBase {
     private void parseCommand(CommandSet command) {
         log.debug("Parsing command: {}", command);
         switch (command) {
-            case REVIEW, REVIEW_LAST -> {
-                changeSetData.setForcedReview(true);
-                if (command == CommandSet.REVIEW_LAST) {
-                    log.info("Forced review command applied to the last Patch Set");
-                    changeSetData.setForcedReviewLastPatchSet(true);
-                }
-                else {
-                    log.info("Forced review command applied to the entire Change Set");
-                }
-            }
-            case CONFIGURE -> {
-                if (config.getEnableMessageDebugging()) {
-                    changeSetData.setHideChatGptReview(true);
-                    dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
-                }
-                else {
-                    changeSetData.setReviewSystemMessage(localizer.getText(
-                            "message.configure.from.messages.disabled"
-                    ));
-                    log.debug("Unable to change configuration from messages: `enableMessageDebugging` config must" +
-                            "be set to true");
-                }
-            }
+            case REVIEW, REVIEW_LAST -> commandForceReview(command);
+            case FORGET_THREAD -> commandForgetThread();
+            case CONFIGURE -> commandDynamicallyConfigure();
+        }
+    }
+
+    private void commandForceReview(CommandSet command) {
+        changeSetData.setForcedReview(true);
+        if (command == CommandSet.REVIEW_LAST) {
+            log.info("Forced review command applied to the last Patch Set");
+            changeSetData.setForcedReviewLastPatchSet(true);
+        }
+        else {
+            log.info("Forced review command applied to the entire Change Set");
+        }
+    }
+
+    private void commandForgetThread() {
+        PluginDataHandler changeDataHandler = pluginDataHandlerProvider.getChangeScope();
+        log.info("Removing thread ID '{}' for Change Set", changeDataHandler.getValue(KEY_THREAD_ID));
+        changeDataHandler.removeValue(KEY_THREAD_ID);
+        changeSetData.setReviewSystemMessage(localizer.getText("message.command.thread.forget"));
+        changeSetData.setHideChatGptReview(true);
+    }
+
+    private void commandDynamicallyConfigure() {
+        if (config.getEnableMessageDebugging()) {
+            changeSetData.setHideChatGptReview(true);
+            dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
+        }
+        else {
+            changeSetData.setReviewSystemMessage(localizer.getText(
+                    "message.configure.from.messages.disabled"
+            ));
+            log.debug("Unable to change configuration from messages: `enableMessageDebugging` config must" +
+                    "be set to true");
         }
     }
 
