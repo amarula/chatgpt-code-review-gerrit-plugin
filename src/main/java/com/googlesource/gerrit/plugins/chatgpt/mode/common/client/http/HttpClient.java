@@ -5,12 +5,22 @@ import okhttp3.*;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
+import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.CHAT_GPT_CONNECTION_TIMEOUT;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class HttpClient {
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client;
+
+    public HttpClient() {
+        this.client = new OkHttpClient.Builder()
+                .connectTimeout(CHAT_GPT_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .readTimeout(CHAT_GPT_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .writeTimeout(CHAT_GPT_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .build();
+    }
 
     public String execute(Request request) {
         try (Response response = client.newCall(request).execute()) {
