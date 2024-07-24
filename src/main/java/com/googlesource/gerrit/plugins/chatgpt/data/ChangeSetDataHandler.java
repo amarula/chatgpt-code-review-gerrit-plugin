@@ -28,7 +28,6 @@ public class ChangeSetDataHandler {
                 localizer);
 
         changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
-        changeSetData.setReviewSystemMessage(null);
         changeSetData.setGptDataPrompt(chatGptDataPrompt.buildPrompt());
         if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
             GerritPermittedVotingRange permittedVotingRange = gerritClient.getPermittedVotingRange(change);
