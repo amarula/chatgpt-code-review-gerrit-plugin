@@ -6,6 +6,7 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksDataDump;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils;
 import lombok.Getter;
@@ -28,7 +29,8 @@ public class ClientCommands extends ClientBase {
         REVIEW_LAST,
         DIRECTIVES,
         FORGET_THREAD,
-        CONFIGURE
+        CONFIGURE,
+        DUMP_STORED_DATA,
     }
     private enum ReviewOptionSet {
         FILTER,
@@ -43,7 +45,8 @@ public class ClientCommands extends ClientBase {
             "review_last", CommandSet.REVIEW_LAST,
             "directives", CommandSet.DIRECTIVES,
             "forget_thread", CommandSet.FORGET_THREAD,
-            "configure", CommandSet.CONFIGURE
+            "configure", CommandSet.CONFIGURE,
+            "dump_stored_data", CommandSet.DUMP_STORED_DATA
     );
     private static final Map<String, ReviewOptionSet> REVIEW_OPTION_MAP = Map.of(
             "filter", ReviewOptionSet.FILTER,
@@ -122,6 +125,7 @@ public class ClientCommands extends ClientBase {
             case REVIEW, REVIEW_LAST -> commandForceReview(command);
             case FORGET_THREAD -> commandForgetThread();
             case CONFIGURE -> commandDynamicallyConfigure();
+            case DUMP_STORED_DATA -> commandDumpStoredData();
         }
     }
 
@@ -150,11 +154,24 @@ public class ClientCommands extends ClientBase {
             dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
         }
         else {
-            changeSetData.setReviewSystemMessage(localizer.getText(
-                    "message.configure.from.messages.disabled"
-            ));
-            log.debug("Unable to change configuration from messages: `enableMessageDebugging` config must" +
-                    "be set to true");
+            changeSetData.setReviewSystemMessage(localizer.getText("message.configure.from.messages.disabled"));
+            log.debug("Unable to change configuration from messages: `enableMessageDebugging` config must be set to" +
+                    " true");
+        }
+    }
+
+    private void commandDumpStoredData() {
+        changeSetData.setHideChatGptReview(true);
+        if (config.getEnableMessageDebugging()) {
+            DebugCodeBlocksDataDump debugCodeBlocksDataDump = new DebugCodeBlocksDataDump(
+                    localizer,
+                    pluginDataHandlerProvider
+            );
+            changeSetData.setReviewSystemMessage(debugCodeBlocksDataDump.getDataDumpBlock());
+        }
+        else {
+            changeSetData.setReviewSystemMessage(localizer.getText("message.dump.stored.data.disabled"));
+            log.debug("Unable to dump stored data: `enableMessageDebugging` config must be set to true");
         }
     }
 

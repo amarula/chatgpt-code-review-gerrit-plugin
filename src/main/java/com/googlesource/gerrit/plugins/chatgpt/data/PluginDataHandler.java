@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -57,6 +58,15 @@ public class PluginDataHandler {
         }
         Type typeOfMap = TypeToken.getParameterized(Map.class, String.class, clazz).getType();
         return getGson().fromJson(value, typeOfMap);
+    }
+
+    public Map<String, String> getAllValues() {
+        log.debug("Getting all properties");
+        Map<String, String> allProperties = new HashMap<>();
+        for (String key : configProperties.stringPropertyNames()) {
+            allProperties.put(key, configProperties.getProperty(key));
+        }
+        return allProperties;
     }
 
     public synchronized void removeValue(String key) {
