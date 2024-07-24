@@ -29,4 +29,12 @@ public class StringUtils {
         }
         return str.substring(0, 1).toUpperCase() + str.substring(1);
     }
+
+    public static String convertPascalCaseToWords(String pascalCase) {
+        if (pascalCase == null || pascalCase.isEmpty()) {
+            return pascalCase;
+        }
+        return pascalCase.replaceAll("(?<!^)([A-Z])", " $1");
+    }
+
 }
