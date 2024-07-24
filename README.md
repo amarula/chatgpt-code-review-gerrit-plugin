@@ -331,6 +331,33 @@ from merely recycling old responses in stateful mode, particularly following mod
 /forget_thread
 ```
 
+### Stored Data Dump
+
+Data is stored across different scopes. To view all stored data, use the following command:
+
+```
+/dump_stored_data
+```
+
+Example of the response:
+
+```
+DUMP OF STORED DATA
+
+### Global Scope
+originalLogLevel: INFO
+
+### Project Scope
+vectorStoreId: vs_XXXXXXXXXXXXXXXXXXXX
+fileId: vs_XXXXXXXXXXXXXXXXXXXX
+
+### Change Scope
+threadId: thread_XXXXXXXXXXXXXXXXXXXX
+lastAssistantId: asst_XXXXXXXXXXXXXXXXXXXX
+```
+
+**NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
+
 ## Testing
 
 ### Overview
