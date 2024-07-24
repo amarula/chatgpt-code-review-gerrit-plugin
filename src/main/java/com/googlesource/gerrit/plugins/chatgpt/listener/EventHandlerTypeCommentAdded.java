@@ -35,7 +35,12 @@ public class EventHandlerTypeCommentAdded implements IEventHandlerType {
             if (changeSetData.getForcedReview()) {
                 log.info("Forcing review due to settings for full change ID: {}", change.getFullChangeId());
                 return PreprocessResult.SWITCH_TO_PATCH_SET_CREATED;
-            } else {
+            }
+            else if(changeSetData.getReviewSystemMessage() != null) {
+                log.info("Echoing system message in the UI");
+                return PreprocessResult.OK;
+            }
+            else {
                 log.info("Exiting preprocessing as no comments require action for full change ID: {}",
                         change.getFullChangeId());
                 return PreprocessResult.EXIT;

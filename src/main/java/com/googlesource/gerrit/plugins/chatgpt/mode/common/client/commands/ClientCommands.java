@@ -145,8 +145,8 @@ public class ClientCommands extends ClientBase {
     }
 
     private void commandDynamicallyConfigure() {
+        changeSetData.setHideChatGptReview(true);
         if (config.getEnableMessageDebugging()) {
-            changeSetData.setHideChatGptReview(true);
             dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
         }
         else {
