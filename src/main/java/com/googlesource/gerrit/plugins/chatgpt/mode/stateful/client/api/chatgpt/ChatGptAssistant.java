@@ -31,11 +31,14 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class ChatGptAssistant extends ClientBase {
+    private static final String KEY_LAST_ASSISTANT_ID = "lastAssistantId";
+
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler projectDataHandler;
+    private final PluginDataHandler changeDataHandler;
     private final PluginDataHandler assistantsDataHandler;
 
     private String description;
@@ -54,8 +57,9 @@ public class ChatGptAssistant extends ClientBase {
         this.changeSetData = changeSetData;
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
-        this.projectDataHandler = pluginDataHandlerProvider.getProjectScope();
-        this.assistantsDataHandler = pluginDataHandlerProvider.getAssistantsWorkspace();
+        projectDataHandler = pluginDataHandlerProvider.getProjectScope();
+        changeDataHandler = pluginDataHandlerProvider.getChangeScope();
+        assistantsDataHandler = pluginDataHandlerProvider.getAssistantsWorkspace();
         log.debug("Initialized ChatGptAssistant with project and assistants data handlers.");
     }
 
@@ -75,6 +79,7 @@ public class ChatGptAssistant extends ClientBase {
         else {
             log.info("Project assistant found for the project. Assistant ID: {}", assistantId);
         }
+        changeDataHandler.setValue(KEY_LAST_ASSISTANT_ID, assistantId);
         return assistantId;
     }
 
