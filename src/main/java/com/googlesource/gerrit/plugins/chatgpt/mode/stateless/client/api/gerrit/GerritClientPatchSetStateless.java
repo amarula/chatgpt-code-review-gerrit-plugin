@@ -29,10 +29,10 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
         int revisionBase = getChangeSetRevisionBase(changeSetData);
         log.debug("Revision base: {}", revisionBase);
 
-        List<String> files = getAffectedFiles(change, revisionBase);
-        log.debug("Affected files for Patch Set: {}", files);
+        patchSetFiles = getAffectedFiles(change, revisionBase);
+        log.debug("Affected files for Patch Set: {}", patchSetFiles);
 
-        String fileDiffsJson = getFileDiffsJson(change, files, revisionBase);
+        String fileDiffsJson = getFileDiffsJson(change, revisionBase);
         log.debug("File diffs JSON: {}", fileDiffsJson);
 
         return fileDiffsJson;
@@ -63,8 +63,8 @@ public class GerritClientPatchSetStateless extends GerritClientPatchSet implemen
         }
     }
 
-    private String getFileDiffsJson(GerritChange change, List<String> files, int revisionBase) throws Exception {
-        retrieveFileDiff(change, files, revisionBase);
+    private String getFileDiffsJson(GerritChange change, int revisionBase) throws Exception {
+        retrieveFileDiff(change, revisionBase);
         diffs.add(String.format("{\"changeId\": \"%s\"}", change.getFullChangeId()));
         return "[" + String.join(",", diffs) + "]\n";
     }
