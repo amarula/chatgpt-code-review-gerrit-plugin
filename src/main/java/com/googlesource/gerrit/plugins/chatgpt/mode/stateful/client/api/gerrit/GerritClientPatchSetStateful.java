@@ -11,8 +11,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientPatchSet;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetHelper.*;
 
 @Slf4j
@@ -33,9 +31,9 @@ public class GerritClientPatchSetStateful extends GerritClientPatchSet implement
         this.change = change;
 
         String formattedPatch = getPatchFromGerrit();
-        List<String> files = extractFilesFromPatch(formattedPatch);
-        log.debug("Files extracted from patch: {}", files);
-        retrieveFileDiff(change, files, revisionBase);
+        patchSetFiles = extractFilesFromPatch(formattedPatch);
+        log.debug("Files extracted from patch: {}", patchSetFiles);
+        retrieveFileDiff(change, revisionBase);
 
         return formattedPatch;
     }

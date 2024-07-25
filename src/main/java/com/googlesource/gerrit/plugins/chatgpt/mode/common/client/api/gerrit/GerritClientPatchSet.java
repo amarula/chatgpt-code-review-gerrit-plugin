@@ -28,6 +28,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
 
     @Getter
     protected Integer revisionBase = 0;
+    protected List<String> patchSetFiles;
 
     private boolean isCommitMessage;
 
@@ -68,11 +69,11 @@ public class GerritClientPatchSet extends GerritClientAccount {
         return base;
     }
 
-    protected void retrieveFileDiff(GerritChange change, List<String> files, int revisionBase) throws Exception {
+    protected void retrieveFileDiff(GerritChange change, int revisionBase) throws Exception {
         List<String> enabledFileExtensions = config.getEnabledFileExtensions();
         log.debug("Retrieving file diff for change: {}", change.getFullChangeId());
         try (ManualRequestContext requestContext = config.openRequestContext()) {
-            for (String filename : files) {
+            for (String filename : patchSetFiles) {
                 isCommitMessage = filename.equals("/COMMIT_MSG");
                 if (!isCommitMessage && !matchesExtensionList(filename, enabledFileExtensions)) {
                     continue;
