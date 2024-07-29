@@ -6,11 +6,13 @@ import java.util.stream.Collectors;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 public class LoggerFilterDecider {
+    private String filterString;
     private List<String[]> filters;
 
     public LoggerFilterDecider(String filter) {
         if (!filter.isEmpty()) {
-            filters = splitString(unwrapDeSlashQuotes(filter))
+            filterString = unwrapDeSlashQuotes(filter);
+            filters = splitString(filterString)
                     .stream()
                     .map(s -> {
                         String[] parts = s.split("#");
@@ -21,7 +23,7 @@ public class LoggerFilterDecider {
     }
 
     public boolean shouldOverrideLogLevel(String loggedClassName, String message) {
-        return filters != null && filters
+        return filters != null && !message.contains(filterString) && filters
                 .stream()
                 .anyMatch(r -> loggedClassName.contains(r[0]) && message.startsWith(r[1]));
     }
