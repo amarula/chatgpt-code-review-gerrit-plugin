@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.comment;
 
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.code.InlineCode;
@@ -16,8 +17,10 @@ public class GerritCommentRange {
     private final HashMap<String, FileDiffProcessed> fileDiffsProcessed;
 
     public GerritCommentRange(GerritClient gerritClient, GerritChange change) {
-        fileDiffsProcessed = gerritClient.getFileDiffsProcessed(change);
-        log.debug("Initialized GerritCommentRange with file diffs processed for change: {}", change.getFullChangeId());
+        log.debug("Initialized GerritCommentRange for change '{}'", change.getFullChangeId());
+        IGerritClientPatchSet gerritClientPatchSet = gerritClient.getClientData(change).getGerritClientPatchSet();
+        fileDiffsProcessed = gerritClientPatchSet.getFileDiffsProcessed();
+        log.debug("Initialized File Diffs processed : {}", fileDiffsProcessed);
     }
 
     public Optional<GerritCodeRange> getGerritCommentRange(ChatGptReplyItem replyItem) {
