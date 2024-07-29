@@ -4,13 +4,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashMap;
 
 @Slf4j
 public class GerritClientFacade {
@@ -52,10 +49,6 @@ public class GerritClientFacade {
         return gerritClientDetail.isWorkInProgress(change);
     }
 
-    public HashMap<String, FileDiffProcessed> getFileDiffsProcessed() {
-        return gerritClientPatchSet.getFileDiffsProcessed();
-    }
-
     public Integer getNotNullAccountId(String authorUsername) {
         return gerritClientPatchSet.getNotNullAccountId(authorUsername);
     }
@@ -71,7 +64,7 @@ public class GerritClientFacade {
 
     public GerritClientData getClientData(GerritChange change) {
         return new GerritClientData(
-                gerritClientPatchSet.getFileDiffsProcessed(),
+                gerritClientPatchSet,
                 gerritClientDetail.getMessages(change),
                 gerritClientComments.getCommentData(),
                 gerritClientPatchSet.getRevisionBase()

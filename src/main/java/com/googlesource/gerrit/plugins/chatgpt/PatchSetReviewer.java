@@ -11,6 +11,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.Ger
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksReview;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.comment.GerritCommentRange;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.filename.FilenameSanitizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptReplyItem;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
@@ -112,6 +113,7 @@ public class PatchSetReviewer {
     }
 
     private void retrieveReviewBatches(ChatGptResponseContent reviewReply, GerritChange change) {
+        FilenameSanitizer filenameSanitizer = new FilenameSanitizer(gerritClient, change);
         log.debug("Retrieving review batches for change: {}", change.getFullChangeId());
         if (reviewReply.getMessageContent() != null && !reviewReply.getMessageContent().isEmpty()) {
             reviewBatches.add(new ReviewBatch(reviewReply.getMessageContent()));
@@ -139,6 +141,7 @@ public class PatchSetReviewer {
                 setCommentBatchMap(batchMap, replyItem.getId());
             }
             else {
+                filenameSanitizer.sanitizeFilename(replyItem);
                 setPatchSetReviewBatchMap(batchMap, replyItem);
             }
             reviewBatches.add(batchMap);
