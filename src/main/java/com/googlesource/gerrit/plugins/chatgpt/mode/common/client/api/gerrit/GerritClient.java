@@ -2,12 +2,9 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashMap;
 
 @Singleton
 @Slf4j
@@ -41,10 +38,6 @@ public class GerritClient {
 
     public boolean isWorkInProgress(GerritChange change) {
         return gerritClientFacade.isWorkInProgress(change);
-    }
-
-    public HashMap<String, FileDiffProcessed> getFileDiffsProcessed(GerritChange change) {
-        return gerritClientFacade.getFileDiffsProcessed();
     }
 
     public Integer getNotNullAccountId(String authorUsername) {
