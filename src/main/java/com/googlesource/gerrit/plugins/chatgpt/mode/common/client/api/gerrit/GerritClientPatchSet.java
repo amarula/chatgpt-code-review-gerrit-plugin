@@ -28,6 +28,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
 
     @Getter
     protected Integer revisionBase = 0;
+    @Getter
     protected List<String> patchSetFiles;
 
     private boolean isCommitMessage;
