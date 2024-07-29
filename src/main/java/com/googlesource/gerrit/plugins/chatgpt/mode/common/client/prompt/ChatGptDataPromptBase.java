@@ -37,7 +37,7 @@ public abstract class ChatGptDataPromptBase implements IChatGptDataPrompt {
             Localizer localizer
     ) {
         this.gerritClientData = gerritClientData;
-        fileDiffsProcessed = gerritClientData.getFileDiffsProcessed();
+        fileDiffsProcessed = gerritClientData.getGerritClientPatchSet().getFileDiffsProcessed();
         commentData = gerritClientData.getCommentData();
         gptMessageHistory = new ChatGptHistory(config, changeSetData, gerritClientData, localizer);
         messageItems = new ArrayList<>();
