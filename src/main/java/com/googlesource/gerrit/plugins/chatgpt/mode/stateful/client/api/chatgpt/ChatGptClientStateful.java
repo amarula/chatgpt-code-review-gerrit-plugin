@@ -45,7 +45,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         String changeId = change.getFullChangeId();
         log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", changeId, patchSet);
 
-        ChatGptThread chatGptThread = new ChatGptThread(config, pluginDataHandlerProvider);
+        ChatGptThread chatGptThread = new ChatGptThread(config, changeSetData, pluginDataHandlerProvider);
         String threadId = chatGptThread.createThread();
         log.debug("Created ChatGPT thread with ID: {}", threadId);
 
