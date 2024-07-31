@@ -12,10 +12,7 @@ import com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,11 +29,9 @@ public class ClientCommands extends ClientBase {
         CONFIGURE,
         DUMP_STORED_DATA,
     }
-    private enum ReviewOptionSet {
+    private enum BaseOptionSet {
         FILTER,
-        DEBUG
-    }
-    private enum ConfigureOptionSet {
+        DEBUG,
         RESET
     }
 
@@ -48,17 +43,20 @@ public class ClientCommands extends ClientBase {
             "configure", CommandSet.CONFIGURE,
             "dump_stored_data", CommandSet.DUMP_STORED_DATA
     );
-    private static final Map<String, ReviewOptionSet> REVIEW_OPTION_MAP = Map.of(
-            "filter", ReviewOptionSet.FILTER,
-            "debug", ReviewOptionSet.DEBUG
+    private static final Map<String, BaseOptionSet> BASE_OPTION_MAP = Map.of(
+            "filter", BaseOptionSet.FILTER,
+            "debug", BaseOptionSet.DEBUG,
+            "reset", BaseOptionSet.RESET
     );
     private static final List<CommandSet> REVIEW_COMMANDS = new ArrayList<>(List.of(
             CommandSet.REVIEW,
             CommandSet.REVIEW_LAST
     ));
-    private static final Map<String, ConfigureOptionSet> CONFIGURE_OPTION_MAP = Map.of(
-            "reset", ConfigureOptionSet.RESET
-    );
+    private static final List<CommandSet> DEBUG_REQUIRED_COMMANDS = new ArrayList<>(List.of(
+            CommandSet.DIRECTIVES,
+            CommandSet.CONFIGURE,
+            CommandSet.DUMP_STORED_DATA
+    ));
     // Option values can be either a sequence of chars enclosed in double quotes or a sequence of non-space chars.
     private static final String OPTION_VALUES = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\\S+";
     private static final Pattern COMMAND_PATTERN = Pattern.compile("/(" + String.join("|",
@@ -72,8 +70,8 @@ public class ClientCommands extends ClientBase {
 
     private PluginDataHandlerProvider pluginDataHandlerProvider;
     private DynamicConfiguration dynamicConfiguration;
-    private boolean modifiedDynamicConfig;
-    private boolean shouldResetDynamicConfig;
+    private Map<BaseOptionSet, String> baseOptions;
+    private Map<String, String> dynamicOptions;
 
     public ClientCommands(
             Configuration config,
@@ -90,8 +88,6 @@ public class ClientCommands extends ClientBase {
             this.pluginDataHandlerProvider = pluginDataHandlerProvider;
             dynamicConfiguration = new DynamicConfiguration(pluginDataHandlerProvider);
         }
-        modifiedDynamicConfig = false;
-        shouldResetDynamicConfig = false;
         log.debug("ClientCommands initialized.");
     }
 
@@ -100,9 +96,13 @@ public class ClientCommands extends ClientBase {
         log.debug("Parsing commands from comment: {}", comment);
         Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(preprocessCommands(comment));
         while (reviewCommandMatcher.find()) {
+            baseOptions = new HashMap<>();
+            dynamicOptions = new HashMap<>();
             CommandSet command = COMMAND_MAP.get(reviewCommandMatcher.group(1));
-            parseOptions(command, reviewCommandMatcher);
-            parseCommand(command);
+            parseOptions(reviewCommandMatcher);
+            if (validateCommand(command)) {
+                executeCommand(command);
+            }
             commandFound = true;
         }
         return commandFound;
@@ -119,8 +119,25 @@ public class ClientCommands extends ClientBase {
         return comment.replaceAll(PREPROCESS_REGEX, PREPROCESS_REPLACEMENT);
     }
 
-    private void parseCommand(CommandSet command) {
-        log.debug("Parsing command: {}", command);
+    private boolean validateCommand(CommandSet command) {
+        log.debug("Validating command: {}", command);
+        if (!config.getEnableMessageDebugging() && requiresMessageDebugging(command)) {
+            changeSetData.setHideChatGptReview(true);
+            changeSetData.setReviewSystemMessage(localizer.getText("message.debugging.messages.disabled"));
+            log.debug("Command `{}` not validated: `enableMessageDebugging` config must be set to true", command);
+            return false;
+        }
+        log.debug("Command `{}` validated", command);
+        return true;
+    }
+
+    private boolean requiresMessageDebugging(CommandSet command) {
+        return DEBUG_REQUIRED_COMMANDS.contains(command) ||
+                REVIEW_COMMANDS.contains(command) && baseOptions.containsKey(BaseOptionSet.DEBUG);
+    }
+
+    private void executeCommand(CommandSet command) {
+        log.debug("Executing command: {}", command);
         switch (command) {
             case REVIEW, REVIEW_LAST -> commandForceReview(command);
             case FORGET_THREAD -> commandForgetThread();
@@ -140,6 +157,16 @@ public class ClientCommands extends ClientBase {
         else {
             log.info("Forced review command applied to the entire Change Set");
         }
+        if (baseOptions.containsKey(BaseOptionSet.FILTER)) {
+            boolean value = Boolean.parseBoolean(baseOptions.get(BaseOptionSet.FILTER));
+            log.debug("Option 'replyFilterEnabled' set to {}", value);
+            changeSetData.setReplyFilterEnabled(value);
+        }
+        else if (baseOptions.containsKey(BaseOptionSet.DEBUG)) {
+            log.debug("Response Mode set to Debug");
+            changeSetData.setDebugReviewMode(true);
+            changeSetData.setReplyFilterEnabled(false);
+        }
     }
 
     private void commandForgetThread() {
@@ -152,79 +179,53 @@ public class ClientCommands extends ClientBase {
 
     private void commandDynamicallyConfigure() {
         changeSetData.setHideChatGptReview(true);
-        if (config.getEnableMessageDebugging()) {
-            dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
+        boolean modifiedDynamicConfig = false;
+        boolean shouldResetDynamicConfig = false;
+        if (baseOptions.containsKey(BaseOptionSet.RESET)) {
+            shouldResetDynamicConfig = true;
+            log.debug("Resetting configuration settings");
         }
-        else {
-            changeSetData.setReviewSystemMessage(localizer.getText("message.configure.from.messages.disabled"));
-            log.debug("Unable to change configuration from messages: `enableMessageDebugging` config must be set to" +
-                    " true");
+        if (!dynamicOptions.isEmpty()) {
+            modifiedDynamicConfig = true;
+            for (Map.Entry<String, String> dynamicOption : dynamicOptions.entrySet()) {
+                String optionKey = dynamicOption.getKey();
+                String optionValue = dynamicOption.getValue();
+                log.debug("Updating configuration setting '{}' to '{}'", optionKey, optionValue);
+                dynamicConfiguration.setConfig(optionKey, optionValue);
+            }
         }
+        dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
     }
 
     private void commandDumpStoredData() {
         changeSetData.setHideChatGptReview(true);
-        if (config.getEnableMessageDebugging()) {
-            DebugCodeBlocksDataDump debugCodeBlocksDataDump = new DebugCodeBlocksDataDump(
-                    localizer,
-                    pluginDataHandlerProvider
-            );
-            changeSetData.setReviewSystemMessage(debugCodeBlocksDataDump.getDataDumpBlock());
-        }
-        else {
-            changeSetData.setReviewSystemMessage(localizer.getText("message.dump.stored.data.disabled"));
-            log.debug("Unable to dump stored data: `enableMessageDebugging` config must be set to true");
-        }
+        DebugCodeBlocksDataDump debugCodeBlocksDataDump = new DebugCodeBlocksDataDump(
+                localizer,
+                pluginDataHandlerProvider
+        );
+        changeSetData.setReviewSystemMessage(debugCodeBlocksDataDump.getDataDumpBlock());
     }
 
-    private void parseOptions(CommandSet command, Matcher reviewCommandMatcher) {
-        log.debug("Parsing options for command {}", command);
+    private void parseOptions(Matcher reviewCommandMatcher) {
+        log.debug("Parsing options `{}`", reviewCommandMatcher.group(2));
         if (reviewCommandMatcher.group(2) == null) return;
         Matcher reviewOptionsMatcher = OPTIONS_PATTERN.matcher(reviewCommandMatcher.group(2));
         while (reviewOptionsMatcher.find()) {
-            parseSingleOption(command, reviewOptionsMatcher);
+            parseSingleOption(reviewOptionsMatcher);
         }
     }
 
-    private void parseSingleOption(CommandSet command, Matcher reviewOptionsMatcher) {
+    private void parseSingleOption(Matcher reviewOptionsMatcher) {
         String optionKey = reviewOptionsMatcher.group(1);
         String optionValue = Optional.ofNullable(reviewOptionsMatcher.group(2))
                 .map(TextUtils::unwrapDeSlashQuotes)
                 .orElse("");
         log.debug("Parsed option - Key: {} - Value: {}", optionKey, optionValue);
-        if (REVIEW_COMMANDS.contains(command)) {
-            switch (REVIEW_OPTION_MAP.get(optionKey)) {
-                case FILTER -> {
-                    boolean value = Boolean.parseBoolean(optionValue);
-                    log.debug("Option 'replyFilterEnabled' set to {}", value);
-                    changeSetData.setReplyFilterEnabled(value);
-                }
-                case DEBUG -> {
-                    if (config.getEnableMessageDebugging()) {
-                        log.debug("Response Mode set to Debug");
-                        changeSetData.setDebugReviewMode(true);
-                        changeSetData.setReplyFilterEnabled(false);
-                    }
-                    else {
-                        changeSetData.setReviewSystemMessage(localizer.getText(
-                                "message.debugging.review.disabled"
-                        ));
-                        log.debug("Unable to set Response Mode to Debug: `enableMessageDebugging` config " +
-                                "must be set to true");
-                    }
-                }
-            }
+        if (BASE_OPTION_MAP.containsKey(optionKey)) {
+            baseOptions.put(BASE_OPTION_MAP.get(optionKey), optionValue);
         }
-        else if (command == CommandSet.CONFIGURE && config.getEnableMessageDebugging()) {
-            if (CONFIGURE_OPTION_MAP.get(optionKey) == ConfigureOptionSet.RESET) {
-                shouldResetDynamicConfig = true;
-                log.debug("Resetting configuration settings");
-            }
-            else {
-                modifiedDynamicConfig = true;
-                log.debug("Updating configuration setting '{}' to '{}'", optionKey, optionValue);
-                dynamicConfiguration.setConfig(optionKey, optionValue);
-            }
+        else {
+            dynamicOptions.put(optionKey, optionValue);
         }
     }
 }
