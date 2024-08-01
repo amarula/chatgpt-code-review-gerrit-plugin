@@ -37,4 +37,11 @@ public class StringUtils {
         return pascalCase.replaceAll("(?<!^)([A-Z])", " $1");
     }
 
+    public static String convertCamelToSnakeCase(String camelCase) {
+        if (camelCase == null || camelCase.isEmpty()) {
+            return camelCase;
+        }
+        return camelCase.replaceAll("(?<!^)([A-Z])", "_$1").toLowerCase();
+    }
+
 }

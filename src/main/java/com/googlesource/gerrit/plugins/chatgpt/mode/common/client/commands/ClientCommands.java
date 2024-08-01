@@ -32,7 +32,10 @@ public class ClientCommands extends ClientBase {
     private enum BaseOptionSet {
         FILTER,
         DEBUG,
-        RESET
+        RESET,
+        // `CONFIGURATION_OPTION` is a placeholder option indicating that the associated options must be validated
+        // against the Configuration keys.
+        CONFIGURATION_OPTION
     }
 
     private static final Map<String, CommandSet> COMMAND_MAP = Map.of(
@@ -48,6 +51,11 @@ public class ClientCommands extends ClientBase {
             "debug", BaseOptionSet.DEBUG,
             "reset", BaseOptionSet.RESET
     );
+    private static final Map<CommandSet, List<BaseOptionSet>> COMMAND_VALID_OPTIONS_MAP = Map.of(
+            CommandSet.REVIEW, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
+            CommandSet.REVIEW_LAST, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
+            CommandSet.CONFIGURE, List.of(BaseOptionSet.RESET, BaseOptionSet.CONFIGURATION_OPTION)
+    );
     private static final List<CommandSet> REVIEW_COMMANDS = new ArrayList<>(List.of(
             CommandSet.REVIEW,
             CommandSet.REVIEW_LAST
@@ -59,8 +67,8 @@ public class ClientCommands extends ClientBase {
     ));
     // Option values can be either a sequence of chars enclosed in double quotes or a sequence of non-space chars.
     private static final String OPTION_VALUES = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\\S+";
-    private static final Pattern COMMAND_PATTERN = Pattern.compile("/(" + String.join("|",
-            COMMAND_MAP.keySet()) + ")\\b((?:\\s+--\\w+(?:=(?:" + OPTION_VALUES + "))?)+)?");
+    private static final Pattern COMMAND_PATTERN = Pattern.compile("/(\\w+)\\b((?:\\s+--\\w+(?:=(?:" +
+            OPTION_VALUES + "))?)+)?");
     private static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(" + OPTION_VALUES + "))?");
     private static final String PREPROCESS_REGEX = "/directives\\s+\"?(.*[^\"])\"?";
     private static final String PREPROCESS_REPLACEMENT = "/configure --directives=\"$1\"";
@@ -70,6 +78,7 @@ public class ClientCommands extends ClientBase {
 
     private PluginDataHandlerProvider pluginDataHandlerProvider;
     private DynamicConfiguration dynamicConfiguration;
+    private String comment;
     private Map<BaseOptionSet, String> baseOptions;
     private Map<String, String> dynamicOptions;
 
@@ -92,18 +101,32 @@ public class ClientCommands extends ClientBase {
     }
 
     public boolean parseCommands(String comment) {
+        this.comment = comment;
         boolean commandFound = false;
         log.debug("Parsing commands from comment: {}", comment);
         Matcher reviewCommandMatcher = COMMAND_PATTERN.matcher(preprocessCommands(comment));
+        changeSetData.setHideChatGptReview(true);
         while (reviewCommandMatcher.find()) {
             baseOptions = new HashMap<>();
             dynamicOptions = new HashMap<>();
             CommandSet command = COMMAND_MAP.get(reviewCommandMatcher.group(1));
+            if (command == null) {
+                changeSetData.setReviewSystemMessage(String.format(localizer.getText("message.command.unknown"),
+                        comment));
+                log.info("Unknown command in comment `{}`", comment);
+                return false;
+            }
             parseOptions(reviewCommandMatcher);
             if (validateCommand(command)) {
                 executeCommand(command);
             }
+            else {
+                log.info("Command in comment `{}` not validated", comment);
+            }
             commandFound = true;
+        }
+        if (!changeSetData.getForcedReview()) {
+            changeSetData.setHideChatGptReview(false);
         }
         return commandFound;
     }
@@ -121,9 +144,14 @@ public class ClientCommands extends ClientBase {
 
     private boolean validateCommand(CommandSet command) {
         log.debug("Validating command: {}", command);
+        if (optionsMismatch(command)) {
+            changeSetData.setReviewSystemMessage(String.format(localizer.getText("message.command.options.mismatch"),
+                    comment));
+            log.debug("Option mismatch for command `{}`. Comment: {}", command, comment);
+            return false;
+        }
         if (!config.getEnableMessageDebugging() && requiresMessageDebugging(command)) {
-            changeSetData.setHideChatGptReview(true);
-            changeSetData.setReviewSystemMessage(localizer.getText("message.debugging.messages.disabled"));
+            changeSetData.setReviewSystemMessage(localizer.getText("message.command.debugging.messages.disabled"));
             log.debug("Command `{}` not validated: `enableMessageDebugging` config must be set to true", command);
             return false;
         }
@@ -134,6 +162,34 @@ public class ClientCommands extends ClientBase {
     private boolean requiresMessageDebugging(CommandSet command) {
         return DEBUG_REQUIRED_COMMANDS.contains(command) ||
                 REVIEW_COMMANDS.contains(command) && baseOptions.containsKey(BaseOptionSet.DEBUG);
+    }
+
+    private boolean optionsMismatch(CommandSet command) {
+        log.debug("Validating options for command: {}", command);
+        List<BaseOptionSet> commandOptions = COMMAND_VALID_OPTIONS_MAP.get(command);
+        if (!baseOptions.isEmpty() && (
+                commandOptions == null || !(new HashSet<>(commandOptions).containsAll(baseOptions.keySet()))
+        )) {
+            log.debug("Options non valid for command `{}`: {}", command, baseOptions);
+            return true;
+        }
+        if (!dynamicOptions.isEmpty() &&(
+                !commandOptions.contains(BaseOptionSet.CONFIGURATION_OPTION) || configurationOptionsMismatch()
+        )) {
+            log.debug("Configuration options non valid for command `{}`: {}", command, dynamicOptions);
+            return true;
+        }
+        return false;
+    }
+    private boolean configurationOptionsMismatch() {
+        log.debug("Checking for mismatches in configuration options");
+        for (String key : dynamicOptions.keySet()) {
+            if (!config.isDefinedKey(key)) {
+                log.debug("Configuration option mismatch found for key `{}`", key);
+                return true;
+            }
+        }
+        return false;
     }
 
     private void executeCommand(CommandSet command) {
@@ -174,11 +230,9 @@ public class ClientCommands extends ClientBase {
         log.info("Removing thread ID '{}' for Change Set", changeDataHandler.getValue(KEY_THREAD_ID));
         changeDataHandler.removeValue(KEY_THREAD_ID);
         changeSetData.setReviewSystemMessage(localizer.getText("message.command.thread.forget"));
-        changeSetData.setHideChatGptReview(true);
     }
 
     private void commandDynamicallyConfigure() {
-        changeSetData.setHideChatGptReview(true);
         boolean modifiedDynamicConfig = false;
         boolean shouldResetDynamicConfig = false;
         if (baseOptions.containsKey(BaseOptionSet.RESET)) {
@@ -198,7 +252,6 @@ public class ClientCommands extends ClientBase {
     }
 
     private void commandDumpStoredData() {
-        changeSetData.setHideChatGptReview(true);
         DebugCodeBlocksDataDump debugCodeBlocksDataDump = new DebugCodeBlocksDataDump(
                 localizer,
                 pluginDataHandlerProvider

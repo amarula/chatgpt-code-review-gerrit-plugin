@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -345,6 +346,22 @@ public class Configuration {
                         .collect(Collectors.toSet())
         );
         return resultValue.isEmpty() ? "" : wrapQuotes(resultValue);
+    }
+
+    public boolean isDefinedKey(String key) {
+        // This method assumes the convention `KEY_<CONFIG_KEY> = "configKey"` is used for naming config key constants.
+        try {
+            String configKey = "KEY_" + convertCamelToSnakeCase(key).toUpperCase();
+            log.debug("Checking if config key `{}` for {} is defined", configKey, key);
+            Field field = this.getClass().getDeclaredField(configKey);
+            field.setAccessible(true);
+            String value = field.get(null).toString();
+            log.debug("Config key value: {}", value);
+            return value.equals(key);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            log.debug("Error checking if config key `{}` is defined", key, e);
+            return false;
+        }
     }
 
     private String getValidatedOrThrow(String key) {
