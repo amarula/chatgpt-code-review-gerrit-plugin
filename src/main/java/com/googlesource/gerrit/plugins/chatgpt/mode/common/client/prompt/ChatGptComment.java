@@ -3,14 +3,14 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessage;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessageCleaner;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ChatGptComment extends ClientBase {
-    protected ClientMessage commentMessage;
+    protected ClientMessageCleaner messageCleaner;
 
     private final ChangeSetData changeSetData;
     private final Localizer localizer;
@@ -24,16 +24,16 @@ public class ChatGptComment extends ClientBase {
 
     public String getCleanedMessage(GerritComment commentProperty) {
         log.debug("Cleaning message for comment property: {}", commentProperty);
-        commentMessage = new ClientMessage(config, changeSetData, commentProperty.getMessage(), localizer);
+        messageCleaner = new ClientMessageCleaner(config, commentProperty.getMessage(), localizer);
         if (isFromAssistant(commentProperty)) {
             log.debug("Comment from assistant detected. Removing debug code blocks.");
-            commentMessage.removeDebugCodeBlocksReview().removeDebugCodeBlocksDynamicSettings();
+            messageCleaner.removeDebugCodeBlocksReview().removeDebugCodeBlocksDynamicSettings();
         }
         else {
             log.debug("Comment not from assistant. Removing mentions and commands.");
-            commentMessage.removeMentions().removeCommands();
+            messageCleaner.removeMentions().removeCommands();
         }
-        String cleanedMessage = commentMessage.removeHeadings().getMessage();
+        String cleanedMessage = messageCleaner.removeHeadings().getMessage();
         log.debug("Cleaned message: {}", cleanedMessage);
         return cleanedMessage;
     }
