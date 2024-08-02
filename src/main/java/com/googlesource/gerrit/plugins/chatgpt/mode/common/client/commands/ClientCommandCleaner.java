@@ -13,6 +13,11 @@ public class ClientCommandCleaner extends ClientCommandBase {
 
     public String removeCommands(String comment) {
         log.debug("Removing commands from comment: {}", comment);
+
+        Matcher messageCommandMatcher = MESSAGE_COMMAND_PATTERN.matcher(comment);
+        if (messageCommandMatcher.find()) {
+            return messageCommandMatcher.replaceAll("$1");
+        }
         Matcher commandMatcher = COMMAND_PATTERN.matcher(comment);
         return commandMatcher.replaceAll("");
     }
