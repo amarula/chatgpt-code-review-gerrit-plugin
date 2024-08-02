@@ -12,14 +12,6 @@ import java.util.regex.Matcher;
 
 @Slf4j
 public class ClientCommandParser extends ClientCommandBase {
-    private static final Map<String, CommandSet> COMMAND_MAP = Map.of(
-            "review", CommandSet.REVIEW,
-            "review_last", CommandSet.REVIEW_LAST,
-            "directives", CommandSet.DIRECTIVES,
-            "forget_thread", CommandSet.FORGET_THREAD,
-            "configure", CommandSet.CONFIGURE,
-            "dump_stored_data", CommandSet.DUMP_STORED_DATA
-    );
     private static final Map<String, BaseOptionSet> BASE_OPTION_MAP = Map.of(
             "filter", BaseOptionSet.FILTER,
             "debug", BaseOptionSet.DEBUG,
@@ -72,7 +64,12 @@ public class ClientCommandParser extends ClientCommandBase {
         this.comment = comment;
         boolean commandFound = false;
         log.debug("Parsing commands from comment: {}", comment);
-        Matcher commandMatcher = COMMAND_PATTERN.matcher(preprocessCommands(comment));
+        comment = preprocessCommands(comment);
+        if (parseMessageCommand(comment)) {
+            log.debug("Message command detected: parsing complete.");
+            return false;
+        }
+        Matcher commandMatcher = COMMAND_PATTERN.matcher(comment);
         changeSetData.setHideChatGptReview(true);
         while (commandMatcher.find()) {
             if (!parseSingleCommand(comment, commandMatcher)) {
@@ -84,6 +81,11 @@ public class ClientCommandParser extends ClientCommandBase {
             changeSetData.setHideChatGptReview(false);
         }
         return commandFound;
+    }
+
+    private boolean parseMessageCommand(String comment) {
+        Matcher messageCommandMatcher = MESSAGE_COMMAND_PATTERN.matcher(comment);
+        return messageCommandMatcher.find();
     }
 
     private boolean parseSingleCommand(String comment, Matcher commandMatcher) {

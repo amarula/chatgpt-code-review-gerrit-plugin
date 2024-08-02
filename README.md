@@ -263,6 +263,35 @@ directives = "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
 
 ## Commands
 
+### Message
+
+To send messages to ChatGPT, simply mention the ChatGPT user in plain English within the message. However, if the
+message includes a string that begins with a slash followed by letters, it might be mistaken for a command and result in
+an "Unknown command" error. To avoid this, use the `/message` command to ensure the text is processed as a direct
+message to ChatGPT, rather than as a command.
+
+#### Command Example
+
+For example, sending:
+
+```
+@gpt is it OK to use "and/or"?
+```
+
+might trigger a system response:
+
+```
+SYSTEM MESSAGE: Unknown command in comment `@gpt is it OK to use "and/or"?`
+```
+
+due to the interpretation of `/or` as a command. However, using
+
+```
+@gpt /message is it OK to use "and/or"?
+```
+
+ensures the message is correctly forwarded to ChatGPT.
+
 ### Review Commands
 
 Reviewing a Change Set or the last Patch Set can occur automatically upon submission or be manually triggered using the
