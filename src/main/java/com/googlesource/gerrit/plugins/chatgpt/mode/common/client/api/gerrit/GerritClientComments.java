@@ -9,7 +9,7 @@ import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessage;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessageParser;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -149,7 +149,12 @@ public class GerritClientComments extends GerritClientAccount {
 
     private void addLastComments(GerritChange change) {
         log.debug("Adding last comments for change: {}", change.getFullChangeId());
-        ClientMessage clientMessage = new ClientMessage(config, changeSetData, pluginDataHandlerProvider, localizer);
+        ClientMessageParser messageParser = new ClientMessageParser(
+                config,
+                changeSetData,
+                pluginDataHandlerProvider,
+                localizer
+        );
         try {
             List<GerritComment> latestComments = retrieveComments(change);
             if (latestComments == null) {
@@ -158,8 +163,8 @@ public class GerritClientComments extends GerritClientAccount {
             for (GerritComment latestComment : latestComments) {
                 String commentMessage = latestComment.getMessage();
                 log.debug("Processing comment: {}", commentMessage);
-                if (clientMessage.isBotAddressed(commentMessage)) {
-                    if (clientMessage.parseCommands(commentMessage)) {
+                if (messageParser.isBotAddressed(commentMessage)) {
+                    if (messageParser.parseCommands(commentMessage)) {
                         commentProperties.clear();
                         return;
                     }
