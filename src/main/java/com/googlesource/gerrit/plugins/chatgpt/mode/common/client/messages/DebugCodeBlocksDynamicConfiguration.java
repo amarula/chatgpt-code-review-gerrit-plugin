@@ -7,8 +7,8 @@ import java.util.Map;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.prettyStringifyMap;
 
-public class DebugCodeBlocksDynamicSettings extends DebugCodeBlocks {
-    public DebugCodeBlocksDynamicSettings(Localizer localizer) {
+public class DebugCodeBlocksDynamicConfiguration extends DebugCodeBlocksBase {
+    public DebugCodeBlocksDynamicConfiguration(Localizer localizer) {
         super(localizer.getText("message.dynamic.configuration.title"));
     }
 
