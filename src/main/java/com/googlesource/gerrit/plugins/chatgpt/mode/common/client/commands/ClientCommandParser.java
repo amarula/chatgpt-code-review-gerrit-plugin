@@ -29,6 +29,7 @@ public class ClientCommandParser extends ClientCommandBase {
     private static final List<CommandSet> DEBUG_REQUIRED_COMMANDS = new ArrayList<>(List.of(
             CommandSet.DIRECTIVES,
             CommandSet.CONFIGURE,
+            CommandSet.DUMP_CONFIG,
             CommandSet.DUMP_STORED_DATA
     ));
     private static final String PREPROCESS_REGEX = "/directives\\s+\"?(.*[^\"])\"?";
