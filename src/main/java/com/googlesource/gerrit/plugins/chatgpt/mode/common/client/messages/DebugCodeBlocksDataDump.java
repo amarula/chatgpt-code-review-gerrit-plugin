@@ -13,7 +13,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.convertP
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.prettyStringifyMap;
 
 @Slf4j
-public class DebugCodeBlocksDataDump extends DebugCodeBlocks {
+public class DebugCodeBlocksDataDump extends DebugCodeBlocksBase {
     private final List<String> dataDump = new ArrayList<>();
 
     public DebugCodeBlocksDataDump(Localizer localizer, PluginDataHandlerProvider pluginDataHandlerProvider) {
