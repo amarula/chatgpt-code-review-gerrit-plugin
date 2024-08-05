@@ -14,7 +14,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksDynamicSettings;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksDynamicConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithDo
 public class GerritClientReview extends GerritClientAccount {
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final Localizer localizer;
-    private final DebugCodeBlocksDynamicSettings debugCodeBlocksDynamicSettings;
+    private final DebugCodeBlocksDynamicConfiguration debugCodeBlocksDynamicConfiguration;
 
     @VisibleForTesting
     @Inject
@@ -45,7 +45,7 @@ public class GerritClientReview extends GerritClientAccount {
         super(config, accountCache);
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.localizer = localizer;
-        debugCodeBlocksDynamicSettings = new DebugCodeBlocksDynamicSettings(localizer);
+        debugCodeBlocksDynamicConfiguration = new DebugCodeBlocksDynamicConfiguration(localizer);
         log.debug("GerritClientReview initialized.");
     }
 
@@ -111,7 +111,7 @@ public class GerritClientReview extends GerritClientAccount {
         List<String> messages = new ArrayList<>();
         Map<String, String> dynamicConfig = new DynamicConfiguration(pluginDataHandlerProvider).getDynamicConfig();
         if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
-            messages.add(debugCodeBlocksDynamicSettings.getDebugCodeBlock(dynamicConfig));
+            messages.add(debugCodeBlocksDynamicConfiguration.getDebugCodeBlock(dynamicConfig));
         }
         if (emptyComments) {
             messages.add(localizer.getText("system.message.prefix") + ' ' + systemMessage);

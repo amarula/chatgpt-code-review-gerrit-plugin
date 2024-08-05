@@ -27,7 +27,7 @@ public class ChatGptComment extends ClientBase {
         messageCleaner = new ClientMessageCleaner(config, commentProperty.getMessage(), localizer);
         if (isFromAssistant(commentProperty)) {
             log.debug("Comment from assistant detected. Removing debug code blocks.");
-            messageCleaner.removeDebugCodeBlocksReview().removeDebugCodeBlocksDynamicSettings();
+            messageCleaner.removeDebugCodeBlocksReview().removeDebugCodeBlocksDynamicConfiguration();
         }
         else {
             log.debug("Comment not from assistant. Removing mentions and commands.");

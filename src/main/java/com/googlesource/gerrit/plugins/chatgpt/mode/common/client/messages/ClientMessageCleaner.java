@@ -14,7 +14,7 @@ public class ClientMessageCleaner extends ClientMessageBase {
             "^(?:Patch Set \\d+:[^\\n]*\\s+(?:\\(\\d+ comments?\\)\\s*)?)+");
 
     private final DebugCodeBlocksReview debugCodeBlocksReview;
-    private final DebugCodeBlocksDynamicSettings debugCodeBlocksDynamicSettings;
+    private final DebugCodeBlocksDynamicConfiguration debugCodeBlocksDynamicConfiguration;
     private final ClientCommandCleaner clientCommandCleaner;
 
     @Getter
@@ -24,7 +24,7 @@ public class ClientMessageCleaner extends ClientMessageBase {
         super(config);
         this.message = message;
         debugCodeBlocksReview = new DebugCodeBlocksReview(localizer);
-        debugCodeBlocksDynamicSettings = new DebugCodeBlocksDynamicSettings(localizer);
+        debugCodeBlocksDynamicConfiguration = new DebugCodeBlocksDynamicConfiguration(localizer);
         clientCommandCleaner = new ClientCommandCleaner(config);
         log.debug("ClientMessageCleaner initialized with bot mention pattern: {}", botMentionPattern);
     }
@@ -57,10 +57,10 @@ public class ClientMessageCleaner extends ClientMessageBase {
         return this;
     }
 
-    public ClientMessageCleaner removeDebugCodeBlocksDynamicSettings() {
-        log.debug("Removing debug code blocks for dynamic settings.");
-        message = debugCodeBlocksDynamicSettings.removeDebugCodeBlocks(message);
-        log.debug("Message after removing dynamic settings debug code blocks: {}", message);
+    public ClientMessageCleaner removeDebugCodeBlocksDynamicConfiguration() {
+        log.debug("Removing debug code blocks for dynamic configuration.");
+        message = debugCodeBlocksDynamicConfiguration.removeDebugCodeBlocks(message);
+        log.debug("Message after removing dynamic configuration debug code blocks: {}", message);
         return this;
     }
 }
