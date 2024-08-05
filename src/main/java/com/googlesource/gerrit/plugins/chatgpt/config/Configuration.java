@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,10 +24,15 @@ import static java.util.stream.Collectors.toList;
 @Slf4j
 public class Configuration {
     // Config Constants
+    public static final String DEFAULT_EMPTY_SETTING = "";
     public static final String ENABLED_USERS_ALL = "ALL";
     public static final String ENABLED_GROUPS_ALL = "ALL";
     public static final String ENABLED_TOPICS_ALL = "ALL";
     public static final String NOT_CONFIGURED_ERROR_MSG = "%s is not configured";
+    // The convention `KEY_<CONFIG_KEY> = "configKey"` is used for naming config key constants
+    public static final String PREFIX_KEY = "KEY_";
+    // The convention is "getConfigKey"` used for naming config key getter methods
+    public static final String PREFIX_GETTER = "get";
 
     // Default Config values
     public static final String OPENAI_DOMAIN = "https://api.openai.com";
@@ -138,6 +144,8 @@ public class Configuration {
     private static final String KEY_TASK_SPECIFIC_ASSISTANTS = "taskSpecificAssistants";
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
     private static final String KEY_SELECTIVE_LOG_LEVEL_OVERRIDE = "selectiveLogLevelOverride";
+
+    private static final List<String> EXCLUDE_FROM_DUMP = List.of("KEY_GPT_TOKEN");
 
     private final OneOffRequestContext context;
     @Getter
@@ -286,6 +294,18 @@ public class Configuration {
         return Locale.getDefault();
     }
 
+    public String getGptRelevanceRules() {
+        return getString(KEY_GPT_RELEVANCE_RULES, DEFAULT_EMPTY_SETTING);
+    }
+
+    public String getGptReviewTemperature() {
+        return getString(KEY_GPT_REVIEW_TEMPERATURE, String.valueOf(DEFAULT_GPT_REVIEW_TEMPERATURE));
+    }
+
+    public String getGptCommentTemperature() {
+        return getString(KEY_GPT_COMMENT_TEMPERATURE, String.valueOf(DEFAULT_GPT_COMMENT_TEMPERATURE));
+    }
+
     public int getVotingMinScore() {
         return getInt(KEY_VOTING_MIN_SCORE, DEFAULT_VOTING_MIN_SCORE);
     }
@@ -349,19 +369,53 @@ public class Configuration {
     }
 
     public boolean isDefinedKey(String key) {
-        // This method assumes the convention `KEY_<CONFIG_KEY> = "configKey"` is used for naming config key constants.
         try {
-            String configKey = "KEY_" + convertCamelToSnakeCase(key).toUpperCase();
+            String configKey = PREFIX_KEY + convertCamelToSnakeCase(key).toUpperCase();
             log.debug("Checking if config key `{}` for {} is defined", configKey, key);
             Field field = this.getClass().getDeclaredField(configKey);
-            field.setAccessible(true);
-            String value = field.get(null).toString();
+            String value = getFieldConfigValue(field);
             log.debug("Config key value: {}", value);
             return value.equals(key);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             log.debug("Error checking if config key `{}` is defined", key, e);
             return false;
         }
+    }
+
+    public TreeMap<String, String> dumpConfigMap() {
+        log.debug("Start dumping config map");
+        TreeMap<String, String> configMap = new TreeMap<>();
+        try {
+            for (Field field : this.getClass().getDeclaredFields()) {
+                String fieldName = field.getName();
+                log.debug("Processing dumping config field `{}`", fieldName);
+                if (!fieldName.startsWith(PREFIX_KEY) || EXCLUDE_FROM_DUMP.contains(fieldName)) {
+                    continue;
+                }
+                String fieldValue = getFieldConfigValue(field);
+                String getterName = PREFIX_GETTER + capitalizeFirstLetter(fieldValue);
+                String configValue;
+                try {
+                    configValue = this.getClass().getDeclaredMethod(getterName).invoke(this).toString();
+                } catch (NoSuchMethodException e) {
+                    log.debug("Config field `{}` lacking getter method `{}` is excluded from the dump", fieldName,
+                            getterName);
+                    continue;
+                }
+                log.debug("Config entities retrieved - Field Value: `{}`, Getter Name: `{}`, Config Value: `{}`",
+                        fieldValue, getterName, configValue);
+                configMap.put(fieldValue, configValue);
+            }
+            return configMap;
+        } catch (InvocationTargetException | IllegalAccessException e) {
+            log.info("Error retrieving configuration", e);
+            return null;
+        }
+    }
+
+    private String getFieldConfigValue(Field field) throws IllegalAccessException {
+        field.setAccessible(true);
+        return field.get(null).toString();
     }
 
     private String getValidatedOrThrow(String key) {

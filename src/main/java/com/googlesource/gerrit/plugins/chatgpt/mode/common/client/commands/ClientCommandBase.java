@@ -16,6 +16,7 @@ public abstract class ClientCommandBase extends ClientBase {
         DIRECTIVES,
         FORGET_THREAD,
         CONFIGURE,
+        DUMP_CONFIG,
         DUMP_STORED_DATA,
     }
     public enum BaseOptionSet {
@@ -34,6 +35,7 @@ public abstract class ClientCommandBase extends ClientBase {
             "directives", CommandSet.DIRECTIVES,
             "forget_thread", CommandSet.FORGET_THREAD,
             "configure", CommandSet.CONFIGURE,
+            "dump_config", CommandSet.DUMP_CONFIG,
             "dump_stored_data", CommandSet.DUMP_STORED_DATA
     );
 
