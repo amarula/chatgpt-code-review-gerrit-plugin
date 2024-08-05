@@ -7,11 +7,11 @@ import java.util.regex.Pattern;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
-public class DebugCodeBlocks {
+public abstract class DebugCodeBlocksBase {
     protected final String commentOpening;
     protected final Pattern debugMessagePattern;
 
-    public DebugCodeBlocks(String openingTitle) {
+    public DebugCodeBlocksBase(String openingTitle) {
         commentOpening = CODE_DELIMITER_BEGIN + openingTitle + "\n";
         debugMessagePattern = Pattern.compile("\\s+" + CODE_DELIMITER +"\\s*" + openingTitle + ".*" +
                 CODE_DELIMITER + "\\s*", Pattern.DOTALL);

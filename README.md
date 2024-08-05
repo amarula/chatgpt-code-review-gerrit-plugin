@@ -387,6 +387,58 @@ lastAssistantId: asst_XXXXXXXXXXXXXXXXXXXX
 
 **NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
 
+### Configuration Settings Dump
+
+The `/dump_config` command allows you to dump relevant non-confidential configuration settings in a UI message:
+
+```
+/dump_config
+```
+
+Example of the response:
+
+```
+CONFIGURATION SETTINGS
+
+directives: []
+disabledGroups: []
+disabledTopicFilter: []
+disabledUsers: []
+enableMessageDebugging: true
+enabledFileExtensions: [.py, .java, .js, .ts, .html, .css, .cs, .cpp, .c, .h, .php, .rb, .swift, .kt, .r, .jl, .go, .scala, .pl, .pm, .rs, .dart, .lua, .sh, .vb, .bat]
+enabledGroups: [ALL]
+enabledProjects:
+enabledTopicFilter: [ALL]
+enabledUsers: [ALL]
+filterCommentsBelowScore: 0
+filterCommentsRelevanceThreshold: 0.6
+filterNegativeComments: true
+filterRelevantComments: true
+forceCreateAssistant: false
+gerritUserName: gpt
+gptCommentTemperature: 1.0
+gptDomain: https://api.openai.com
+gptFullFileReview: true
+gptMode: stateful
+gptModel: gpt-4-turbo
+gptReviewCommitMessages: true
+gptReviewPatchSet: true
+gptReviewTemperature: 0.2
+gptStreamOutput: false
+ignoreOutdatedInlineComments: false
+ignoreResolvedChatGptComments: true
+inlineCommentsAsResolved: false
+maxReviewFileSize: 20000
+maxReviewLines: 1000
+patchSetCommentsAsResolved: false
+selectiveLogLevelOverride:
+taskSpecificAssistants: false
+votingMaxScore: 1
+votingMinScore: -1
+```
+
+**NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
+
 ## Testing
 
 ### Overview

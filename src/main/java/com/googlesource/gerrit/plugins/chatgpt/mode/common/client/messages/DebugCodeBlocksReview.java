@@ -7,7 +7,7 @@ import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.prettyStringifyObject;
 
-public class DebugCodeBlocksReview extends DebugCodeBlocks {
+public class DebugCodeBlocksReview extends DebugCodeBlocksBase {
     private static final String HIDDEN_REPLY = "hidden: %s";
 
     public DebugCodeBlocksReview(Localizer localizer) {
