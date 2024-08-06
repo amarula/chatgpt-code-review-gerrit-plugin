@@ -7,7 +7,7 @@
     <groupId>com.googlesource.gerrit.plugins</groupId>
     <artifactId>chatgpt-code-review-gerrit-plugin</artifactId>
     <packaging>jar</packaging>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
     <properties>
         <Gerrit-ApiType>plugin</Gerrit-ApiType>
         <Gerrit-ApiVersion>3.10.0-rc3</Gerrit-ApiVersion>
