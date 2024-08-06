@@ -42,13 +42,33 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
 
     public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet) {
         isCommentEvent = change.getIsCommentEvent();
-        String changeId = change.getFullChangeId();
-        log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", changeId, patchSet);
+        log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", change.getFullChangeId(),
+                patchSet);
 
+        String threadId = createThreadWithMessage(changeSetData, change, patchSet);
+        if (threadId == null) {
+            return null;
+        }
+        ChatGptRun chatGptRun = runThread(changeSetData, change, threadId);
+        if (chatGptRun == null) {
+            return null;
+        }
+        ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
+        if (chatGptResponseContent == null) {
+            return null;
+        }
+        chatGptRun.cancelRun();
+
+        return chatGptResponseContent;
+    }
+
+    private String createThreadWithMessage(ChangeSetData changeSetData, GerritChange change, String patchSet) {
         ChatGptThread chatGptThread = new ChatGptThread(config, changeSetData, pluginDataHandlerProvider);
         String threadId = chatGptThread.createThread();
         log.debug("Created ChatGPT thread with ID: {}", threadId);
-
+        if (threadId == null) {
+            return null;
+        }
         ChatGptThreadMessage chatGptThreadMessage = new ChatGptThreadMessage(
                 threadId,
                 config,
@@ -58,6 +78,13 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         );
         chatGptThreadMessage.addMessage();
 
+        requestBody = chatGptThreadMessage.getAddMessageRequestBody();  // Valued for testing purposes
+        log.debug("ChatGPT request body: {}", requestBody);
+
+        return threadId;
+    }
+
+    private ChatGptRun runThread(ChangeSetData changeSetData, GerritChange change, String threadId) {
         ChatGptRun chatGptRun = new ChatGptRun(
                 threadId,
                 config,
@@ -66,15 +93,13 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
                 gitRepoFiles,
                 pluginDataHandlerProvider
         );
-        chatGptRun.createRun();
-        chatGptRun.pollRunStep();
-        requestBody = chatGptThreadMessage.getAddMessageRequestBody();  // Valued for testing purposes
-        log.debug("ChatGPT request body: {}", requestBody);
-
-        ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
-        chatGptRun.cancelRun();
-
-        return chatGptResponseContent;
+        if (!chatGptRun.createRun()) {
+            return null;
+        }
+        if (!chatGptRun.pollRunStep()) {
+            return null;
+        }
+        return chatGptRun;
     }
 
     private ChatGptResponseContent getResponseContentStateful(String threadId, ChatGptRun chatGptRun) {
@@ -97,6 +122,10 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         log.debug("Retrieving message with ID: {}", messageId);
 
         ChatGptThreadMessageResponse threadMessageResponse = chatGptThreadMessage.retrieveMessage(messageId);
+        if (threadMessageResponse == null) {
+            log.error("Retrieving message with ID {} failed.", messageId);
+            return null;
+        }
         String responseText = threadMessageResponse.getContent().get(0).getText().getValue();
         if (responseText == null) {
             log.error("ChatGPT thread message response content is null for message ID: {}", messageId);

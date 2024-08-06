@@ -59,7 +59,7 @@ public class ChatGptRun extends ClientBase {
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
     }
 
-    public void createRun() {
+    public boolean createRun() {
         ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
                 config,
                 changeSetData,
@@ -68,15 +68,19 @@ public class ChatGptRun extends ClientBase {
                 pluginDataHandlerProvider
         );
         assistantId = chatGptAssistant.setupAssistant();
-
+        if (assistantId == null) {
+            return false;
+        }
         Request request = runCreateRequest();
         log.info("ChatGPT Create Run request: {}", request);
 
         runResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
         log.info("Run created: {}", runResponse);
+
+        return runResponse != null;
     }
 
-    public void pollRunStep() {
+    public boolean pollRunStep() {
         for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
             int pollingCount = pollRun();
 
@@ -87,13 +91,14 @@ public class ChatGptRun extends ClientBase {
             log.debug("ChatGPT Response: {}", response);
             stepResponse = getGson().fromJson(response, ChatGptListResponse.class);
             log.info("Run executed after {} polling requests: {}", pollingCount, stepResponse);
-            if (stepResponse.getData().isEmpty()) {
+            if (stepResponse == null || stepResponse.getData().isEmpty()) {
                 log.warn("Empty response from ChatGPT");
                 threadSleep(STEP_RETRIEVAL_INTERVAL);
                 continue;
             }
-            return;
+            return true;
         }
+        return false;
     }
 
     public ChatGptResponseMessage getFirstStepDetails() {
@@ -125,7 +130,7 @@ public class ChatGptRun extends ClientBase {
     private int pollRun() {
         int pollingCount = 0;
 
-        while (UNCOMPLETED_STATUSES.contains(runResponse.getStatus())) {
+        while (runResponse != null && UNCOMPLETED_STATUSES.contains(runResponse.getStatus())) {
             pollingCount++;
             log.debug("Polling request #{}", pollingCount);
             threadSleep(RUN_POLLING_INTERVAL);

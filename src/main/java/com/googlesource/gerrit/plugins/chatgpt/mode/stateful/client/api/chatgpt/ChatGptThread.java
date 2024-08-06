@@ -39,7 +39,9 @@ public class ChatGptThread {
             log.debug("ChatGPT Create Thread request: {}", request);
 
             ChatGptResponse threadResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
-            threadId = threadResponse.getId();
+            if (threadResponse != null) {
+                threadId = threadResponse.getId();
+            }
             if (threadId != null) {
                 log.info("Thread created: {}", threadResponse);
                 changeDataHandler.setValue(KEY_THREAD_ID, threadId);

@@ -21,6 +21,7 @@ import java.net.URI;
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 @Slf4j
@@ -58,7 +59,47 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
     }
 
     @Test
-    public void initialEmptyResponse() throws Exception {
+    public void filesCreateResponse400() {
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.filesCreateUri()).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_BAD_REQUEST)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
+    }
+
+    @Test
+    public void threadCreateResponse400() {
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain() +
+                        UriResourceLocatorStateful.threadsUri()).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_BAD_REQUEST)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
+    }
+
+    @Test
+    public void runCreateResponse400() {
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain() +
+                            UriResourceLocatorStateful.runsUri(CHAT_GPT_THREAD_ID)).getPath()))
+                    .willReturn(WireMock.aResponse()
+                            .withStatus(HTTP_BAD_REQUEST)
+                            .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                    )
+        );
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
+    }
+
+    @Test
+    public void runStepsInitialEmptyResponse() throws Exception {
         // To effectively test how an initial empty response from ChatGPT is managed, the following approach is adopted:
         // 1. the ChatGPT run-steps request is initially mocked to return an empty data field, and
         // 2. the sleep function is mocked to replace the empty response with a valid one, instead of pausing execution
@@ -81,6 +122,23 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
             Assert.assertEquals(reviewPrompt, requestContent);
             Assert.assertEquals(reviewMessageCode, getCapturedMessage(captor, "test_file_1.py"));
             Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
+        }
+    }
+
+    @Test
+    public void runStepsResponse400() {
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_BAD_REQUEST)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
+
+        try (MockedStatic<ThreadUtils> mocked = Mockito.mockStatic(ThreadUtils.class)) {
+            mocked.when(() -> ThreadUtils.threadSleep(Mockito.anyLong())).then(invocation -> null);
+
+            handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+            Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
         }
     }
 
@@ -116,6 +174,21 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
         ArgumentCaptor<ReviewInput> captor = testRequestSent();
         Assert.assertEquals(promptTagComments, requestContent);
         Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
+    }
+
+    @Test
+    public void gptMentionedInCommentMessageResponseText400() {
+        chatGptPromptStateful.setCommentEvent(true);
+        setupMockRequestRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_BAD_REQUEST)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
     }
 
     @Test
