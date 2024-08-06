@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseMessage;
@@ -59,7 +60,7 @@ public class ChatGptRun extends ClientBase {
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
     }
 
-    public void createRun() {
+    public void createRun() throws OpenAiConnectionFailException {
         ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
                 config,
                 changeSetData,
@@ -76,14 +77,23 @@ public class ChatGptRun extends ClientBase {
         log.info("Run created: {}", runResponse);
     }
 
-    public void pollRunStep() {
+    public void pollRunStep() throws OpenAiConnectionFailException {
+        OpenAiConnectionFailException exception = null;
         for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
             int pollingCount = pollRun();
 
             Request stepsRequest = getStepsRequest();
             log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
 
-            String response = httpClient.execute(stepsRequest);
+            String response = null;
+            try {
+                response = httpClient.execute(stepsRequest);
+            } catch (OpenAiConnectionFailException e) {
+                exception = e;
+                log.warn("Error retrieving run steps from ChatGPT: {}", e.getMessage());
+                threadSleep(STEP_RETRIEVAL_INTERVAL);
+                continue;
+            }
             log.debug("ChatGPT Response: {}", response);
             stepResponse = getGson().fromJson(response, ChatGptListResponse.class);
             log.info("Run executed after {} polling requests: {}", pollingCount, stepResponse);
@@ -94,6 +104,7 @@ public class ChatGptRun extends ClientBase {
             }
             return;
         }
+        throw new OpenAiConnectionFailException(exception);
     }
 
     public ChatGptResponseMessage getFirstStepDetails() {
@@ -122,7 +133,7 @@ public class ChatGptRun extends ClientBase {
         }
     }
 
-    private int pollRun() {
+    private int pollRun() throws OpenAiConnectionFailException {
         int pollingCount = 0;
 
         while (UNCOMPLETED_STATUSES.contains(runResponse.getStatus())) {

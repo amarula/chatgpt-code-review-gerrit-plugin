@@ -3,6 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
@@ -32,7 +33,7 @@ public class ChatGptThread {
         this.changeDataHandler = pluginDataHandlerProvider.getChangeScope();
     }
 
-    public String createThread() {
+    public String createThread() throws OpenAiConnectionFailException {
         String threadId = changeDataHandler.getValue(KEY_THREAD_ID);
         if (threadId == null || !changeSetData.getForcedReview()) {
             Request request = createThreadRequest();
