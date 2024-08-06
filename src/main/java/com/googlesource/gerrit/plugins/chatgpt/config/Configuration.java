@@ -3,36 +3,20 @@ package com.googlesource.gerrit.plugins.chatgpt.config;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.extensions.api.GerritApi;
 import com.google.gerrit.server.config.PluginConfig;
-import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.gerrit.server.util.OneOffRequestContext;
 
-import com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
+import java.util.Locale;
+import java.util.TreeMap;
 
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
-import static java.util.stream.Collectors.toList;
 
-@Slf4j
-public class Configuration {
+public class Configuration extends ConfigCore {
     // Config Constants
     public static final String DEFAULT_EMPTY_SETTING = "";
     public static final String ENABLED_USERS_ALL = "ALL";
     public static final String ENABLED_GROUPS_ALL = "ALL";
     public static final String ENABLED_TOPICS_ALL = "ALL";
-    public static final String NOT_CONFIGURED_ERROR_MSG = "%s is not configured";
-    // The convention `KEY_<CONFIG_KEY> = "configKey"` is used for naming config key constants
-    public static final String PREFIX_KEY = "KEY_";
-    // The convention is "getConfigKey"` used for naming config key getter methods
-    public static final String PREFIX_GETTER = "get";
 
     // Default Config values
     public static final String OPENAI_DOMAIN = "https://api.openai.com";
@@ -145,32 +129,15 @@ public class Configuration {
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
     private static final String KEY_SELECTIVE_LOG_LEVEL_OVERRIDE = "selectiveLogLevelOverride";
 
-    private static final List<String> EXCLUDE_FROM_DUMP = List.of("KEY_GPT_TOKEN");
-
-    private final OneOffRequestContext context;
-    @Getter
-    private final Account.Id userId;
-    @Getter
-    private final PluginConfig globalConfig;
-    @Getter
-    private final PluginConfig projectConfig;
-    @Getter
-    private final String gerritUserEmail;
-    @Getter
-    private final GerritApi gerritApi;
-
-
-    public Configuration(OneOffRequestContext context, GerritApi gerritApi, PluginConfig globalConfig, PluginConfig projectConfig, String gerritUserEmail, Account.Id userId) {
-        this.context = context;
-        this.gerritApi = gerritApi;
-        this.globalConfig = globalConfig;
-        this.projectConfig = projectConfig;
-        this.gerritUserEmail = gerritUserEmail;
-        this.userId = userId;
-    }
-
-    public ManualRequestContext openRequestContext() {
-      return context.openAs(userId);
+    public Configuration(
+            OneOffRequestContext context,
+            GerritApi gerritApi,
+            PluginConfig globalConfig,
+            PluginConfig projectConfig,
+            String gerritUserEmail,
+            Account.Id userId
+    ) {
+        super(context, gerritApi, globalConfig, projectConfig, gerritUserEmail, userId);
     }
 
     public String getGptToken() {
@@ -263,11 +230,7 @@ public class Configuration {
     }
 
     public List<String> getDirectives() {
-        return splitConfig(getString(KEY_DIRECTIVES, DEFAULT_DIRECTIVES), TextUtils.QUOTED_ITEM_COMMA_DELIMITED)
-                .stream()
-                .filter(s -> !s.isEmpty())
-                .map(s -> StringUtils.appendIfMissing(StringUtils.strip(s, TextUtils.DOUBLE_QUOTES), "."))
-                .collect(toList());
+        return splitNarrativeConfig(getString(KEY_DIRECTIVES, DEFAULT_DIRECTIVES));
     }
 
     public boolean isVotingEnabled() {
@@ -346,117 +309,11 @@ public class Configuration {
         return getProjectGlobalString(KEY_SELECTIVE_LOG_LEVEL_OVERRIDE, DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE);
     }
 
-    public String getString(String key, String defaultValue) {
-        String value = projectConfig.getString(key);
-        if (value != null) {
-            return value;
-        }
-        return globalConfig.getString(key, defaultValue);
-    }
-
-    public String getProjectGlobalString(String key, String defaultValue) {
-        String globalValue = globalConfig.getString(key, defaultValue);
-        String projectValue = projectConfig.getString(key, defaultValue);
-        log.debug("Get project global string - globalConfig: {}, projectConfig: {}", globalValue, projectValue);
-
-        String resultValue = joinWithComma(
-                Stream.of(globalValue, projectValue)
-                        .filter(s -> !s.isEmpty())
-                        .map(TextUtils::unwrapQuotes)
-                        .collect(Collectors.toSet())
-        );
-        return resultValue.isEmpty() ? "" : wrapQuotes(resultValue);
-    }
-
     public boolean isDefinedKey(String key) {
-        try {
-            String configKey = PREFIX_KEY + convertCamelToSnakeCase(key).toUpperCase();
-            log.debug("Checking if config key `{}` for {} is defined", configKey, key);
-            Field field = this.getClass().getDeclaredField(configKey);
-            String value = getFieldConfigValue(field);
-            log.debug("Config key value: {}", value);
-            return value.equals(key);
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            log.debug("Error checking if config key `{}` is defined", key, e);
-            return false;
-        }
+        return isDefinedKey(this.getClass(), key);
     }
 
     public TreeMap<String, String> dumpConfigMap() {
-        log.debug("Start dumping config map");
-        TreeMap<String, String> configMap = new TreeMap<>();
-        try {
-            for (Field field : this.getClass().getDeclaredFields()) {
-                String fieldName = field.getName();
-                log.debug("Processing dumping config field `{}`", fieldName);
-                if (!fieldName.startsWith(PREFIX_KEY) || EXCLUDE_FROM_DUMP.contains(fieldName)) {
-                    continue;
-                }
-                String fieldValue = getFieldConfigValue(field);
-                String getterName = PREFIX_GETTER + capitalizeFirstLetter(fieldValue);
-                String configValue;
-                try {
-                    configValue = this.getClass().getDeclaredMethod(getterName).invoke(this).toString();
-                } catch (NoSuchMethodException e) {
-                    log.debug("Config field `{}` lacking getter method `{}` is excluded from the dump", fieldName,
-                            getterName);
-                    continue;
-                }
-                log.debug("Config entities retrieved - Field Value: `{}`, Getter Name: `{}`, Config Value: `{}`",
-                        fieldValue, getterName, configValue);
-                configMap.put(fieldValue, configValue);
-            }
-            return configMap;
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            log.info("Error retrieving configuration", e);
-            return null;
-        }
-    }
-
-    private String getFieldConfigValue(Field field) throws IllegalAccessException {
-        field.setAccessible(true);
-        return field.get(null).toString();
-    }
-
-    private String getValidatedOrThrow(String key) {
-        String value = projectConfig.getString(key);
-        if (value == null) {
-            value = globalConfig.getString(key);
-        }
-        if (value == null) {
-            throw new RuntimeException(String.format(NOT_CONFIGURED_ERROR_MSG, key));
-        }
-        return value;
-    }
-
-    private int getInt(String key, int defaultValue) {
-        int valueForProject = projectConfig.getInt(key, defaultValue);
-        // To avoid misinterpreting an undefined value as zero, a secondary check is performed by retrieving the value
-        // as a String.
-        if (valueForProject != defaultValue && valueForProject != 0
-                && projectConfig.getString(key, "") != null) {
-            return valueForProject;
-        }
-        return globalConfig.getInt(key, defaultValue);
-    }
-
-    private boolean getBoolean(String key, boolean defaultValue) {
-        boolean valueForProject = projectConfig.getBoolean(key, defaultValue);
-        if (projectConfig.getString(key) != null) {
-            return valueForProject;
-        }
-        return globalConfig.getBoolean(key, defaultValue);
-    }
-
-    private Double getDouble(String key, Double defaultValue) {
-        return Double.parseDouble(getString(key, String.valueOf(defaultValue)));
-    }
-
-    private List<String> splitConfig(String value) {
-        return TextUtils.splitString(value);
-    }
-
-    private List<String> splitConfig(String value, String delimiter) {
-        return TextUtils.splitString(value, delimiter);
+        return dumpConfigMap(this.getClass());
     }
 }
