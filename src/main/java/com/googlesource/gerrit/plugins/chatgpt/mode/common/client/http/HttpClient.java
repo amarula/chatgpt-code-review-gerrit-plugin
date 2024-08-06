@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http;
 
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
@@ -22,7 +23,7 @@ public class HttpClient {
                 .build();
     }
 
-    public String execute(Request request) {
+    public String execute(Request request) throws OpenAiConnectionFailException {
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 log.error("HTTP request failed with status code: {}", response.code());
@@ -39,7 +40,7 @@ public class HttpClient {
             }
         } catch (IOException e) {
             log.error("HTTP request execution failed for request URL: {}", request.url(), e);
-            throw new RuntimeException(e);
+            throw new OpenAiConnectionFailException(e);
         }
         return null;
     }
