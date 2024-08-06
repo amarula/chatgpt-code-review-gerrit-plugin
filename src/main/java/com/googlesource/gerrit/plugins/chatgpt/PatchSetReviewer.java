@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -76,10 +77,17 @@ public class PatchSetReviewer {
         ChangeSetDataHandler.update(config, change, gerritClient, changeSetData, localizer);
 
         if (changeSetData.shouldRequestChatGptReview()) {
-            ChatGptResponseContent reviewReply = getReviewReply(change, patchSet);
-            log.debug("ChatGPT response: {}", reviewReply);
-
-            retrieveReviewBatches(reviewReply, change);
+            ChatGptResponseContent reviewReply = null;
+            try {
+                reviewReply = getReviewReply(change, patchSet);
+                log.debug("ChatGPT response: {}", reviewReply);
+            }
+            catch (OpenAiConnectionFailException e) {
+                changeSetData.setReviewSystemMessage(localizer.getText("message.openai.connection.error"));
+            }
+            if (reviewReply != null) {
+                retrieveReviewBatches(reviewReply, change);
+            }
         }
         clientReviewProvider.get().setReview(change, reviewBatches, changeSetData, getReviewScore(change));
     }
