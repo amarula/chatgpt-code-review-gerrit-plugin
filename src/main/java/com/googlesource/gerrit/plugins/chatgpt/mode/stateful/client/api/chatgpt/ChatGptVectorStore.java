@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
@@ -26,7 +27,7 @@ public class ChatGptVectorStore extends ClientBase {
         this.change = change;
     }
 
-    public ChatGptResponse createVectorStore() {
+    public ChatGptResponse createVectorStore() throws OpenAiConnectionFailException {
         Request request = vectorStoreCreateRequest();
         log.debug("ChatGPT Create Vector Store request: {}", request);
 

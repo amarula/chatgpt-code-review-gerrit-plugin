@@ -3,6 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptParameters;
@@ -63,7 +64,7 @@ public class ChatGptAssistant extends ClientBase {
         log.debug("Initialized ChatGptAssistant with project and assistants data handlers.");
     }
 
-    public String setupAssistant() {
+    public String setupAssistant() throws OpenAiConnectionFailException {
         log.debug("Setting up the assistant parameters.");
         setupAssistantParameters();
         String assistantIdHashKey = calculateAssistantIdHashKey();
@@ -83,7 +84,7 @@ public class ChatGptAssistant extends ClientBase {
         return assistantId;
     }
 
-    public String createVectorStore() {
+    public String createVectorStore() throws OpenAiConnectionFailException {
         log.debug("Creating or retrieving vector store.");
         String vectorStoreId = projectDataHandler.getValue(KEY_VECTOR_STORE_ID);
         if (vectorStoreId == null) {
@@ -106,7 +107,7 @@ public class ChatGptAssistant extends ClientBase {
         assistantsDataHandler.destroy();
     }
 
-    private String uploadRepoFiles() {
+    private String uploadRepoFiles() throws OpenAiConnectionFailException {
         log.debug("Uploading repository files.");
         String repoFiles = gitRepoFiles.getGitRepoFiles(config, change);
         Path repoPath = createTempFileWithContent(sanitizeFilename(change.getProjectName()), ".json", repoFiles);
@@ -116,7 +117,7 @@ public class ChatGptAssistant extends ClientBase {
         return chatGptFilesResponse.getId();
     }
 
-    private String createAssistant(String vectorStoreId) {
+    private String createAssistant(String vectorStoreId) throws OpenAiConnectionFailException {
         log.debug("Creating assistant with vector store ID: {}", vectorStoreId);
         Request request = createRequest(vectorStoreId);
         log.debug("ChatGPT Create Assistant request: {}", request);
