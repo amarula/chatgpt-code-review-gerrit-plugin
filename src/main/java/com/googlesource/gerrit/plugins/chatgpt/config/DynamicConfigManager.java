@@ -10,14 +10,14 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
-public class DynamicConfiguration {
+public class DynamicConfigManager {
     public static final String KEY_DYNAMIC_CONFIG = "dynamicConfig";
 
     private final PluginDataHandler pluginDataHandler;
     @Getter
     private final Map<String, String> dynamicConfig;
 
-    public DynamicConfiguration(PluginDataHandlerProvider pluginDataHandlerProvider) {
+    public DynamicConfigManager(PluginDataHandlerProvider pluginDataHandlerProvider) {
         this.pluginDataHandler = pluginDataHandlerProvider.getChangeScope();
         dynamicConfig = Optional.ofNullable(pluginDataHandler.getJsonValue(KEY_DYNAMIC_CONFIG, String.class))
                 .orElse(new HashMap<>());
