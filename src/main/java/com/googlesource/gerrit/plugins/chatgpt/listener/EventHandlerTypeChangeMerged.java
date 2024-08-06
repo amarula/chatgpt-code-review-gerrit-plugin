@@ -50,7 +50,11 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
         );
         chatGptAssistant.flushAssistantIds();
         log.debug("Flushed assistant IDs for change merged: {}", change.getFullChangeId());
-        chatGptAssistant.createVectorStore();
-        log.debug("Created vector store for change merged: {}", change.getFullChangeId());
+        if (chatGptAssistant.createVectorStore() != null) {
+            log.info("Created vector store for change merged: {}", change.getFullChangeId());
+        }
+        else {
+            log.error("Failed to create vector store for change merged: {}", change.getFullChangeId());
+        }
     }
 }
