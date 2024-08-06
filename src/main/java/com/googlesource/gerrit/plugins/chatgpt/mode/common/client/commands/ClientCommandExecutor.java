@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfigManager;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
@@ -19,7 +19,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
     private final ChangeSetData changeSetData;
     private final Localizer localizer;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
-    private final DynamicConfiguration dynamicConfiguration;
+    private final DynamicConfigManager dynamicConfigManager;
 
     private Map<BaseOptionSet, String> baseOptions;
     private Map<String, String> dynamicOptions;
@@ -34,7 +34,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
         this.localizer = localizer;
         this.changeSetData = changeSetData;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        dynamicConfiguration = new DynamicConfiguration(pluginDataHandlerProvider);
+        dynamicConfigManager = new DynamicConfigManager(pluginDataHandlerProvider);
         log.debug("ClientCommandExecutor initialized.");
     }
 
@@ -98,10 +98,10 @@ public class ClientCommandExecutor extends ClientCommandBase {
                 String optionKey = dynamicOption.getKey();
                 String optionValue = dynamicOption.getValue();
                 log.debug("Updating configuration setting '{}' to '{}'", optionKey, optionValue);
-                dynamicConfiguration.setConfig(optionKey, optionValue);
+                dynamicConfigManager.setConfig(optionKey, optionValue);
             }
         }
-        dynamicConfiguration.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
+        dynamicConfigManager.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
     }
 
     private void commandDumpConfig() {
