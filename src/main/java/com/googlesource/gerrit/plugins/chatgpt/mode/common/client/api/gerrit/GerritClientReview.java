@@ -11,7 +11,7 @@ import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfigManager;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksDynamicConfiguration;
@@ -109,7 +109,7 @@ public class GerritClientReview extends GerritClientAccount {
 
     private void updateSystemMessage(ReviewInput reviewInput, boolean emptyComments, String systemMessage) {
         List<String> messages = new ArrayList<>();
-        Map<String, String> dynamicConfig = new DynamicConfiguration(pluginDataHandlerProvider).getDynamicConfig();
+        Map<String, String> dynamicConfig = new DynamicConfigManager(pluginDataHandlerProvider).getDynamicConfig();
         if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
             messages.add(debugCodeBlocksDynamicConfiguration.getDebugCodeBlock(dynamicConfig));
         }
