@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptReplyItem;
@@ -34,7 +35,8 @@ public class ChatGptClientStatefulTaskSpecific extends ChatGptClientStateful imp
         log.debug("Initialized ChatGptClientStatefulTaskSpecific.");
     }
 
-    public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet) {
+    public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet)
+            throws OpenAiConnectionFailException {
         log.debug("Task-specific ChatGPT ask method called with changeId: {}", change.getFullChangeId());
         if (change.getIsCommentEvent()) {
             return super.ask(changeSetData, change, patchSet);

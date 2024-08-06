@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -40,11 +41,22 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         log.debug("Initialized ChatGptClientStateful.");
     }
 
-    public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet) {
+    public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet)
+            throws OpenAiConnectionFailException {
         isCommentEvent = change.getIsCommentEvent();
-        String changeId = change.getFullChangeId();
-        log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", changeId, patchSet);
+        log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", change.getFullChangeId(),
+                patchSet);
 
+        String threadId = createThreadWithMessage(changeSetData, change, patchSet);
+        ChatGptRun chatGptRun = runThread(changeSetData, change, threadId);
+        ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
+        chatGptRun.cancelRun();
+
+        return chatGptResponseContent;
+    }
+
+    private String createThreadWithMessage(ChangeSetData changeSetData, GerritChange change, String patchSet)
+            throws OpenAiConnectionFailException {
         ChatGptThread chatGptThread = new ChatGptThread(config, changeSetData, pluginDataHandlerProvider);
         String threadId = chatGptThread.createThread();
         log.debug("Created ChatGPT thread with ID: {}", threadId);
@@ -58,6 +70,14 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         );
         chatGptThreadMessage.addMessage();
 
+        requestBody = chatGptThreadMessage.getAddMessageRequestBody();  // Valued for testing purposes
+        log.debug("ChatGPT request body: {}", requestBody);
+
+        return threadId;
+    }
+
+    private ChatGptRun runThread(ChangeSetData changeSetData, GerritChange change, String threadId)
+            throws OpenAiConnectionFailException {
         ChatGptRun chatGptRun = new ChatGptRun(
                 threadId,
                 config,
@@ -68,16 +88,12 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         );
         chatGptRun.createRun();
         chatGptRun.pollRunStep();
-        requestBody = chatGptThreadMessage.getAddMessageRequestBody();  // Valued for testing purposes
-        log.debug("ChatGPT request body: {}", requestBody);
 
-        ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
-        chatGptRun.cancelRun();
-
-        return chatGptResponseContent;
+        return chatGptRun;
     }
 
-    private ChatGptResponseContent getResponseContentStateful(String threadId, ChatGptRun chatGptRun) {
+    private ChatGptResponseContent getResponseContentStateful(String threadId, ChatGptRun chatGptRun)
+            throws OpenAiConnectionFailException {
         return switch (chatGptRun.getFirstStepDetails().getType()) {
             case TYPE_MESSAGE_CREATION -> {
                 log.debug("Retrieving thread message for thread ID: {}", threadId);
@@ -91,7 +107,8 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         };
     }
 
-    private ChatGptResponseContent retrieveThreadMessage(String threadId, ChatGptRun chatGptRun) {
+    private ChatGptResponseContent retrieveThreadMessage(String threadId, ChatGptRun chatGptRun)
+            throws OpenAiConnectionFailException {
         ChatGptThreadMessage chatGptThreadMessage = new ChatGptThreadMessage(threadId, config);
         String messageId = chatGptRun.getFirstStepDetails().getMessageCreation().getMessageId();
         log.debug("Retrieving message with ID: {}", messageId);

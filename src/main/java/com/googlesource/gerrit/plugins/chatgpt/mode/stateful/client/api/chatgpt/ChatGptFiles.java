@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http.HttpClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
@@ -22,7 +23,7 @@ public class ChatGptFiles extends ClientBase {
         super(config);
     }
 
-    public ChatGptFilesResponse uploadFiles(Path repoPath) {
+    public ChatGptFilesResponse uploadFiles(Path repoPath) throws OpenAiConnectionFailException {
         Request request = createUploadFileRequest(repoPath);
         log.debug("ChatGPT Upload Files request: {}", request);
 
