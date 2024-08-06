@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -45,7 +46,7 @@ public class ChatGptThreadMessage extends ClientBase {
         this.patchSet = patchSet;
     }
 
-    public ChatGptThreadMessageResponse retrieveMessage(String messageId) {
+    public ChatGptThreadMessageResponse retrieveMessage(String messageId) throws OpenAiConnectionFailException {
         Request request = createRetrieveMessageRequest(messageId);
         log.debug("ChatGPT Retrieve Thread Message request: {}", request);
         ChatGptThreadMessageResponse threadMessageResponse = getGson().fromJson(
@@ -56,7 +57,7 @@ public class ChatGptThreadMessage extends ClientBase {
         return threadMessageResponse;
     }
 
-    public void addMessage() {
+    public void addMessage() throws OpenAiConnectionFailException {
         Request request = addMessageRequest();
         log.debug("ChatGPT Add Message request: {}", request);
 
