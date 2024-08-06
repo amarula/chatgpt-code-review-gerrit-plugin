@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfiguration.KEY_DYNAMIC_CONFIG;
+import static com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfigManager.KEY_DYNAMIC_CONFIG;
 
 @Singleton
 @Slf4j
