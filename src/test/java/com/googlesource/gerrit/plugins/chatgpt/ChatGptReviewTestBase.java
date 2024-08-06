@@ -125,6 +125,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected ConfigCreator mockConfigCreator;
     protected JsonObject gptRequestBody;
     protected String promptTagComments;
+    protected Localizer localizer;
 
     @Before
     public void before() throws RestApiException {
@@ -306,7 +307,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                 config.getVotingMinScore(),
                 config.getMaxReviewFileSize()
         );
-        Localizer localizer = new Localizer(config);
+        localizer = new Localizer(config);
         gerritClient =
             new GerritClient(
                 new GerritClientFacade(

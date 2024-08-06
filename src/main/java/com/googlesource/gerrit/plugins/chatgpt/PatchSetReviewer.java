@@ -79,7 +79,12 @@ public class PatchSetReviewer {
             ChatGptResponseContent reviewReply = getReviewReply(change, patchSet);
             log.debug("ChatGPT response: {}", reviewReply);
 
-            retrieveReviewBatches(reviewReply, change);
+            if (reviewReply != null) {
+                retrieveReviewBatches(reviewReply, change);
+            }
+            else {
+                changeSetData.setReviewSystemMessage(localizer.getText("message.openai.connection.error"));
+            }
         }
         clientReviewProvider.get().setReview(change, reviewBatches, changeSetData, getReviewScore(change));
     }

@@ -39,7 +39,6 @@ public class HttpClient {
             }
         } catch (IOException e) {
             log.error("HTTP request execution failed for request URL: {}", request.url(), e);
-            throw new RuntimeException(e);
         }
         return null;
     }

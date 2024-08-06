@@ -52,6 +52,9 @@ public class ChatGptClientStatefulTaskSpecific extends ChatGptClientStateful imp
         log.debug("Merging responses from different task-specific stages.");
         ChatGptResponseContent mergedResponse = chatGptResponseContents.remove(0);
         for (ChatGptResponseContent chatGptResponseContent : chatGptResponseContents) {
+            if (chatGptResponseContent == null) {
+                return null;
+            }
             List<ChatGptReplyItem> replies = chatGptResponseContent.getReplies();
             if (replies != null) {
                 mergedResponse.getReplies().addAll(replies);

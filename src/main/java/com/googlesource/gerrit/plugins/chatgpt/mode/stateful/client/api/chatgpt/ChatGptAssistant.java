@@ -72,7 +72,13 @@ public class ChatGptAssistant extends ClientBase {
         if (assistantId == null || config.getForceCreateAssistant()) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
             String vectorStoreId = createVectorStore();
+            if (vectorStoreId == null) {
+                return null;
+            }
             assistantId = createAssistant(vectorStoreId);
+            if (assistantId == null) {
+                return null;
+            }
             assistantsDataHandler.setValue(assistantIdHashKey, assistantId);
             log.info("Project assistant created with ID: {}", assistantId);
         }
@@ -88,8 +94,15 @@ public class ChatGptAssistant extends ClientBase {
         String vectorStoreId = projectDataHandler.getValue(KEY_VECTOR_STORE_ID);
         if (vectorStoreId == null) {
             String fileId = uploadRepoFiles();
+            if (fileId == null) {
+                return null;
+            }
             ChatGptVectorStore vectorStore = new ChatGptVectorStore(fileId, config, change);
             ChatGptResponse createVectorStoreResponse = vectorStore.createVectorStore();
+            if (createVectorStoreResponse == null) {
+                log.error("Error creating vector store");
+                return null;
+            }
             vectorStoreId = createVectorStoreResponse.getId();
             projectDataHandler.setValue(KEY_VECTOR_STORE_ID, vectorStoreId);
             log.info("Vector Store created with ID: {}", vectorStoreId);
@@ -112,7 +125,10 @@ public class ChatGptAssistant extends ClientBase {
         Path repoPath = createTempFileWithContent(sanitizeFilename(change.getProjectName()), ".json", repoFiles);
         ChatGptFiles chatGptFiles = new ChatGptFiles(config);
         ChatGptFilesResponse chatGptFilesResponse = chatGptFiles.uploadFiles(repoPath);
-
+        if (chatGptFilesResponse == null) {
+            log.error("Error uploading repository files");
+            return null;
+        }
         return chatGptFilesResponse.getId();
     }
 
@@ -123,7 +139,10 @@ public class ChatGptAssistant extends ClientBase {
 
         ChatGptResponse assistantResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
         log.debug("Assistant created: {}", assistantResponse);
-
+        if (assistantResponse == null) {
+            log.error("Error creating assistant");
+            return null;
+        }
         return assistantResponse.getId();
     }
 
