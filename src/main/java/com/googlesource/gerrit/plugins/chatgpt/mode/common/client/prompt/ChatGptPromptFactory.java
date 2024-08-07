@@ -25,7 +25,8 @@ public class ChatGptPromptFactory {
             return new ChatGptPromptStatefulRequests(config, changeSetData, change);
         }
         else {
-            if (config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants()) {
+            if (config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ||
+                    changeSetData.getForcedStagedReview()) {
                 return switch (changeSetData.getReviewAssistantStage()) {
                     case REVIEW_CODE -> {
                         log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCode");
@@ -34,6 +35,10 @@ public class ChatGptPromptFactory {
                     case REVIEW_COMMIT_MESSAGE -> {
                         log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCommitMessage");
                         yield new ChatGptPromptStatefulReviewCommitMessage(config, changeSetData, change);
+                    }
+                    case REVIEW_REITERATED -> {
+                        log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewReiterate");
+                        yield new ChatGptPromptStatefulReviewReiterated(config, changeSetData, change);
                     }
                 };
             }
