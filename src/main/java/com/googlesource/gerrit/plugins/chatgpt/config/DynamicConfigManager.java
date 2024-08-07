@@ -19,7 +19,7 @@ public class DynamicConfigManager {
 
     public DynamicConfigManager(PluginDataHandlerProvider pluginDataHandlerProvider) {
         this.pluginDataHandler = pluginDataHandlerProvider.getChangeScope();
-        dynamicConfig = Optional.ofNullable(pluginDataHandler.getJsonValue(KEY_DYNAMIC_CONFIG, String.class))
+        dynamicConfig = Optional.ofNullable(pluginDataHandler.getJsonObjectValue(KEY_DYNAMIC_CONFIG, String.class))
                 .orElse(new HashMap<>());
         log.debug("Loaded dynamic configuration: {}", dynamicConfig);
     }
