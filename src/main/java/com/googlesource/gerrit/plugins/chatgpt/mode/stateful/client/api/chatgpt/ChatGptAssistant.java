@@ -29,10 +29,11 @@ import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.c
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFilename;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.now;
 
 @Slf4j
 public class ChatGptAssistant extends ClientBase {
-    private static final String KEY_LAST_ASSISTANT_ID = "lastAssistantId";
+    private static final String ASSISTANT_ID_LOG = "assistantIdLog";
 
     private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
     private final ChangeSetData changeSetData;
@@ -80,7 +81,8 @@ public class ChatGptAssistant extends ClientBase {
         else {
             log.info("Project assistant found for the project. Assistant ID: {}", assistantId);
         }
-        changeDataHandler.setValue(KEY_LAST_ASSISTANT_ID, assistantId);
+        changeDataHandler.appendJsonValue(ASSISTANT_ID_LOG, now() + ": " + assistantId, String.class);
+
         return assistantId;
     }
 
