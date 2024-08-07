@@ -64,7 +64,7 @@ public class ConfigCreator {
         // `PluginDataHandlerProvider` cannot be injected because `GerritChange` is not initialized at this stage:
         // instead of using `PluginDataHandlerProvider.getChangeScope`, `PluginDataHandlerBaseProvider.get` is employed
         Map<String, String> dynamicConfig = pluginDataHandlerBaseProvider.get(changeKey.toString())
-                .getJsonValue(KEY_DYNAMIC_CONFIG, String.class);
+                .getJsonObjectValue(KEY_DYNAMIC_CONFIG, String.class);
         if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
             log.info("DynamicConfig found for change '{}': {}", changeKey, dynamicConfig);
             projectConfig = updateDynamicConfig(projectConfig, pluginName, dynamicConfig);
