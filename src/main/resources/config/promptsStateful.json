@@ -4,5 +4,6 @@
   "DEFAULT_GPT_ASSISTANT_INSTRUCTIONS": "The project file uploaded as JSON object includes the source files for the `%s` project. The JSON object structure uses the file paths (from the project's root) as keys, and the corresponding file contents (stored as arrays of lines) as their values. This arrangement ensures that the line number for any given line of content is equal to its array index plus one.",
   "DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT": "\n// MANDATORY Response format\n- the response will be only valid JSON using double-quotes\n- the response starts with {\n\n// Example response to user\n",
   "DEFAULT_GPT_MESSAGE_REVIEW": "Review the following Patch Set: ```%s```",
+  "DEFAULT_GPT_MESSAGE_REQUEST_RESEND_FORMATTED": "Please resend the last review in the following MANDATORY Response format:",
   "DEFAULT_GPT_HOW_TO_FIND_COMMIT_MESSAGE": "the \"Subject:\" entry of the Patch Set"
 }

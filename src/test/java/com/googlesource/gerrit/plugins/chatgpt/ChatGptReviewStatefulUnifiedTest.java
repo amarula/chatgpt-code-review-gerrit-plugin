@@ -5,6 +5,7 @@ import com.google.common.net.HttpHeaders;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.ChatGptPromptStatefulReviewReiterated;
 import com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
@@ -140,6 +141,25 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
             Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
         }
+    }
+
+    @Test
+    public void patchSetCreatedReiterateRequest() throws Exception {
+        String reviewReiteratePrompt = new ChatGptPromptStatefulReviewReiterated(config, changeSetData, getGerritChange())
+                .getDefaultGptThreadReviewMessage("");
+
+        setupMockRequestRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
+                        + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBodyFile("chatGptResponseThreadMessageText.json")));
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        testRequestSent();
+        Assert.assertEquals(reviewReiteratePrompt, requestContent);
     }
 
     @Test
