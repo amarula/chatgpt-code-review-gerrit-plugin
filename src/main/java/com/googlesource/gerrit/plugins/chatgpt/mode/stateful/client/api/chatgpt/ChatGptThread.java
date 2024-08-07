@@ -35,7 +35,7 @@ public class ChatGptThread {
 
     public String createThread() throws OpenAiConnectionFailException {
         String threadId = changeDataHandler.getValue(KEY_THREAD_ID);
-        if (threadId == null || !changeSetData.getForcedReview()) {
+        if (threadId == null || !changeSetData.getForcedReview() && !changeSetData.getForcedStagedReview()) {
             Request request = createThreadRequest();
             log.debug("ChatGPT Create Thread request: {}", request);
 
