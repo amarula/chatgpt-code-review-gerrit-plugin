@@ -9,9 +9,7 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
@@ -49,15 +47,24 @@ public class PluginDataHandler {
         return configProperties.getProperty(key);
     }
 
-    public <T> Map<String, T> getJsonValue(String key, Class<T> clazz) {
+    public <T> List<T> getJsonArrayValue(String key, Class<T> clazz) {
+        Type typeOfArray = TypeToken.getParameterized(List.class, clazz).getType();
+        return getJsonValue(key, typeOfArray);
+    }
+
+    public <T> Map<String, T> getJsonObjectValue(String key, Class<T> clazz) {
+        Type typeOfMap = TypeToken.getParameterized(Map.class, String.class, clazz).getType();
+        return getJsonValue(key, typeOfMap);
+    }
+
+    public <T> T getJsonValue(String key, Type type) {
         log.debug("Getting JSON value for key: {}", key);
         String value = getValue(key);
         if (value == null || value.isEmpty()) {
             log.debug("No value found for key: {}", key);
             return null;
         }
-        Type typeOfMap = TypeToken.getParameterized(Map.class, String.class, clazz).getType();
-        return getGson().fromJson(value, typeOfMap);
+        return getGson().fromJson(value, type);
     }
 
     public Map<String, String> getAllValues() {
@@ -67,6 +74,16 @@ public class PluginDataHandler {
             allProperties.put(key, configProperties.getProperty(key));
         }
         return allProperties;
+    }
+
+    public synchronized <T> void appendJsonValue(String key, T value, Class<T> clazz) {
+        log.debug("Updating JSON value for key: {}", key);
+        List<T> jsonProperty = getJsonArrayValue(key, clazz);
+        if (jsonProperty == null) {
+            jsonProperty = new ArrayList<>();
+        }
+        jsonProperty.add(value);
+        setJsonValue(key, jsonProperty);
     }
 
     public synchronized void removeValue(String key) {
