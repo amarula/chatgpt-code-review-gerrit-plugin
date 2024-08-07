@@ -20,9 +20,10 @@ import java.util.List;
 @Slf4j
 @Singleton
 public class ChatGptClientStatefulTaskSpecific extends ChatGptClientStateful implements IChatGptClient {
-    public enum ReviewAssistantStages {
-        REVIEW_CODE, REVIEW_COMMIT_MESSAGE
-    }
+    private static final List<ReviewAssistantStages> TASK_SPECIFIC_ASSISTANT_STAGES = List.of(
+            ReviewAssistantStages.REVIEW_CODE,
+            ReviewAssistantStages.REVIEW_COMMIT_MESSAGE
+    );
 
     @VisibleForTesting
     @Inject
@@ -42,7 +43,7 @@ public class ChatGptClientStatefulTaskSpecific extends ChatGptClientStateful imp
             return super.ask(changeSetData, change, patchSet);
         }
         List<ChatGptResponseContent> chatGptResponseContents = new ArrayList<>();
-        for (ReviewAssistantStages assistantStage : ReviewAssistantStages.values()) {
+        for (ReviewAssistantStages assistantStage : TASK_SPECIFIC_ASSISTANT_STAGES) {
             changeSetData.setReviewAssistantStage(assistantStage);
             log.debug("Processing stage: {}", assistantStage);
             chatGptResponseContents.add(super.ask(changeSetData, change, patchSet));

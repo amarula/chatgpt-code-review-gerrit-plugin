@@ -22,8 +22,14 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.unwrap
 @Slf4j
 @Singleton
 public class ChatGptClientStateful extends ChatGptClient implements IChatGptClient {
+    public enum ReviewAssistantStages {
+        REVIEW_CODE,
+        REVIEW_COMMIT_MESSAGE,
+        REVIEW_REITERATED
+    }
     private static final String TYPE_MESSAGE_CREATION = "message_creation";
     private static final String TYPE_TOOL_CALLS = "tool_calls";
+    private static final int MAX_REITERATION_REQUESTS = 2;
 
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
@@ -47,6 +53,27 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         log.info("Processing STATEFUL ChatGPT Request with changeId: {}, Patch Set: {}", change.getFullChangeId(),
                 patchSet);
 
+        ChatGptResponseContent chatGptResponseContent = null;
+        for (int reiterate = 0; reiterate < MAX_REITERATION_REQUESTS; reiterate++) {
+            chatGptResponseContent = askSingleRequest(changeSetData, change, patchSet);
+            if (chatGptResponseContent == null) {
+                return null;
+            }
+            if (!isCommentEvent && chatGptResponseContent.getReplies() == null) {
+                log.debug("Review response in incorrect format; Requesting resend with correct format.");
+                changeSetData.setForcedStagedReview(true);
+                changeSetData.setReviewAssistantStage(ReviewAssistantStages.REVIEW_REITERATED);
+            }
+            else {
+                break;
+            }
+        }
+        return chatGptResponseContent;
+    }
+
+    private ChatGptResponseContent askSingleRequest(ChangeSetData changeSetData, GerritChange change, String patchSet)
+            throws OpenAiConnectionFailException {
+        log.debug("Processing Single Stateful Request");
         String threadId = createThreadWithMessage(changeSetData, change, patchSet);
         ChatGptRun chatGptRun = runThread(changeSetData, change, threadId);
         ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
@@ -129,7 +156,6 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         log.debug("Response text is not JSON, returning as is.");
         return new ChatGptResponseContent(responseText);
     }
-
 
     private ChatGptResponseContent extractResponseContent(String responseText) {
         log.debug("Extracting response content from JSON.");

@@ -1,6 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data;
 
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStatefulTaskSpecific.ReviewAssistantStages;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful.ReviewAssistantStages;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +15,7 @@ public class ChangeSetData {
     private String gptDataPrompt;
     private Integer commentPropertiesSize;
     private ReviewAssistantStages reviewAssistantStage = ReviewAssistantStages.REVIEW_CODE;
+    private Boolean forcedStagedReview = false;
     @NonNull
     private Integer votingMinScore;
     @NonNull
