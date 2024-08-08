@@ -17,7 +17,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 public class ChatGptVectorStore extends ClientBase {
     public static final String KEY_VECTOR_STORE_ID = "vectorStoreId";
 
-    private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
+    private final ChatGptHttpClient httpClient;
     private final String fileId;
     private final GerritChange change;
 
@@ -25,6 +25,7 @@ public class ChatGptVectorStore extends ClientBase {
         super(config);
         this.fileId = fileId;
         this.change = change;
+        httpClient = new ChatGptHttpClient(config);
     }
 
     public ChatGptResponse createVectorStore() throws OpenAiConnectionFailException {
@@ -47,6 +48,6 @@ public class ChatGptVectorStore extends ClientBase {
                 .build();
 
         log.debug("ChatGPT Create Vector Store request body: {}", requestBody);
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
+        return httpClient.createRequestFromJson(uri.toString(), requestBody);
     }
 }
