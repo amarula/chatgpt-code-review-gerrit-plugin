@@ -11,6 +11,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetD
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
+import com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
@@ -43,6 +44,8 @@ public class ChatGptRun extends ClientBase {
     private ChatGptResponse runResponse;
     private ChatGptListResponse stepResponse;
     private String assistantId;
+    private int pollingCount;
+    private double elapsedTime;
 
     public ChatGptRun(
             String threadId,
@@ -80,8 +83,7 @@ public class ChatGptRun extends ClientBase {
     public void pollRunStep() throws OpenAiConnectionFailException {
         OpenAiConnectionFailException exception = null;
         for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
-            int pollingCount = pollRun();
-
+            pollRun();
             Request stepsRequest = getStepsRequest();
             log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
 
@@ -96,7 +98,8 @@ public class ChatGptRun extends ClientBase {
             }
             log.debug("ChatGPT Response: {}", response);
             stepResponse = getGson().fromJson(response, ChatGptListResponse.class);
-            log.info("Run executed after {} polling requests: {}", pollingCount, stepResponse);
+            log.info("Run executed after {} seconds ({} polling requests); Step response: {}", elapsedTime,
+                    pollingCount, stepResponse);
             if (stepResponse.getData().isEmpty()) {
                 log.warn("Empty response from ChatGPT");
                 threadSleep(STEP_RETRIEVAL_INTERVAL);
@@ -133,8 +136,11 @@ public class ChatGptRun extends ClientBase {
         }
     }
 
-    private int pollRun() throws OpenAiConnectionFailException {
-        int pollingCount = 0;
+    private void pollRun() throws OpenAiConnectionFailException {
+        long startTime = TimeUtils.getCurrentMillis();
+        int timeout = config.getGptRunPollingTimeout();
+        elapsedTime = 0.0;
+        pollingCount = 0;
 
         while (UNCOMPLETED_STATUSES.contains(runResponse.getStatus())) {
             pollingCount++;
@@ -144,8 +150,12 @@ public class ChatGptRun extends ClientBase {
             log.debug("ChatGPT Poll Run request: {}", pollRequest);
             runResponse = getGson().fromJson(httpClient.execute(pollRequest), ChatGptResponse.class);
             log.debug("ChatGPT Run response: {}", runResponse);
+            elapsedTime = (double) (TimeUtils.getCurrentMillis() - startTime) / 1000;
+            if (elapsedTime >= timeout) {
+                log.error("Polling timed out after {} seconds.", elapsedTime);
+                throw new OpenAiConnectionFailException();
+            }
         }
-        return pollingCount;
     }
 
     private ChatGptRunStepsResponse getFirstStep() {
