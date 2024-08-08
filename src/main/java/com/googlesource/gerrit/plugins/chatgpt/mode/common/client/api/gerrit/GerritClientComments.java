@@ -21,7 +21,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.*;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.getTimeStamp;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.getEpochSeconds;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientDetail.toAuthor;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientDetail.toDateString;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
@@ -126,7 +126,7 @@ public class GerritClientComments extends GerritClientAccount {
                     String changeMessageId = commentObject.getChangeMessageId();
                     String commentAuthorUsername = commentObject.getAuthor().getUsername();
                     log.debug("Change Message Object: {}", commentObject);
-                    long updatedTimeStamp = getTimeStamp(commentObject.getUpdated());
+                    long updatedTimeStamp = getEpochSeconds(commentObject.getUpdated());
                     if (commentAuthorUsername.equals(authorUsername)
                         && updatedTimeStamp
                             >= change.getEventTimeStamp() - MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT) {
