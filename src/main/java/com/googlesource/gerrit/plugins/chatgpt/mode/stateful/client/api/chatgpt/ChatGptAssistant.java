@@ -35,7 +35,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.now;
 public class ChatGptAssistant extends ClientBase {
     private static final String ASSISTANT_ID_LOG = "assistantIdLog";
 
-    private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
+    private final ChatGptHttpClient httpClient;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final GitRepoFiles gitRepoFiles;
@@ -59,6 +59,7 @@ public class ChatGptAssistant extends ClientBase {
         this.changeSetData = changeSetData;
         this.change = change;
         this.gitRepoFiles = gitRepoFiles;
+        httpClient = new ChatGptHttpClient(config);
         projectDataHandler = pluginDataHandlerProvider.getProjectScope();
         changeDataHandler = pluginDataHandlerProvider.getChangeScope();
         assistantsDataHandler = pluginDataHandlerProvider.getAssistantsWorkspace();
@@ -153,7 +154,7 @@ public class ChatGptAssistant extends ClientBase {
                 .toolResources(toolResources)
                 .build();
         log.debug("Request body for creating assistant: {}", requestBody);
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
+        return httpClient.createRequestFromJson(uri.toString(), requestBody);
     }
 
     private void setupAssistantParameters() {

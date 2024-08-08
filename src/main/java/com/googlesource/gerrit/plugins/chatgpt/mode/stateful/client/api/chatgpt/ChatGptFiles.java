@@ -17,10 +17,11 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class ChatGptFiles extends ClientBase {
-    private final HttpClient httpClient = new HttpClient();
+    private final HttpClient httpClient;
 
     public ChatGptFiles(Configuration config) {
         super(config);
+        httpClient = new HttpClient(config);
     }
 
     public ChatGptFilesResponse uploadFiles(Path repoPath) throws OpenAiConnectionFailException {
@@ -44,6 +45,6 @@ public class ChatGptFiles extends ClientBase {
                         RequestBody.create(file, MediaType.parse("application/json")))
                 .build();
 
-        return httpClient.createRequest(uri.toString(), config.getGptToken(), requestBody, null);
+        return httpClient.createRequest(uri.toString(), requestBody, null);
     }
 }

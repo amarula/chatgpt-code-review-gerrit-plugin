@@ -18,7 +18,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 public class ChatGptThread {
     public static final String KEY_THREAD_ID = "threadId";
 
-    private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
+    private final ChatGptHttpClient httpClient;
     private final Configuration config;
     private final ChangeSetData changeSetData;
     private final PluginDataHandler changeDataHandler;
@@ -31,6 +31,7 @@ public class ChatGptThread {
         this.config = config;
         this.changeSetData = changeSetData;
         this.changeDataHandler = pluginDataHandlerProvider.getChangeScope();
+        httpClient = new ChatGptHttpClient(config);
     }
 
     public String createThread() throws OpenAiConnectionFailException {
@@ -59,6 +60,6 @@ public class ChatGptThread {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.threadsUri());
         log.debug("ChatGPT Create Thread request URI: {}", uri);
 
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), new Object());
+        return httpClient.createRequestFromJson(uri.toString(), new Object());
     }
 }

@@ -20,7 +20,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class ChatGptThreadMessage extends ClientBase {
-    private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
+    private final ChatGptHttpClient httpClient;
     private final String threadId;
 
     private ChangeSetData changeSetData;
@@ -31,6 +31,7 @@ public class ChatGptThreadMessage extends ClientBase {
     public ChatGptThreadMessage(String threadId, Configuration config) {
         super(config);
         this.threadId = threadId;
+        httpClient = new ChatGptHttpClient(config);
     }
 
     public ChatGptThreadMessage(
@@ -74,7 +75,7 @@ public class ChatGptThreadMessage extends ClientBase {
                 UriResourceLocatorStateful.threadMessageRetrieveUri(threadId, messageId));
         log.debug("ChatGPT Retrieve Thread Message request URI: {}", uri);
 
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), null);
+        return httpClient.createRequestFromJson(uri.toString(), null);
     }
 
     private Request addMessageRequest() {
@@ -87,6 +88,6 @@ public class ChatGptThreadMessage extends ClientBase {
                 .build();
         log.debug("ChatGPT Add Message request body: {}", addMessageRequestBody);
 
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), addMessageRequestBody);
+        return httpClient.createRequestFromJson(uri.toString(), addMessageRequestBody);
     }
 }
