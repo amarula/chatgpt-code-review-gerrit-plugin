@@ -81,6 +81,9 @@ public class Configuration extends ConfigCore {
     private static final boolean DEFAULT_IGNORE_RESOLVED_CHAT_GPT_COMMENTS = true;
     private static final boolean DEFAULT_FORCE_CREATE_ASSISTANT = false;
     private static final boolean DEFAULT_TASK_SPECIFIC_ASSISTANTS = false;
+    private static final int DEFAULT_GPT_CONNECTION_TIMEOUT = 30;
+    private static final int DEFAULT_GPT_CONNECTION_RETRY_INTERVAL = 10;
+    private static final int DEFAULT_GPT_CONNECTION_MAX_RETRY_ATTEMPTS = 2;
     private static final int DEFAULT_GPT_RUN_POLLING_TIMEOUT = 180;
     private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
     private static final String DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = "";
@@ -126,6 +129,9 @@ public class Configuration extends ConfigCore {
     private static final String KEY_IGNORE_RESOLVED_CHAT_GPT_COMMENTS = "ignoreResolvedChatGptComments";
     private static final String KEY_FORCE_CREATE_ASSISTANT = "forceCreateAssistant";
     private static final String KEY_TASK_SPECIFIC_ASSISTANTS = "taskSpecificAssistants";
+    private static final String KEY_GPT_CONNECTION_TIMEOUT = "gptConnectionTimeout";
+    private static final String KEY_GPT_CONNECTION_RETRY_INTERVAL = "gptConnectionRetryInterval";
+    private static final String KEY_GPT_CONNECTION_MAX_RETRY_ATTEMPTS = "gptConnectionMaxRetryAttempts";
     private static final String KEY_GPT_RUN_POLLING_TIMEOUT = "gptRunPollingTimeout";
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
     private static final String KEY_SELECTIVE_LOG_LEVEL_OVERRIDE = "selectiveLogLevelOverride";
@@ -284,6 +290,18 @@ public class Configuration extends ConfigCore {
 
     public boolean getTaskSpecificAssistants() {
         return getBoolean(KEY_TASK_SPECIFIC_ASSISTANTS, DEFAULT_TASK_SPECIFIC_ASSISTANTS);
+    }
+
+    public int getGptConnectionTimeout() {
+        return getInt(KEY_GPT_CONNECTION_TIMEOUT, DEFAULT_GPT_CONNECTION_TIMEOUT);
+    }
+
+    public int getGptConnectionRetryInterval() {
+        return getInt(KEY_GPT_CONNECTION_RETRY_INTERVAL, DEFAULT_GPT_CONNECTION_RETRY_INTERVAL);
+    }
+
+    public int getGptConnectionMaxRetryAttempts() {
+        return getInt(KEY_GPT_CONNECTION_MAX_RETRY_ATTEMPTS, DEFAULT_GPT_CONNECTION_MAX_RETRY_ATTEMPTS);
     }
 
     public int getGptRunPollingTimeout() {

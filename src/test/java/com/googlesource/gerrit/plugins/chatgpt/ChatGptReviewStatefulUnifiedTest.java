@@ -24,6 +24,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.c
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
@@ -66,6 +67,11 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_BAD_REQUEST)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
+        //  This test executes 2 retries with the retry interval configured to 0.
+        when(globalConfig.getInt(Mockito.eq("gptConnectionMaxRetryAttempts"), Mockito.anyInt()))
+                .thenReturn(2);
+        when(globalConfig.getInt(Mockito.eq("gptConnectionRetryInterval"), Mockito.anyInt()))
+                .thenReturn(0);
 
         handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
