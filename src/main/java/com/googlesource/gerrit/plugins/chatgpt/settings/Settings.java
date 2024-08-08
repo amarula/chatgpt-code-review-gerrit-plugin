@@ -16,7 +16,6 @@ public class Settings {
     );
     public static final String GERRIT_COMMIT_MESSAGE_PREFIX = "Subject: ";
 
-    public static final int CHAT_GPT_CONNECTION_TIMEOUT = 30;
     public static final String CHAT_GPT_ROLE_USER = "user";
     public static final String CHAT_GPT_ROLE_ASSISTANT = "assistant";
 
