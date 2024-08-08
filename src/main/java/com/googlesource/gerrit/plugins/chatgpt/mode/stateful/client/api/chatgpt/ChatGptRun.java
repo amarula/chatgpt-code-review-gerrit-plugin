@@ -34,7 +34,7 @@ public class ChatGptRun extends ClientBase {
     public static final String COMPLETED_STATUS = "completed";
     public static final String CANCELLED_STATUS = "cancelled";
 
-    private final ChatGptHttpClient httpClient = new ChatGptHttpClient();
+    private final ChatGptHttpClient httpClient;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final String threadId;
@@ -61,6 +61,7 @@ public class ChatGptRun extends ClientBase {
         this.threadId = threadId;
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+        httpClient = new ChatGptHttpClient(config);
     }
 
     public void createRun() throws OpenAiConnectionFailException {
@@ -169,7 +170,7 @@ public class ChatGptRun extends ClientBase {
                 .assistantId(assistantId)
                 .build();
 
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), requestBody);
+        return httpClient.createRequestFromJson(uri.toString(), requestBody);
     }
 
     private Request getPollRequest() {
@@ -193,10 +194,10 @@ public class ChatGptRun extends ClientBase {
                 + UriResourceLocatorStateful.runCancelUri(threadId, runResponse.getId()));
         log.debug("ChatGPT Run Cancel request URI: {}", uri);
 
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), new Object());
+        return httpClient.createRequestFromJson(uri.toString(), new Object());
     }
 
     private Request getRunPollRequest(URI uri) {
-        return httpClient.createRequestFromJson(uri.toString(), config.getGptToken(), null);
+        return httpClient.createRequestFromJson(uri.toString(), null);
     }
 }
