@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http;
 
+import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -8,18 +9,25 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.CHAT_GPT_CONNECTION_TIMEOUT;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class HttpClient {
     private final OkHttpClient client;
+    private final String bearer;
 
-    public HttpClient() {
+    public HttpClient(Configuration config) {
+        this.bearer = config.getGptToken();
+        int connectionTimeout = config.getGptConnectionTimeout();
+        HttpRetryInterceptor httpRetryInterceptor = new HttpRetryInterceptor(
+                config.getGptConnectionMaxRetryAttempts(),
+                config.getGptConnectionRetryInterval()
+        );
         this.client = new OkHttpClient.Builder()
-                .connectTimeout(CHAT_GPT_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(CHAT_GPT_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
-                .writeTimeout(CHAT_GPT_CONNECTION_TIMEOUT, TimeUnit.SECONDS)
+                .addInterceptor(httpRetryInterceptor)
+                .connectTimeout(connectionTimeout, TimeUnit.SECONDS)
+                .readTimeout(connectionTimeout, TimeUnit.SECONDS)
+                .writeTimeout(connectionTimeout, TimeUnit.SECONDS)
                 .build();
     }
 
@@ -45,7 +53,7 @@ public class HttpClient {
         return null;
     }
 
-    public Request createRequest(String uri, String bearer, RequestBody body, Map<String, String> additionalHeaders) {
+    public Request createRequest(String uri, RequestBody body, Map<String, String> additionalHeaders) {
         // If body is null, a GET request is initiated. Otherwise, a POST request is sent with the specified body.
         Request.Builder builder = new Request.Builder()
                 .url(uri)
@@ -68,18 +76,17 @@ public class HttpClient {
         return builder.build();
     }
 
-    public Request createRequestFromJson(String uri, String bearer, Object requestObject,
-                                         Map<String, String> additionalHeaders) {
+    public Request createRequestFromJson(String uri, Object requestObject, Map<String, String> additionalHeaders) {
         if (requestObject != null) {
             String bodyJson = getGson().toJson(requestObject);
             log.debug("Creating JSON request body: {}", bodyJson);
             RequestBody body = RequestBody.create(bodyJson, MediaType.get("application/json"));
 
-            return createRequest(uri, bearer, body, additionalHeaders);
+            return createRequest(uri, body, additionalHeaders);
         }
         else {
             log.debug("Creating request without a body for URI: {}", uri);
-            return createRequest(uri, bearer, null, additionalHeaders);
+            return createRequest(uri, null, additionalHeaders);
         }
     }
 }
