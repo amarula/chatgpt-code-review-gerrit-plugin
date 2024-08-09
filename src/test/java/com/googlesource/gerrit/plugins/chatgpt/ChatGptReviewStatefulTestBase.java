@@ -22,7 +22,6 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.io.ByteArrayInputStream;
-import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
@@ -83,32 +82,28 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
         when(gitRepoFiles.getGitRepoFiles(any(), any())).thenReturn(repoJson);
 
         // Mock the behavior of the ChatGPT create-file request
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.filesCreateUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.filesCreateUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBody("{\"id\": " + CHAT_GPT_FILE_ID + "}")));
 
         // Mock the behavior of the ChatGPT create-vector-store request
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.vectorStoreCreateUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.vectorStoreCreateUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBody("{\"id\": " + CHAT_GPT_VECTOR_ID + "}")));
 
         // Mock the behavior of the ChatGPT create-thread request
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.threadsUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.threadsUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBody("{\"id\": " + CHAT_GPT_THREAD_ID + "}")));
 
         // Mock the behavior of the ChatGPT add-message-to-thread request
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.threadMessagesUri(CHAT_GPT_THREAD_ID)).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.threadMessagesUri(CHAT_GPT_THREAD_ID)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -202,8 +197,7 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
 
     protected void setupMockRequestRetrieveRunStepsFromBody(String body, String runId) {
         // Mock the behavior of the ChatGPT retrieve-run-steps request
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, runId)).getPath()))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, runId)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -215,7 +209,7 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
     }
 
     private MappingBuilder getScenarioMapping(String resourceURI, String scenario, String fromState, String toState) {
-        MappingBuilder mappingBuilder = WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain() + resourceURI).getPath()));
+        MappingBuilder mappingBuilder = WireMock.post(WireMock.urlEqualTo(resourceURI));
         if (fromState != null) {
             mappingBuilder = mappingBuilder
                     .inScenario(scenario)

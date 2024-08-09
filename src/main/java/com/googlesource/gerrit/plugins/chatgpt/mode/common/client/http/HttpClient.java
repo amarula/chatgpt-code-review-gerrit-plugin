@@ -15,9 +15,11 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 public class HttpClient {
     private final OkHttpClient client;
     private final String bearer;
+    private final String domain;
 
     public HttpClient(Configuration config) {
         this.bearer = config.getGptToken();
+        this.domain = config.getGptDomain();
         int connectionTimeout = config.getGptConnectionTimeout();
         HttpRetryInterceptor httpRetryInterceptor = new HttpRetryInterceptor(
                 config.getGptConnectionMaxRetryAttempts(),
@@ -55,6 +57,7 @@ public class HttpClient {
 
     public Request createRequest(String uri, RequestBody body, Map<String, String> additionalHeaders) {
         // If body is null, a GET request is initiated. Otherwise, a POST request is sent with the specified body.
+        uri = domain + uri;
         Request.Builder builder = new Request.Builder()
                 .url(uri)
                 .header("Authorization", "Bearer " + bearer);
