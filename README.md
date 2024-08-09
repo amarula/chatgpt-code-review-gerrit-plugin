@@ -158,7 +158,6 @@ The advantages of the Stateful mode over the Stateless are twofold:
 - `gptMode`: Select whether requests are processed in Stateless or Stateful mode. For backward compatibility, the
   default value is `stateless`. To enable Stateful mode, set this parameter to `stateful`.
 - `gptModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
-- `gptDomain`: The default ChatGPT domain is `https://api.openai.com`.
 - `gptSystemPrompt`: You can modify the default system prompt ("Act as a PatchSet Reviewer") to your preferred prompt.
 - `gptReviewTemperature`: Specifies the temperature setting for ChatGPT when reviewing a Patch Set, with a default
   setting of 0.2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more
@@ -260,6 +259,17 @@ directives = "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
 ### Optional Parameters for Project Configuration only
 
 - `isEnabled`: The default is false. If set to true, the plugin will review the Patch Set of this project.
+
+### Advanced Connection Parameters for OpenAI
+
+These parameters are specific to connecting with the OpenAI server and should only be modified by advanced users:
+
+- `gptDomain`: Specifies the default domain for OpenAI, set to `https://api.openai.com`.
+- `gptConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
+- `gptRunPollingTimeout`: Sets the timeout for terminating ChatGPT run polling on Stateful requests, defaulting to 180
+  seconds.
+- `gptConnectionRetryInterval`: Sets the interval between two connection attempts, with a default of 10 seconds.
+- `gptConnectionMaxRetryAttempts`: Determines the maximum number of retry attempts, defaulting to 2.
 
 ## Commands
 
