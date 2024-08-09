@@ -9,7 +9,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import java.net.URI;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
@@ -39,7 +38,7 @@ public class ChatGptVectorStore extends ClientBase {
     }
 
     private Request vectorStoreCreateRequest() {
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.vectorStoreCreateUri());
+        String uri = UriResourceLocatorStateful.vectorStoreCreateUri();
         log.debug("ChatGPT Create Vector Store request URI: {}", uri);
 
         ChatGptCreateVectorStoreRequest requestBody = ChatGptCreateVectorStoreRequest.builder()
@@ -48,6 +47,6 @@ public class ChatGptVectorStore extends ClientBase {
                 .build();
 
         log.debug("ChatGPT Create Vector Store request body: {}", requestBody);
-        return httpClient.createRequestFromJson(uri.toString(), requestBody);
+        return httpClient.createRequestFromJson(uri, requestBody);
     }
 }

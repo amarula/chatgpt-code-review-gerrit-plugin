@@ -10,7 +10,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.C
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import java.net.URI;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
@@ -19,7 +18,6 @@ public class ChatGptThread {
     public static final String KEY_THREAD_ID = "threadId";
 
     private final ChatGptHttpClient httpClient;
-    private final Configuration config;
     private final ChangeSetData changeSetData;
     private final PluginDataHandler changeDataHandler;
 
@@ -28,7 +26,6 @@ public class ChatGptThread {
             ChangeSetData changeSetData,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
-        this.config = config;
         this.changeSetData = changeSetData;
         this.changeDataHandler = pluginDataHandlerProvider.getChangeScope();
         httpClient = new ChatGptHttpClient(config);
@@ -57,9 +54,9 @@ public class ChatGptThread {
     }
 
     private Request createThreadRequest() {
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.threadsUri());
+        String uri = UriResourceLocatorStateful.threadsUri();
         log.debug("ChatGPT Create Thread request URI: {}", uri);
 
-        return httpClient.createRequestFromJson(uri.toString(), new Object());
+        return httpClient.createRequestFromJson(uri, new Object());
     }
 }

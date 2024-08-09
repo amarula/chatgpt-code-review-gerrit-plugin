@@ -15,7 +15,6 @@ import com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import java.net.URI;
 import java.util.*;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
@@ -88,7 +87,7 @@ public class ChatGptRun extends ClientBase {
             Request stepsRequest = getStepsRequest();
             log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
 
-            String response = null;
+            String response;
             try {
                 response = httpClient.execute(stepsRequest);
             } catch (OpenAiConnectionFailException e) {
@@ -164,40 +163,37 @@ public class ChatGptRun extends ClientBase {
     }
 
     private Request runCreateRequest() {
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.runsUri(threadId));
+        String uri = UriResourceLocatorStateful.runsUri(threadId);
         log.debug("ChatGPT Create Run request URI: {}", uri);
         ChatGptCreateRunRequest requestBody = ChatGptCreateRunRequest.builder()
                 .assistantId(assistantId)
                 .build();
 
-        return httpClient.createRequestFromJson(uri.toString(), requestBody);
+        return httpClient.createRequestFromJson(uri, requestBody);
     }
 
     private Request getPollRequest() {
-        URI uri = URI.create(config.getGptDomain()
-                + UriResourceLocatorStateful.runRetrieveUri(threadId, runResponse.getId()));
+        String uri = UriResourceLocatorStateful.runRetrieveUri(threadId, runResponse.getId());
         log.debug("ChatGPT Poll Run request URI: {}", uri);
 
         return getRunPollRequest(uri);
     }
 
     private Request getStepsRequest() {
-        URI uri = URI.create(config.getGptDomain()
-                + UriResourceLocatorStateful.runStepsUri(threadId, runResponse.getId()));
+        String uri = UriResourceLocatorStateful.runStepsUri(threadId, runResponse.getId());
         log.debug("ChatGPT Run Steps request URI: {}", uri);
 
         return getRunPollRequest(uri);
     }
 
     private Request getCancelRequest() {
-        URI uri = URI.create(config.getGptDomain()
-                + UriResourceLocatorStateful.runCancelUri(threadId, runResponse.getId()));
+        String uri = UriResourceLocatorStateful.runCancelUri(threadId, runResponse.getId());
         log.debug("ChatGPT Run Cancel request URI: {}", uri);
 
-        return httpClient.createRequestFromJson(uri.toString(), new Object());
+        return httpClient.createRequestFromJson(uri, new Object());
     }
 
-    private Request getRunPollRequest(URI uri) {
-        return httpClient.createRequestFromJson(uri.toString(), null);
+    private Request getRunPollRequest(String uri) {
+        return httpClient.createRequestFromJson(uri, null);
     }
 }
