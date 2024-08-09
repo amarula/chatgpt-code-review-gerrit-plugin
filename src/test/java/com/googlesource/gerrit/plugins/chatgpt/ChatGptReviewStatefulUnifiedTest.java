@@ -17,7 +17,6 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.net.URI;
 
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
@@ -62,8 +61,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
     @Test
     public void filesCreateResponse400() {
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.filesCreateUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.filesCreateUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_BAD_REQUEST)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
@@ -80,8 +78,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
     @Test
     public void threadCreateResponse400() {
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain() +
-                        UriResourceLocatorStateful.threadsUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.threadsUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_BAD_REQUEST)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
@@ -93,8 +90,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
     @Test
     public void runCreateResponse400() {
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain() +
-                            UriResourceLocatorStateful.runsUri(CHAT_GPT_THREAD_ID)).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(    UriResourceLocatorStateful.runsUri(CHAT_GPT_THREAD_ID)))
                     .willReturn(WireMock.aResponse()
                             .withStatus(HTTP_BAD_REQUEST)
                             .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -134,8 +130,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
     @Test
     public void runStepsResponse400() {
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)).getPath()))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(UriResourceLocatorStateful.runStepsUri(CHAT_GPT_THREAD_ID, CHAT_GPT_RUN_ID)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_BAD_REQUEST)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
@@ -155,8 +150,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
                 .getDefaultGptThreadReviewMessage("");
 
         setupMockRequestRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -188,8 +182,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
         chatGptPromptStateful.setCommentEvent(true);
         setupMockRequestRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -206,8 +199,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
     public void gptMentionedInCommentMessageResponseText400() {
         chatGptPromptStateful.setCommentEvent(true);
         setupMockRequestRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_BAD_REQUEST)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
@@ -223,8 +215,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
         chatGptPromptStateful.setCommentEvent(true);
         setupMockRequestRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
-        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)).getPath()))
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(UriResourceLocatorStateful.threadMessageRetrieveUri(CHAT_GPT_THREAD_ID, CHAT_GPT_MESSAGE_ID)))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())

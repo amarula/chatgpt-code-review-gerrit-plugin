@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
@@ -20,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getNoEscapedGson;
@@ -68,11 +66,11 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
     }
 
     protected Request createRequest(Configuration config, ChangeSetData changeSetData, String patchSet) {
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateless.chatCompletionsUri());
+        String uri = UriResourceLocatorStateless.chatCompletionsUri();
         log.debug("ChatGPT request URI: {}", uri);
         ChatGptCompletionRequest completionRequest = createRequestBody(config, changeSetData, patchSet);
 
-        return httpClient.createRequestFromJson(uri.toString(), completionRequest);
+        return httpClient.createRequestFromJson(uri, completionRequest);
     }
 
     private ChatGptCompletionRequest createRequestBody(Configuration config, ChangeSetData changeSetData, String patchSet) {

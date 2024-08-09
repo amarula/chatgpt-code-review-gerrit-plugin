@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 import java.io.File;
-import java.net.URI;
 import java.nio.file.Path;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
@@ -35,7 +34,7 @@ public class ChatGptFiles extends ClientBase {
     }
 
     private Request createUploadFileRequest(Path repoPath) {
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.filesCreateUri());
+        String uri = UriResourceLocatorStateful.filesCreateUri();
         log.debug("ChatGPT Upload Files request URI: {}", uri);
         File file = repoPath.toFile();
         RequestBody requestBody = new MultipartBody.Builder()
@@ -45,6 +44,6 @@ public class ChatGptFiles extends ClientBase {
                         RequestBody.create(file, MediaType.parse("application/json")))
                 .build();
 
-        return httpClient.createRequest(uri.toString(), requestBody, null);
+        return httpClient.createRequest(uri, requestBody, null);
     }
 }

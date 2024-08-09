@@ -19,7 +19,6 @@ import com.googlesource.gerrit.plugins.chatgpt.utils.HashUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import java.net.URI;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,7 +132,7 @@ public class ChatGptAssistant extends ClientBase {
 
     private Request createRequest(String vectorStoreId) {
         log.debug("Creating request to build new assistant.");
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.assistantCreateUri());
+        String uri = UriResourceLocatorStateful.assistantCreateUri();
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
         ChatGptTool[] tools = new ChatGptTool[] {
                 new ChatGptTool("file_search"),
@@ -154,7 +153,7 @@ public class ChatGptAssistant extends ClientBase {
                 .toolResources(toolResources)
                 .build();
         log.debug("Request body for creating assistant: {}", requestBody);
-        return httpClient.createRequestFromJson(uri.toString(), requestBody);
+        return httpClient.createRequestFromJson(uri, requestBody);
     }
 
     private void setupAssistantParameters() {
