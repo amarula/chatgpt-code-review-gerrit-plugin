@@ -13,7 +13,6 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.C
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import java.net.URI;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
@@ -71,15 +70,14 @@ public class ChatGptThreadMessage extends ClientBase {
     }
 
     private Request createRetrieveMessageRequest(String messageId) {
-        URI uri = URI.create(config.getGptDomain() +
-                UriResourceLocatorStateful.threadMessageRetrieveUri(threadId, messageId));
+        String uri = UriResourceLocatorStateful.threadMessageRetrieveUri(threadId, messageId);
         log.debug("ChatGPT Retrieve Thread Message request URI: {}", uri);
 
-        return httpClient.createRequestFromJson(uri.toString(), null);
+        return httpClient.createRequestFromJson(uri, null);
     }
 
     private Request addMessageRequest() {
-        URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateful.threadMessagesUri(threadId));
+        String uri = UriResourceLocatorStateful.threadMessagesUri(threadId);
         log.debug("ChatGPT Add Message request URI: {}", uri);
         IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, change);
         addMessageRequestBody = ChatGptRequestMessage.builder()
@@ -88,6 +86,6 @@ public class ChatGptThreadMessage extends ClientBase {
                 .build();
         log.debug("ChatGPT Add Message request body: {}", addMessageRequestBody);
 
-        return httpClient.createRequestFromJson(uri.toString(), addMessageRequestBody);
+        return httpClient.createRequestFromJson(uri, addMessageRequestBody);
     }
 }
