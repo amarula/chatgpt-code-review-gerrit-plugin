@@ -89,4 +89,8 @@ public class HttpClient {
             return createRequest(uri, null, additionalHeaders);
         }
     }
+
+    public Request createRequestFromJson(String uri, Object requestObject) {
+        return createRequestFromJson(uri, requestObject, null);
+    }
 }

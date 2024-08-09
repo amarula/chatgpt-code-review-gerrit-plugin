@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.net.HttpHeaders;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
@@ -10,19 +9,17 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.Ch
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptParameters;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http.HttpClientWithRetry;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.http.HttpClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.model.api.chatgpt.ChatGptCompletionRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.entity.ContentType;
+import okhttp3.Request;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getNoEscapedGson;
@@ -32,12 +29,13 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getNoEscap
 public class ChatGptClientStateless extends ChatGptClient implements IChatGptClient {
     private static final int REVIEW_ATTEMPT_LIMIT = 3;
 
-    private final HttpClientWithRetry httpClientWithRetry = new HttpClientWithRetry();
+    private final HttpClient httpClient;
 
     @VisibleForTesting
     @Inject
     public ChatGptClientStateless(Configuration config) {
         super(config);
+        httpClient = new HttpClient(config);
     }
 
     public ChatGptResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet)
@@ -46,18 +44,16 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
         String changeId = change.getFullChangeId();
         log.info("Processing STATELESS ChatGPT Request with changeId: {}, Patch Set: {}", changeId, patchSet);
         for (int attemptInd = 0; attemptInd < REVIEW_ATTEMPT_LIMIT; attemptInd++) {
-            HttpRequest request = createRequest(config, changeSetData, patchSet);
+            Request request = createRequest(config, changeSetData, patchSet);
             log.debug("ChatGPT request attempt #{}: {}", attemptInd, request);
 
-            HttpResponse<String> response = httpClientWithRetry.execute(request);
-
-            String body = response.body();
-            log.debug("ChatGPT response body attempt #{}: {}", attemptInd, body);
-            if (body == null) {
+            String response = httpClient.execute(request);
+            log.debug("ChatGPT response body attempt #{}: {}", attemptInd, response);
+            if (response == null) {
                 throw new IOException("ChatGPT response body is null");
             }
 
-            ChatGptResponseContent contentExtracted = extractContent(config, body);
+            ChatGptResponseContent contentExtracted = extractContent(config, response);
             if (validateResponse(contentExtracted, changeId, attemptInd)) {
                 log.info("Valid ChatGPT response received on attempt #{}", attemptInd);
                 return contentExtracted;
@@ -70,21 +66,15 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
         throw new RuntimeException("Failed to receive valid ChatGPT response");
     }
 
-    protected HttpRequest createRequest(Configuration config, ChangeSetData changeSetData, String patchSet) {
+    protected Request createRequest(Configuration config, ChangeSetData changeSetData, String patchSet) {
         URI uri = URI.create(config.getGptDomain() + UriResourceLocatorStateless.chatCompletionsUri());
         log.debug("ChatGPT request URI: {}", uri);
-        requestBody = createRequestBody(config, changeSetData, patchSet);
-        log.debug("ChatGPT request body: {}", requestBody);
+        ChatGptCompletionRequest completionRequest = createRequestBody(config, changeSetData, patchSet);
 
-        return HttpRequest.newBuilder()
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + config.getGptToken())
-                .header(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                .uri(uri)
-                .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                .build();
+        return httpClient.createRequestFromJson(uri.toString(), completionRequest);
     }
 
-    private String createRequestBody(Configuration config, ChangeSetData changeSetData, String patchSet) {
+    private ChatGptCompletionRequest createRequestBody(Configuration config, ChangeSetData changeSetData, String patchSet) {
         ChatGptPromptStateless chatGptPromptStateless = new ChatGptPromptStateless(config, isCommentEvent);
         ChatGptRequestMessage systemMessage = ChatGptRequestMessage.builder()
                 .role("system")
@@ -114,6 +104,9 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
                 .toolChoice(ChatGptTools.retrieveFormatRepliesToolChoice())
                 .build();
 
-        return getNoEscapedGson().toJson(chatGptCompletionRequest);
+        requestBody = getNoEscapedGson().toJson(chatGptCompletionRequest);
+        log.debug("ChatGPT request body: {}", requestBody);
+
+        return chatGptCompletionRequest;
     }
 }
