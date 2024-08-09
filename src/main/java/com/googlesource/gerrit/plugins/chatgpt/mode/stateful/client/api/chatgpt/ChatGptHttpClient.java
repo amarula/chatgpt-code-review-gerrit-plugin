@@ -13,6 +13,7 @@ public class ChatGptHttpClient extends HttpClient {
         super(config);
     }
 
+    @Override
     public Request createRequestFromJson(String uri, Object requestObject) {
         return createRequestFromJson(uri, requestObject, BETA_VERSION_HEADER);
     }

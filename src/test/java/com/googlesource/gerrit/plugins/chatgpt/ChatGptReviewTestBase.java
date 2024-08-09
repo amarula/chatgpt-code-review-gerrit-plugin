@@ -155,6 +155,8 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
         when(globalConfig.getString(Mockito.eq("gptDomain"), Mockito.anyString()))
                 .thenReturn(GPT_DOMAIN);
         when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_GPT_USERNAME);
+        when(globalConfig.getInt(Mockito.eq("gptConnectionMaxRetryAttempts"), Mockito.anyInt()))
+                .thenReturn(1);
 
         projectConfig = mock(PluginConfig.class);
 
