@@ -24,7 +24,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.net.URI;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -82,8 +81,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
         when(testFileMock.diff(0)).thenReturn(testFileDiff);
 
         // Mock the behavior of the askGpt request
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateless.chatCompletionsUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateless.chatCompletionsUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -147,8 +145,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
 
         String reviewUserPrompt = getReviewUserPrompt();
         chatGptPromptStateless.setCommentEvent(false);
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateless.chatCompletionsUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateless.chatCompletionsUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
@@ -197,8 +194,7 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
     public void gptMentionedInComment() throws RestApiException {
         when(config.getGerritUserName()).thenReturn(GERRIT_GPT_USERNAME);
         chatGptPromptStateless.setCommentEvent(true);
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(URI.create(config.getGptDomain()
-                        + UriResourceLocatorStateless.chatCompletionsUri()).getPath()))
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateless.chatCompletionsUri()))
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
