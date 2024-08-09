@@ -11,6 +11,7 @@ import com.google.gerrit.extensions.common.FileInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.json.OutputFormat;
 import com.google.gson.Gson;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.UriResourceLocatorStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptPromptStateless;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import java.util.Map;
 
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithNewLine;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -161,6 +163,27 @@ public class ChatGptReviewStatelessTest extends ChatGptReviewTestBase {
 
         Gson gson = OutputFormat.JSON_COMPACT.newGson();
         Assert.assertEquals(gson.toJson(gerritPatchSetReview), gson.toJson(captor.getAllValues().get(0)));
+    }
+
+    @Test
+    public void patchSetCreatedOrUpdatedResponse400() throws Exception {
+        when(globalConfig.getBoolean(Mockito.eq("gptStreamOutput"), Mockito.anyBoolean()))
+                .thenReturn(false);
+
+        String reviewUserPrompt = getReviewUserPrompt();
+        chatGptPromptStateless.setCommentEvent(false);
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateless.chatCompletionsUri()))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_BAD_REQUEST)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        testRequestSent();
+        String userPrompt = prompts.get(1).getAsJsonObject().get("content").getAsString();
+        Assert.assertEquals(reviewUserPrompt, userPrompt);
+
+        Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
     }
 
     @Test
