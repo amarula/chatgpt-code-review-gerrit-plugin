@@ -5,7 +5,7 @@ import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import java.util.List;
 import java.util.Map;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.prettyStringifyMap;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.prettyStringifyMap;
 
 public class DebugCodeBlocksDynamicConfiguration extends DebugCodeBlocksBase {
     public DebugCodeBlocksDynamicConfiguration(Localizer localizer) {
