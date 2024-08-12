@@ -392,7 +392,12 @@ fileId: vs_XXXXXXXXXXXXXXXXXXXX
 
 ### Change Scope
 threadId: thread_XXXXXXXXXXXXXXXXXXXX
-lastAssistantId: asst_XXXXXXXXXXXXXXXXXXXX
+dynamicConfig: 
+    gptMode: stateful
+    enabledVoting = true
+assistantIdLog: 
+    2024-08-09 10:28:46.973108457: asst_XXXXXXXXXXXXXXXXXXXXXXXX
+    2024-08-09 10:29:00.460755585: asst_YYYYYYYYYYYYYYYYYYYYYYYY
 ```
 
 **NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
@@ -410,16 +415,23 @@ Example of the response:
 ```
 CONFIGURATION SETTINGS
 
-directives: []
-disabledGroups: []
-disabledTopicFilter: []
-disabledUsers: []
+directives: 
+disabledGroups: 
+disabledTopicFilter: 
+disabledUsers: 
 enableMessageDebugging: true
-enabledFileExtensions: [.py, .java, .js, .ts, .html, .css, .cs, .cpp, .c, .h, .php, .rb, .swift, .kt, .r, .jl, .go, .scala, .pl, .pm, .rs, .dart, .lua, .sh, .vb, .bat]
-enabledGroups: [ALL]
-enabledProjects:
-enabledTopicFilter: [ALL]
-enabledUsers: [ALL]
+enabledFileExtensions: 
+    .py
+    .java
+    .js
+    (...)
+enabledGroups: 
+    ALL
+enabledProjects: 
+enabledTopicFilter: 
+    ALL
+enabledUsers: 
+    ALL
 filterCommentsBelowScore: 0
 filterCommentsRelevanceThreshold: 0.6
 filterNegativeComments: true
