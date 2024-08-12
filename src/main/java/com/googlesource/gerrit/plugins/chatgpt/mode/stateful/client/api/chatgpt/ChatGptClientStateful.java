@@ -16,7 +16,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.C
 import lombok.extern.slf4j.Slf4j;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.isJsonString;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.isJsonObjectAsString;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.unwrapJsonCode;
 
 @Slf4j
@@ -148,7 +148,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         }
 
         log.debug("Response text received: {}", responseText);
-        if (isJsonString(responseText)) {
+        if (isJsonObjectAsString(responseText)) {
             log.debug("Response text is JSON, extracting content.");
             return extractResponseContent(responseText);
         }
