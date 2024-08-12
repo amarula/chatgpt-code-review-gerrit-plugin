@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.convertPascalCaseToWords;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.prettyStringifyMap;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.prettyStringifyMap;
 
 @Slf4j
 public class DebugCodeBlocksDataDump extends DebugCodeBlocksBase {
@@ -36,8 +36,12 @@ public class DebugCodeBlocksDataDump extends DebugCodeBlocksBase {
                 log.debug("Populating data key {}", dataKey);
                 dataDump.add("### " + convertPascalCaseToWords(dataKey));
                 PluginDataHandler dataHandler = (PluginDataHandler) method.invoke(pluginDataHandlerProvider);
-                log.debug("Retrieved Data Handler {}", dataHandler);
-                dataDump.add(prettyStringifyMap(dataHandler.getAllValues()) + "\n");
+                try {
+                    dataDump.add(prettyStringifyMap(dataHandler.getAllValues()) + "\n");
+                }
+                catch (Exception e) {
+                    log.warn("Exception while retrieving data", e);
+                }
             }
             catch (Exception e) {
                 log.error("Error while invoking method: {}", method.getName(), e);
