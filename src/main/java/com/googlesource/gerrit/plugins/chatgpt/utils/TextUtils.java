@@ -94,14 +94,6 @@ public class TextUtils extends StringUtils {
         return joinWithNewLine(lines);
     }
 
-    public static String prettyStringifyMap(Map<String, String> map) {
-        return joinWithNewLine(
-                map.entrySet().stream()
-                        .map(entry -> entry.getKey() + COLON_SPACE + entry.getValue())
-                        .collect(Collectors.toList())
-        );
-    }
-
     public static List<String> splitString(String value) {
         return splitString(value, ITEM_COMMA_DELIMITED);
     }
