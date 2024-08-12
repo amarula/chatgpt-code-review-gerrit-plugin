@@ -26,6 +26,11 @@ public class TextUtils extends StringUtils {
     public static final String QUOTED_ITEM_COMMA_DELIMITED = "(?<!\\\\)" + DOUBLE_QUOTES + ITEM_COMMA_DELIMITED +
             DOUBLE_QUOTES;
 
+
+    public static String deSlashQuotes(String input) {
+        return deSlash(input, DOUBLE_QUOTES);
+    }
+
     public static String parseOutOfDelimiters(String body, String splitDelim, Function<String, String> processMessage,
                                               String leftDelimReplacement, String rightDelimReplacement) {
         String[] chunks = body.split(splitDelim, -1);
@@ -94,14 +99,6 @@ public class TextUtils extends StringUtils {
         return joinWithNewLine(lines);
     }
 
-    public static String prettyStringifyMap(Map<String, String> map) {
-        return joinWithNewLine(
-                map.entrySet().stream()
-                        .map(entry -> entry.getKey() + COLON_SPACE + entry.getValue())
-                        .collect(Collectors.toList())
-        );
-    }
-
     public static List<String> splitString(String value) {
         return splitString(value, ITEM_COMMA_DELIMITED);
     }
@@ -117,7 +114,7 @@ public class TextUtils extends StringUtils {
 
     public static String unwrapDeSlashQuotes(String input) {
         String unwrappedInput = unwrapQuotes(input);
-        return unwrappedInput.equals(input) ? input : deSlash(unwrappedInput, DOUBLE_QUOTES);
+        return unwrappedInput.equals(input) ? input : deSlashQuotes(unwrappedInput);
     }
 
     public static String wrapQuotes(String input) {
