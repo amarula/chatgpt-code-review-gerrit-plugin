@@ -145,7 +145,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
     }
 
     @Test
-    public void patchSetCreatedReiterateRequest() throws Exception {
+    public void patchSetCreatedReiterateRequestForTextualResponse() throws Exception {
         String reviewReiteratePrompt = new ChatGptPromptStatefulReviewReiterated(config, changeSetData, getGerritChange())
                 .getDefaultGptThreadReviewMessage("");
 
@@ -155,6 +155,19 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBodyFile("chatGptResponseThreadMessageText.json")));
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        testRequestSent();
+        Assert.assertEquals(reviewReiteratePrompt, requestContent);
+    }
+
+    @Test
+    public void patchSetCreatedReiterateRequestForMalformedJson() throws Exception {
+        String reviewReiteratePrompt = new ChatGptPromptStatefulReviewReiterated(config, changeSetData, getGerritChange())
+                .getDefaultGptThreadReviewMessage("");
+
+        setupMockRequestRetrieveRunSteps("chatGptRunStepsResponseMalformedJson.json");
 
         handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
