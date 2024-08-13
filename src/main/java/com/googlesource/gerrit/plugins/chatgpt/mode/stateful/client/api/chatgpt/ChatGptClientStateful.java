@@ -1,11 +1,13 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gson.JsonSyntaxException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.ResponseEmptyRepliesException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
@@ -55,18 +57,19 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
 
         ChatGptResponseContent chatGptResponseContent = null;
         for (int reiterate = 0; reiterate < MAX_REITERATION_REQUESTS; reiterate++) {
-            chatGptResponseContent = askSingleRequest(changeSetData, change, patchSet);
-            if (chatGptResponseContent == null) {
-                return null;
+            try {
+                chatGptResponseContent = askSingleRequest(changeSetData, change, patchSet);
             }
-            if (!isCommentEvent && chatGptResponseContent.getReplies() == null) {
+            catch (ResponseEmptyRepliesException | JsonSyntaxException e) {
                 log.debug("Review response in incorrect format; Requesting resend with correct format.");
                 changeSetData.setForcedStagedReview(true);
                 changeSetData.setReviewAssistantStage(ReviewAssistantStages.REVIEW_REITERATED);
+                continue;
             }
-            else {
-                break;
+            if (chatGptResponseContent == null) {
+                return null;
             }
+            break;
         }
         return chatGptResponseContent;
     }
@@ -78,7 +81,9 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         ChatGptRun chatGptRun = runThread(changeSetData, change, threadId);
         ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
         chatGptRun.cancelRun();
-
+        if (!isCommentEvent && chatGptResponseContent.getReplies() == null) {
+            throw new ResponseEmptyRepliesException();
+        }
         return chatGptResponseContent;
     }
 
