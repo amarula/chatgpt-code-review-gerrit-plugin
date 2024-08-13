@@ -5,6 +5,10 @@ public class OpenAiConnectionFailException extends Exception {
         super("Failed to connect to OpenAI services");
     }
 
+    public OpenAiConnectionFailException(String message) {
+        super(message);
+    }
+
     public OpenAiConnectionFailException(Throwable cause) {
         super(cause);
     }
