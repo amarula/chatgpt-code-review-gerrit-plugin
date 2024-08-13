@@ -1,0 +1,28 @@
+{
+  "object": "list",
+  "data": [
+    {
+      "id": "step_TEST_STEP_ID",
+      "object": "thread.run.step",
+      "status": "completed",
+      "created_at": 1714983398.0,
+      "run_id": "run_TEST_RUN_ID",
+      "assistant_id": "asst_TEST_ASSISTANT_ID",
+      "thread_id": "thread_TEST_THREAD_ID",
+      "type": "tool_calls",
+      "step_details": {
+        "type": "tool_calls",
+        "tool_calls": [
+          {
+            "id": "call_8xIUWZjqjw4UKJOY58jmINKX",
+            "type": "function",
+            "function": {
+              "name": "format_replies",
+              "arguments": "{\n                \"replies\": [\n                  {\n                    MALFORMED JSON"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
