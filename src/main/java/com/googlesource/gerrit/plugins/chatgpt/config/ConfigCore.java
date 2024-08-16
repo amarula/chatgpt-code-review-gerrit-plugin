@@ -80,7 +80,7 @@ public abstract class ConfigCore {
                 projectValue);
         String resultValue = joinWithComma(
                 Stream.of(globalValue, projectValue)
-                        .filter(s -> !s.isEmpty())
+                        .filter(s -> s != null && !s.isEmpty())
                         .map(TextUtils::unwrapQuotes)
                         .collect(Collectors.toSet())
         );
