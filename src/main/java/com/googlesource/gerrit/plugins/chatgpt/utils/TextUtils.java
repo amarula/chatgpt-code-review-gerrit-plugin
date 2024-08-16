@@ -94,6 +94,12 @@ public class TextUtils extends StringUtils {
         return joinWithNewLine(lines);
     }
 
+    public static String sortTextLines(String value) {
+        List<String> lines = splitString(value, "\n");
+        Collections.sort(lines);
+        return joinWithNewLine(lines);
+    }
+
     public static List<String> splitString(String value) {
         return splitString(value, ITEM_COMMA_DELIMITED);
     }
