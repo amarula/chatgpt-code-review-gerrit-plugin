@@ -1,0 +1,17 @@
+
+
+```
+DUMP OF STORED DATA
+
+### Global Scope
+configKey2: 
+    configSubKey: configSubValue
+configKey1: configValue1
+
+### Project Scope
+
+
+### Change Scope
+
+
+```
