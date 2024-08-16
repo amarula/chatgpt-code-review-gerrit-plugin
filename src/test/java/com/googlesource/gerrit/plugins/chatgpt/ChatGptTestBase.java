@@ -10,7 +10,7 @@ import org.mockito.Mock;
 
 import java.nio.file.Path;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 public class ChatGptTestBase {
     protected static final Project.NameKey PROJECT_NAME = Project.NameKey.parse("myProject");
@@ -30,7 +30,7 @@ public class ChatGptTestBase {
         Path realProjectDataPath = tempFolder.getRoot().toPath().resolve(PROJECT_NAME + ".data");
 
         // Mock the PluginData annotation project behavior
-        when(mockPluginDataPath.resolve(PROJECT_NAME + ".data")).thenReturn(realProjectDataPath);
+        lenient().when(mockPluginDataPath.resolve(PROJECT_NAME + ".data")).thenReturn(realProjectDataPath);
     }
 
     protected GerritChange getGerritChange() {

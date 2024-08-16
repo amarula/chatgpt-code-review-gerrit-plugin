@@ -27,6 +27,7 @@ import com.google.inject.TypeLiteral;
 import com.google.inject.util.Providers;
 import com.googlesource.gerrit.plugins.chatgpt.config.ConfigCreator;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataProvider;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
@@ -67,10 +68,7 @@ import java.util.function.Consumer;
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.EVENT_CLASS_MAP;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected static final Path basePath = Paths.get("src/test/resources");
@@ -83,9 +81,11 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected static final String GERRIT_USER_GROUP = "Test";
     protected static final String GPT_TOKEN = "tk-test";
     protected static final String GPT_DOMAIN = "http://localhost:9527";
-    protected static final boolean GPT_STREAM_OUTPUT = true;
+    protected static final boolean GPT_STREAM_OUTPUT = false;
     protected static final long TEST_TIMESTAMP = 1699270812;
-    private static  final int GPT_USER_ACCOUNT_ID = 1000000;
+    protected static final Type COMMENTS_GERRIT_TYPE = new TypeLiteral<Map<String, List<CommentInfo>>>() {}.getType();
+
+    private static final int GPT_USER_ACCOUNT_ID = 1000000;
 
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(9527);
@@ -115,6 +115,8 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected CommentsRequest commentsRequestMock;
     @Mock
     protected AccountCache accountCacheMock;
+    @Mock
+    protected ChangeSetDataProvider changeSetDataProvider;
 
     protected PluginConfig globalConfig;
     protected PluginConfig projectConfig;
@@ -192,13 +194,13 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
         mockGerritChangeDetailsApiCall();
 
         // Mock the behavior of the gerritPatchSet comments request
-        mockGerritChangeCommentsApiCall();
+        mockGerritChangeCommentsApiCall("gerritPatchSetComments.json");
 
         // Mock the behavior of the gerrit Review request
         mockGerritReviewApiCall();
 
         // Mock the GerritApi's revision API
-        when(changeApiMock.current()).thenReturn(revisionApiMock);
+        lenient().when(changeApiMock.current()).thenReturn(revisionApiMock);
 
         // Mock the pluginDataHandlerProvider to return the mocked Change pluginDataHandler
         when(pluginDataHandlerProvider.getChangeScope()).thenReturn(pluginDataHandler);
@@ -220,11 +222,10 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
 
     private void mockGerritAccountGroupsApiCall(Accounts accountsMock, int accountId)
         throws RestApiException {
-        Gson gson = OutputFormat.JSON.newGson();
-        List<GroupInfo> groups =
-            gson.fromJson(
-                readTestFile("__files/gerritAccountGroups.json"),
-                new TypeLiteral<List<GroupInfo>>() {}.getType());
+        List<GroupInfo> groups = readTestFileToType(
+                "__files/gerritAccountGroups.json",
+                new TypeLiteral<List<GroupInfo>>() {}.getType()
+        );
         AccountApi accountApiMock = mock(AccountApi.class);
         when(accountsMock.id(accountId)).thenReturn(accountApiMock);
         when(accountApiMock.getGroups()).thenReturn(groups);
@@ -232,16 +233,13 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
 
     private void mockGerritChangeDetailsApiCall() throws RestApiException {
         ChangeInfo changeInfo = readTestFileToClass("__files/gerritPatchSetDetail.json", ChangeInfo.class);
-        when(changeApiMock.get()).thenReturn(changeInfo);
+        lenient().when(changeApiMock.get()).thenReturn(changeInfo);
     }
 
-    private void mockGerritChangeCommentsApiCall() throws RestApiException {
-        Map<String, List<CommentInfo>> comments =
-            readTestFileToType(
-                "__files/gerritPatchSetComments.json",
-                new TypeLiteral<Map<String, List<CommentInfo>>>() {}.getType());
-        when(changeApiMock.commentsRequest()).thenReturn(commentsRequestMock);
-        when(commentsRequestMock.get()).thenReturn(comments);
+    private void mockGerritChangeCommentsApiCall(String patchSetCommentsFilename) throws RestApiException {
+        Map<String, List<CommentInfo>> comments = readTestFileToType("__files/" + patchSetCommentsFilename,
+                COMMENTS_GERRIT_TYPE);
+        mockGerritChangeCommentsApiCall(comments);
     }
 
     private void mockGerritChangeApiRestEndpoint() throws RestApiException {
@@ -251,19 +249,22 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
 
     private void mockGerritReviewApiCall() throws RestApiException {
         ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
-        when(revisionApiMock.review(reviewInputCaptor.capture())).thenReturn(reviewResult);
+        lenient().when(revisionApiMock.review(reviewInputCaptor.capture())).thenReturn(reviewResult);
     }
 
     protected void initComparisonContent() {}
 
-    protected <T> T readTestFileToClass(String filename, Class<T> clazz) {
+    protected <T> T readContentToType(String content, Type type) {
         Gson gson = OutputFormat.JSON.newGson();
-        return gson.fromJson(readTestFile(filename), clazz);
+        return gson.fromJson(content, type);
+    }
+
+    protected <T> T readTestFileToClass(String filename, Class<T> clazz) {
+        return readContentToType(readTestFile(filename), clazz);
     }
 
     protected <T> T readTestFileToType(String filename, Type type) {
-        Gson gson = OutputFormat.JSON.newGson();
-        return gson.fromJson(readTestFile(filename), type);
+        return readContentToType(readTestFile(filename), type);
     }
 
     protected String readTestFile(String filename) {
@@ -272,6 +273,11 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected void mockGerritChangeCommentsApiCall(Map<String, List<CommentInfo>> comments) throws RestApiException {
+        when(changeApiMock.commentsRequest()).thenReturn(commentsRequestMock);
+        when(commentsRequestMock.get()).thenReturn(comments);
     }
 
     protected EventHandlerTask.Result handleEventBasedOnType(EventHandlerTask.SupportedEvents triggeredEvent) {
@@ -288,6 +294,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                 bind(GerritClient.class).toInstance(gerritClient);
                 bind(GitRepoFiles.class).toInstance(gitRepoFiles);
                 bind(ConfigCreator.class).toInstance(mockConfigCreator);
+                bind(ChangeSetDataProvider.class).toInstance(changeSetDataProvider);
                 bind(PatchSetReviewer.class).toInstance(patchSetReviewer);
                 bind(PluginDataHandlerProvider.class).toInstance(pluginDataHandlerProvider);
                 bind(AccountCache.class).toInstance(mockAccountCache());
@@ -309,6 +316,8 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                 config.getVotingMinScore(),
                 config.getMaxReviewFileSize()
         );
+        when(changeSetDataProvider.get()).thenReturn(changeSetData);
+
         localizer = new Localizer(config);
         gerritClient =
             new GerritClient(
@@ -386,7 +395,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
         AccountCache accountCache = mock(AccountCache.class);
         Account account = Account.builder(Account.id(GPT_USER_ACCOUNT_ID), Instant.now()).build();
         AccountState accountState = AccountState.forAccount(account, Collections.emptyList());
-        doReturn(Optional.of(accountState)).when(accountCache).getByUsername(GERRIT_GPT_USERNAME);
+        lenient().doReturn(Optional.of(accountState)).when(accountCache).getByUsername(GERRIT_GPT_USERNAME);
 
         return accountCache;
     }

@@ -15,6 +15,14 @@ public class StringUtils {
         return slashedBody.toString();
     }
 
+    public static String backslashDoubleQuotes(String body) {
+        return body.replace("\"", "\\\"");
+    }
+
+    public static String doubleBackslashDoubleQuotes(String body) {
+        return body.replace("\"", "\\\\\"");
+    }
+
     public static String deSlash(String target, String deSlashChars) {
         return target.replaceAll("\\\\([" + deSlashChars + "])", "$1");
     }
