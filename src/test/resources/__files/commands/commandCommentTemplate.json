@@ -1,0 +1,20 @@
+{
+  "/PATCHSET_LEVEL": [
+    {
+      "author": {
+        "_account_id": 1000001,
+        "name": "Test",
+        "display_name": "Test",
+        "email": "test@example.com",
+        "username": "test"
+      },
+      "change_message_id": "70d9e572e8ff2d653079c267575431cc8df6024f",
+      "unresolved": false,
+      "patch_set": 1,
+      "id": "79d10719_df6121b2",
+      "updated": "2023-11-06 11:47:51.000000000",
+      "message": "@gpt {% command %}",
+      "commit_id": "f5433ac8b8650225de6d2912032689089e5d9f40"
+    }
+  ]
+}
