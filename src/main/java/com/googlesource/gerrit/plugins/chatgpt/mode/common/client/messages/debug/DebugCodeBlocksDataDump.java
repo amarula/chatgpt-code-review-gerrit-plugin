@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug;
 
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
@@ -21,7 +21,7 @@ public class DebugCodeBlocksDataDump extends DebugCodeBlocksBase {
         retrieveStoredData(pluginDataHandlerProvider);
     }
 
-    public String getDataDumpBlock() {
+    public String getDebugCodeBlock() {
         return super.getDebugCodeBlock(dataDump);
     }
 
