@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug;
 
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptReplyItem;
