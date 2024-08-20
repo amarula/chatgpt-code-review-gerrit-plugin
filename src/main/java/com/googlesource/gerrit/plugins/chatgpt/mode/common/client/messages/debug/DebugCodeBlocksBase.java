@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug;
 
 import java.util.ArrayList;
 import java.util.List;
