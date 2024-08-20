@@ -5,8 +5,8 @@ import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfigManager;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksDataDump;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.DebugCodeBlocksConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDataDump;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
@@ -108,7 +108,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
         DebugCodeBlocksConfiguration debugCodeBlocksConfiguration = new DebugCodeBlocksConfiguration(
                 localizer
         );
-        changeSetData.setReviewSystemMessage(debugCodeBlocksConfiguration.getDataDumpBlock(config));
+        changeSetData.setReviewSystemMessage(debugCodeBlocksConfiguration.getDebugCodeBlock(config));
     }
 
     private void commandDumpStoredData() {
@@ -116,6 +116,6 @@ public class ClientCommandExecutor extends ClientCommandBase {
                 localizer,
                 pluginDataHandlerProvider
         );
-        changeSetData.setReviewSystemMessage(debugCodeBlocksDataDump.getDataDumpBlock());
+        changeSetData.setReviewSystemMessage(debugCodeBlocksDataDump.getDebugCodeBlock());
     }
 }

@@ -3,6 +3,8 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands.ClientCommandCleaner;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDynamicConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksReview;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
