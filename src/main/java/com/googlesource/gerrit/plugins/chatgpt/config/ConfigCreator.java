@@ -14,6 +14,7 @@ import com.google.gerrit.server.util.OneOffRequestContext;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerBaseProvider;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.config.entry.IConfigEntry;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.lib.Config;
@@ -21,9 +22,10 @@ import org.eclipse.jgit.lib.Config;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
-import static com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfigManager.KEY_DYNAMIC_CONFIG;
+import static com.googlesource.gerrit.plugins.chatgpt.config.entry.ConfigEntryFactory.getConfigEntry;
+import static com.googlesource.gerrit.plugins.chatgpt.config.dynamic.DynamicConfigManager.KEY_DYNAMIC_CONFIG;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.CollectionUtils.putAllMergeStringLists;
 
 @Singleton
 @Slf4j
@@ -96,19 +98,24 @@ public class ConfigCreator {
     ) {
         log.debug("Updating dynamic configuration for plugin: {}", pluginName);
         // Retrieve all current configuration values
-        Set<String> keys = projectConfig.getNames();
-        Map<String, String> currentConfigValues = new HashMap<>();
-        for (String key : keys) {
-            currentConfigValues.put(key, projectConfig.getString(key));
+        Map<String, Object> currentConfigValues = new HashMap<>();
+        Map<String, Object> dynamicConfigValues = new HashMap<>();
+        for (String key : projectConfig.getNames()) {
+            IConfigEntry configEntry = getConfigEntry(key);
+            configEntry.setCurrentConfigValue(currentConfigValues, projectConfig);
+        }
+        for (Map.Entry<String, String> dynamicEntry : dynamicConfig.entrySet()) {
+            IConfigEntry configEntry = getConfigEntry(dynamicEntry.getKey());
+            configEntry.setDynamicConfigValue(dynamicConfigValues, dynamicEntry.getValue());
         }
         // Merge current config with new values from dynamicConfig
-        currentConfigValues.putAll(dynamicConfig);
+        putAllMergeStringLists(currentConfigValues, dynamicConfigValues);
         PluginConfig.Update configUpdater = getProjectUpdate(pluginName, currentConfigValues);
 
         return configUpdater.asPluginConfig();
     }
 
-    private PluginConfig.@NonNull Update getProjectUpdate(String pluginName, Map<String, String> currentConfigValues) {
+    private PluginConfig.@NonNull Update getProjectUpdate(String pluginName, Map<String, Object> currentConfigValues) {
         log.debug("Applying merged configuration for plugin: {}", pluginName);
         PluginConfig.Update configUpdater = new PluginConfig.Update(
                 pluginName,
@@ -116,8 +123,13 @@ public class ConfigCreator {
                 Optional.empty()
         );
         // Set all merged values
-        for (Map.Entry<String, String> entry : currentConfigValues.entrySet()) {
-            configUpdater.setString(entry.getKey(), entry.getValue());
+        for (Map.Entry<String, Object> entry : currentConfigValues.entrySet()) {
+            String key = entry.getKey();
+            Object value = entry.getValue();
+            log.debug("Assigning merged values for key {}: {}", key, value);
+
+            IConfigEntry configEntry = getConfigEntry(key);
+            configEntry.setMergedConfigValue(configUpdater, value);
         }
         return configUpdater;
     }
