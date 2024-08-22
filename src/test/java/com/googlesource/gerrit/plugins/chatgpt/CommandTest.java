@@ -20,7 +20,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfigManager.KEY_DYNAMIC_CONFIG;
+import static com.googlesource.gerrit.plugins.chatgpt.config.Configuration.KEY_DIRECTIVES;
+import static com.googlesource.gerrit.plugins.chatgpt.config.dynamic.DynamicConfigManager.KEY_DYNAMIC_CONFIG;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.backslashDoubleQuotes;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TemplateUtils.renderTemplate;
@@ -55,6 +56,16 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
 
     private void enableMessageDebugging() {
         when(config.getEnableMessageDebugging()).thenReturn(true);
+    }
+
+    private PluginDataHandler getChangeDataHandler() {
+        Path realChangeDataPath = tempFolder.getRoot().toPath().resolve(ChatGptTestBase.CHANGE_ID + ".data");
+        when(mockPluginDataPath.resolve(ChatGptTestBase.CHANGE_ID + ".data")).thenReturn(realChangeDataPath);
+        PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
+        PluginDataHandler changeHandler = provider.getChangeScope();
+        when(pluginDataHandlerProvider.getChangeScope()).thenReturn(changeHandler);
+
+        return changeHandler;
     }
 
     @Test
@@ -92,17 +103,26 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
         String dynamicValue = "DUMMY_MODEL";
         setupCommandComment(String.format("/configure --%s=%s", dynamicKey, dynamicValue));
         enableMessageDebugging();
-
-        Path realChangeDataPath = tempFolder.getRoot().toPath().resolve(ChatGptTestBase.CHANGE_ID + ".data");
-        when(mockPluginDataPath.resolve(ChatGptTestBase.CHANGE_ID + ".data")).thenReturn(realChangeDataPath);
-        PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
-        PluginDataHandler changeHandler = provider.getChangeScope();
-        when(pluginDataHandlerProvider.getChangeScope()).thenReturn(changeHandler);
+        PluginDataHandler changeHandler = getChangeDataHandler();
 
         handleEventBasedOnType(EventHandlerTask.SupportedEvents.COMMENT_ADDED);
 
         String dynamicChanges = changeHandler.getValue(KEY_DYNAMIC_CONFIG);
         String expectedChanges = getGson().toJson(Map.of(dynamicKey, dynamicValue));
+        Assert.assertEquals(expectedChanges, dynamicChanges);
+    }
+
+    @Test
+    public void commandAddDirective() throws Exception {
+        List<String> directives = List.of("DUMMY DIRECTIVE");
+        setupCommandComment(String.format("/directives %s", directives.get(0)));
+        enableMessageDebugging();
+        PluginDataHandler changeHandler = getChangeDataHandler();
+
+        handleEventBasedOnType(EventHandlerTask.SupportedEvents.COMMENT_ADDED);
+
+        String dynamicChanges = changeHandler.getValue(KEY_DYNAMIC_CONFIG);
+        String expectedChanges = getGson().toJson(Map.of(KEY_DIRECTIVES, getGson().toJson(directives)));
         Assert.assertEquals(expectedChanges, dynamicChanges);
     }
 
