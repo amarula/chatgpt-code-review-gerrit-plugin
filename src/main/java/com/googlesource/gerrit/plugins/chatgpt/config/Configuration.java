@@ -5,6 +5,7 @@ import com.google.gerrit.extensions.api.GerritApi;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.util.OneOffRequestContext;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TreeMap;
@@ -66,7 +67,7 @@ public class Configuration extends ConfigCore {
             ".bat"
     });
     private static final boolean DEFAULT_PROJECT_ENABLE = false;
-    private static final String DEFAULT_DIRECTIVES = "";
+    private static final List<String> DEFAULT_DIRECTIVES = new ArrayList<>();
     private static final int DEFAULT_MAX_REVIEW_LINES = 1000;
     private static final int DEFAULT_MAX_REVIEW_FILE_SIZE = 10000;
     private static final boolean DEFAULT_ENABLED_VOTING = false;
@@ -94,6 +95,7 @@ public class Configuration extends ConfigCore {
     public static final String KEY_GPT_RELEVANCE_RULES = "gptRelevanceRules";
     public static final String KEY_GPT_REVIEW_TEMPERATURE = "gptReviewTemperature";
     public static final String KEY_GPT_COMMENT_TEMPERATURE = "gptCommentTemperature";
+    public static final String KEY_DIRECTIVES = "directive";
     public static final String KEY_VOTING_MIN_SCORE = "votingMinScore";
     public static final String KEY_VOTING_MAX_SCORE = "votingMaxScore";
     public static final String KEY_GERRIT_USERNAME = "gerritUserName";
@@ -108,7 +110,6 @@ public class Configuration extends ConfigCore {
     private static final String KEY_FULL_FILE_REVIEW = "gptFullFileReview";
     private static final String KEY_PROJECT_ENABLE = "isEnabled";
     private static final String KEY_GLOBAL_ENABLE = "globalEnable";
-    private static final String KEY_DIRECTIVES = "directives";
     private static final String KEY_DISABLED_USERS = "disabledUsers";
     private static final String KEY_ENABLED_USERS = "enabledUsers";
     private static final String KEY_DISABLED_GROUPS = "disabledGroups";
@@ -237,8 +238,8 @@ public class Configuration extends ConfigCore {
         return splitConfig(getString(KEY_ENABLED_FILE_EXTENSIONS, DEFAULT_ENABLED_FILE_EXTENSIONS));
     }
 
-    public List<String> getDirectives() {
-        return splitNarrativeConfig(getString(KEY_DIRECTIVES, DEFAULT_DIRECTIVES));
+    public List<String> getDirective() {
+        return splitListIntoItems(KEY_DIRECTIVES, DEFAULT_DIRECTIVES);
     }
 
     public boolean isVotingEnabled() {

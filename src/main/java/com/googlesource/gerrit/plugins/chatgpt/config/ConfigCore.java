@@ -5,28 +5,27 @@ import com.google.gerrit.extensions.api.GerritApi;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.gerrit.server.util.OneOffRequestContext;
+import com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils;
 import com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.capitalizeFirstLetter;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.convertCamelToSnakeCase;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.CollectionUtils.arrayToList;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.*;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithComma;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.wrapQuotes;
-import static java.util.stream.Collectors.toList;
 
 @Slf4j
 public abstract class ConfigCore {
     private static final Set<String> EXCLUDE_FROM_DUMP = Set.of("KEY_GPT_TOKEN");
+    private static final String GLOBAL_CONFIG = "GlobalConfig";
+    private static final String PROJECT_CONFIG = "ProjectConfig";
 
     public static final String NOT_CONFIGURED_ERROR_MSG = "%s is not configured";
     // The convention `KEY_<CONFIG_KEY> = "configKey"` is used for naming config key constants
@@ -46,6 +45,10 @@ public abstract class ConfigCore {
     @Getter
     protected final GerritApi gerritApi;
 
+    private final LinkedHashMap<String, PluginConfig> configScopes;
+
+    private boolean isDumpingConfig = false;
+
     public ConfigCore(
             OneOffRequestContext context,
             GerritApi gerritApi,
@@ -60,6 +63,10 @@ public abstract class ConfigCore {
         this.projectConfig = projectConfig;
         this.gerritUserEmail = gerritUserEmail;
         this.userId = userId;
+
+        configScopes = new LinkedHashMap<>();
+        configScopes.put(GLOBAL_CONFIG, globalConfig);
+        configScopes.put(PROJECT_CONFIG, projectConfig);
     }
 
     public ManualRequestContext openRequestContext() {
@@ -105,6 +112,7 @@ public abstract class ConfigCore {
     protected TreeMap<String, String> dumpConfigMap(Class<?> configClass) {
         log.debug("Start dumping config map");
         TreeMap<String, String> configMap = new TreeMap<>();
+        isDumpingConfig = true;
         try {
             for (Field field : configClass.getDeclaredFields()) {
                 String fieldName = field.getName();
@@ -129,8 +137,10 @@ public abstract class ConfigCore {
             }
             return configMap;
         } catch (InvocationTargetException | IllegalAccessException e) {
-            log.info("Error retrieving configuration", e);
+            log.warn("Error retrieving configuration", e);
             return null;
+        } finally {
+            isDumpingConfig = false;
         }
     }
 
@@ -172,16 +182,27 @@ public abstract class ConfigCore {
         return TextUtils.splitString(value);
     }
 
-    protected List<String> splitConfig(String value, String delimiter) {
-        return TextUtils.splitString(value, delimiter);
-    }
+    protected List<String> splitListIntoItems(String key, List<String> defaultValue) {
+        log.debug("Retrieving and splitting Global and Project configuration items for key {}", key);
+        List<String> items = new ArrayList<>();
+        for (Map.Entry<String, PluginConfig> configScope : configScopes.entrySet()) {
+            List<String> scopeItems = arrayToList(configScope.getValue().getStringList(key));
+            items.addAll(scopeItems);
+            log.debug("{} configuration split items retrieved: {}", configScope.getKey(), scopeItems);
+        }
 
-    protected List<String> splitNarrativeConfig(String value) {
-        return splitConfig(value, TextUtils.QUOTED_ITEM_COMMA_DELIMITED)
-                .stream()
-                .filter(s -> !s.isEmpty())
-                .map(s -> StringUtils.appendIfMissing(StringUtils.strip(s, TextUtils.DOUBLE_QUOTES), "."))
-                .collect(toList());
+        log.debug("Global and Project configuration split items: {}", items);
+        if (items.isEmpty()) {
+            return defaultValue;
+        }
+        items.replaceAll(StringUtils::backslashDoubleQuotes);
+        log.debug("Sanitized configuration split items: {}", items);
+
+        if (isDumpingConfig) {
+            items.replaceAll(TextUtils::wrapQuotes);
+            log.debug("Wrapped items with double quotes: {}", items);
+        }
+        return items;
     }
 
     private String getFieldConfigValue(Field field) throws IllegalAccessException {
