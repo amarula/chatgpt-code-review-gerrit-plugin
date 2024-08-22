@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.config;
+package com.googlesource.gerrit.plugins.chatgpt.config.dynamic;
 
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
@@ -22,6 +22,11 @@ public class DynamicConfigManager {
         dynamicConfig = Optional.ofNullable(pluginDataHandler.getJsonObjectValue(KEY_DYNAMIC_CONFIG, String.class))
                 .orElse(new HashMap<>());
         log.debug("Loaded dynamic configuration: {}", dynamicConfig);
+    }
+
+    public String getConfig(String key) {
+        log.debug("Retrieving config key: {}", key);
+        return dynamicConfig.get(key);
     }
 
     public void setConfig(String key, String value) {
