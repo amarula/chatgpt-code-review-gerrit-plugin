@@ -23,6 +23,7 @@ public abstract class ClientCommandBase extends ClientBase {
         FILTER,
         DEBUG,
         RESET,
+        REMOVE,
         // `CONFIGURATION_OPTION` is a placeholder option indicating that the associated options must be validated
         // against the Configuration keys.
         CONFIGURATION_OPTION

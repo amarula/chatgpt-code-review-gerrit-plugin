@@ -15,12 +15,14 @@ public class ClientCommandParser extends ClientCommandBase {
     private static final Map<String, BaseOptionSet> BASE_OPTION_MAP = Map.of(
             "filter", BaseOptionSet.FILTER,
             "debug", BaseOptionSet.DEBUG,
-            "reset", BaseOptionSet.RESET
+            "reset", BaseOptionSet.RESET,
+            "remove", BaseOptionSet.REMOVE
     );
     private static final Map<CommandSet, List<BaseOptionSet>> COMMAND_VALID_OPTIONS_MAP = Map.of(
             CommandSet.REVIEW, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
             CommandSet.REVIEW_LAST, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
-            CommandSet.CONFIGURE, List.of(BaseOptionSet.RESET, BaseOptionSet.CONFIGURATION_OPTION)
+            CommandSet.CONFIGURE, List.of(BaseOptionSet.RESET, BaseOptionSet.CONFIGURATION_OPTION),
+            CommandSet.DIRECTIVES, List.of(BaseOptionSet.RESET, BaseOptionSet.REMOVE)
     );
     private static final List<CommandSet> REVIEW_COMMANDS = new ArrayList<>(List.of(
             CommandSet.REVIEW,
@@ -32,8 +34,6 @@ public class ClientCommandParser extends ClientCommandBase {
             CommandSet.DUMP_CONFIG,
             CommandSet.DUMP_STORED_DATA
     ));
-    private static final String PREPROCESS_REGEX = "/directives\\s+\"?(.*[^\"])\"?";
-    private static final String PREPROCESS_REPLACEMENT = "/configure --directives=\"$1\"";
 
     private final ChangeSetData changeSetData;
     private final Localizer localizer;
@@ -65,7 +65,6 @@ public class ClientCommandParser extends ClientCommandBase {
         this.comment = comment;
         boolean commandFound = false;
         log.debug("Parsing commands from comment: {}", comment);
-        comment = preprocessCommands(comment);
         if (parseMessageCommand(comment)) {
             log.debug("Message command detected: parsing complete.");
             return false;
@@ -101,17 +100,17 @@ public class ClientCommandParser extends ClientCommandBase {
         }
         parseOptions(commandMatcher);
         if (validateCommand(command)) {
-            clientCommandExecutor.executeCommand(command, baseOptions, dynamicOptions);
+            clientCommandExecutor.executeCommand(
+                    command,
+                    baseOptions,
+                    dynamicOptions,
+                    comment.substring(commandMatcher.end())
+            );
         }
         else {
             log.info("Command in comment `{}` not validated", comment);
         }
         return true;
-    }
-
-    private String preprocessCommands(String comment) {
-        log.debug("Preprocessing commands: {}", comment);
-        return comment.replaceAll(PREPROCESS_REGEX, PREPROCESS_REPLACEMENT);
     }
 
     private boolean validateCommand(CommandSet command) {
