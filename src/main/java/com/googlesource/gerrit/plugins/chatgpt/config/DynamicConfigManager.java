@@ -24,12 +24,17 @@ public class DynamicConfigManager {
         log.debug("Loaded dynamic configuration: {}", dynamicConfig);
     }
 
+    public String getConfig(String key) {
+        log.debug("Retrieving config key: {}", key);
+        return dynamicConfig.get(key);
+    }
+
     public void setConfig(String key, String value) {
         log.debug("Setting config key: {} with value: {}", key, value);
         dynamicConfig.put(key, value);
     }
 
-    public void updateConfiguration(boolean modifiedDynamicConfig, boolean shouldResetDynamicConfig) {
+    public void updateConfiguration(boolean shouldResetDynamicConfig, boolean modifiedDynamicConfig) {
         if (dynamicConfig == null || dynamicConfig.isEmpty()) {
             log.debug("Dynamic configuration is empty or null, skipping update.");
             return;
