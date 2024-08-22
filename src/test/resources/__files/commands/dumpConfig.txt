@@ -3,7 +3,7 @@
 ```
 CONFIGURATION SETTINGS
 
-directives: 
+directive: 
 disabledGroups: 
 disabledTopicFilter: 
 disabledUsers: 

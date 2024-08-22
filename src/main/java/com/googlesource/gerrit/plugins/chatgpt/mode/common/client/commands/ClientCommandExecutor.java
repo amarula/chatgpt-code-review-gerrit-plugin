@@ -1,12 +1,15 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.config.DynamicConfigManager;
+import com.googlesource.gerrit.plugins.chatgpt.config.dynamic.DynamicConfigManager;
+import com.googlesource.gerrit.plugins.chatgpt.config.dynamic.DynamicConfigManagerDirectives;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.exceptions.DynamicDirectivesModifyException;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDataDump;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksConfiguration;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDirectives;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,10 +22,10 @@ public class ClientCommandExecutor extends ClientCommandBase {
     private final ChangeSetData changeSetData;
     private final Localizer localizer;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
-    private final DynamicConfigManager dynamicConfigManager;
 
     private Map<BaseOptionSet, String> baseOptions;
     private Map<String, String> dynamicOptions;
+    private String nextString;
 
     public ClientCommandExecutor(
             Configuration config,
@@ -34,22 +37,24 @@ public class ClientCommandExecutor extends ClientCommandBase {
         this.localizer = localizer;
         this.changeSetData = changeSetData;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        dynamicConfigManager = new DynamicConfigManager(pluginDataHandlerProvider);
         log.debug("ClientCommandExecutor initialized.");
     }
 
     public void executeCommand(
             CommandSet command,
             Map<BaseOptionSet, String> baseOptions,
-            Map<String, String> dynamicOptions
+            Map<String, String> dynamicOptions,
+            String nextString
     ) {
         log.debug("Executing Command: {}, Base Options: {}, Dynamic Options: {}", command, baseOptions, dynamicOptions);
         this.baseOptions = baseOptions;
         this.dynamicOptions = dynamicOptions;
+        this.nextString = nextString.trim();
         switch (command) {
             case REVIEW, REVIEW_LAST -> commandForceReview(command);
             case FORGET_THREAD -> commandForgetThread();
             case CONFIGURE -> commandDynamicallyConfigure();
+            case DIRECTIVES -> commandDirectives();
             case DUMP_CONFIG -> commandDumpConfig();
             case DUMP_STORED_DATA -> commandDumpStoredData();
         }
@@ -88,6 +93,8 @@ public class ClientCommandExecutor extends ClientCommandBase {
     private void commandDynamicallyConfigure() {
         boolean modifiedDynamicConfig = false;
         boolean shouldResetDynamicConfig = false;
+        DynamicConfigManager dynamicConfigManager = new DynamicConfigManager(pluginDataHandlerProvider);
+
         if (baseOptions.containsKey(BaseOptionSet.RESET)) {
             shouldResetDynamicConfig = true;
             log.debug("Resetting configuration settings");
@@ -104,10 +111,31 @@ public class ClientCommandExecutor extends ClientCommandBase {
         dynamicConfigManager.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
     }
 
-    private void commandDumpConfig() {
-        DebugCodeBlocksConfiguration debugCodeBlocksConfiguration = new DebugCodeBlocksConfiguration(
-                localizer
+    private void commandDirectives() {
+        DynamicConfigManagerDirectives dynamicConfigManagerDirectives = new DynamicConfigManagerDirectives(
+                pluginDataHandlerProvider
         );
+        DebugCodeBlocksDirectives debugCodeBlocksDirectives = new DebugCodeBlocksDirectives(localizer);
+        try {
+            if (baseOptions.containsKey(BaseOptionSet.RESET)) {
+                dynamicConfigManagerDirectives.resetDirectives();
+            } else if (baseOptions.containsKey(BaseOptionSet.REMOVE)) {
+                dynamicConfigManagerDirectives.removeDirective(nextString);
+            } else if (!nextString.isEmpty()) {
+                dynamicConfigManagerDirectives.addDirective(nextString);
+            }
+        }
+        catch (DynamicDirectivesModifyException e) {
+            changeSetData.setReviewSystemMessage(localizer.getText("message.dump.directives.modify.error"));
+            return;
+        }
+        changeSetData.setReviewSystemMessage(debugCodeBlocksDirectives.getDebugCodeBlock(
+                dynamicConfigManagerDirectives.getDirectives()
+        ));
+    }
+
+    private void commandDumpConfig() {
+        DebugCodeBlocksConfiguration debugCodeBlocksConfiguration = new DebugCodeBlocksConfiguration(localizer);
         changeSetData.setReviewSystemMessage(debugCodeBlocksConfiguration.getDebugCodeBlock(config));
     }
 
