@@ -23,8 +23,6 @@ public class TextUtils extends StringUtils {
     public static final String SEMICOLON_SPACE = "; ";
     public static final String ITEM_COMMA_DELIMITED = "\\s*,\\s*";
     public static final String QUOTED_ENTIRE_ITEM = "^" + DOUBLE_QUOTES + "(.*)" + DOUBLE_QUOTES + "$";
-    public static final String QUOTED_ITEM_COMMA_DELIMITED = "(?<!\\\\)" + DOUBLE_QUOTES + ITEM_COMMA_DELIMITED +
-            DOUBLE_QUOTES;
 
 
     public static String deSlashQuotes(String input) {
@@ -80,6 +78,10 @@ public class TextUtils extends StringUtils {
                         components.get(i)
                 )
                 .collect(Collectors.toList());
+    }
+
+    public static List<String> getNumberedList(List<String> components) {
+        return getNumberedList(components, null, null);
     }
 
     public static String getNumberedListString(List<String> components, String prefix, String postfix) {
