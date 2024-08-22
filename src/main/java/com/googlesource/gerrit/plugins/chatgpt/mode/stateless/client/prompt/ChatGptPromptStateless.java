@@ -84,9 +84,9 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
                 prompt.add(DEFAULT_GPT_REVIEW_PROMPT_MESSAGE_HISTORY);
                 prompt.add(gptRequestDataPrompt);
             }
-            if (!config.getDirectives().isEmpty()) {
+            if (!config.getDirective().isEmpty()) {
                 prompt.add(DEFAULT_GPT_REVIEW_PROMPT_DIRECTIVES);
-                prompt.add(getNumberedListString(config.getDirectives(), null, null));
+                prompt.add(getNumberedListString(config.getDirective(), null, null));
             }
         }
         String userPrompt = joinWithNewLine(prompt);
