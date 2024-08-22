@@ -180,13 +180,16 @@ The advantages of the Stateful mode over the Stateless are twofold:
 - `disabledTopicFilter`: Works in contrast to enabledTopicFilter, excluding Patch Sets and comments from review if their
   topics contain specified keywords.
 - `directives`: Directives are mandatory instructions written in plain English that ChatGPT must adhere to during its
-  reviews. You can provide a single directive or multiple directives, each enclosed in double quotes and separated by
-  commas. Examples:
+  reviews. You can provide a single directive or multiple directives.
+
+  Example of multiple directive configuration:
 
 ```
-directives = <DIRECTIVE_CONTENT>
-directives = "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
+directives = Be constructive, respectful and concise
+directives = End each reply with \"Hope this helps!\"
 ```
+
+**NOTE**: Double quotes need to be escaped in directives content.
 
 - `enabledFileExtensions`: This limits the reviewed files to the given types. Default file extensions are ".py, .java,
   .js, .ts, .html, .css, .cs, .cpp, .c, .h, .php, .rb, .swift, .kt, .r, .jl, .go, .scala, .pl, .pm, .rs, .dart, .lua,
@@ -282,13 +285,13 @@ message to ChatGPT, rather than as a command.
 
 #### Command Example
 
-For example, sending:
+For example, sending
 
 ```
 @gpt is it OK to use "and/or"?
 ```
 
-might trigger a system response:
+might trigger the following system response
 
 ```
 SYSTEM MESSAGE: Unknown command in comment `@gpt is it OK to use "and/or"?`
@@ -348,14 +351,45 @@ The `reset` option can be employed to restore modified settings to their origina
 
 ### Directives
 
-Directives are mandatory instructions written in plain English that ChatGPT must adhere to during its reviews. They can
-be specified using the `/directives` command, which serves as a shortcut for `/configure --directives=`.
+Directives are mandatory instructions written in plain English that ChatGPT must adhere to during its reviews. In
+addition to static directives, which can be specified in global and/or project configurations, directives can also be
+dynamically managed using the `/directives` command.
 
-#### Basic Syntax
+Examples:
+
+#### Query Dynamic Directives
 
 ```
-/directives <DIRECTIVE_CONTENT>
-/directives "<DIRECTIVE_1_CONTENT>", "<DIRECTIVE_2_CONTENT>"
+/directives
+```
+
+Example of the response:
+
+```
+1. First directive
+2. Second directive
+```
+
+#### Adding a Dynamic Directive
+
+```
+/directives Third directive with "quotation"
+```
+
+**NOTE**: In case of dynamic directives, double quotes do not need to be escaped.
+
+#### Removing a Dynamic Directive
+
+The index in the response to `/directives` query can be used to remove single dynamic directives.
+
+```
+/directives --remove 1
+```
+
+#### Removing All the Dynamic Directives
+
+```
+/directives --reset
 ```
 
 ### Forgetting Thread History
@@ -392,10 +426,10 @@ fileId: vs_XXXXXXXXXXXXXXXXXXXX
 
 ### Change Scope
 threadId: thread_XXXXXXXXXXXXXXXXXXXX
-dynamicConfig: 
+dynamicConfig:
     gptMode: stateful
-    enabledVoting = true
-assistantIdLog: 
+    enabledVoting: true
+assistantIdLog:
     2024-08-09 10:28:46.973108457: asst_XXXXXXXXXXXXXXXXXXXXXXXX
     2024-08-09 10:29:00.460755585: asst_YYYYYYYYYYYYYYYYYYYYYYYY
 ```
@@ -415,22 +449,24 @@ Example of the response:
 ```
 CONFIGURATION SETTINGS
 
-directives: 
-disabledGroups: 
-disabledTopicFilter: 
-disabledUsers: 
+directives:
+    First directive
+    Second directive
+disabledGroups:
+disabledTopicFilter:
+disabledUsers:
 enableMessageDebugging: true
-enabledFileExtensions: 
+enabledFileExtensions:
     .py
     .java
     .js
     (...)
-enabledGroups: 
+enabledGroups:
     ALL
-enabledProjects: 
-enabledTopicFilter: 
+enabledProjects:
+enabledTopicFilter:
     ALL
-enabledUsers: 
+enabledUsers:
     ALL
 filterCommentsBelowScore: 0
 filterCommentsRelevanceThreshold: 0.6

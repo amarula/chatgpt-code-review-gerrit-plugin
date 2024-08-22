@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -17,11 +19,29 @@ public class JsonTextUtils extends TextUtils {
     private static final String INDENT = "    ";
     private static final Pattern JSON_DELIMITED = Pattern.compile("^.*?" + CODE_DELIMITER + "json\\s*(.*)\\s*" +
                     CODE_DELIMITER + ".*$", Pattern.DOTALL);
+    private static final Pattern JSON_ARRAY = Pattern.compile("^\\[.*\\]$", Pattern.DOTALL);
     private static final Pattern JSON_OBJECT = Pattern.compile("^\\{.*\\}$", Pattern.DOTALL);
-    private static final Pattern JSON_COMPLEX_VALUE = Pattern.compile("^[\\[{].*[\\]}]$", Pattern.DOTALL);
+    private static final Pattern JSON_COMPLEX_VALUE = Pattern.compile(JSON_ARRAY.pattern() + "|" +
+            JSON_OBJECT.pattern(), Pattern.DOTALL);
 
     public static String unwrapJsonCode(String text) {
         return JSON_DELIMITED.matcher(text).replaceAll("$1");
+    }
+
+    public static List<String> jsonArrayToList(String input) {
+        log.debug("Starting to convert Json Array to list: `{}`", input);
+        if (input == null || input.isEmpty() || !JSON_ARRAY.matcher(input).matches()) {
+            return new ArrayList<>();
+        }
+        log.debug("Potential Json Array found");
+        JsonElement jsonArray = parseJsonWithDeSlash(input);
+        if (jsonArray == null || jsonArray.isJsonNull()) {
+            return new ArrayList<>();
+        }
+        log.debug("Converting Json Array to list: {}", jsonArray);
+        return StreamSupport.stream(jsonArray.getAsJsonArray().spliterator(), false)
+                .map(JsonElement::getAsString)
+                .collect(Collectors.toList());
     }
 
     public static boolean isJsonObjectAsString(String text) {
