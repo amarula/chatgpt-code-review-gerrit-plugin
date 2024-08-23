@@ -106,6 +106,7 @@ public class ClientCommandParser extends ClientCommandBase {
                     dynamicOptions,
                     comment.substring(commandMatcher.end())
             );
+            clientCommandExecutor.postExecuteCommand();
         }
         else {
             log.info("Command in comment `{}` not validated", comment);
