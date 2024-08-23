@@ -14,15 +14,17 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.RegexUtils.patternJoinAlternation;
+
 @Slf4j
 public class JsonTextUtils extends TextUtils {
     private static final String INDENT = "    ";
     private static final Pattern JSON_DELIMITED = Pattern.compile("^.*?" + CODE_DELIMITER + "json\\s*(.*)\\s*" +
-                    CODE_DELIMITER + ".*$", Pattern.DOTALL);
+            CODE_DELIMITER + ".*$", Pattern.DOTALL);
     private static final Pattern JSON_ARRAY = Pattern.compile("^\\[.*\\]$", Pattern.DOTALL);
     private static final Pattern JSON_OBJECT = Pattern.compile("^\\{.*\\}$", Pattern.DOTALL);
-    private static final Pattern JSON_COMPLEX_VALUE = Pattern.compile(JSON_ARRAY.pattern() + "|" +
-            JSON_OBJECT.pattern(), Pattern.DOTALL);
+    private static final Pattern JSON_COMPLEX_VALUE = Pattern.compile(patternJoinAlternation(JSON_ARRAY, JSON_OBJECT),
+            Pattern.DOTALL);
 
     public static String unwrapJsonCode(String text) {
         return JSON_DELIMITED.matcher(text).replaceAll("$1");
