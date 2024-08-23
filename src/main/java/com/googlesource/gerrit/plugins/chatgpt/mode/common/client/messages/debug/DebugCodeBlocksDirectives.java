@@ -6,12 +6,9 @@ import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.getNumberedList;
 
-public class DebugCodeBlocksDirectives extends DebugCodeBlocksBase {
-     private final Localizer localizer;
-
+public class DebugCodeBlocksDirectives extends DebugCodeBlocksComposer {
     public DebugCodeBlocksDirectives(Localizer localizer) {
-        super(localizer.getText("message.dump.directives.title"));
-        this.localizer = localizer;
+        super(localizer, "message.dump.directives.title");
     }
 
     public String getDebugCodeBlock(List<String> directives) {

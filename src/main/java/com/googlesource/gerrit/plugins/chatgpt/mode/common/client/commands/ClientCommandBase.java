@@ -40,11 +40,15 @@ public abstract class ClientCommandBase extends ClientBase {
             "dump_stored_data", CommandSet.DUMP_STORED_DATA
     );
 
+    private static final ImmutableBiMap<CommandSet, String> COMMAND_MAP_INVERSE = COMMAND_MAP.inverse();
+
     // Option values can be either a sequence of chars enclosed in double quotes or a sequence of non-space chars.
     private static final String OPTION_VALUES = "\"[^\"\\\\]*(?:\\\\.[^\"\\\\]*)*\"|\\S+";
 
     protected static final Pattern MESSAGE_COMMAND_PATTERN = Pattern.compile("\\s*/" +
-            COMMAND_MAP.inverse().get(CommandSet.MESSAGE) + "\\b(.*)$");
+            COMMAND_MAP_INVERSE.get(CommandSet.MESSAGE) + "\\b(.*)$");
+    protected static final Pattern DIRECTIVE_COMMAND_PATTERN = Pattern.compile("\\s*/" +
+            COMMAND_MAP_INVERSE.get(CommandSet.DIRECTIVES) + "\\b.*$");
     protected static final Pattern COMMAND_PATTERN = Pattern.compile("/(\\w+)\\b((?:\\s+--\\w+(?:=(?:" +
             OPTION_VALUES + "))?)+)?");
     protected static final Pattern OPTIONS_PATTERN = Pattern.compile("--(\\w+)(?:=(" + OPTION_VALUES + "))?");

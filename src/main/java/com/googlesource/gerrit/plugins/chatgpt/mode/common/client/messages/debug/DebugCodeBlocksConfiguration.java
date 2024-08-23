@@ -8,12 +8,9 @@ import java.util.TreeMap;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.prettyStringifyMap;
 
-public class DebugCodeBlocksConfiguration extends DebugCodeBlocksBase {
-    private final Localizer localizer;
-
+public class DebugCodeBlocksConfiguration extends DebugCodeBlocksComposer {
     public DebugCodeBlocksConfiguration(Localizer localizer) {
-        super(localizer.getText("message.dump.configuration.title"));
-        this.localizer = localizer;
+        super(localizer, "message.dump.configuration.title");
     }
 
     public String getDebugCodeBlock(Configuration config) {
