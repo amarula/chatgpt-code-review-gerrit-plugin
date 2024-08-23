@@ -125,7 +125,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
             }
         }
         dynamicConfigManager.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
-        changeSetData.setReviewSystemMessage(localizer.getText("message.dynamic.configuration.notify"));
+        changeSetData.setReviewSystemMessage(localizer.getText("message.dump.dynamic.configuration.notify"));
     }
 
     private void commandDirectives() {
