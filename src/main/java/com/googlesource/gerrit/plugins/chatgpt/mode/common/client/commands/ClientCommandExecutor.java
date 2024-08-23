@@ -14,15 +14,24 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetD
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.Set;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptThread.KEY_THREAD_ID;
 
 @Slf4j
 public class ClientCommandExecutor extends ClientCommandBase {
+    private static final Set<CommandSet> DYNAMIC_CONFIG_MESSAGE_COMMANDS = Set.of(
+            CommandSet.REVIEW,
+            CommandSet.REVIEW_LAST,
+            CommandSet.CONFIGURE,
+            CommandSet.DUMP_CONFIG
+    );
+
     private final ChangeSetData changeSetData;
     private final Localizer localizer;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
+    private CommandSet command;
     private Map<BaseOptionSet, String> baseOptions;
     private Map<String, String> dynamicOptions;
     private String nextString;
@@ -47,6 +56,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
             String nextString
     ) {
         log.debug("Executing Command: {}, Base Options: {}, Dynamic Options: {}", command, baseOptions, dynamicOptions);
+        this.command = command;
         this.baseOptions = baseOptions;
         this.dynamicOptions = dynamicOptions;
         this.nextString = nextString.trim();
@@ -57,6 +67,12 @@ public class ClientCommandExecutor extends ClientCommandBase {
             case DIRECTIVES -> commandDirectives();
             case DUMP_CONFIG -> commandDumpConfig();
             case DUMP_STORED_DATA -> commandDumpStoredData();
+        }
+    }
+
+    public void postExecuteCommand() {
+        if (!DYNAMIC_CONFIG_MESSAGE_COMMANDS.contains(command)) {
+            changeSetData.setHideDynamicConfigMessage(true);
         }
     }
 
@@ -109,6 +125,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
             }
         }
         dynamicConfigManager.updateConfiguration(modifiedDynamicConfig, shouldResetDynamicConfig);
+        changeSetData.setReviewSystemMessage(localizer.getText("message.dynamic.configuration.notify"));
     }
 
     private void commandDirectives() {
