@@ -27,6 +27,7 @@ public class ChangeSetData {
     private Boolean replyFilterEnabled = true;
     private Boolean debugReviewMode = false;
     private Boolean hideChatGptReview = false;
+    private Boolean hideDynamicConfigMessage = false;
     private String reviewSystemMessage;
 
     public Boolean shouldHideChatGptReview() {
