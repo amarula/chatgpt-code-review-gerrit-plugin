@@ -34,6 +34,8 @@ public class GerritClientReview extends GerritClientAccount {
     private final Localizer localizer;
     private final DebugCodeBlocksDynamicConfiguration debugCodeBlocksDynamicConfiguration;
 
+    private GerritChange change;
+
     @VisibleForTesting
     @Inject
     public GerritClientReview(
@@ -56,6 +58,7 @@ public class GerritClientReview extends GerritClientAccount {
             Integer reviewScore
     ) throws Exception {
         log.debug("Setting review for change ID: {}", change.getFullChangeId());
+        this.change = change;
         ReviewInput reviewInput = buildReview(reviewBatches, changeSetData, reviewScore);
         if (reviewInput.comments == null && reviewInput.message == null) {
             log.debug("No comments or messages to post for review.");
@@ -100,18 +103,26 @@ public class GerritClientReview extends GerritClientAccount {
                 reviewInput.label(LabelId.CODE_REVIEW, reviewScore);
             }
         }
-        updateSystemMessage(reviewInput, comments.isEmpty(), systemMessage);
+        updateSystemMessage(changeSetData, reviewInput, comments.isEmpty(), systemMessage);
+
         if (!comments.isEmpty()) {
             reviewInput.comments = comments;
         }
         return reviewInput;
     }
 
-    private void updateSystemMessage(ReviewInput reviewInput, boolean emptyComments, String systemMessage) {
+    private void updateSystemMessage(
+            ChangeSetData changeSetData,
+            ReviewInput reviewInput,
+            boolean emptyComments,
+            String systemMessage
+    ) {
         List<String> messages = new ArrayList<>();
-        Map<String, String> dynamicConfig = new DynamicConfigManager(pluginDataHandlerProvider).getDynamicConfig();
-        if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
-            messages.add(debugCodeBlocksDynamicConfiguration.getDebugCodeBlock(dynamicConfig));
+        if (!change.getIsCommentEvent() && !changeSetData.getHideDynamicConfigMessage()) {
+            Map<String, String> dynamicConfig = new DynamicConfigManager(pluginDataHandlerProvider).getDynamicConfig();
+            if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
+                messages.add(debugCodeBlocksDynamicConfiguration.getDebugCodeBlock(dynamicConfig));
+            }
         }
         if (emptyComments) {
             messages.add(localizer.getText("system.message.prefix") + ' ' + systemMessage);
