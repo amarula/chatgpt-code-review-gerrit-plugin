@@ -18,6 +18,10 @@ public class ClientCommandCleaner extends ClientCommandBase {
         if (messageCommandMatcher.find()) {
             return messageCommandMatcher.replaceAll("$1");
         }
+        Matcher directiveCommandMatcher = DIRECTIVE_COMMAND_PATTERN.matcher(comment);
+        if (directiveCommandMatcher.find()) {
+            return directiveCommandMatcher.replaceAll("");
+        }
         Matcher commandMatcher = COMMAND_PATTERN.matcher(comment);
         return commandMatcher.replaceAll("");
     }
