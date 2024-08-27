@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.RegexUtils.patternJoinAlternation;
 
 @Slf4j
@@ -57,6 +58,10 @@ public class JsonTextUtils extends TextUtils {
                         .map(JsonTextUtils::formatEntry)
                         .collect(Collectors.toList())
         );
+    }
+
+    public static String prettyFormatList(List<String> list) {
+        return formatJsonArray(getGson().toJsonTree(list).getAsJsonArray(), "    ");
     }
 
     private static String formatEntry(Map.Entry<String, String> entry) {
