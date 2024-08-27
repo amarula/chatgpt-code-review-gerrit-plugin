@@ -13,13 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.CollectionUtils.arrayToList;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.*;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithComma;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.wrapQuotes;
 
 @Slf4j
 public abstract class ConfigCore {
@@ -79,20 +75,6 @@ public abstract class ConfigCore {
             return value;
         }
         return globalConfig.getString(key, defaultValue);
-    }
-
-    protected String getProjectGlobalString(String key, String defaultValue) {
-        String globalValue = globalConfig.getString(key, defaultValue);
-        String projectValue = projectConfig.getString(key, defaultValue);
-        log.debug("Get project global string - globalConfig: {}, projectConfig: {}", globalValue,
-                projectValue);
-        String resultValue = joinWithComma(
-                Stream.of(globalValue, projectValue)
-                        .filter(s -> s != null && !s.isEmpty())
-                        .map(TextUtils::unwrapQuotes)
-                        .collect(Collectors.toSet())
-        );
-        return resultValue.isEmpty() ? "" : wrapQuotes(resultValue);
     }
 
     protected boolean isDefinedKey(Class<?> configClass, String key) {
