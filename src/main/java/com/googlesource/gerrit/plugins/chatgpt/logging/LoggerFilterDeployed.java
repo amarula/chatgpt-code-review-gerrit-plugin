@@ -5,13 +5,15 @@ import org.apache.log4j.Level;
 import org.apache.log4j.spi.Filter;
 import org.apache.log4j.spi.LoggingEvent;
 
+import java.util.List;
+
 @SuppressWarnings("UnstableApiUsage")
 @Slf4j
 public class LoggerFilterDeployed extends Filter {
     private final LoggerFilterDecider loggerFilterDecider;
     private final Level thresholdLevel;
 
-    public LoggerFilterDeployed(String filter, Level thresholdLevel) {
+    public LoggerFilterDeployed(List<String> filter, Level thresholdLevel) {
         loggerFilterDecider = new LoggerFilterDecider(filter);
         this.thresholdLevel = thresholdLevel;
         log.debug("LoggerFilters Level: {}", thresholdLevel);

@@ -8,7 +8,8 @@ import java.util.Set;
 public class ConfigEntryFactory {
     // Config entry keys with list values
     private static final Set<String> LIST_TYPE_ENTRY_KEYS = Set.of(
-            Configuration.KEY_DIRECTIVES
+            Configuration.KEY_DIRECTIVES,
+            Configuration.KEY_SELECTIVE_LOG_LEVEL_OVERRIDE
     );
 
     public static IConfigEntry getConfigEntry(String key) {

@@ -6,6 +6,8 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerBaseProvide
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.*;
 
+import java.util.List;
+
 @Slf4j
 @SuppressWarnings("UnstableApiUsage")
 public class LoggingConfigurationDeployed {
@@ -16,7 +18,7 @@ public class LoggingConfigurationDeployed {
         Appender appender = logger.getAppender("error_log");
         PluginDataHandler globalDataHandler = pluginDataHandlerBaseProvider.get();
         String originalLogLevelStr = globalDataHandler.getValue(ORIGINAL_LOG_LEVEL);
-        String selectiveLogLevelOverride = config.getSelectiveLogLevelOverride();
+        List<String> selectiveLogLevelOverride = config.getSelectiveLogLevelOverride();
         log.debug("Logger configured for selective override: {} - Appender: {}", logger, appender);
         if (selectiveLogLevelOverride.isEmpty()) {
             if (originalLogLevelStr != null) {

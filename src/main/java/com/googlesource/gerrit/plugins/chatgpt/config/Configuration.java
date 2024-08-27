@@ -88,7 +88,7 @@ public class Configuration extends ConfigCore {
     private static final int DEFAULT_GPT_CONNECTION_MAX_RETRY_ATTEMPTS = 2;
     private static final int DEFAULT_GPT_RUN_POLLING_TIMEOUT = 180;
     private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
-    private static final String DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = "";
+    private static final List<String> DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = new ArrayList<>();
 
     // Config setting keys
     public static final String KEY_GPT_SYSTEM_PROMPT = "gptSystemPrompt";
@@ -99,6 +99,7 @@ public class Configuration extends ConfigCore {
     public static final String KEY_VOTING_MIN_SCORE = "votingMinScore";
     public static final String KEY_VOTING_MAX_SCORE = "votingMaxScore";
     public static final String KEY_GERRIT_USERNAME = "gerritUserName";
+    public static final String KEY_SELECTIVE_LOG_LEVEL_OVERRIDE = "selectiveLogLevelOverride";
 
     private static final String KEY_GPT_TOKEN = "gptToken";
     private static final String KEY_GPT_DOMAIN = "gptDomain";
@@ -136,7 +137,6 @@ public class Configuration extends ConfigCore {
     private static final String KEY_GPT_CONNECTION_MAX_RETRY_ATTEMPTS = "gptConnectionMaxRetryAttempts";
     private static final String KEY_GPT_RUN_POLLING_TIMEOUT = "gptRunPollingTimeout";
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
-    private static final String KEY_SELECTIVE_LOG_LEVEL_OVERRIDE = "selectiveLogLevelOverride";
 
     public Configuration(
             OneOffRequestContext context,
@@ -330,8 +330,8 @@ public class Configuration extends ConfigCore {
         return getBoolean(KEY_IGNORE_OUTDATED_INLINE_COMMENTS, DEFAULT_IGNORE_OUTDATED_INLINE_COMMENTS);
     }
 
-    public String getSelectiveLogLevelOverride() {
-        return getProjectGlobalString(KEY_SELECTIVE_LOG_LEVEL_OVERRIDE, DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE);
+    public List<String> getSelectiveLogLevelOverride() {
+        return splitListIntoItems(KEY_SELECTIVE_LOG_LEVEL_OVERRIDE, DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE);
     }
 
     public boolean isDefinedKey(String key) {
