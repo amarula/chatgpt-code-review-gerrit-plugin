@@ -528,7 +528,7 @@ $ export GERRIT_CHATGPT_TEST_FILTER_VALUE=ClientMessage
 The syntax for the filter value is as follows:
 
 ```
-export GERRIT_CHATGPT_TEST_FILTER_VALUE="[<class_name_1>]#[<message_1>], ..., [<class_name_N>]#[<message_N>]"
+export GERRIT_CHATGPT_TEST_FILTER_VALUE="[<class_name_1>]|[<message_1>], ..., [<class_name_N>]|[<message_N>]"
 ```
 
 Double quotes are required when specifying multiple filter items. Each filter item can include a `className` and
@@ -539,17 +539,20 @@ such as all DEBUG messages in classes containing `EventHandler`:
 $ export GERRIT_CHATGPT_TEST_FILTER_VALUE=EventHandler
 ```
 
-To filter messages containing the word "Found":
+To filter DEBUG messages containing the ChatGPT request and response bodies, the pipe ("|") prefix must be used:
 
 ```
-$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=#Found
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE="|ChatGPT request body, |ChatGPT response body"
 ```
 
 For multiple items with spaces, enclose the settings string in double quotes and escape any internal double quotes:
 
 ```
-$ export GERRIT_CHATGPT_TEST_FILTER_VALUE="#Found, ChatGptRun#\"ChatGPT Retrieve Run\""
+$ export GERRIT_CHATGPT_TEST_FILTER_VALUE="|ChatGPT request body, ChatGptRun|ChatGPT Retrieve Run"
 ```
+
+This setting shows the DEBUG log messages containing the string "ChatGPT request body" and the ones in `ChatGptRun`
+containing "ChatGPT Retrieve Run".
 
 ## Debugging
 
@@ -585,50 +588,38 @@ messages from various sources in the Gerrit log file. The `selectiveLogLevelOver
 similarly to the `GERRIT_CHATGPT_TEST_FILTER_VALUE`, permitting the logging of specific messages below the current log
 level threshold.
 
-For instance, to log all DEBUG messages from the `ClientMessage` class for all projects, add the following
-to `global.config`:
+For instance, to log all DEBUG messages from the `ClientMessage` and `ClientCommandExecutor` classes for a specific
+project, add the following to the related `project.config`:
 
 ```
 selectiveLogLevelOverride = ClientMessage
+selectiveLogLevelOverride = ClientCommandExecutor
 ```
 
-This effect can also be achieved for actions performed on a specific Change Set using the command:
+This effect can also be achieved for actions performed on a specific Change Set by dynamically changing the configuration:
 
 ```
-@gpt /configure --selectiveLogLevelOverride=ClientMessage
+@gpt /configure --selectiveLogLevelOverride="[ClientMessage, ClientCommandExecutor]"
 ```
 
-The `selectiveLogLevelOverride` option uses the following syntax:
+The `selectiveLogLevelOverride` dynamic option uses the following general syntax:
 
 ```
-selectiveLogLevelOverride = "[<class_name_1>]#[<message_1>], ..., [<class_name_N>]#[<message_N>]"
+selectiveLogLevelOverride = "[\"<class_name_1>|<message_1>\", ..., \"<class_name_N>|<message_N>\"]"
 ```
 
-Note that it's mandatory to enclose the `selectiveLogLevelOverride` global value in double quotes when specifying
-multiple filter items.
+Note that it's mandatory to enclose the `selectiveLogLevelOverride` value in double quotes when specifying filters on
+messages.
 
-Each item's filter may consist of a `className` and a `message` filter. Since the filter uses the "contain" criterion,
-multiple items with a common substring can be selected by setting that substring. For example, all DEBUG messages in
-classes whose names contains `EventHandler` can be elevated with:
+Each item's filter may consist of a `className` and a `message` filter, separated by a pipe ("|"). Since the filter uses
+the "contain" criterion, multiple items with a common substring can be selected by setting that substring.
 
-```
-@gpt /configure --selectiveLogLevelOverride=EventHandler
-```
-
-To select log messages containing the word "Found," you can use:
+For example, all DEBUG messages in classes whose log messages containing the ChatGPT request and response bodies can be
+elevated with:
 
 ```
-@gpt /configure --selectiveLogLevelOverride=#Found
+@gpt /configure --selectiveLogLevelOverride="[\"|ChatGPT request body\", \"|ChatGPT response body\"]"
 ```
-
-For multiple items, enclose the settings string in double quotes:
-
-```
-@gpt /configure --selectiveLogLevelOverride="#Found, ChatGptRun#\"ChatGPT Retrieve Run\""
-```
-
-Note that, if the message filters contain spaces, they must also be enclosed in double quotes. When the global value
-itself is quoted, any double quotes around the message filters should be escaped with backslashes.
 
 ### Dynamically Changing Settings for Testing/Debugging
 
@@ -648,7 +639,7 @@ Following this configuration, a new Change Set review can be initiated with:
 It's also possible to make multiple changes at once:
 
 ```
-@gpt /configure --gptMode=stateful, --gptModel=gpt-4-turbo
+@gpt /configure --gptMode=stateful --gptModel=gpt-4-turbo
 ```
 
 ## License
