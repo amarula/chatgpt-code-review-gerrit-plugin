@@ -2,7 +2,6 @@ package com.googlesource.gerrit.plugins.chatgpt.listener;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -49,12 +48,7 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
                 gitRepoFiles,
                 pluginDataHandlerProvider
         );
-        chatGptAssistant.flushAssistantIds();
-        log.debug("Flushed assistant IDs for change merged: {}", change.getFullChangeId());
-        try {
-            chatGptAssistant.createVectorStore();
-        } catch (OpenAiConnectionFailException e) {
-            log.error("Could not create vector store", e);
-        }
+        chatGptAssistant.flushAssistantAndVectorIds();
+        log.debug("Flushed assistant and Vector Store IDs for change merged: {}", change.getFullChangeId());
     }
 }

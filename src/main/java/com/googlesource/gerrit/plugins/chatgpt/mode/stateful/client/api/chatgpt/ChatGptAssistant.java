@@ -103,7 +103,7 @@ public class ChatGptAssistant extends ClientBase {
         return vectorStoreId;
     }
 
-    public void flushAssistantIds() {
+    public void flushAssistantAndVectorIds() {
         log.debug("Flushing assistant IDs.");
         projectDataHandler.removeValue(KEY_VECTOR_STORE_ID);
         assistantsDataHandler.destroy();
