@@ -18,6 +18,7 @@ public abstract class ClientCommandBase extends ClientBase {
         CONFIGURE,
         DUMP_CONFIG,
         DUMP_STORED_DATA,
+        UPLOAD_CODEBASE
     }
     public enum BaseOptionSet {
         FILTER,
@@ -37,7 +38,8 @@ public abstract class ClientCommandBase extends ClientBase {
             "forget_thread", CommandSet.FORGET_THREAD,
             "configure", CommandSet.CONFIGURE,
             "dump_config", CommandSet.DUMP_CONFIG,
-            "dump_stored_data", CommandSet.DUMP_STORED_DATA
+            "dump_stored_data", CommandSet.DUMP_STORED_DATA,
+            "upload_codebase", CommandSet.UPLOAD_CODEBASE
     );
 
     private static final ImmutableBiMap<CommandSet, String> COMMAND_MAP_INVERSE = COMMAND_MAP.inverse();
