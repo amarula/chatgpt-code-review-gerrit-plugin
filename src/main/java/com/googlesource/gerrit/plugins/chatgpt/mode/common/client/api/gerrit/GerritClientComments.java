@@ -14,6 +14,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.Gerr
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.CommentData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +32,7 @@ public class GerritClientComments extends GerritClientAccount {
     private static final Integer MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT = 2;
 
     private final ChangeSetData changeSetData;
+    private final GitRepoFiles gitRepoFiles;
     private final HashMap<String, GerritComment> commentMap;
     private final HashMap<String, GerritComment> patchSetCommentMap;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
@@ -46,11 +48,13 @@ public class GerritClientComments extends GerritClientAccount {
             Configuration config,
             AccountCache accountCache,
             ChangeSetData changeSetData,
+            GitRepoFiles gitRepoFiles,
             PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
     ) {
         super(config, accountCache);
         this.changeSetData = changeSetData;
+        this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.localizer = localizer;
         commentProperties = new ArrayList<>();
@@ -152,6 +156,8 @@ public class GerritClientComments extends GerritClientAccount {
         ClientMessageParser messageParser = new ClientMessageParser(
                 config,
                 changeSetData,
+                change,
+                gitRepoFiles,
                 pluginDataHandlerProvider,
                 localizer
         );
