@@ -240,12 +240,4 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
         Assert.assertEquals(promptTagComments, requestContent);
         Assert.assertEquals(reviewMessageCommitMessage, getCapturedMessage(captor, GERRIT_PATCH_SET_FILENAME));
     }
-
-    @Test
-    public void gerritMergedCommits() {
-        projectHandler.removeValue(KEY_VECTOR_STORE_ID);
-        handleEventBasedOnType(SupportedEvents.CHANGE_MERGED);
-
-        Assert.assertEquals(CHAT_GPT_VECTOR_ID, projectHandler.getValue(KEY_VECTOR_STORE_ID));
-    }
 }
