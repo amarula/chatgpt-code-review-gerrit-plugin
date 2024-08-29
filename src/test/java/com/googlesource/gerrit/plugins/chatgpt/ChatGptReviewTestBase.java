@@ -328,6 +328,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                             config,
                             accountCacheMock,
                             changeSetData,
+                            gitRepoFiles,
                             pluginDataHandlerProvider,
                             localizer
                     ),
