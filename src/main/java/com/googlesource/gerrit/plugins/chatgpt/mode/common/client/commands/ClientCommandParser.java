@@ -3,7 +3,9 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +34,8 @@ public class ClientCommandParser extends ClientCommandBase {
             CommandSet.DIRECTIVES,
             CommandSet.CONFIGURE,
             CommandSet.DUMP_CONFIG,
-            CommandSet.DUMP_STORED_DATA
+            CommandSet.DUMP_STORED_DATA,
+            CommandSet.UPLOAD_CODEBASE
     ));
 
     private final ChangeSetData changeSetData;
@@ -46,6 +49,8 @@ public class ClientCommandParser extends ClientCommandBase {
     public ClientCommandParser(
             Configuration config,
             ChangeSetData changeSetData,
+            GerritChange change,
+            GitRepoFiles gitRepoFiles,
             PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
     ) {
@@ -55,6 +60,8 @@ public class ClientCommandParser extends ClientCommandBase {
         this.clientCommandExecutor = new ClientCommandExecutor(
                 config,
                 changeSetData,
+                change,
+                gitRepoFiles,
                 pluginDataHandlerProvider,
                 localizer
         );

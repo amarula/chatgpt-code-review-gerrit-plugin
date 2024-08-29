@@ -497,6 +497,19 @@ votingMinScore: -1
 
 **NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
 
+### Uploading Codebase
+
+This command allows you to force the upload of the Git project's codebase to ChatGPT.
+
+**NOTE**: Running this command, available when the `enableMessageDebugging` configuration setting is enabled, may
+increase OpenAI API usage and should be used for **testing or debugging purposes only**.
+
+#### Basic Syntax
+
+```
+/upload_codebase
+```
+
 ## Testing
 
 ### Overview
@@ -596,7 +609,8 @@ selectiveLogLevelOverride = ClientMessage
 selectiveLogLevelOverride = ClientCommandExecutor
 ```
 
-This effect can also be achieved for actions performed on a specific Change Set by dynamically changing the configuration:
+This effect can also be achieved for actions performed on a specific Change Set by dynamically changing the
+configuration:
 
 ```
 @gpt /configure --selectiveLogLevelOverride="[ClientMessage, ClientCommandExecutor]"
