@@ -3,8 +3,10 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands.ClientCommandParser;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.regex.Matcher;
@@ -16,11 +18,20 @@ public class ClientMessageParser extends ClientMessageBase {
     public ClientMessageParser(
             Configuration config,
             ChangeSetData changeSetData,
+            GerritChange change,
+            GitRepoFiles gitRepoFiles,
             PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
     ) {
         super(config);
-        clientCommandParser = new ClientCommandParser(config, changeSetData, pluginDataHandlerProvider, localizer);
+        clientCommandParser = new ClientCommandParser(
+                config,
+                changeSetData,
+                change,
+                gitRepoFiles,
+                pluginDataHandlerProvider,
+                localizer
+        );
         log.debug("ClientMessageParser initialized with bot mention pattern: {}", botMentionPattern);
     }
 
