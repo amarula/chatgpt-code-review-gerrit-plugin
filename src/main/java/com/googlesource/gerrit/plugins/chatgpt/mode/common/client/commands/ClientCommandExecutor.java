@@ -7,10 +7,13 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.exceptions.DynamicDirectivesModifyException;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDataDump;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDirectives;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -28,6 +31,8 @@ public class ClientCommandExecutor extends ClientCommandBase {
     );
 
     private final ChangeSetData changeSetData;
+    private final GerritChange change;
+    private final GitRepoFiles gitRepoFiles;
     private final Localizer localizer;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
@@ -39,12 +44,16 @@ public class ClientCommandExecutor extends ClientCommandBase {
     public ClientCommandExecutor(
             Configuration config,
             ChangeSetData changeSetData,
+            GerritChange change,
+            GitRepoFiles gitRepoFiles,
             PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
     ) {
         super(config);
         this.localizer = localizer;
         this.changeSetData = changeSetData;
+        this.change = change;
+        this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         log.debug("ClientCommandExecutor initialized.");
     }
@@ -62,6 +71,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
         this.nextString = nextString.trim();
         switch (command) {
             case REVIEW, REVIEW_LAST -> commandForceReview(command);
+            case UPLOAD_CODEBASE -> commandUploadCodebase();
             case FORGET_THREAD -> commandForgetThread();
             case CONFIGURE -> commandDynamicallyConfigure();
             case DIRECTIVES -> commandDirectives();
@@ -97,6 +107,26 @@ public class ClientCommandExecutor extends ClientCommandBase {
             changeSetData.setDebugReviewMode(true);
             changeSetData.setReplyFilterEnabled(false);
         }
+    }
+
+    private void commandUploadCodebase() {
+        log.info("Uploading codebase for the project");
+        ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
+                config,
+                changeSetData,
+                change,
+                gitRepoFiles,
+                pluginDataHandlerProvider
+        );
+        chatGptAssistant.flushAssistantAndVectorIds();
+        try {
+            chatGptAssistant.createVectorStore();
+        }
+        catch (Exception OpenAiConnectionFailException) {
+            changeSetData.setReviewSystemMessage(localizer.getText("message.command.codebase.upload.error"));
+            return;
+        }
+        changeSetData.setReviewSystemMessage(localizer.getText("message.command.codebase.upload.successful"));
     }
 
     private void commandForgetThread() {
