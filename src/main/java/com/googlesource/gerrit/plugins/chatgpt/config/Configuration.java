@@ -5,10 +5,7 @@ import com.google.gerrit.extensions.api.GerritApi;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.util.OneOffRequestContext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.TreeMap;
+import java.util.*;
 
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
 
@@ -100,6 +97,12 @@ public class Configuration extends ConfigCore {
     public static final String KEY_VOTING_MAX_SCORE = "votingMaxScore";
     public static final String KEY_GERRIT_USERNAME = "gerritUserName";
     public static final String KEY_SELECTIVE_LOG_LEVEL_OVERRIDE = "selectiveLogLevelOverride";
+
+    // Config entry keys with list values
+    public static final Set<String> LIST_TYPE_ENTRY_KEYS = Set.of(
+            KEY_DIRECTIVES,
+            KEY_SELECTIVE_LOG_LEVEL_OVERRIDE
+    );
 
     private static final String KEY_GPT_TOKEN = "gptToken";
     private static final String KEY_GPT_DOMAIN = "gptDomain";
