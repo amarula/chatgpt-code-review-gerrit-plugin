@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.*;
 import java.util.regex.Matcher;
 
+import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.jsonArrayToList;
+
 @Slf4j
 public class ClientCommandParser extends ClientCommandBase {
     private static final Map<String, BaseOptionSet> BASE_OPTION_MAP = Map.of(
@@ -42,7 +44,6 @@ public class ClientCommandParser extends ClientCommandBase {
     private final Localizer localizer;
     private final ClientCommandExecutor clientCommandExecutor;
 
-    private String comment;
     private Map<BaseOptionSet, String> baseOptions;
     private Map<String, String> dynamicOptions;
 
@@ -69,7 +70,6 @@ public class ClientCommandParser extends ClientCommandBase {
     }
 
     public boolean parseCommands(String comment) {
-        this.comment = comment;
         boolean commandFound = false;
         log.debug("Parsing commands from comment: {}", comment);
         if (parseMessageCommand(comment)) {
@@ -124,9 +124,6 @@ public class ClientCommandParser extends ClientCommandBase {
     private boolean validateCommand(CommandSet command) {
         log.debug("Validating command: {}", command);
         if (optionsMismatch(command)) {
-            changeSetData.setReviewSystemMessage(String.format(localizer.getText("message.command.options.mismatch"),
-                    comment));
-            log.debug("Option mismatch for command `{}`. Comment: {}", command, comment);
             return false;
         }
         if (!config.getEnableMessageDebugging() && requiresMessageDebugging(command)) {
@@ -149,23 +146,41 @@ public class ClientCommandParser extends ClientCommandBase {
         if (!baseOptions.isEmpty() && (
                 commandOptions == null || !(new HashSet<>(commandOptions).containsAll(baseOptions.keySet()))
         )) {
-            log.debug("Options non valid for command `{}`: {}", command, baseOptions);
+            log.debug("Invalid option for command `{}`: {}", command, baseOptions);
+            changeSetData.setReviewSystemMessage(String.format(
+                    localizer.getText("message.command.option.invalid"), command, baseOptions)
+            );
             return true;
         }
-        if (!dynamicOptions.isEmpty() &&(
-                !commandOptions.contains(BaseOptionSet.CONFIGURATION_OPTION) || configurationOptionsMismatch()
-        )) {
-            log.debug("Configuration options non valid for command `{}`: {}", command, dynamicOptions);
-            return true;
+        if (!dynamicOptions.isEmpty()) {
+            if (commandOptions == null || !commandOptions.contains(BaseOptionSet.CONFIGURATION_OPTION)) {
+                log.debug("Unknown option(s) for command `{}`: {}", command, dynamicOptions);
+                changeSetData.setReviewSystemMessage(
+                        String.format(localizer.getText("message.command.option.unknown"), command, dynamicOptions)
+                );
+                return true;
+            }
+            return configurationOptionsMismatch();
         }
         return false;
     }
 
     private boolean configurationOptionsMismatch() {
         log.debug("Checking for mismatches in configuration options");
-        for (String key : dynamicOptions.keySet()) {
+        for (Map.Entry<String, String> dynamicEntry : dynamicOptions.entrySet()) {
+            String key = dynamicEntry.getKey();
             if (!config.isDefinedKey(key)) {
-                log.debug("Configuration option mismatch found for key `{}`", key);
+                log.debug("Unknown configuration option: {}", key);
+                changeSetData.setReviewSystemMessage(
+                        String.format(localizer.getText("message.command.option.config.unknown"), key)
+                );
+                return true;
+            }
+            if (Configuration.LIST_TYPE_ENTRY_KEYS.contains(key) && jsonArrayToList(dynamicEntry.getValue()).isEmpty()) {
+                log.debug("Value of `{}` must be formatted as a JSON array", key);
+                changeSetData.setReviewSystemMessage(
+                        String.format(localizer.getText("message.command.option.config.array.malformed"), key)
+                );
                 return true;
             }
         }
