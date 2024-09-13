@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
 
+import java.util.List;
+
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
@@ -17,12 +19,12 @@ public class ChatGptVectorStore extends ClientBase {
     public static final String KEY_VECTOR_STORE_ID = "vectorStoreId";
 
     private final ChatGptHttpClient httpClient;
-    private final String fileId;
+    private final List<String> fileIds;
     private final GerritChange change;
 
-    public ChatGptVectorStore(String fileId, Configuration config, GerritChange change) {
+    public ChatGptVectorStore(List<String> fileIds, Configuration config, GerritChange change) {
         super(config);
-        this.fileId = fileId;
+        this.fileIds = fileIds;
         this.change = change;
         httpClient = new ChatGptHttpClient(config);
     }
@@ -43,7 +45,7 @@ public class ChatGptVectorStore extends ClientBase {
 
         ChatGptCreateVectorStoreRequest requestBody = ChatGptCreateVectorStoreRequest.builder()
                 .name(change.getProjectName())
-                .fileIds(new String[] { fileId })
+                .fileIds(fileIds.toArray(String[]::new))
                 .build();
 
         log.debug("ChatGPT Create Vector Store request body: {}", requestBody);
