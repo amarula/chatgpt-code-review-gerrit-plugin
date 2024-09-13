@@ -15,27 +15,27 @@ import java.nio.file.Path;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
-public class ChatGptFiles extends ClientBase {
+public class ChatGptFile extends ClientBase {
     private final HttpClient httpClient;
 
-    public ChatGptFiles(Configuration config) {
+    public ChatGptFile(Configuration config) {
         super(config);
         httpClient = new HttpClient(config);
     }
 
-    public ChatGptFilesResponse uploadFiles(Path repoPath) throws OpenAiConnectionFailException {
+    public ChatGptFilesResponse uploadFile(Path repoPath) throws OpenAiConnectionFailException {
         Request request = createUploadFileRequest(repoPath);
-        log.debug("ChatGPT Upload Files request: {}", request);
+        log.debug("ChatGPT Upload File request: {}", request);
 
         String response = httpClient.execute(request);
-        log.debug("ChatGPT Upload Files response: {}", response);
+        log.debug("ChatGPT Upload File response: {}", response);
 
         return getGson().fromJson(response, ChatGptFilesResponse.class);
     }
 
     private Request createUploadFileRequest(Path repoPath) {
         String uri = UriResourceLocatorStateful.filesCreateUri();
-        log.debug("ChatGPT Upload Files request URI: {}", uri);
+        log.debug("ChatGPT Upload File request URI: {}", uri);
         File file = repoPath.toFile();
         RequestBody requestBody = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
