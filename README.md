@@ -273,6 +273,9 @@ These parameters are specific to connecting with the OpenAI server and should on
   seconds.
 - `gptConnectionRetryInterval`: Sets the interval between two connection attempts, with a default of 10 seconds.
 - `gptConnectionMaxRetryAttempts`: Determines the maximum number of retry attempts, defaulting to 2.
+- `gptUploadedChunkSizeMb`: When uploading project repositories to ChatGPT in stateful mode, the repositories are
+  packaged and split into chunk files. This setting specifies the maximum size of each chunk file, with a default of 5
+  MB.
 
 ## Commands
 

@@ -19,14 +19,11 @@ import com.googlesource.gerrit.plugins.chatgpt.utils.HashUtils;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.createTempFileWithContent;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFilename;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.now;
 
@@ -37,10 +34,10 @@ public class ChatGptAssistant extends ClientBase {
     private final ChatGptHttpClient httpClient;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
-    private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandler projectDataHandler;
     private final PluginDataHandler changeDataHandler;
     private final PluginDataHandler assistantsDataHandler;
+    private final ChatGptRepoUploader chatGptRepoUploader;
 
     private String description;
     private String instructions;
@@ -57,11 +54,11 @@ public class ChatGptAssistant extends ClientBase {
         super(config);
         this.changeSetData = changeSetData;
         this.change = change;
-        this.gitRepoFiles = gitRepoFiles;
         httpClient = new ChatGptHttpClient(config);
         projectDataHandler = pluginDataHandlerProvider.getProjectScope();
         changeDataHandler = pluginDataHandlerProvider.getChangeScope();
         assistantsDataHandler = pluginDataHandlerProvider.getAssistantsWorkspace();
+        chatGptRepoUploader = new ChatGptRepoUploader(config, change, gitRepoFiles);
         log.debug("Initialized ChatGptAssistant with project and assistants data handlers.");
     }
 
@@ -90,8 +87,8 @@ public class ChatGptAssistant extends ClientBase {
         log.debug("Creating or retrieving vector store.");
         String vectorStoreId = projectDataHandler.getValue(KEY_VECTOR_STORE_ID);
         if (vectorStoreId == null) {
-            String fileId = uploadRepoFiles();
-            ChatGptVectorStore vectorStore = new ChatGptVectorStore(fileId, config, change);
+            List<String> fileIds = chatGptRepoUploader.uploadRepoFiles();
+            ChatGptVectorStore vectorStore = new ChatGptVectorStore(fileIds, config, change);
             ChatGptResponse createVectorStoreResponse = vectorStore.createVectorStore();
             vectorStoreId = createVectorStoreResponse.getId();
             projectDataHandler.setValue(KEY_VECTOR_STORE_ID, vectorStoreId);
@@ -107,16 +104,6 @@ public class ChatGptAssistant extends ClientBase {
         log.debug("Flushing assistant IDs.");
         projectDataHandler.removeValue(KEY_VECTOR_STORE_ID);
         assistantsDataHandler.destroy();
-    }
-
-    private String uploadRepoFiles() throws OpenAiConnectionFailException {
-        log.debug("Uploading repository files.");
-        String repoFiles = gitRepoFiles.getGitRepoFiles(config, change);
-        Path repoPath = createTempFileWithContent(sanitizeFilename(change.getProjectName()), ".json", repoFiles);
-        ChatGptFiles chatGptFiles = new ChatGptFiles(config);
-        ChatGptFilesResponse chatGptFilesResponse = chatGptFiles.uploadFiles(repoPath);
-
-        return chatGptFilesResponse.getId();
     }
 
     private String createAssistant(String vectorStoreId) throws OpenAiConnectionFailException {

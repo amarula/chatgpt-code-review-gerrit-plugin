@@ -84,6 +84,7 @@ public class Configuration extends ConfigCore {
     private static final int DEFAULT_GPT_CONNECTION_RETRY_INTERVAL = 10;
     private static final int DEFAULT_GPT_CONNECTION_MAX_RETRY_ATTEMPTS = 2;
     private static final int DEFAULT_GPT_RUN_POLLING_TIMEOUT = 180;
+    private static final int DEFAULT_GPT_UPLOADED_CHUNK_SIZE_MB = 5;
     private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
     private static final List<String> DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = new ArrayList<>();
 
@@ -139,6 +140,7 @@ public class Configuration extends ConfigCore {
     private static final String KEY_GPT_CONNECTION_RETRY_INTERVAL = "gptConnectionRetryInterval";
     private static final String KEY_GPT_CONNECTION_MAX_RETRY_ATTEMPTS = "gptConnectionMaxRetryAttempts";
     private static final String KEY_GPT_RUN_POLLING_TIMEOUT = "gptRunPollingTimeout";
+    private static final String KEY_GPT_UPLOADED_CHUNK_SIZE_MB = "gptUploadedChunkSizeMb";
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
 
     public Configuration(
@@ -323,6 +325,10 @@ public class Configuration extends ConfigCore {
 
     public int getGptRunPollingTimeout() {
         return getInt(KEY_GPT_RUN_POLLING_TIMEOUT, DEFAULT_GPT_RUN_POLLING_TIMEOUT);
+    }
+
+    public int getGptUploadedChunkSizeMb() {
+        return getInt(KEY_GPT_UPLOADED_CHUNK_SIZE_MB, DEFAULT_GPT_UPLOADED_CHUNK_SIZE_MB);
     }
 
     public boolean getEnableMessageDebugging() {

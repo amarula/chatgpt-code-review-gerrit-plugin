@@ -62,6 +62,7 @@ gptReviewPatchSet: true
 gptReviewTemperature: 0.2
 gptRunPollingTimeout: 180
 gptStreamOutput: false
+gptUploadedChunkSizeMb: 5
 ignoreOutdatedInlineComments: false
 ignoreResolvedChatGptComments: true
 inlineCommentsAsResolved: false
