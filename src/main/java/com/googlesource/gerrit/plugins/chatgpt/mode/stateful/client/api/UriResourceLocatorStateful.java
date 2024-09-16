@@ -46,4 +46,12 @@ public class UriResourceLocatorStateful {
     public static String vectorStoreCreateUri() {
         return VERSION_URI + "/vector_stores";
     }
+
+    public static String vectorStoreFileBatchCreateUri(String vectorStoreId) {
+        return vectorStoreCreateUri() + "/" + vectorStoreId + "/file_batches";
+    }
+
+    public static String vectorStoreFileBatchRetrieveUri(String vectorStoreId, String vectorStoreFileBatchId) {
+        return vectorStoreFileBatchCreateUri(vectorStoreId) + "/" + vectorStoreFileBatchId;
+    }
 }

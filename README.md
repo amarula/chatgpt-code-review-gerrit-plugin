@@ -269,8 +269,8 @@ These parameters are specific to connecting with the OpenAI server and should on
 
 - `gptDomain`: Specifies the default domain for OpenAI, set to `https://api.openai.com`.
 - `gptConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
-- `gptRunPollingTimeout`: Sets the timeout for terminating ChatGPT run polling on Stateful requests, defaulting to 180
-  seconds.
+- `gptPollingTimeout`: Sets the timeout for terminating ChatGPT polling on Stateful requests, defaulting to 180 seconds.
+- `getPollingInterval`: Sets the interval for ChatGPT polling on Stateful requests, defaulting to 1 second.
 - `gptConnectionRetryInterval`: Sets the interval between two connection attempts, with a default of 10 seconds.
 - `gptConnectionMaxRetryAttempts`: Determines the maximum number of retry attempts, defaulting to 2.
 - `gptUploadedChunkSizeMb`: When uploading project repositories to ChatGPT in stateful mode, the repositories are
