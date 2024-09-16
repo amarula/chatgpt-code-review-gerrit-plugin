@@ -13,6 +13,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDirectives;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStoreHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
@@ -119,8 +120,15 @@ public class ClientCommandExecutor extends ClientCommandBase {
                 pluginDataHandlerProvider
         );
         chatGptAssistant.flushAssistantAndVectorIds();
+
+        ChatGptVectorStoreHandler chatGptVectorStoreHandler = new ChatGptVectorStoreHandler(
+                config,
+                change,
+                gitRepoFiles,
+                pluginDataHandlerProvider.getProjectScope()
+        );
         try {
-            chatGptAssistant.createVectorStore();
+            chatGptVectorStoreHandler.generateVectorStore();
         }
         catch (Exception OpenAiConnectionFailException) {
             changeSetData.setReviewSystemMessage(localizer.getText("message.command.codebase.upload.error"));

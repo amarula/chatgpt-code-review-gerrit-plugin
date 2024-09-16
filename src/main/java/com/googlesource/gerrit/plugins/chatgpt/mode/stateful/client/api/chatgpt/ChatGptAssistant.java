@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils.now;
 
@@ -34,10 +33,9 @@ public class ChatGptAssistant extends ClientBase {
     private final ChatGptHttpClient httpClient;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
-    private final PluginDataHandler projectDataHandler;
     private final PluginDataHandler changeDataHandler;
     private final PluginDataHandler assistantsDataHandler;
-    private final ChatGptRepoUploader chatGptRepoUploader;
+    private final ChatGptVectorStoreHandler chatGptVectorStoreHandler;
 
     private String description;
     private String instructions;
@@ -55,10 +53,14 @@ public class ChatGptAssistant extends ClientBase {
         this.changeSetData = changeSetData;
         this.change = change;
         httpClient = new ChatGptHttpClient(config);
-        projectDataHandler = pluginDataHandlerProvider.getProjectScope();
         changeDataHandler = pluginDataHandlerProvider.getChangeScope();
         assistantsDataHandler = pluginDataHandlerProvider.getAssistantsWorkspace();
-        chatGptRepoUploader = new ChatGptRepoUploader(config, change, gitRepoFiles);
+        chatGptVectorStoreHandler = new ChatGptVectorStoreHandler(
+                config,
+                change,
+                gitRepoFiles,
+                pluginDataHandlerProvider.getProjectScope()
+        );
         log.debug("Initialized ChatGptAssistant with project and assistants data handlers.");
     }
 
@@ -70,7 +72,7 @@ public class ChatGptAssistant extends ClientBase {
         String assistantId = assistantsDataHandler.getValue(assistantIdHashKey);
         if (assistantId == null || config.getForceCreateAssistant()) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
-            String vectorStoreId = createVectorStore();
+            String vectorStoreId = chatGptVectorStoreHandler.generateVectorStore();
             assistantId = createAssistant(vectorStoreId);
             assistantsDataHandler.setValue(assistantIdHashKey, assistantId);
             log.info("Project assistant created with ID: {}", assistantId);
@@ -83,26 +85,9 @@ public class ChatGptAssistant extends ClientBase {
         return assistantId;
     }
 
-    public String createVectorStore() throws OpenAiConnectionFailException {
-        log.debug("Creating or retrieving vector store.");
-        String vectorStoreId = projectDataHandler.getValue(KEY_VECTOR_STORE_ID);
-        if (vectorStoreId == null) {
-            List<String> fileIds = chatGptRepoUploader.uploadRepoFiles();
-            ChatGptVectorStore vectorStore = new ChatGptVectorStore(fileIds, config, change);
-            ChatGptResponse createVectorStoreResponse = vectorStore.createVectorStore();
-            vectorStoreId = createVectorStoreResponse.getId();
-            projectDataHandler.setValue(KEY_VECTOR_STORE_ID, vectorStoreId);
-            log.info("Vector Store created with ID: {}", vectorStoreId);
-        }
-        else {
-            log.info("Vector Store found for the project. Vector Store ID: {}", vectorStoreId);
-        }
-        return vectorStoreId;
-    }
-
     public void flushAssistantAndVectorIds() {
         log.debug("Flushing assistant IDs.");
-        projectDataHandler.removeValue(KEY_VECTOR_STORE_ID);
+        chatGptVectorStoreHandler.removeVectorStoreId();
         assistantsDataHandler.destroy();
     }
 

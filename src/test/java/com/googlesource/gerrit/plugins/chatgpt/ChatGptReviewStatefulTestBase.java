@@ -27,7 +27,7 @@ import java.util.List;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptRun.COMPLETED_STATUS;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptPoller.COMPLETED_STATUS;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,7 +37,8 @@ import static org.mockito.Mockito.when;
 @Slf4j
 public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
     protected static final String CHAT_GPT_FILE_ID = "file-TEST_FILE_ID";
-    protected static final String CHAT_GPT_VECTOR_ID = "file-TEST_VECTOR_ID";
+    protected static final String CHAT_GPT_VECTOR_STORE_ID = "vs-TEST_VECTOR_STORE_ID";
+    protected static final String CHAT_GPT_VECTOR_STORE_FILE_BATCH_ID = "vsfb-TEST_VECTOR_STORE_FILE_BATCH_ID";
     protected static final String CHAT_GPT_THREAD_ID = "thread_TEST_THREAD_ID";
     protected static final String CHAT_GPT_MESSAGE_ID = "msg_TEST_MESSAGE_ID";
     protected static final String RESOURCE_STATEFUL_PATH = "__files/stateful/";
@@ -93,7 +94,23 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
                 .willReturn(WireMock.aResponse()
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBody("{\"id\": " + CHAT_GPT_VECTOR_ID + "}")));
+                        .withBody("{\"id\": " + CHAT_GPT_VECTOR_STORE_ID + "}")));
+
+        // Mock the behavior of the ChatGPT create-vector-store-file-batch request
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.vectorStoreFileBatchCreateUri(CHAT_GPT_VECTOR_STORE_ID)))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBody("{\"id\": " + CHAT_GPT_VECTOR_STORE_FILE_BATCH_ID + ", \"status\": " + COMPLETED_STATUS + "}")));
+
+        // Mock the behavior of the ChatGPT retrieve-vector-store-file-batch request
+        WireMock.stubFor(WireMock.get(WireMock.urlEqualTo(UriResourceLocatorStateful.vectorStoreFileBatchRetrieveUri(
+                        CHAT_GPT_VECTOR_STORE_ID, CHAT_GPT_VECTOR_STORE_FILE_BATCH_ID
+                )))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBody("{\"status\": " + COMPLETED_STATUS + "}")));
 
         // Mock the behavior of the ChatGPT create-thread request
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.threadsUri()))
