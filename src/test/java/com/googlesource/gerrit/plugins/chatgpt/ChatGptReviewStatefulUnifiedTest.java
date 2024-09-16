@@ -19,7 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.SupportedEvents;
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStore.KEY_VECTOR_STORE_ID;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptPoller.FAILED_STATUS;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -42,6 +42,17 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
     private void setupMockRequestRetrieveRunSteps(String bodyFile) {
         setupMockRequestRetrieveRunSteps(bodyFile, CHAT_GPT_RUN_ID);
+    }
+
+    private void setupVectorStoreFailure() {
+        // Mock the behavior of the ChatGPT create-vector-store-file-batch request with failure
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.vectorStoreFileBatchCreateUri(CHAT_GPT_VECTOR_STORE_ID)))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBody("{\"id\": " + CHAT_GPT_VECTOR_STORE_FILE_BATCH_ID + ", \"status\": " + FAILED_STATUS + "}")));
+        when(globalConfig.getInt(Mockito.eq("gptPollingInterval"), Mockito.anyInt()))
+                .thenReturn(0);
     }
 
     @Test
@@ -69,6 +80,36 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
         when(globalConfig.getInt(Mockito.eq("gptConnectionMaxRetryAttempts"), Mockito.anyInt()))
                 .thenReturn(2);
         when(globalConfig.getInt(Mockito.eq("gptConnectionRetryInterval"), Mockito.anyInt()))
+                .thenReturn(0);
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        Assert.assertEquals(localizer.getText("message.openai.connection.error"), changeSetData.getReviewSystemMessage());
+    }
+
+    @Test
+    public void vectorStoreCreateFirstTimeFailure() throws Exception {
+        String reviewMessageCode = getReviewMessage("__files/stateful/chatGptRunStepsResponse.json", 0);
+        setupVectorStoreFailure();
+
+        handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
+
+        ArgumentCaptor<ReviewInput> captor = testRequestSent();
+        Assert.assertEquals(reviewMessageCode, getCapturedMessage(captor, "test_file_1.py"));
+    }
+
+    @Test
+    public void vectorStoreCreateFailure() {
+        setupVectorStoreFailure();
+        // Mock the behavior of the ChatGPT retrieve-vector-store-file-batch request with failure
+        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.vectorStoreFileBatchRetrieveUri(
+                        CHAT_GPT_VECTOR_STORE_ID, CHAT_GPT_VECTOR_STORE_FILE_BATCH_ID
+                )))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(HTTP_OK)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                        .withBody("{\"status\": " + FAILED_STATUS + "}")));
+        when(globalConfig.getInt(Mockito.eq("gptPollingTimeout"), Mockito.anyInt()))
                 .thenReturn(0);
 
         handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
