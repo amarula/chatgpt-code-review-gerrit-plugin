@@ -1,9 +1,9 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
+package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptApiBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptCreateVectorStoreRequest;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -11,15 +11,11 @@ import okhttp3.Request;
 
 import java.util.List;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-
 @Slf4j
-public class ChatGptVectorStoreFileBatch extends ClientBase {
-    private final ChatGptHttpClient httpClient;
+public class ChatGptVectorStoreFileBatch extends ChatGptApiBase {
 
     public ChatGptVectorStoreFileBatch(Configuration config) {
         super(config);
-        httpClient = new ChatGptHttpClient(config);
     }
 
     public ChatGptResponse createVectorStoreFileBatch(String vectorStoreId, List<String> fileIds)
@@ -27,8 +23,7 @@ public class ChatGptVectorStoreFileBatch extends ClientBase {
         Request request = vectorStoreFileBatchCreateRequest(vectorStoreId, fileIds);
         log.debug("ChatGPT Create Vector Store File Batch request: {}", request);
 
-        ChatGptResponse createVectorStoreFileBatchResponse = getGson().fromJson(httpClient.execute(request),
-                ChatGptResponse.class);
+        ChatGptResponse createVectorStoreFileBatchResponse = getChatGptResponse(request);
         log.info("Vector Store File Batch created: {}", createVectorStoreFileBatchResponse);
 
         return createVectorStoreFileBatchResponse;

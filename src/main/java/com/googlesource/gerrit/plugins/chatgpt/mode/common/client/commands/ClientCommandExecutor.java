@@ -12,7 +12,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDirectives;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistantHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptVectorStoreHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 import java.util.Set;
 
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptThread.KEY_THREAD_ID;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptThread.KEY_THREAD_ID;
 
 @Slf4j
 public class ClientCommandExecutor extends ClientCommandBase {
@@ -112,14 +112,14 @@ public class ClientCommandExecutor extends ClientCommandBase {
 
     private void commandUploadCodebase() {
         log.info("Uploading codebase for the project");
-        ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
+        ChatGptAssistantHandler chatGptAssistantHandler = new ChatGptAssistantHandler(
                 config,
                 changeSetData,
                 change,
                 gitRepoFiles,
                 pluginDataHandlerProvider
         );
-        chatGptAssistant.flushAssistantAndVectorIds();
+        chatGptAssistantHandler.flushAssistantAndVectorIds();
 
         ChatGptVectorStoreHandler chatGptVectorStoreHandler = new ChatGptVectorStoreHandler(
                 config,
