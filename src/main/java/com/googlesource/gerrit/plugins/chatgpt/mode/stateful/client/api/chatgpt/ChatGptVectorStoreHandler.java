@@ -6,6 +6,8 @@ import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailEx
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptVectorStore;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptVectorStoreFileBatch;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
 import lombok.extern.slf4j.Slf4j;

@@ -9,6 +9,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.Cha
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptToolCall;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptRun;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +17,13 @@ import okhttp3.Request;
 
 import java.util.List;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils.threadSleep;
 
 @Slf4j
-public class ChatGptRun extends ClientBase {
+public class ChatGptRunHandler extends ChatGptApiBase {
     private static final int STEP_RETRIEVAL_INTERVAL = 10000;
     private static final int MAX_STEP_RETRIEVAL_RETRIES = 3;
 
-    private final ChatGptHttpClient httpClient;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final String threadId;
@@ -32,11 +31,11 @@ public class ChatGptRun extends ClientBase {
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final ChatGptPoller chatGptPoller;
 
+    private ChatGptRun chatGptRun;
     private ChatGptResponse runResponse;
     private ChatGptListResponse stepResponse;
-    private String assistantId;
 
-    public ChatGptRun(
+    public ChatGptRunHandler(
             String threadId,
             Configuration config,
             ChangeSetData changeSetData,
@@ -50,25 +49,23 @@ public class ChatGptRun extends ClientBase {
         this.threadId = threadId;
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        httpClient = new ChatGptHttpClient(config);
         chatGptPoller = new ChatGptPoller(config);
     }
 
-    public void createRun() throws OpenAiConnectionFailException {
-        ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
+    public void setupRun() throws OpenAiConnectionFailException {
+        ChatGptAssistantHandler chatGptAssistantHandler = new ChatGptAssistantHandler(
                 config,
                 changeSetData,
                 change,
                 gitRepoFiles,
                 pluginDataHandlerProvider
         );
-        assistantId = chatGptAssistant.setupAssistant();
-
-        Request request = runCreateRequest();
-        log.info("ChatGPT Create Run request: {}", request);
-
-        runResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
-        log.info("Run created: {}", runResponse);
+        chatGptRun = new ChatGptRun(
+                config,
+                chatGptAssistantHandler.setupAssistant(),
+                threadId
+        );
+        runResponse = chatGptRun.createRun();
     }
 
     public void pollRunStep() throws OpenAiConnectionFailException {
@@ -78,20 +75,17 @@ public class ChatGptRun extends ClientBase {
                     UriResourceLocatorStateful.runRetrieveUri(threadId, runResponse.getId()),
                     runResponse
             );
-            Request stepsRequest = getStepsRequest();
+            Request stepsRequest = chatGptRun.getStepsRequest(runResponse.getId());
             log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
-
-            String response;
             try {
-                response = httpClient.execute(stepsRequest);
+                stepResponse = getChatGptResponse(stepsRequest, ChatGptListResponse.class);
             } catch (OpenAiConnectionFailException e) {
                 exception = e;
                 log.warn("Error retrieving run steps from ChatGPT: {}", e.getMessage());
                 threadSleep(STEP_RETRIEVAL_INTERVAL);
                 continue;
             }
-            log.debug("ChatGPT Response: {}", response);
-            stepResponse = getGson().fromJson(response, ChatGptListResponse.class);
+            log.debug("ChatGPT Response: {}", clientResponse);
             log.info("Run executed after {} seconds ({} polling requests); Step response: {}",
                     chatGptPoller.getElapsedTime(), chatGptPoller.getPollingCount(), stepResponse);
             if (stepResponse.getData().isEmpty()) {
@@ -114,47 +108,10 @@ public class ChatGptRun extends ClientBase {
 
     public void cancelRun() {
         if (getFirstStep().getStatus().equals(ChatGptPoller.COMPLETED_STATUS)) return;
-
-        Request cancelRequest = getCancelRequest();
-        log.debug("ChatGPT Cancel Run request: {}", cancelRequest);
-        try {
-            String fullResponse = httpClient.execute(cancelRequest);
-            log.debug("ChatGPT Cancel Run Full response: {}", fullResponse);
-            ChatGptResponse response = getGson().fromJson(fullResponse, ChatGptResponse.class);
-            if (!response.getStatus().equals(ChatGptPoller.CANCELLED_STATUS)) {
-                log.error("Unable to cancel run. Run cancel response: {}", fullResponse);
-            }
-        }
-        catch (Exception e) {
-            log.error("Error cancelling run", e);
-        }
+        chatGptRun.cancelRun(runResponse.getId());
     }
 
     private ChatGptRunStepsResponse getFirstStep() {
         return stepResponse.getData().get(0);
-    }
-
-    private Request runCreateRequest() {
-        String uri = UriResourceLocatorStateful.runsUri(threadId);
-        log.debug("ChatGPT Create Run request URI: {}", uri);
-        ChatGptCreateRunRequest requestBody = ChatGptCreateRunRequest.builder()
-                .assistantId(assistantId)
-                .build();
-
-        return httpClient.createRequestFromJson(uri, requestBody);
-    }
-
-    private Request getStepsRequest() {
-        String uri = UriResourceLocatorStateful.runStepsUri(threadId, runResponse.getId());
-        log.debug("ChatGPT Run Steps request URI: {}", uri);
-
-        return httpClient.createRequestFromJson(uri, null);
-    }
-
-    private Request getCancelRequest() {
-        String uri = UriResourceLocatorStateful.runCancelUri(threadId, runResponse.getId());
-        log.debug("ChatGPT Run Cancel request URI: {}", uri);
-
-        return httpClient.createRequestFromJson(uri, new Object());
     }
 }

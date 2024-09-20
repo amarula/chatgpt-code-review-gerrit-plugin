@@ -1,32 +1,28 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
+package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptApiBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-
 @Slf4j
-public class ChatGptVectorStore extends ClientBase {
-    private final ChatGptHttpClient httpClient;
+public class ChatGptVectorStore extends ChatGptApiBase {
     private final GerritChange change;
 
     public ChatGptVectorStore(Configuration config, GerritChange change) {
         super(config);
         this.change = change;
-        httpClient = new ChatGptHttpClient(config);
     }
 
     public ChatGptResponse createVectorStore() throws OpenAiConnectionFailException {
         Request request = vectorStoreCreateRequest();
         log.debug("ChatGPT Create Vector Store request: {}", request);
 
-        ChatGptResponse createVectorStoreResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
+        ChatGptResponse createVectorStoreResponse = getChatGptResponse(request);
         log.info("Vector Store created: {}", createVectorStoreResponse);
 
         return createVectorStoreResponse;
