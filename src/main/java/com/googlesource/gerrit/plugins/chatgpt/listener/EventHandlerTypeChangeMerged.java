@@ -5,7 +5,7 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistant;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistantHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,14 +41,14 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
     @Override
     public void processEvent() {
         log.debug("Starting processing event for change merged: {}", change.getFullChangeId());
-        ChatGptAssistant chatGptAssistant = new ChatGptAssistant(
+        ChatGptAssistantHandler chatGptAssistantHandler = new ChatGptAssistantHandler(
                 config,
                 changeSetData,
                 change,
                 gitRepoFiles,
                 pluginDataHandlerProvider
         );
-        chatGptAssistant.flushAssistantAndVectorIds();
+        chatGptAssistantHandler.flushAssistantAndVectorIds();
         log.debug("Flushed assistant and Vector Store IDs for change merged: {}", change.getFullChangeId());
     }
 }

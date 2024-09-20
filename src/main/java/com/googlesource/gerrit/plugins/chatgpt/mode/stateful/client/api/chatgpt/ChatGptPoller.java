@@ -12,11 +12,10 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils.threadSleep;
 
 @Slf4j
-public class ChatGptPoller {
+public class ChatGptPoller extends ChatGptApiBase {
     public static final String COMPLETED_STATUS = "completed";
     public static final String CANCELLED_STATUS = "cancelled";
     public static final String FAILED_STATUS = "failed";
@@ -29,7 +28,6 @@ public class ChatGptPoller {
 
     private final int pollingTimeout;
     private final int pollingInterval;
-    private final ChatGptHttpClient httpClient;
 
     @Getter
     private int pollingCount;
@@ -37,9 +35,9 @@ public class ChatGptPoller {
     private double elapsedTime;
 
     public ChatGptPoller(Configuration config) {
+        super(config);
         pollingTimeout = config.getGptPollingTimeout();
         pollingInterval = config.getGptPollingInterval();
-        httpClient = new ChatGptHttpClient(config);
         elapsedTime = 0.0;
         pollingCount = 0;
     }
@@ -53,7 +51,7 @@ public class ChatGptPoller {
             threadSleep(pollingInterval);
             Request pollRequest = httpClient.createRequestFromJson(uri, null);
             log.debug("ChatGPT Poll request: {}", pollRequest);
-            pollResponse = getGson().fromJson(httpClient.execute(pollRequest), ChatGptResponse.class);
+            pollResponse = getChatGptResponse(pollRequest);
             log.debug("ChatGPT Poll response: {}", pollResponse);
             elapsedTime = (double) (TimeUtils.getCurrentMillis() - startTime) / 1000;
             if (elapsedTime >= pollingTimeout) {

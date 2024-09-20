@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
+package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
@@ -6,18 +6,15 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptApiBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-
 @Slf4j
-public class ChatGptThread {
+public class ChatGptThread extends ChatGptApiBase {
     public static final String KEY_THREAD_ID = "threadId";
 
-    private final ChatGptHttpClient httpClient;
     private final ChangeSetData changeSetData;
     private final PluginDataHandler changeDataHandler;
 
@@ -26,9 +23,9 @@ public class ChatGptThread {
             ChangeSetData changeSetData,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
+        super(config);
         this.changeSetData = changeSetData;
         this.changeDataHandler = pluginDataHandlerProvider.getChangeScope();
-        httpClient = new ChatGptHttpClient(config);
     }
 
     public String createThread() throws OpenAiConnectionFailException {
@@ -37,7 +34,7 @@ public class ChatGptThread {
             Request request = createThreadRequest();
             log.debug("ChatGPT Create Thread request: {}", request);
 
-            ChatGptResponse threadResponse = getGson().fromJson(httpClient.execute(request), ChatGptResponse.class);
+            ChatGptResponse threadResponse = getChatGptResponse(request);
             threadId = threadResponse.getId();
             if (threadId != null) {
                 log.info("Thread created: {}", threadResponse);
