@@ -13,6 +13,8 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.Ch
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptThread;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptThreadMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptThreadMessageResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +37,8 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
 
     private final GitRepoFiles gitRepoFiles;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
+
+    private ChatGptRunHandler chatGptRunHandler;
 
     @VisibleForTesting
     @Inject
@@ -78,9 +82,9 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
             throws OpenAiConnectionFailException {
         log.debug("Processing Single Stateful Request");
         String threadId = createThreadWithMessage(changeSetData, change, patchSet);
-        ChatGptRun chatGptRun = runThread(changeSetData, change, threadId);
-        ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId, chatGptRun);
-        chatGptRun.cancelRun();
+        runThread(changeSetData, change, threadId);
+        ChatGptResponseContent chatGptResponseContent = getResponseContentStateful(threadId);
+        chatGptRunHandler.cancelRun();
         if (!isCommentEvent && chatGptResponseContent.getReplies() == null) {
             throw new ResponseEmptyRepliesException();
         }
@@ -108,9 +112,9 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
         return threadId;
     }
 
-    private ChatGptRun runThread(ChangeSetData changeSetData, GerritChange change, String threadId)
+    private void runThread(ChangeSetData changeSetData, GerritChange change, String threadId)
             throws OpenAiConnectionFailException {
-        ChatGptRun chatGptRun = new ChatGptRun(
+        chatGptRunHandler = new ChatGptRunHandler(
                 threadId,
                 config,
                 changeSetData,
@@ -118,31 +122,28 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
                 gitRepoFiles,
                 pluginDataHandlerProvider
         );
-        chatGptRun.createRun();
-        chatGptRun.pollRunStep();
-
-        return chatGptRun;
+        chatGptRunHandler.setupRun();
+        chatGptRunHandler.pollRunStep();
     }
 
-    private ChatGptResponseContent getResponseContentStateful(String threadId, ChatGptRun chatGptRun)
-            throws OpenAiConnectionFailException {
-        return switch (chatGptRun.getFirstStepDetails().getType()) {
+    private ChatGptResponseContent getResponseContentStateful(String threadId) throws OpenAiConnectionFailException {
+        return switch (chatGptRunHandler.getFirstStepDetails().getType()) {
             case TYPE_MESSAGE_CREATION -> {
                 log.debug("Retrieving thread message for thread ID: {}", threadId);
-                yield retrieveThreadMessage(threadId, chatGptRun);
+                yield retrieveThreadMessage(threadId);
             }
             case TYPE_TOOL_CALLS -> {
                 log.debug("Processing tool calls from ChatGPT run.");
-                yield getResponseContent(chatGptRun.getFirstStepToolCalls());
+                yield getResponseContent(chatGptRunHandler.getFirstStepToolCalls());
             }
-            default -> throw new IllegalStateException("Unexpected Step Type in stateful ChatGpt response: " + chatGptRun);
+            default -> throw new IllegalStateException("Unexpected Step Type in stateful ChatGpt response: " +
+                    chatGptRunHandler);
         };
     }
 
-    private ChatGptResponseContent retrieveThreadMessage(String threadId, ChatGptRun chatGptRun)
-            throws OpenAiConnectionFailException {
+    private ChatGptResponseContent retrieveThreadMessage(String threadId) throws OpenAiConnectionFailException {
         ChatGptThreadMessage chatGptThreadMessage = new ChatGptThreadMessage(threadId, config);
-        String messageId = chatGptRun.getFirstStepDetails().getMessageCreation().getMessageId();
+        String messageId = chatGptRunHandler.getFirstStepDetails().getMessageCreation().getMessageId();
         log.debug("Retrieving message with ID: {}", messageId);
 
         ChatGptThreadMessageResponse threadMessageResponse = chatGptThreadMessage.retrieveMessage(messageId);
