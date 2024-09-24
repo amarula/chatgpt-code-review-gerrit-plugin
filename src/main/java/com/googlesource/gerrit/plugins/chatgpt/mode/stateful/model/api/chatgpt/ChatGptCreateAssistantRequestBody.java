@@ -5,6 +5,8 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.Cha
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 public class ChatGptCreateAssistantRequestBody {
@@ -13,7 +15,7 @@ public class ChatGptCreateAssistantRequestBody {
     private String instructions;
     private String model;
     private Double temperature;
-    private ChatGptTool[] tools;
+    private List<ChatGptTool> tools;
     @SerializedName("tool_resources")
     private ChatGptToolResources toolResources;
 }

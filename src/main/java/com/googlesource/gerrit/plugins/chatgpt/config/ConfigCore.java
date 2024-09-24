@@ -160,6 +160,15 @@ public abstract class ConfigCore {
         return Double.parseDouble(getString(key, String.valueOf(defaultValue)));
     }
 
+    protected <T extends Enum<T>> T getEnum(String key, String defaultValue, Class<T> enumClass) {
+        String value = getString(key, defaultValue);
+        try {
+            return Enum.valueOf(enumClass, value);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Illegal value: " + value, e);
+        }
+    }
+
     protected List<String> splitConfig(String value) {
         return TextUtils.splitString(value);
     }
