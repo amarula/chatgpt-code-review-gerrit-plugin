@@ -7,6 +7,7 @@ import com.google.gerrit.server.util.OneOffRequestContext;
 
 import java.util.*;
 
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies.CodeContextPolicies;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
 
 public class Configuration extends ConfigCore {
@@ -26,6 +27,7 @@ public class Configuration extends ConfigCore {
     private static final boolean DEFAULT_REVIEW_PATCH_SET = true;
     private static final boolean DEFAULT_REVIEW_COMMIT_MESSAGES = true;
     private static final boolean DEFAULT_FULL_FILE_REVIEW = true;
+    private static final String DEFAULT_CODE_CONTEXT_POLICY = "UPLOAD_ALL";
     private static final boolean DEFAULT_STREAM_OUTPUT = false;
     private static final boolean DEFAULT_GLOBAL_ENABLE = false;
     private static final String DEFAULT_DISABLED_USERS = "";
@@ -114,6 +116,7 @@ public class Configuration extends ConfigCore {
     private static final String KEY_REVIEW_COMMIT_MESSAGES = "gptReviewCommitMessages";
     private static final String KEY_REVIEW_PATCH_SET = "gptReviewPatchSet";
     private static final String KEY_FULL_FILE_REVIEW = "gptFullFileReview";
+    private static final String KEY_CODE_CONTEXT_POLICY = "codeContextPolicy";
     private static final String KEY_PROJECT_ENABLE = "isEnabled";
     private static final String KEY_GLOBAL_ENABLE = "globalEnable";
     private static final String KEY_DISABLED_USERS = "disabledUsers";
@@ -177,12 +180,7 @@ public class Configuration extends ConfigCore {
     }
 
     public Modes getGptMode() {
-        String mode = getString(KEY_GPT_MODE, DEFAULT_GPT_MODE);
-        try {
-            return Enum.valueOf(Modes.class, mode);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Illegal mode: " + mode, e);
-        }
+        return getEnum(KEY_GPT_MODE, DEFAULT_GPT_MODE, Modes.class);
     }
 
     public boolean getGptReviewCommitMessages() {
@@ -191,6 +189,10 @@ public class Configuration extends ConfigCore {
 
     public boolean getGptFullFileReview() {
         return getBoolean(KEY_FULL_FILE_REVIEW, DEFAULT_FULL_FILE_REVIEW);
+    }
+
+    public CodeContextPolicies getCodeContextPolicy() {
+        return getEnum(KEY_CODE_CONTEXT_POLICY, DEFAULT_CODE_CONTEXT_POLICY, CodeContextPolicies.class);
     }
 
     public boolean getGptStreamOutput() {

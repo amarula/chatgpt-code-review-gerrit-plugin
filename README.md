@@ -239,6 +239,12 @@ directive = End each reply with \"Hope this helps!\"
 
 ### Optional Parameters Specific to Stateful Mode
 
+- `codeContextPolicy`: Defines the code context policy to provide ChatGPT with the missing code context from the
+  ChangeSet when operating in Stateful mode. The currently supported policies are:
+    - **UPLOAD_ALL**: Uploads the entire codebase during each merge event, giving ChatGPT full access to the necessary
+      context for its reviews.
+    - **NONE**: Skips file uploads entirely, relying solely on the formatted patch for reviews and interactions with
+      ChatGPT.
 - `taskSpecificAssistants`: This option allows for dividing the Patch Set review between two specialized assistants: one
   focused to the Patch's code and another to the commit message. When this option is set to false (default value), the
   Patch Set review is unified into one single request processed by one assistant instructed for both tasks.

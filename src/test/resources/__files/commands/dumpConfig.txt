@@ -3,6 +3,7 @@
 ```
 CONFIGURATION SETTINGS
 
+codeContextPolicy: UPLOAD_ALL
 directive: 
 disabledGroups: 
 disabledTopicFilter: 

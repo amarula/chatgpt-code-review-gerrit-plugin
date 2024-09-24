@@ -10,13 +10,15 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies.CodeContextPolicies;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 @Slf4j
 public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements IChatGptPromptStateful {
     public static String DEFAULT_GPT_ASSISTANT_NAME;
     public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES;
     public static String DEFAULT_GPT_MESSAGE_REQUEST_RESEND_FORMATTED;
@@ -47,7 +49,7 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
     public String getDefaultGptAssistantInstructions() {
         List<String> instructions = new ArrayList<>(List.of(
                 DEFAULT_GPT_SYSTEM_PROMPT + DOT,
-                String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS, change.getProjectName())
+                getCodeContextPolicyAwareAssistantInstructions()
         ));
         addGptAssistantInstructions(instructions);
         String compiledInstructions = joinWithSpace(instructions);
@@ -66,5 +68,11 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
             log.debug("Default Thread Review Message used: {}", defaultMessage);
             return defaultMessage;
         }
+    }
+
+    private String getCodeContextPolicyAwareAssistantInstructions() {
+        return config.getCodeContextPolicy() == CodeContextPolicies.NONE ?
+                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT :
+                String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT, change.getProjectName());
     }
 }

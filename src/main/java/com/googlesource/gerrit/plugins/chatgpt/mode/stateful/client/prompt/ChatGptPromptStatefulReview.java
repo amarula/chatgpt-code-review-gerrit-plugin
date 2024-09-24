@@ -4,6 +4,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -64,10 +65,12 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
     protected String getGptAssistantInstructionsReview(boolean... ruleFilter) {
         // Rules are applied by default unless the corresponding ruleFilter values is set to false
         ArrayList<String> rules = new ArrayList<>(List.of(
-                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET
         ));
+        if (config.getCodeContextPolicy() != ChatGptCodeContextPolicies.CodeContextPolicies.NONE) {
+            rules.add(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE);
+        }
         if (config.getDirective() != null) {
             rules.addAll(config.getDirective());
         }
