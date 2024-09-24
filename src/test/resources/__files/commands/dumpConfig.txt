@@ -48,6 +48,7 @@ filterNegativeComments: true
 filterRelevantComments: true
 forceCreateAssistant: false
 gerritUserName: gpt
+gitCodebaseUploadPolicy: ALL
 gptCommentTemperature: 1.0
 gptConnectionMaxRetryAttempts: 1
 gptConnectionRetryInterval: 10

@@ -55,7 +55,10 @@ public class ChatGptAssistantHandler extends ClientBase {
         String assistantId = assistantsDataHandler.getValue(assistantIdHashKey);
         if (assistantId == null || config.getForceCreateAssistant()) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
-            String vectorStoreId = chatGptVectorStoreHandler.generateVectorStore();
+            String vectorStoreId = null;
+            if (config.getGitCodebaseUploadPolicy() != ChatGptUploadPolicies.UploadPolicies.NONE) {
+                vectorStoreId = chatGptVectorStoreHandler.generateVectorStore();
+            }
             assistantId = chatGptAssistant.createAssistant(vectorStoreId);
             assistantsDataHandler.setValue(assistantIdHashKey, assistantId);
             log.info("Project Assistant created with ID: {}", assistantId);
