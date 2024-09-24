@@ -1,7 +1,8 @@
 {
   "DEFAULT_GPT_ASSISTANT_NAME": "PatchSet Reviewer",
   "DEFAULT_GPT_ASSISTANT_DESCRIPTION": "PatchSet Reviewer for project %s.",
-  "DEFAULT_GPT_ASSISTANT_INSTRUCTIONS": "The project file uploaded as JSON object includes the source files for the `%s` project. The JSON object structure uses the file paths (from the project's root) as keys, and the corresponding file contents (stored as arrays of lines) as their values. This arrangement ensures that the line number for any given line of content is equal to its array index plus one.",
+  "DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT": "The project file uploaded as JSON object includes the source files for the `%s` project. The JSON object structure uses the file paths (from the project's root) as keys, and the corresponding file contents (stored as arrays of lines) as their values. This arrangement ensures that the line number for any given line of content is equal to its array index plus one.",
+  "DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT": "Disregard missing implementations of methods or other code entities, as the full codebase is not provided. Also, refrain from reviewing potential issues based on changes that may not align with the hypothetical codebase you're not provided with. For example, avoid comments like \"This change could potentially lead to issues if the function expects...\".",
   "DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT": "\n// MANDATORY Response format\n- the response will be only valid JSON using double-quotes\n- the response starts with {\n\n// Example response to user\n",
   "DEFAULT_GPT_MESSAGE_REVIEW": "Review the following Patch Set: ```%s```",
   "DEFAULT_GPT_MESSAGE_REQUEST_RESEND_FORMATTED": "Please resend the last review in the following MANDATORY Response format:",

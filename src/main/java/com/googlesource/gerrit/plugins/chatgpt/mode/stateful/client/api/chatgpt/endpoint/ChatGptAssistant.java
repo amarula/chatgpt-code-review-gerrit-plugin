@@ -16,6 +16,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 
 @Slf4j
@@ -52,15 +55,16 @@ public class ChatGptAssistant extends ChatGptApiBase {
         log.debug("Creating request to build new assistant.");
         String uri = UriResourceLocatorStateful.assistantCreateUri();
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
-        ChatGptTool[] tools = new ChatGptTool[] {
-                new ChatGptTool("file_search"),
-                ChatGptTools.retrieveFormatRepliesTool()
-        };
-        ChatGptToolResources toolResources = new ChatGptToolResources(
-                new ChatGptToolResources.VectorStoreIds(
-                        new String[] {vectorStoreId}
-                )
-        );
+        List<ChatGptTool> tools = new ArrayList<>(List.of(ChatGptTools.retrieveFormatRepliesTool()));
+        ChatGptToolResources toolResources = null;
+        if (vectorStoreId != null) {
+            tools.add(new ChatGptTool("file_search"));
+            toolResources = new ChatGptToolResources(
+                    new ChatGptToolResources.VectorStoreIds(
+                            new String[] {vectorStoreId}
+                    )
+            );
+        }
         ChatGptCreateAssistantRequestBody requestBody = ChatGptCreateAssistantRequestBody.builder()
                 .name(ChatGptPromptStatefulBase.DEFAULT_GPT_ASSISTANT_NAME)
                 .description(description)
