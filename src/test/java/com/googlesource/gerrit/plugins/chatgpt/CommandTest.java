@@ -128,7 +128,7 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
 
     @Test
     public void commandDumpStoredData() throws Exception {
-        setupCommandComment("/dump_stored_data");
+        setupCommandComment("/show --local_data");
         enableMessageDebugging();
 
         PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
@@ -149,7 +149,7 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
 
     @Test
     public void commandDumpConfig() throws Exception {
-        setupCommandComment("/dump_config");
+        setupCommandComment("/show --config");
         enableMessageDebugging();
 
         handleEventBasedOnType(EventHandlerTask.SupportedEvents.COMMENT_ADDED);

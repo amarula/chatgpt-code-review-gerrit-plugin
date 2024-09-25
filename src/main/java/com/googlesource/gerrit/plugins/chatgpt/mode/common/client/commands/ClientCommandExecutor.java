@@ -8,8 +8,6 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.exceptions.DynamicDirectivesModifyException;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDataDump;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDirectives;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistantHandler;
@@ -28,7 +26,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
             CommandSet.REVIEW,
             CommandSet.REVIEW_LAST,
             CommandSet.CONFIGURE,
-            CommandSet.DUMP_CONFIG
+            CommandSet.SHOW
     );
 
     private final ChangeSetData changeSetData;
@@ -76,8 +74,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
             case FORGET_THREAD -> commandForgetThread();
             case CONFIGURE -> commandDynamicallyConfigure();
             case DIRECTIVES -> commandDirectives();
-            case DUMP_CONFIG -> commandDumpConfig();
-            case DUMP_STORED_DATA -> commandDumpStoredData();
+            case SHOW -> commandShow();
         }
     }
 
@@ -189,16 +186,13 @@ public class ClientCommandExecutor extends ClientCommandBase {
         ));
     }
 
-    private void commandDumpConfig() {
-        DebugCodeBlocksConfiguration debugCodeBlocksConfiguration = new DebugCodeBlocksConfiguration(localizer);
-        changeSetData.setReviewSystemMessage(debugCodeBlocksConfiguration.getDebugCodeBlock(config));
-    }
-
-    private void commandDumpStoredData() {
-        DebugCodeBlocksDataDump debugCodeBlocksDataDump = new DebugCodeBlocksDataDump(
-                localizer,
-                pluginDataHandlerProvider
+    private void commandShow() {
+        ClientShowCommandExecutor clientShowCommandExecutor = new ClientShowCommandExecutor(
+                config,
+                changeSetData,
+                pluginDataHandlerProvider,
+                localizer
         );
-        changeSetData.setReviewSystemMessage(debugCodeBlocksDataDump.getDebugCodeBlock());
+        clientShowCommandExecutor.executeShowCommand(baseOptions);
     }
 }
