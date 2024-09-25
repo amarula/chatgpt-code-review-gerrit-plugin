@@ -84,7 +84,7 @@ as follows:
 
     # Optional parameters
     gptModel = {gptModel}
-    gptSystemPrompt = {gptSystemPrompt}
+    gptSystemPromptInstructions = {gptSystemPromptInstructions}
     ...
 ```
 
@@ -113,7 +113,7 @@ To add the following content, please edit the `project.config` file in `refs/met
 
     # Optional parameters
     gptModel = {gptModel}
-    gptSystemPrompt = {gptSystemPrompt}
+    gptSystemPromptInstructions = {gptSystemPromptInstructions}
     ...
 ```
 
@@ -158,7 +158,8 @@ The advantages of the Stateful mode over the Stateless are twofold:
 - `gptMode`: Select whether requests are processed in Stateless or Stateful mode. For backward compatibility, the
   default value is `stateless`. To enable Stateful mode, set this parameter to `stateful`.
 - `gptModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
-- `gptSystemPrompt`: You can modify the default system prompt ("Act as a PatchSet Reviewer") to your preferred prompt.
+- `gptSystemPromptInstructions`: You can customize the default stateless system prompt ("Act as a PatchSet Reviewer") to
+  your preferred prompt. This same prompt is also used as the assistant instructions in stateful mode.
 - `gptReviewTemperature`: Specifies the temperature setting for ChatGPT when reviewing a Patch Set, with a default
   setting of 0.2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more
   focused and deterministic.
@@ -348,7 +349,7 @@ debugging purposes. This feature becomes available when the `enableMessageDebugg
 - `/configure --<CONFIG_KEY_1>=<CONFIG_VALUE_1> [... --<CONFIG_KEY_N>=<CONFIG_VALUE_N>]` assigns new values to one or
   more configuration keys.
 
-  **NOTE**: Values that include spaces, such as `gptSystemPrompt`, must be enclosed in double quotes.
+  **NOTE**: Values that include spaces, such as `gptSystemPromptInstructions`, must be enclosed in double quotes.
 
 #### Command Options
 

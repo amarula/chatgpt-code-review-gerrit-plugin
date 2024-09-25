@@ -32,7 +32,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
 
     public static String getDefaultGptReviewSystemPrompt() {
         return joinWithSpace(new ArrayList<>(List.of(
-                DEFAULT_GPT_SYSTEM_PROMPT + DOT,
+                DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS + DOT,
                 DEFAULT_GPT_SYSTEM_PROMPT_INPUT_DESCRIPTION,
                 DEFAULT_GPT_SYSTEM_PROMPT_INPUT_DESCRIPTION_REVIEW
         )));
@@ -50,7 +50,7 @@ public class ChatGptPromptStateless extends ChatGptPrompt {
 
     public String getGptSystemPrompt() {
         List<String> prompt = new ArrayList<>(Arrays.asList(
-                config.getString(Configuration.KEY_GPT_SYSTEM_PROMPT, DEFAULT_GPT_SYSTEM_PROMPT) + DOT,
+                config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS) + DOT,
                 DEFAULT_GPT_SYSTEM_PROMPT_INPUT_DESCRIPTION
         ));
         if (!isCommentEvent) {

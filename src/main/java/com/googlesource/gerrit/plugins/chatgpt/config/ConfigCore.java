@@ -77,6 +77,10 @@ public abstract class ConfigCore {
         return globalConfig.getString(key, defaultValue);
     }
 
+    public Locale getLocaleDefault() {
+        return Locale.getDefault();
+    }
+
     protected boolean isDefinedKey(Class<?> configClass, String key) {
         try {
             String configKey = PREFIX_KEY + convertCamelToSnakeCase(key).toUpperCase();
