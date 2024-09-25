@@ -33,7 +33,7 @@ public class ChatGptPrompt {
     ));
 
     // Prompt constants loaded from JSON file
-    public static String DEFAULT_GPT_SYSTEM_PROMPT;
+    public static String DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS;
     public static String DEFAULT_GPT_REVIEW_PROMPT_DIRECTIVES;
     public static String DEFAULT_GPT_PROMPT_FORCE_JSON_FORMAT;
     public static String DEFAULT_GPT_REPLIES_PROMPT_SPECS;
@@ -72,25 +72,29 @@ public class ChatGptPrompt {
         )));
     }
 
-    protected void loadDefaultPrompts(String promptFilename) {
+    public static Map<String, Object> getJsonPromptValues(String promptFilename) {
         String promptFile = String.format("config/%s.json", promptFilename);
-        Class<? extends ChatGptPrompt> me = this.getClass();
         try (InputStreamReader reader = FileUtils.getInputStreamReader(promptFile)) {
-            Map<String, Object> values = getGson().fromJson(reader, new TypeToken<Map<String, Object>>(){}.getType());
-            for (Map.Entry<String, Object> entry : values.entrySet()) {
-                try {
-                    Field field = me.getField(entry.getKey());
-                    field.setAccessible(true);
-                    field.set(null, entry.getValue());
-                    log.debug("Loaded prompt attribute: {} with value: {}", entry.getKey(), entry.getValue());
-                } catch (NoSuchFieldException | IllegalAccessException e) {
-                    log.error("Error setting prompt '{}'", entry.getKey(), e);
-                    throw new IOException();
-                }
-            }
+            return getGson().fromJson(reader, new TypeToken<Map<String, Object>>() {}.getType());
         } catch (IOException e) {
-            log.error("Failed to load prompts from file: {}", promptFile, e);
+            log.error("Failed to load prompts from file: {}", promptFilename, e);
             throw new RuntimeException("Failed to load prompts", e);
+        }
+    }
+
+    protected void loadDefaultPrompts(String promptFilename) {
+        Class<? extends ChatGptPrompt> me = this.getClass();
+        Map<String, Object> values = getJsonPromptValues(promptFilename);
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            try {
+                Field field = me.getField(entry.getKey());
+                field.setAccessible(true);
+                field.set(null, entry.getValue());
+                log.debug("Loaded prompt attribute: {} with value: {}", entry.getKey(), entry.getValue());
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                log.error("Error setting prompt '{}'", entry.getKey(), e);
+                throw new RuntimeException("Error setting prompt field", e);
+            }
         }
         // Keep the given order of attributes
         DEFAULT_GPT_REPLIES_ATTRIBUTES = new LinkedHashMap<>(DEFAULT_GPT_REPLIES_ATTRIBUTES);

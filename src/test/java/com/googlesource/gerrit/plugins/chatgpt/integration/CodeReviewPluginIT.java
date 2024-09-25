@@ -53,7 +53,7 @@ public class CodeReviewPluginIT {
         when(config.getGptDomain()).thenReturn(Configuration.OPENAI_DOMAIN);
         when(config.getGptToken()).thenReturn("Your GPT token");
         when(config.getGptModel()).thenReturn(Configuration.DEFAULT_GPT_MODEL);
-        when(chatGptPromptStateless.getGptSystemPrompt()).thenReturn(ChatGptPromptStateless.DEFAULT_GPT_SYSTEM_PROMPT);
+        when(chatGptPromptStateless.getGptSystemPrompt()).thenReturn(ChatGptPromptStateless.DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS);
 
         ChatGptResponseContent answer = chatGptClient.ask(changeSetData, new GerritChange(""), "hello");
         log.info("answer: {}", answer);

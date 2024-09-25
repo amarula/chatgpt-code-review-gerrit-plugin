@@ -48,7 +48,7 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
 
     public String getDefaultGptAssistantInstructions() {
         List<String> instructions = new ArrayList<>(List.of(
-                DEFAULT_GPT_SYSTEM_PROMPT + DOT,
+                config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS) + DOT,
                 getFileContextAwareAssistantInstructions()
         ));
         addGptAssistantInstructions(instructions);

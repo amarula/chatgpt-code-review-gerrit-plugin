@@ -7,6 +7,7 @@ import com.google.gerrit.server.util.OneOffRequestContext;
 
 import java.util.*;
 
+import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt.getJsonPromptValues;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptUploadPolicies.UploadPolicies;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
 
@@ -92,7 +93,7 @@ public class Configuration extends ConfigCore {
     private static final List<String> DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = new ArrayList<>();
 
     // Config setting keys
-    public static final String KEY_GPT_SYSTEM_PROMPT = "gptSystemPrompt";
+    public static final String KEY_GPT_SYSTEM_PROMPT_INSTRUCTIONS = "gptSystemPromptInstructions";
     public static final String KEY_GPT_RELEVANCE_RULES = "gptRelevanceRules";
     public static final String KEY_GPT_REVIEW_TEMPERATURE = "gptReviewTemperature";
     public static final String KEY_GPT_COMMENT_TEMPERATURE = "gptCommentTemperature";
@@ -173,6 +174,18 @@ public class Configuration extends ConfigCore {
 
     public String getGptModel() {
         return getString(KEY_GPT_MODEL, DEFAULT_GPT_MODEL);
+    }
+
+    // The default system prompt/instructions are specified in the prompt files and are passed as a parameter
+    public String getGptSystemPromptInstructions(String defaultGptSystemPromptInstructions) {
+        return getString(KEY_GPT_SYSTEM_PROMPT_INSTRUCTIONS, defaultGptSystemPromptInstructions);
+    }
+
+    // If the default system prompt/instructions are not available in the caller's scope (e.g., when displaying the
+    // configuration after a command request), they are retrieved from the prompt files.
+    public String getGptSystemPromptInstructions() {
+        Map<String, Object> systemPrompts = getJsonPromptValues("prompts");
+        return getGptSystemPromptInstructions(systemPrompts.get("DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS").toString());
     }
 
     public boolean getGptReviewPatchSet() {
@@ -269,10 +282,6 @@ public class Configuration extends ConfigCore {
 
     public double getFilterCommentsRelevanceThreshold() {
         return getDouble(KEY_FILTER_COMMENTS_RELEVANCE_THRESHOLD, DEFAULT_FILTER_COMMENTS_RELEVANCE_THRESHOLD);
-    }
-
-    public Locale getLocaleDefault() {
-        return Locale.getDefault();
     }
 
     public String getGptRelevanceRules() {
