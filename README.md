@@ -408,18 +408,18 @@ from merely recycling old responses in stateful mode, particularly following mod
 /forget_thread
 ```
 
-### Stored Data Dump
+### Showing Locally Stored Data
 
-Data is stored across different scopes. To view all stored data, use the following command:
+Data is stored locally across different scopes. To view all locally stored data, use the `/show` command as following:
 
 ```
-/dump_stored_data
+/show --local_data
 ```
 
 Example of the response:
 
 ```
-DUMP OF STORED DATA
+DUMP OF LOCAL DATA
 
 ### Global Scope
 originalLogLevel: INFO
@@ -440,12 +440,12 @@ assistantIdLog:
 
 **NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
 
-### Configuration Settings Dump
+### Showing Configuration Settings
 
-The `/dump_config` command allows you to dump relevant non-confidential configuration settings in a UI message:
+The `/show` command allows you to dump relevant non-confidential configuration settings in a UI message as well:
 
 ```
-/dump_config
+/show --config
 ```
 
 Example of the response:
