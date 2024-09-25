@@ -16,8 +16,7 @@ public abstract class ClientCommandBase extends ClientBase {
         DIRECTIVES,
         FORGET_THREAD,
         CONFIGURE,
-        DUMP_CONFIG,
-        DUMP_STORED_DATA,
+        SHOW,
         UPLOAD_CODEBASE
     }
     public enum BaseOptionSet {
@@ -27,7 +26,9 @@ public abstract class ClientCommandBase extends ClientBase {
         REMOVE,
         // `CONFIGURATION_OPTION` is a placeholder option indicating that the associated options must be validated
         // against the Configuration keys.
-        CONFIGURATION_OPTION
+        CONFIGURATION_OPTION,
+        CONFIG,
+        LOCAL_DATA
     }
 
     protected static final ImmutableBiMap<String, CommandSet> COMMAND_MAP = ImmutableBiMap.of(
@@ -37,11 +38,9 @@ public abstract class ClientCommandBase extends ClientBase {
             "directives", CommandSet.DIRECTIVES,
             "forget_thread", CommandSet.FORGET_THREAD,
             "configure", CommandSet.CONFIGURE,
-            "dump_config", CommandSet.DUMP_CONFIG,
-            "dump_stored_data", CommandSet.DUMP_STORED_DATA,
+            "show", CommandSet.SHOW,
             "upload_codebase", CommandSet.UPLOAD_CODEBASE
     );
-
     private static final ImmutableBiMap<CommandSet, String> COMMAND_MAP_INVERSE = COMMAND_MAP.inverse();
 
     // Option values can be either a sequence of chars enclosed in double quotes or a sequence of non-space chars.

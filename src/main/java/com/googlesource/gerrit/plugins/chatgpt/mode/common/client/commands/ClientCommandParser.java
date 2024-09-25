@@ -20,23 +20,28 @@ public class ClientCommandParser extends ClientCommandBase {
             "filter", BaseOptionSet.FILTER,
             "debug", BaseOptionSet.DEBUG,
             "reset", BaseOptionSet.RESET,
-            "remove", BaseOptionSet.REMOVE
+            "remove", BaseOptionSet.REMOVE,
+            "config", BaseOptionSet.CONFIG,
+            "local_data", BaseOptionSet.LOCAL_DATA
     );
     private static final Map<CommandSet, List<BaseOptionSet>> COMMAND_VALID_OPTIONS_MAP = Map.of(
             CommandSet.REVIEW, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
             CommandSet.REVIEW_LAST, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
             CommandSet.CONFIGURE, List.of(BaseOptionSet.RESET, BaseOptionSet.CONFIGURATION_OPTION),
-            CommandSet.DIRECTIVES, List.of(BaseOptionSet.RESET, BaseOptionSet.REMOVE)
+            CommandSet.DIRECTIVES, List.of(BaseOptionSet.RESET, BaseOptionSet.REMOVE),
+            CommandSet.SHOW, List.of(BaseOptionSet.CONFIG, BaseOptionSet.LOCAL_DATA)
     );
     private static final List<CommandSet> REVIEW_COMMANDS = new ArrayList<>(List.of(
             CommandSet.REVIEW,
             CommandSet.REVIEW_LAST
     ));
+    private static final List<CommandSet> BASE_OPTIONS_REQUIRED = new ArrayList<>(List.of(
+            CommandSet.SHOW
+    ));
     private static final List<CommandSet> DEBUG_REQUIRED_COMMANDS = new ArrayList<>(List.of(
             CommandSet.DIRECTIVES,
             CommandSet.CONFIGURE,
-            CommandSet.DUMP_CONFIG,
-            CommandSet.DUMP_STORED_DATA,
+            CommandSet.SHOW,
             CommandSet.UPLOAD_CODEBASE
     ));
 
@@ -143,9 +148,16 @@ public class ClientCommandParser extends ClientCommandBase {
     private boolean optionsMismatch(CommandSet command) {
         log.debug("Validating options for command: {}", command);
         List<BaseOptionSet> commandOptions = COMMAND_VALID_OPTIONS_MAP.get(command);
-        if (!baseOptions.isEmpty() && (
-                commandOptions == null || !(new HashSet<>(commandOptions).containsAll(baseOptions.keySet()))
-        )) {
+        if (baseOptions.isEmpty()) {
+            if (BASE_OPTIONS_REQUIRED.contains(command) && dynamicOptions.isEmpty()) {
+                log.debug("Option(s) required for command `{}`", command);
+                changeSetData.setReviewSystemMessage(String.format(
+                        localizer.getText("message.command.option.required"), command)
+                );
+                return true;
+            }
+        }
+        else if (commandOptions == null || !(new HashSet<>(commandOptions).containsAll(baseOptions.keySet()))) {
             log.debug("Invalid option for command `{}`: {}", command, baseOptions);
             changeSetData.setReviewSystemMessage(String.format(
                     localizer.getText("message.command.option.invalid"), command, baseOptions)
