@@ -8,6 +8,8 @@ import java.util.List;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 public abstract class DebugCodeBlocksComposer {
+    private static final String TITLE_PREFIX = "### ";
+
     protected final Localizer localizer;
     protected final String commentOpening;
 
@@ -23,5 +25,9 @@ public abstract class DebugCodeBlocksComposer {
             addAll(panelItems);
             add(CODE_DELIMITER);
         }});
+    }
+
+    protected String getAsTitle(String title) {
+        return TITLE_PREFIX + convertPascalCaseToWords(title);
     }
 }

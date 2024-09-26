@@ -190,6 +190,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
         ClientShowCommandExecutor clientShowCommandExecutor = new ClientShowCommandExecutor(
                 config,
                 changeSetData,
+                change,
                 pluginDataHandlerProvider,
                 localizer
         );
