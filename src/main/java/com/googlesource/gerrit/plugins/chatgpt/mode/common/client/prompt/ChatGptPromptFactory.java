@@ -8,6 +8,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.Ch
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful.ReviewAssistantStages;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt.*;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.prompt.ChatGptDataPromptRequestsStateless;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
@@ -48,6 +49,16 @@ public class ChatGptPromptFactory {
                 return new ChatGptPromptStatefulReview(config, changeSetData, change);
             }
         }
+    }
+
+    public static IChatGptPromptStateful getChatGptPromptStateful(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change,
+            ReviewAssistantStages reviewAssistantStage
+    ) {
+        changeSetData.setReviewAssistantStage(reviewAssistantStage);
+        return getChatGptPromptStateful(config, changeSetData, change);
     }
 
     public static IChatGptDataPrompt getChatGptDataPrompt(
