@@ -22,14 +22,15 @@ public class ClientCommandParser extends ClientCommandBase {
             "reset", BaseOptionSet.RESET,
             "remove", BaseOptionSet.REMOVE,
             "config", BaseOptionSet.CONFIG,
-            "local_data", BaseOptionSet.LOCAL_DATA
+            "local_data", BaseOptionSet.LOCAL_DATA,
+            "prompts", BaseOptionSet.PROMPTS
     );
     private static final Map<CommandSet, List<BaseOptionSet>> COMMAND_VALID_OPTIONS_MAP = Map.of(
             CommandSet.REVIEW, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
             CommandSet.REVIEW_LAST, List.of(BaseOptionSet.FILTER, BaseOptionSet.DEBUG),
             CommandSet.CONFIGURE, List.of(BaseOptionSet.RESET, BaseOptionSet.CONFIGURATION_OPTION),
             CommandSet.DIRECTIVES, List.of(BaseOptionSet.RESET, BaseOptionSet.REMOVE),
-            CommandSet.SHOW, List.of(BaseOptionSet.CONFIG, BaseOptionSet.LOCAL_DATA)
+            CommandSet.SHOW, List.of(BaseOptionSet.CONFIG, BaseOptionSet.LOCAL_DATA, BaseOptionSet.PROMPTS)
     );
     private static final List<CommandSet> REVIEW_COMMANDS = new ArrayList<>(List.of(
             CommandSet.REVIEW,

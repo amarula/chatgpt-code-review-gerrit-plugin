@@ -9,7 +9,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.convertPascalCaseToWords;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.prettyStringifyMap;
 
 @Slf4j
@@ -34,7 +33,7 @@ public class DebugCodeBlocksDataDump extends DebugCodeBlocksComposer {
                 if (!methodName.startsWith("get") || !methodName.endsWith("Scope")) continue;
                 String dataKey = methodName.replaceAll("^get", "");
                 log.debug("Populating data key {}", dataKey);
-                dataDump.add("### " + convertPascalCaseToWords(dataKey));
+                dataDump.add(getAsTitle(dataKey));
                 PluginDataHandler dataHandler = (PluginDataHandler) method.invoke(pluginDataHandlerProvider);
                 try {
                     dataDump.add(prettyStringifyMap(dataHandler.getAllValues()) + "\n");

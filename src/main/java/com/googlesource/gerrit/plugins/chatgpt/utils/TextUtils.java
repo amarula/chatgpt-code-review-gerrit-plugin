@@ -50,6 +50,10 @@ public class TextUtils extends StringUtils {
         return parseOutOfDelimiters(body, splitDelim, processMessage, splitDelim, splitDelim);
     }
 
+    public static String distanceCodeDelimiter(String body) {
+        return body.replace("`", " `");
+    }
+
     public static String joinWithNewLine(List<String> components) {
         return String.join("\n", components);
     }
