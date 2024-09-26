@@ -36,6 +36,10 @@ public class ChatGptParameters extends ClientBase {
         return ThreadLocalRandom.current().nextInt();
     }
 
+    public boolean shouldSpecializeAssistants() {
+        return config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants();
+    }
+
     private Double retrieveTemperature(String temperatureKey, Double defaultTemperature) {
         return Double.parseDouble(config.getString(temperatureKey, String.valueOf(defaultTemperature)));
     }

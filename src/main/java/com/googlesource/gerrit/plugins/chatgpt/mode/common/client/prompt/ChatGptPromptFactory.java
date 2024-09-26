@@ -4,6 +4,7 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptDataPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptParameters;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
@@ -25,8 +26,8 @@ public class ChatGptPromptFactory {
             return new ChatGptPromptStatefulRequests(config, changeSetData, change);
         }
         else {
-            if (config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ||
-                    changeSetData.getForcedStagedReview()) {
+            ChatGptParameters chatGptParameters = new ChatGptParameters(config, false);
+            if (chatGptParameters.shouldSpecializeAssistants() || changeSetData.getForcedStagedReview()) {
                 return switch (changeSetData.getReviewAssistantStage()) {
                     case REVIEW_CODE -> {
                         log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCode");
