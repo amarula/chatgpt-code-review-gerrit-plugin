@@ -414,7 +414,62 @@ from merely recycling old responses in stateful mode, particularly following mod
 /forget_thread
 ```
 
-### Showing Locally Stored Data
+### Showing Information
+
+The `/show` command, followed by one or more options, can be used to display relevant information for debugging and
+fine-tuning purposes. Below are the currently supported options and their associated objects:
+
+- `prompts`: Shows the prompts currently used
+- `instructions`: Shows the assistant instructions currently used
+- `local_data`: Shows locally stored data
+- `config`: Shows the current configuration
+
+**NOTE**: This command is available when the `enableMessageDebugging` configuration setting is enabled.
+
+#### Showing Prompting Parameters
+
+The `/show` command also enables you to view the prompts and assistant instructions used with your current
+configuration.
+
+For example, running `@gpt /show --prompts` in stateless mode will return something like:
+
+```
+PROMPTS CURRENTLY USED
+
+### System Prompt
+Act as a PatchSet Reviewer. I will provide you with PatchSet Diffs for various files in a JSON format. ...
+
+### User Prompt
+To conduct your review, follow these steps in the given order:
+Begin with examining the PatchSet Diff, focusing exclusively on the "a" and "b" items, and using the "ab" items ...
+You MUST review the commit message of the PatchSet and provide your feedback in an additional reply. The commit ...
+Here are the PatchSet Diffs:
+Subject: <COMMIT_MESSAGE> Change-Id: ... <PATCH_SET>
+```
+
+Similarly, running `@gpt /show --instructions` in stateless mode will display something like:
+
+```
+INSTRUCTIONS CURRENTLY USED
+
+### Assistant Instructions
+Act as a PatchSet Reviewer. Disregard missing implementations of methods or other code entities, as the full ...
+RULE #1: You MUST take into account of the messages previously exchanged in the thread for your review. ...
+RULE #2: You MUST only evaluate the code that has been modified in the patch, specifically the lines of the patch ...
+Here are other guidelines for reviewing the patch: A. Identify any potential problems and offer suggestions for ...
+
+// MANDATORY Response format
+- the response will be only valid JSON using double-quotes
+- the response starts with {
+
+// Example response to user
+
+User: Review the following Patch Set:  ` ` `<PATCH_SET_BODY> ` ` `
+Assistant: {"replies": [{"reply": "<REVIEW_1>", "score": 0, "relevance": 0.8, "repeated": false, ...
+The answer object includes the string attributes  `reply `,  `score `,  `relevance `,  `repeated `,  ...
+```
+
+#### Showing Locally Stored Data
 
 Data is stored locally across different scopes. To view all locally stored data, use the `/show` command as following:
 
@@ -444,9 +499,7 @@ assistantIdLog:
     2024-08-09 10:29:00.460755585: asst_YYYYYYYYYYYYYYYYYYYYYYYY
 ```
 
-**NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
-
-### Showing Configuration Settings
+#### Showing Configuration Settings
 
 The `/show` command allows you to dump relevant non-confidential configuration settings in a UI message as well:
 
@@ -504,8 +557,6 @@ taskSpecificAssistants: false
 votingMaxScore: 1
 votingMinScore: -1
 ```
-
-**NOTE**: This feature is available when the `enableMessageDebugging` configuration setting is enabled.
 
 ### Uploading Codebase
 

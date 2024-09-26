@@ -6,7 +6,8 @@ import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDataDump;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksPrompts;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksPromptingParamInstructions;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksPromptingParamPrompts;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,6 +47,7 @@ public class ClientCommandShowExecutor extends ClientCommandBase {
                 case CONFIG -> commandDumpConfig();
                 case LOCAL_DATA -> commandDumpStoredData();
                 case PROMPTS -> commandShowPrompts();
+                case INSTRUCTIONS -> commandShowInstructions();
             }
         }
         changeSetData.setReviewSystemMessage(joinWithDoubleNewLine(itemsToShow));
@@ -65,7 +67,14 @@ public class ClientCommandShowExecutor extends ClientCommandBase {
     }
 
     private void commandShowPrompts() {
-        DebugCodeBlocksPrompts debugCodeBlocksPrompts = new DebugCodeBlocksPrompts(localizer, config, changeSetData, change);
-        itemsToShow.add(debugCodeBlocksPrompts.getDebugCodeBlock());
+        DebugCodeBlocksPromptingParamPrompts debugCodeBlocksPromptingParamPrompts =
+                new DebugCodeBlocksPromptingParamPrompts(localizer, config, changeSetData, change);
+        itemsToShow.add(debugCodeBlocksPromptingParamPrompts.getDebugCodeBlock());
+    }
+
+    private void commandShowInstructions() {
+        DebugCodeBlocksPromptingParamInstructions debugCodeBlocksPromptingParamInstructions =
+                new DebugCodeBlocksPromptingParamInstructions(localizer, config, changeSetData, change);
+        itemsToShow.add(debugCodeBlocksPromptingParamInstructions.getDebugCodeBlock());
     }
 }

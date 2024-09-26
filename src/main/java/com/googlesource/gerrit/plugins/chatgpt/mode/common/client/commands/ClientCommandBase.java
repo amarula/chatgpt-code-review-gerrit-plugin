@@ -29,7 +29,8 @@ public abstract class ClientCommandBase extends ClientBase {
         CONFIGURATION_OPTION,
         CONFIG,
         LOCAL_DATA,
-        PROMPTS
+        PROMPTS,
+        INSTRUCTIONS
     }
 
     protected static final ImmutableBiMap<String, CommandSet> COMMAND_MAP = ImmutableBiMap.of(
