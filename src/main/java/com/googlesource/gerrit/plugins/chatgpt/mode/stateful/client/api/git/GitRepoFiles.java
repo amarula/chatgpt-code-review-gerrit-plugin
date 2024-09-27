@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.git.FileEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.*;
@@ -14,24 +15,21 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.matchesExtensionList;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-import java.util.ArrayList;
 
 @Slf4j
 public class GitRepoFiles {
     public static final String REPO_PATTERN = "git/%s.git";
 
+    private GitFileChunkBuilder gitFileChunkBuilder;
     private List<String> enabledFileExtensions;
-    private long maxChunkSize;
 
     public List<String> getGitRepoFiles(Configuration config, GerritChange change) {
-        maxChunkSize = 1024 * 1024 * (long) config.getGptUploadedChunkSizeMb();
+        gitFileChunkBuilder = new GitFileChunkBuilder(config);
         enabledFileExtensions = config.getEnabledFileExtensions();
         log.debug("Open Repo from {}", change.getProjectNameKey());
         String repoPath = String.format(REPO_PATTERN, change.getProjectNameKey().toString());
@@ -49,9 +47,7 @@ public class GitRepoFiles {
     }
 
     private List<Map<String, String>> listFilesWithContent(Repository repository) throws IOException, GitAPIException {
-        List<Map<String, String>> chunkedFileContent = new ArrayList<>();
-        Map<String, String> currentChunk = new HashMap<>();
-        long currentChunkSize = 0;
+        Map<String, List<FileEntry>> dirFilesMap = new LinkedHashMap<>();
 
         try (ObjectReader reader = repository.newObjectReader();
              RevWalk revWalk = new RevWalk(repository)) {
@@ -67,27 +63,27 @@ public class GitRepoFiles {
                 while (treeWalk.next()) {
                     String path = treeWalk.getPathString();
                     if (!matchesExtensionList(path, enabledFileExtensions)) continue;
+                    int lastSlashIndex = path.lastIndexOf('/');
+                    String dirPath = (lastSlashIndex != -1) ? path.substring(0, lastSlashIndex) : "";
                     ObjectId objectId = treeWalk.getObjectId(0);
                     byte[] bytes = reader.open(objectId).getBytes();
                     long fileSize = bytes.length;
-
-                    if (currentChunkSize + fileSize > maxChunkSize) {
-                        chunkedFileContent.add(currentChunk);
-                        currentChunk = new HashMap<>();
-                        currentChunkSize = 0;
-                    }
-
                     String content = new String(bytes, StandardCharsets.UTF_8); // Assumes text files with UTF-8 encoding
-                    currentChunk.put(path, content);
-                    currentChunkSize += fileSize;
+
+                    dirFilesMap.computeIfAbsent(dirPath, k -> new ArrayList<>())
+                            .add(new FileEntry(path, content, fileSize));
                     log.debug("Repo File loaded: {}", path);
-                }
-                if (!currentChunk.isEmpty()) {
-                    chunkedFileContent.add(currentChunk);
                 }
             }
         }
-        return chunkedFileContent;
+        for (Map.Entry<String, List<FileEntry>> entry : dirFilesMap.entrySet()) {
+            String dirPath = entry.getKey();
+            log.debug("File from dirFilesMap processed: {}", dirPath);
+            List<FileEntry> fileEntries = entry.getValue();
+            gitFileChunkBuilder.addFiles(dirPath, fileEntries);
+        }
+
+        return gitFileChunkBuilder.getChunks();
     }
 
     private Repository openRepository(String path) throws IOException {
