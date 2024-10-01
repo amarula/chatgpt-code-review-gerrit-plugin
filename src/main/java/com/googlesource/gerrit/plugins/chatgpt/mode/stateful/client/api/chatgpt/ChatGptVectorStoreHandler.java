@@ -10,6 +10,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptVectorStoreFileBatch;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptRunResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -94,7 +95,7 @@ public class ChatGptVectorStoreHandler extends ClientBase {
             String vectorStoreFileBatchId = projectDataHandler.getValue(KEY_VECTOR_STORE_FILE_BATCH_ID);
             ChatGptResponse vectorStoreFileBatchResponse = chatGptPoller.runPoll(
                     UriResourceLocatorStateful.vectorStoreFileBatchRetrieveUri(vectorStoreId, vectorStoreFileBatchId),
-                    new ChatGptResponse()
+                    new ChatGptRunResponse()
             );
             updateVectorStoreFileBatchStatus(vectorStoreFileBatchResponse);
             log.info("Vector Store File Batch poll executed after {} seconds ({} polling requests); Response: {}",

@@ -22,12 +22,18 @@ import java.util.List;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 
 @Slf4j
-@Getter
 public class ChatGptAssistant extends ChatGptApiBase {
+    @Getter
     private final String description;
+    @Getter
     private final String instructions;
+    @Getter
     private final String model;
+    @Getter
     private final Double temperature;
+
+    private ChatGptToolResources toolResources = null;
+    private List<ChatGptTool> tools;
 
     public ChatGptAssistant(Configuration config, ChangeSetData changeSetData, GerritChange change) {
         super(config);
@@ -55,16 +61,8 @@ public class ChatGptAssistant extends ChatGptApiBase {
         log.debug("Creating request to build new assistant.");
         String uri = UriResourceLocatorStateful.assistantCreateUri();
         log.debug("ChatGPT Create Assistant request URI: {}", uri);
-        List<ChatGptTool> tools = new ArrayList<>(List.of(ChatGptTools.retrieveFormatRepliesTool()));
-        ChatGptToolResources toolResources = null;
-        if (vectorStoreId != null) {
-            tools.add(new ChatGptTool("file_search"));
-            toolResources = new ChatGptToolResources(
-                    new ChatGptToolResources.VectorStoreIds(
-                            new String[] {vectorStoreId}
-                    )
-            );
-        }
+        updateTools(vectorStoreId);
+
         ChatGptCreateAssistantRequestBody requestBody = ChatGptCreateAssistantRequestBody.builder()
                 .name(ChatGptPromptStatefulBase.DEFAULT_GPT_ASSISTANT_NAME)
                 .description(description)
@@ -75,6 +73,26 @@ public class ChatGptAssistant extends ChatGptApiBase {
                 .toolResources(toolResources)
                 .build();
         log.debug("Request body for creating assistant: {}", requestBody);
+
         return httpClient.createRequestFromJson(uri, requestBody);
+    }
+
+    private void updateTools(String vectorStoreId) {
+        ChatGptTools chatGptFormatRepliesTools = new ChatGptTools(ChatGptTools.Functions.formatReplies);
+        tools = new ArrayList<>(List.of(chatGptFormatRepliesTools.retrieveFunctionTool()));
+        switch (config.getCodeContextPolicy()) {
+            case ON_DEMAND:
+                ChatGptTools chatGptGetContextTools = new ChatGptTools(ChatGptTools.Functions.getContext);
+                tools.add(chatGptGetContextTools.retrieveFunctionTool());
+                break;
+            case UPLOAD_ALL:
+                tools.add(new ChatGptTool("file_search"));
+                toolResources = new ChatGptToolResources(
+                        new ChatGptToolResources.VectorStoreIds(
+                                new String[]{vectorStoreId}
+                        )
+                );
+                break;
+        }
     }
 }
