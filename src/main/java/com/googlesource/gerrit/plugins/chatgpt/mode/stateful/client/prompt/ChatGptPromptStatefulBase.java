@@ -5,12 +5,12 @@ import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.p
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies.CodeContextPolicies;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 @Slf4j
@@ -48,9 +48,9 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
 
     public String getDefaultGptAssistantInstructions() {
         List<String> instructions = new ArrayList<>(List.of(
-                config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS) + DOT,
-                getCodeContextPolicyAwareAssistantInstructions()
+                config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS) + DOT
         ));
+        addCodeContextPolicyAwareAssistantInstructions(instructions);
         addGptAssistantInstructions(instructions);
         String compiledInstructions = joinWithSpace(instructions);
         log.debug("Compiled GPT Assistant Instructions: {}", compiledInstructions);
@@ -70,9 +70,15 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
         }
     }
 
-    private String getCodeContextPolicyAwareAssistantInstructions() {
-        return config.getCodeContextPolicy() == CodeContextPolicies.NONE ?
-                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT :
-                String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT, change.getProjectName());
+    private void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions) {
+        if (config.getCodeContextPolicy() == ChatGptCodeContextPolicies.CodeContextPolicies.ON_DEMAND) {
+            return;
+        }
+        String contextAwareInstructions = switch (config.getCodeContextPolicy()) {
+            case NONE -> DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
+            case UPLOAD_ALL -> String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT, change.getProjectName());
+            default -> throw new IllegalStateException("Unexpected value: " + config.getCodeContextPolicy());
+        };
+        instructions.add(contextAwareInstructions);
     }
 }

@@ -87,8 +87,12 @@ abstract public class ChatGptClient extends ClientBase {
         return getGson().fromJson(content, ChatGptResponseContent.class);
     }
 
+    private ChatGptToolCall.Function getFunction(List<ChatGptToolCall> toolCalls, int ind) {
+        return toolCalls.get(ind).getFunction();
+    }
+
     private String getArgumentAsString(List<ChatGptToolCall> toolCalls, int ind) {
-        return toolCalls.get(ind).getFunction().getArguments();
+        return getFunction(toolCalls, ind).getArguments();
     }
 
     private ChatGptResponseContent getArgumentAsResponse(List<ChatGptToolCall> toolCalls, int ind) {

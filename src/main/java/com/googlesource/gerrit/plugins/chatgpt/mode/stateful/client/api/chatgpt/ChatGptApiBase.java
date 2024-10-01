@@ -3,7 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptRunResponse;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
@@ -28,7 +28,7 @@ public abstract class ChatGptApiBase extends ClientBase {
         return getGson().fromJson(clientResponse, clazz);
     }
 
-    public ChatGptResponse getChatGptResponse(Request request) throws OpenAiConnectionFailException {
-        return getChatGptResponse(request, ChatGptResponse.class);
+    public ChatGptRunResponse getChatGptResponse(Request request) throws OpenAiConnectionFailException {
+        return getChatGptResponse(request, ChatGptRunResponse.class);
     }
 }

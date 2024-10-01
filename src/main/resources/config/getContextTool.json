@@ -1,0 +1,35 @@
+{
+  "type": "function",
+  "function": {
+    "name": "get_context",
+    "description": "Provide the code missing in the Patch Set for context.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "replies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string"
+              },
+              "lineNumber": {
+                "type": "integer"
+              },
+              "codeSnippet": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "codeSnippet"
+            ]
+          }
+        }
+      },
+      "required": [
+        "replies"
+      ]
+    }
+  }
+}

@@ -43,6 +43,10 @@ public class UriResourceLocatorStateful {
         return runRetrieveUri(threadId, runId) + "/cancel";
     }
 
+    public static String runSubmitToolOutputsUri(String threadId, String runId) {
+        return runRetrieveUri(threadId, runId) + "/submit_tool_outputs";
+    }
+
     public static String vectorStoreCreateUri() {
         return VERSION_URI + "/vector_stores";
     }
