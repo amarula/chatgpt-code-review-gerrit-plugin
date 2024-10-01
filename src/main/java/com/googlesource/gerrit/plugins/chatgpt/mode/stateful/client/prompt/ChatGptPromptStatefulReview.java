@@ -23,6 +23,7 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
+    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_ON_DEMAND_REQUEST;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET;
 
@@ -64,13 +65,12 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
 
     protected String getGptAssistantInstructionsReview(boolean... ruleFilter) {
         // Rules are applied by default unless the corresponding ruleFilter values is set to false
-        ArrayList<String> rules = new ArrayList<>(List.of(
+        List<String> rules = new ArrayList<>();
+        addCodeContextPolicyAwareRule(rules);
+        rules.addAll(List.of(
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET
         ));
-        if (config.getCodeContextPolicy() != ChatGptCodeContextPolicies.CodeContextPolicies.NONE) {
-            rules.add(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE);
-        }
         if (config.getDirective() != null) {
             rules.addAll(config.getDirective());
         }
@@ -82,5 +82,17 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
                         .collect(Collectors.toList()),
                 RULE_NUMBER_PREFIX, COLON_SPACE
         ));
+    }
+
+    private void addCodeContextPolicyAwareRule(List<String> rules) {
+        if (config.getCodeContextPolicy() == ChatGptCodeContextPolicies.CodeContextPolicies.NONE) {
+            return;
+        }
+        String contextAwareRule = switch (config.getCodeContextPolicy()) {
+            case ON_DEMAND -> DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_ON_DEMAND_REQUEST;
+            case UPLOAD_ALL -> DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
+            default -> throw new IllegalStateException("Unexpected value: " + config.getCodeContextPolicy());
+        };
+        rules.add(contextAwareRule);
     }
 }

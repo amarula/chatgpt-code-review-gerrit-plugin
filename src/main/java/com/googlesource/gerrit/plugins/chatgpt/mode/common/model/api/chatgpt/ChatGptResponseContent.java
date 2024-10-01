@@ -13,4 +13,5 @@ public class ChatGptResponseContent {
     private String changeId;
     @NonNull
     private String messageContent;
+    private String responseFunctionName;
 }

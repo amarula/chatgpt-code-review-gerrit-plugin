@@ -88,8 +88,9 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
         log.debug("User message for ChatGPT: {}", userMessage.getContent());
 
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, isCommentEvent);
+        ChatGptTools chatGptTools = new ChatGptTools(ChatGptTools.Functions.formatReplies);
         ChatGptTool[] tools = new ChatGptTool[] {
-                ChatGptTools.retrieveFormatRepliesTool()
+                chatGptTools.retrieveFunctionTool()
         };
         ChatGptCompletionRequest chatGptCompletionRequest = ChatGptCompletionRequest.builder()
                 .model(config.getGptModel())
@@ -100,7 +101,7 @@ public class ChatGptClientStateless extends ChatGptClient implements IChatGptCli
                 // temporal proximity.
                 .seed(chatGptParameters.getRandomSeed())
                 .tools(tools)
-                .toolChoice(ChatGptTools.retrieveFormatRepliesToolChoice())
+                .toolChoice(chatGptTools.retrieveFunctionToolChoice())
                 .build();
 
         requestBody = getNoEscapedGson().toJson(chatGptCompletionRequest);

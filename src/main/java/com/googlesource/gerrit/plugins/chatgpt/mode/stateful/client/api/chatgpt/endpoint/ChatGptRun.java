@@ -5,15 +5,18 @@ import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectio
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptApiBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptPoller;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptCreateRunRequest;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
+
+import java.util.List;
 
 @Slf4j
 public class ChatGptRun extends ChatGptApiBase {
     private final String assistantId;
     private final String threadId;
+
+    private String runId;
 
     public ChatGptRun(Configuration config, String assistantId, String threadId) {
         super(config);
@@ -21,12 +24,13 @@ public class ChatGptRun extends ChatGptApiBase {
         this.threadId = threadId;
     }
 
-    public ChatGptResponse createRun() throws OpenAiConnectionFailException {
-        Request request = createRunRequest();
-        log.info("ChatGPT Create Run request: {}", request);
+    public ChatGptRunResponse createRun() throws OpenAiConnectionFailException {
+        Request createRunRequest = createRunRequest();
+        log.info("ChatGPT Create Run request: {}", createRunRequest);
 
-        ChatGptResponse runResponse = getChatGptResponse(request);
+        ChatGptRunResponse runResponse = getChatGptResponse(createRunRequest);
         log.info("Run created: {}", runResponse);
+        runId = runResponse.getId();
 
         return runResponse;
     }
@@ -52,6 +56,14 @@ public class ChatGptRun extends ChatGptApiBase {
         return httpClient.createRequestFromJson(uri, null);
     }
 
+    public void submitToolOutputs(List<ChatGptToolOutput> toolOutputs) throws OpenAiConnectionFailException {
+        Request submitToolOutputsRequest = submitToolOutputsRequest(toolOutputs);
+        log.debug("ChatGPT Submit Tool Outputs request: {}", submitToolOutputsRequest);
+
+        ChatGptResponse submitToolOutputsResponse = getChatGptResponse(submitToolOutputsRequest);
+        log.debug("Submit Tool Outputs response: {}", submitToolOutputsResponse);
+    }
+
     private Request createRunRequest() {
         String uri = UriResourceLocatorStateful.runsUri(threadId);
         log.debug("ChatGPT Create Run request URI: {}", uri);
@@ -67,5 +79,16 @@ public class ChatGptRun extends ChatGptApiBase {
         log.debug("ChatGPT Run Cancel request URI: {}", uri);
 
         return httpClient.createRequestFromJson(uri, new Object());
+    }
+
+    private Request submitToolOutputsRequest(List<ChatGptToolOutput> toolOutputs) {
+        String uri = UriResourceLocatorStateful.runSubmitToolOutputsUri(threadId, runId);
+        log.debug("ChatGPT Submit Tool Outputs request URI: {}", uri);
+        ChatGptSubmitToolOutputsToRunRequest submitToolOutputsToRunRequest = ChatGptSubmitToolOutputsToRunRequest.builder()
+                .toolOutputs(toolOutputs)
+                .build();
+        log.debug("ChatGPT Submit Tool Outputs request params: {}", submitToolOutputsToRunRequest);
+
+        return httpClient.createRequestFromJson(uri, submitToolOutputsToRunRequest);
     }
 }

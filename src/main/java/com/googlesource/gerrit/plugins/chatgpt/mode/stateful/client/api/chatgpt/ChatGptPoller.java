@@ -2,7 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptRunResponse;
 import com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,7 @@ public class ChatGptPoller extends ChatGptApiBase {
     public static final String COMPLETED_STATUS = "completed";
     public static final String CANCELLED_STATUS = "cancelled";
     public static final String FAILED_STATUS = "failed";
+    public static final String REQUIRES_ACTION_STATUS = "requires_action";
 
     private static final Set<String> PENDING_STATUSES = new HashSet<>(Arrays.asList(
             "queued",
@@ -42,7 +43,7 @@ public class ChatGptPoller extends ChatGptApiBase {
         pollingCount = 0;
     }
 
-    public ChatGptResponse runPoll(String uri, ChatGptResponse pollResponse) throws OpenAiConnectionFailException {
+    public ChatGptRunResponse runPoll(String uri, ChatGptRunResponse pollResponse) throws OpenAiConnectionFailException {
         long startTime = TimeUtils.getCurrentMillis();
 
         while (isPending(pollResponse.getStatus())) {
@@ -64,6 +65,10 @@ public class ChatGptPoller extends ChatGptApiBase {
 
     public boolean isNotCompleted(String status) {
         return status == null || !status.equals(COMPLETED_STATUS);
+    }
+
+    public boolean isActionRequired(String status) {
+        return status != null && status.equals(REQUIRES_ACTION_STATUS);
     }
 
     private boolean isPending(String status) {
