@@ -42,8 +42,8 @@ public abstract class DebugCodeBlocksPromptingParamBase extends DebugCodeBlocksC
 
     private List<String> getPromptingParameters() {
         switch (config.getGptMode()) {
-            case stateful -> populateStatefulParameters();
-            case stateless -> populateStatelessParameters();
+            case STATEFUL -> populateStatefulParameters();
+            case STATELESS -> populateStatelessParameters();
         }
         return promptingParameters.entrySet().stream()
                 .map(e -> getAsTitle(e.getKey()) + "\n" + distanceCodeDelimiter(e.getValue()) + "\n")

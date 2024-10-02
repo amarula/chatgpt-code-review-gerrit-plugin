@@ -136,7 +136,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
                 log.debug("Processing tool calls from ChatGPT run.");
                 yield getResponseContent(chatGptRunHandler.getFirstStepToolCalls());
             }
-            default -> throw new IllegalStateException("Unexpected Step Type in stateful ChatGpt response: " +
+            default -> throw new IllegalStateException("Unexpected Step Type in Stateful ChatGpt response: " +
                     chatGptRunHandler);
         };
     }

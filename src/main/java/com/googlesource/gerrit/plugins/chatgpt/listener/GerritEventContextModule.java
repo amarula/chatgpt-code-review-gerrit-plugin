@@ -35,8 +35,8 @@ public class GerritEventContextModule extends FactoryModule {
     protected void configure() {
         log.debug("Configuring bindings for GerritEventContextModule");
 
-        bind(IChatGptClient.class).to(getChatGptMode());
-        log.debug("Bound IChatGptClient to: {}", getChatGptMode().getSimpleName());
+        bind(IChatGptClient.class).to(getChatGptClient());
+        log.debug("Bound IChatGptClient to: {}", getChatGptClient().getSimpleName());
 
         bind(IGerritClientPatchSet.class).to(getClientPatchSet());
         log.debug("Bound IGerritClientPatchSet to: {}", getClientPatchSet().getSimpleName());
@@ -52,18 +52,18 @@ public class GerritEventContextModule extends FactoryModule {
         log.debug("PluginDataHandler bound to singleton provider");
     }
 
-    private Class<? extends IChatGptClient> getChatGptMode() {
+    private Class<? extends IChatGptClient> getChatGptClient() {
         return switch (config.getGptMode()){
-            case stateful -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
+            case STATEFUL -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
                     ChatGptClientStatefulTaskSpecific.class : ChatGptClientStateful.class;
-            case stateless -> ChatGptClientStateless.class;
+            case STATELESS -> ChatGptClientStateless.class;
         };
     }
 
     private Class<? extends IGerritClientPatchSet> getClientPatchSet() {
         return switch (config.getGptMode()){
-            case stateful -> GerritClientPatchSetStateful.class;
-            case stateless -> GerritClientPatchSetStateless.class;
+            case STATEFUL -> GerritClientPatchSetStateful.class;
+            case STATELESS -> GerritClientPatchSetStateless.class;
         };
     }
 }

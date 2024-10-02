@@ -156,10 +156,10 @@ The advantages of the Stateful mode over the Stateless are twofold:
 ### Optional Parameters Common to Both Modes
 
 - `gptMode`: Select whether requests are processed in Stateless or Stateful mode. For backward compatibility, the
-  default value is `stateless`. To enable Stateful mode, set this parameter to `stateful`.
+  default value is `STATELESS`. To enable Stateful mode, set this parameter to `STATEFUL`.
 - `gptModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
-- `gptSystemPromptInstructions`: You can customize the default stateless system prompt ("Act as a PatchSet Reviewer") to
-  your preferred prompt. This same prompt is also used as the assistant instructions in stateful mode.
+- `gptSystemPromptInstructions`: You can customize the default Stateless system prompt ("Act as a PatchSet Reviewer") to
+  your preferred prompt. This same prompt is also used as the assistant instructions in Stateful mode.
 - `gptReviewTemperature`: Specifies the temperature setting for ChatGPT when reviewing a Patch Set, with a default
   setting of 0.2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more
   focused and deterministic.
@@ -280,7 +280,7 @@ These parameters are specific to connecting with the OpenAI server and should on
 - `getPollingInterval`: Sets the interval for ChatGPT polling on Stateful requests, defaulting to 1 second.
 - `gptConnectionRetryInterval`: Sets the interval between two connection attempts, with a default of 10 seconds.
 - `gptConnectionMaxRetryAttempts`: Determines the maximum number of retry attempts, defaulting to 2.
-- `gptUploadedChunkSizeMb`: When uploading project repositories to ChatGPT in stateful mode, the repositories are
+- `gptUploadedChunkSizeMb`: When uploading project repositories to ChatGPT in Stateful mode, the repositories are
   packaged and split into chunk files. This setting specifies the maximum size of each chunk file, with a default of 5
   MB.
 
@@ -406,7 +406,7 @@ The index in the response to `/directives` query can be used to remove single dy
 
 Threads capture all prior interactions and evaluations involving ChatGPT within each Change Set. The history stored in
 these threads can be removed with the `/forget_thread` command. This functionality is crucial for preventing ChatGPT
-from merely recycling old responses in stateful mode, particularly following modifications to configuration parameters.
+from merely recycling old responses in Stateful mode, particularly following modifications to configuration parameters.
 
 #### Basic Syntax
 
@@ -431,7 +431,7 @@ fine-tuning purposes. Below are the currently supported options and their associ
 The `/show` command also enables you to view the prompts and assistant instructions used with your current
 configuration.
 
-For example, running `@gpt /show --prompts` in stateless mode will return something like:
+For example, running `@gpt /show --prompts` in Stateless mode will return something like:
 
 ```
 PROMPTS CURRENTLY USED
@@ -447,7 +447,7 @@ Here are the PatchSet Diffs:
 Subject: <COMMIT_MESSAGE> Change-Id: ... <PATCH_SET>
 ```
 
-Similarly, running `@gpt /show --instructions` in stateless mode will display something like:
+Similarly, running `@gpt /show --instructions` in Stateless mode will display something like:
 
 ```
 INSTRUCTIONS CURRENTLY USED
@@ -492,7 +492,7 @@ fileId: vs_XXXXXXXXXXXXXXXXXXXX
 ### Change Scope
 threadId: thread_XXXXXXXXXXXXXXXXXXXX
 dynamicConfig:
-    gptMode: stateful
+    gptMode: STATEFUL
     enabledVoting: true
 assistantIdLog:
     2024-08-09 10:28:46.973108457: asst_XXXXXXXXXXXXXXXXXXXXXXXX
@@ -540,7 +540,7 @@ gerritUserName: gpt
 gptCommentTemperature: 1.0
 gptDomain: https://api.openai.com
 gptFullFileReview: true
-gptMode: stateful
+gptMode: STATEFUL
 gptModel: gpt-4-turbo
 gptReviewCommitMessages: true
 gptReviewPatchSet: true
@@ -715,7 +715,7 @@ Following this configuration, a new Change Set review can be initiated with:
 It's also possible to make multiple changes at once:
 
 ```
-@gpt /configure --gptMode=stateful --gptModel=gpt-4-turbo
+@gpt /configure --gptMode=STATEFUL --gptModel=gpt-4-turbo
 ```
 
 ## License

@@ -22,7 +22,7 @@ public class Settings {
     public static final String CHAT_GPT_ROLE_ASSISTANT = "assistant";
 
     public enum Modes {
-        stateless,
-        stateful
+        STATELESS,
+        STATEFUL
     }
 }

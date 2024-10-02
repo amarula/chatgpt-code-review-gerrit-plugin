@@ -57,7 +57,7 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
 
         // Mock the Global Config values that differ from the ones provided by Default
         when(globalConfig.getString(Mockito.eq("gptMode"), Mockito.anyString()))
-                .thenReturn(Modes.stateful.name());
+                .thenReturn(Modes.STATEFUL.name());
 
         setupPluginData();
         PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());

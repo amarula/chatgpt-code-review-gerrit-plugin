@@ -24,7 +24,7 @@ public class Configuration extends ConfigCore {
     public static final double DEFAULT_GPT_REVIEW_TEMPERATURE = 0.2;
     public static final double DEFAULT_GPT_COMMENT_TEMPERATURE = 1.0;
 
-    private static final String DEFAULT_GPT_MODE = "stateless";
+    private static final String DEFAULT_GPT_MODE = "STATELESS";
     private static final boolean DEFAULT_REVIEW_PATCH_SET = true;
     private static final boolean DEFAULT_REVIEW_COMMIT_MESSAGES = true;
     private static final boolean DEFAULT_FULL_FILE_REVIEW = true;

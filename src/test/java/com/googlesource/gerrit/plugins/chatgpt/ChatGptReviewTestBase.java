@@ -403,17 +403,17 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
 
     private IChatGptClient getChatGptClient() {
         return switch (config.getGptMode()) {
-            case stateful -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
+            case STATEFUL -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
                     new ChatGptClientStatefulTaskSpecific(config, gitRepoFiles, pluginDataHandlerProvider):
                     new ChatGptClientStateful(config, gitRepoFiles, pluginDataHandlerProvider);
-            case stateless -> new ChatGptClientStateless(config);
+            case STATELESS -> new ChatGptClientStateless(config);
         };
     }
 
     private IGerritClientPatchSet getGerritClientPatchSet() {
         return switch (config.getGptMode()) {
-            case stateful -> new GerritClientPatchSetStateful(config, accountCacheMock);
-            case stateless -> new GerritClientPatchSetStateless(config, accountCacheMock);
+            case STATEFUL -> new GerritClientPatchSetStateful(config, accountCacheMock);
+            case STATELESS -> new GerritClientPatchSetStateless(config, accountCacheMock);
         };
     }
 }
