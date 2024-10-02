@@ -1,7 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptResponse;
 import com.googlesource.gerrit.plugins.chatgpt.utils.TimeUtils;
 import lombok.Getter;

@@ -2,7 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.config.dynamic;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.chatgpt.exceptions.DynamicDirectivesModifyException;
+import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.DynamicDirectivesModifyException;
 import lombok.Getter;
 
 import java.util.List;

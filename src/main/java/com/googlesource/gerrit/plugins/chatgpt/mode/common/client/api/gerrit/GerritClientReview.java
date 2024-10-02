@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.config.dynamic.DynamicConfigManager;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.errors.ErrorMessageHandler;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDynamicConfiguration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -34,6 +35,7 @@ public class GerritClientReview extends GerritClientAccount {
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final Localizer localizer;
     private final DebugCodeBlocksDynamicConfiguration debugCodeBlocksDynamicConfiguration;
+    private final ErrorMessageHandler errorMessageHandler;
 
     private GerritChange change;
 
@@ -49,6 +51,7 @@ public class GerritClientReview extends GerritClientAccount {
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.localizer = localizer;
         debugCodeBlocksDynamicConfiguration = new DebugCodeBlocksDynamicConfiguration(localizer);
+        errorMessageHandler = new ErrorMessageHandler(config, localizer);
         log.debug("GerritClientReview initialized.");
     }
 
@@ -129,10 +132,12 @@ public class GerritClientReview extends GerritClientAccount {
         if (emptyComments) {
             messages.add(localizer.getText("system.message.prefix") + ' ' + systemMessage);
         }
+        errorMessageHandler.updateErrorMessages(messages);
+
         if (!messages.isEmpty()) {
             reviewInput.message(joinWithDoubleNewLine(messages));
         }
-        log.debug("System message for review set.");
+        log.debug("System messages for review set: {}", messages);
     }
 
     private Map<String, List<CommentInput>> getReviewComments(List<ReviewBatch> reviewBatches) {

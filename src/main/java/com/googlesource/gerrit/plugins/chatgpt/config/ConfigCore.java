@@ -44,6 +44,8 @@ public abstract class ConfigCore {
     private final LinkedHashMap<String, PluginConfig> configScopes;
 
     private boolean isDumpingConfig = false;
+    @Getter
+    private Set<String> unknownEnumSettings = new HashSet<>();
 
     public ConfigCore(
             OneOffRequestContext context,
@@ -169,7 +171,8 @@ public abstract class ConfigCore {
         try {
             return Enum.valueOf(enumClass, value);
         } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Illegal value: " + value, e);
+            unknownEnumSettings.add(key);
+            return Enum.valueOf(enumClass, defaultValue);
         }
     }
 
