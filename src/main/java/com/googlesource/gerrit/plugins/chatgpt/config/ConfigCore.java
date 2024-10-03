@@ -177,7 +177,7 @@ public abstract class ConfigCore {
     }
 
     protected List<String> splitConfig(String value) {
-        return TextUtils.splitString(value);
+        return value.isEmpty() ? List.of() : TextUtils.splitString(value);
     }
 
     protected List<String> splitListIntoItems(String key, List<String> defaultValue) {
