@@ -13,6 +13,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 
 import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.jsonArrayToList;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.distanceCodeDelimiter;
 
 @Slf4j
 public class ClientCommandParser extends ClientCommandBase {
@@ -108,7 +109,7 @@ public class ClientCommandParser extends ClientCommandBase {
         CommandSet command = COMMAND_MAP.get(commandMatcher.group(1));
         if (command == null) {
             changeSetData.setReviewSystemMessage(String.format(localizer.getText("message.command.unknown"),
-                    comment));
+                    distanceCodeDelimiter(comment)));
             log.info("Unknown command in comment `{}`", comment);
             return false;
         }
