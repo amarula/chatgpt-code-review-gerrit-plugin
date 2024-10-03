@@ -86,7 +86,7 @@ public class CodeFinder {
     }
 
     private double calcCodeDistance(GerritCodeRange range, int fromLine) {
-        return Math.abs((range.endLine - range.startLine) / 2 - fromLine);
+        return Math.abs((range.endLine + range.startLine) / 2 - fromLine);
     }
 
     private String getDiffItem(Field diffField, DiffContent diffItem) {
