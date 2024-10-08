@@ -4,11 +4,12 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OperationNotSupportedException;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptAssistant;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.utils.HashUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,29 +23,24 @@ public class ChatGptAssistantHandler extends ClientBase {
     private static final String ASSISTANT_ID_LOG = "assistantIdLog";
 
     private final GerritChange change;
+    private final ICodeContextPolicy codeContextPolicy;
     private final PluginDataHandler changeDataHandler;
     private final PluginDataHandler assistantsDataHandler;
     private final ChatGptAssistant chatGptAssistant;
-    private final ChatGptVectorStoreHandler chatGptVectorStoreHandler;
 
     public ChatGptAssistantHandler (
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
-            GitRepoFiles gitRepoFiles,
+            ICodeContextPolicy codeContextPolicy,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         super(config);
         this.change = change;
+        this.codeContextPolicy = codeContextPolicy;
         changeDataHandler = pluginDataHandlerProvider.getChangeScope();
         assistantsDataHandler = pluginDataHandlerProvider.getAssistantsWorkspace();
-        chatGptAssistant = new ChatGptAssistant(config, changeSetData, change);
-        chatGptVectorStoreHandler = new ChatGptVectorStoreHandler(
-                config,
-                change,
-                gitRepoFiles,
-                pluginDataHandlerProvider.getProjectScope()
-        );
+        chatGptAssistant = new ChatGptAssistant(config, changeSetData, change, codeContextPolicy);
         log.debug("Initialized ChatGptAssistant with project and assistants data handlers.");
     }
 
@@ -55,10 +51,7 @@ public class ChatGptAssistantHandler extends ClientBase {
         String assistantId = assistantsDataHandler.getValue(assistantIdHashKey);
         if (assistantId == null || config.getForceCreateAssistant()) {
             log.debug("Setup Assistant for project {}", change.getProjectNameKey());
-            String vectorStoreId = null;
-            if (config.getCodeContextPolicy() == ChatGptCodeContextPolicies.CodeContextPolicies.UPLOAD_ALL) {
-                vectorStoreId = chatGptVectorStoreHandler.generateVectorStore();
-            }
+            String vectorStoreId = codeContextPolicy.generateVectorStore();
             assistantId = chatGptAssistant.createAssistant(vectorStoreId);
             assistantsDataHandler.setValue(assistantIdHashKey, assistantId);
             log.info("Project Assistant created with ID: {}", assistantId);
@@ -71,9 +64,9 @@ public class ChatGptAssistantHandler extends ClientBase {
         return assistantId;
     }
 
-    public void flushAssistantAndVectorIds() {
+    public void flushAssistantAndVectorIds() throws OperationNotSupportedException {
         log.debug("Flushing Assistant and Vector Store IDs.");
-        chatGptVectorStoreHandler.removeVectorStoreId();
+        codeContextPolicy.removeVectorStore();
         assistantsDataHandler.destroy();
     }
 

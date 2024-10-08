@@ -9,7 +9,11 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyNone;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyOnDemand;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyUploadAll;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStatefulTaskSpecific;
@@ -41,6 +45,9 @@ public class GerritEventContextModule extends FactoryModule {
         bind(IGerritClientPatchSet.class).to(getClientPatchSet());
         log.debug("Bound IGerritClientPatchSet to: {}", getClientPatchSet().getSimpleName());
 
+        bind(ICodeContextPolicy.class).to(getCodeContextPolicy());
+        log.debug("Bound ICodeContextPolicy to: {}", getCodeContextPolicy().getSimpleName());
+
         bind(Configuration.class).toInstance(config);
         bind(GerritChange.class).toInstance(new GerritChange(event));
         log.debug("GerritChange bound to instance created from event: {}", event.getType());
@@ -64,6 +71,14 @@ public class GerritEventContextModule extends FactoryModule {
         return switch (config.getGptMode()){
             case STATEFUL -> GerritClientPatchSetStateful.class;
             case STATELESS -> GerritClientPatchSetStateless.class;
+        };
+    }
+
+    private Class<? extends ICodeContextPolicy> getCodeContextPolicy() {
+        return switch (config.getCodeContextPolicy()){
+            case NONE -> CodeContextPolicyNone.class;
+            case ON_DEMAND -> CodeContextPolicyOnDemand.class;
+            case UPLOAD_ALL -> CodeContextPolicyUploadAll.class;
         };
     }
 }

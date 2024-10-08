@@ -6,6 +6,8 @@ import com.googlesource.gerrit.plugins.chatgpt.config.dynamic.DynamicConfigManag
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.DynamicDirectivesModifyException;
+import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OperationNotSupportedException;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksDirectives;
@@ -31,6 +33,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
 
     private final ChangeSetData changeSetData;
     private final GerritChange change;
+    private final ICodeContextPolicy codeContextPolicy;
     private final GitRepoFiles gitRepoFiles;
     private final Localizer localizer;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
@@ -44,6 +47,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
+            ICodeContextPolicy codeContextPolicy,
             GitRepoFiles gitRepoFiles,
             PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
@@ -52,6 +56,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
         this.localizer = localizer;
         this.changeSetData = changeSetData;
         this.change = change;
+        this.codeContextPolicy = codeContextPolicy;
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         log.debug("ClientCommandExecutor initialized.");
@@ -113,11 +118,17 @@ public class ClientCommandExecutor extends ClientCommandBase {
                 config,
                 changeSetData,
                 change,
-                gitRepoFiles,
+                codeContextPolicy,
                 pluginDataHandlerProvider
         );
-        chatGptAssistantHandler.flushAssistantAndVectorIds();
-
+        try {
+            chatGptAssistantHandler.flushAssistantAndVectorIds();
+        } catch (OperationNotSupportedException e) {
+            changeSetData.setReviewSystemMessage(localizer.getText(
+                    "message.command.codebase.upload.context.policy.mismatch"
+            ));
+            return;
+        }
         ChatGptVectorStoreHandler chatGptVectorStoreHandler = new ChatGptVectorStoreHandler(
                 config,
                 change,
@@ -191,6 +202,7 @@ public class ClientCommandExecutor extends ClientCommandBase {
                 config,
                 changeSetData,
                 change,
+                codeContextPolicy,
                 pluginDataHandlerProvider,
                 localizer
         );

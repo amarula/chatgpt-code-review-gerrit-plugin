@@ -2,11 +2,12 @@ package com.googlesource.gerrit.plugins.chatgpt.listener;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OperationNotSupportedException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistantHandler;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -14,20 +15,20 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
     private final Configuration config;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
-    private final GitRepoFiles gitRepoFiles;
+    private final ICodeContextPolicy codeContextPolicy;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
     EventHandlerTypeChangeMerged(
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
-            GitRepoFiles gitRepoFiles,
+            ICodeContextPolicy codeContextPolicy,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         this.config = config;
         this.changeSetData = changeSetData;
         this.change = change;
-        this.gitRepoFiles = gitRepoFiles;
+        this.codeContextPolicy = codeContextPolicy;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         log.debug("Initialized EventHandlerTypeChangeMerged for change ID: {}", change.getFullChangeId());
     }
@@ -45,10 +46,15 @@ public class EventHandlerTypeChangeMerged implements IEventHandlerType {
                 config,
                 changeSetData,
                 change,
-                gitRepoFiles,
+                codeContextPolicy,
                 pluginDataHandlerProvider
         );
-        chatGptAssistantHandler.flushAssistantAndVectorIds();
+        try {
+            chatGptAssistantHandler.flushAssistantAndVectorIds();
+        } catch (OperationNotSupportedException e) {
+            log.error("Exception while flushing assistant and vector ids", e);
+            return;
+        }
         log.debug("Flushed assistant and Vector Store IDs for change merged: {}", change.getFullChangeId());
     }
 }
