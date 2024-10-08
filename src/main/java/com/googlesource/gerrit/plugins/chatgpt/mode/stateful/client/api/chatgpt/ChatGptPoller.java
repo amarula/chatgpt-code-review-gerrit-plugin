@@ -63,15 +63,15 @@ public class ChatGptPoller extends ChatGptApiBase {
         return pollResponse;
     }
 
-    public boolean isNotCompleted(String status) {
+    public static boolean isNotCompleted(String status) {
         return status == null || !status.equals(COMPLETED_STATUS);
     }
 
-    public boolean isActionRequired(String status) {
+    public static boolean isActionRequired(String status) {
         return status != null && status.equals(REQUIRES_ACTION_STATUS);
     }
 
-    private boolean isPending(String status) {
+    private static boolean isPending(String status) {
         return status == null || status.isEmpty() || PENDING_STATUSES.contains(status);
     }
 }

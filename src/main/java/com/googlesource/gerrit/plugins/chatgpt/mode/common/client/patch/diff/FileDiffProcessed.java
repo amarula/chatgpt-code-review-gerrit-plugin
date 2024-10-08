@@ -2,7 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPatchSetFileDiff;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.code.CodeFinderDiff;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.code.patch.CodeFinderDiff;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.diff.DiffContent;
 import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
 import lombok.Getter;

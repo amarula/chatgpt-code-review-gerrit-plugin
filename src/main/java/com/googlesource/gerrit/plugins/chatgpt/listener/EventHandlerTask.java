@@ -11,10 +11,10 @@ import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -50,7 +50,7 @@ public class EventHandlerTask implements Runnable {
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final PatchSetReviewer reviewer;
-    private final GitRepoFiles gitRepoFiles;
+    private final ICodeContextPolicy codeContextPolicy;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
     private SupportedEvents processing_event_type;
@@ -63,7 +63,7 @@ public class EventHandlerTask implements Runnable {
             GerritChange change,
             PatchSetReviewer reviewer,
             GerritClient gerritClient,
-            GitRepoFiles gitRepoFiles,
+            ICodeContextPolicy codeContextPolicy,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         this.changeSetData = changeSetData;
@@ -71,7 +71,7 @@ public class EventHandlerTask implements Runnable {
         this.reviewer = reviewer;
         this.gerritClient = gerritClient;
         this.config = config;
-        this.gitRepoFiles = gitRepoFiles;
+        this.codeContextPolicy = codeContextPolicy;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         log.debug("EventHandlerTask initialized for change ID: {}", change.getFullChangeId());
     }
@@ -142,7 +142,7 @@ public class EventHandlerTask implements Runnable {
         return switch (processing_event_type) {
             case PATCH_SET_CREATED -> new EventHandlerTypePatchSetReview(config, changeSetData, change, reviewer, gerritClient);
             case COMMENT_ADDED -> new EventHandlerTypeCommentAdded(changeSetData, change, reviewer, gerritClient);
-            case CHANGE_MERGED -> new EventHandlerTypeChangeMerged(config, changeSetData, change, gitRepoFiles, pluginDataHandlerProvider);
+            case CHANGE_MERGED -> new EventHandlerTypeChangeMerged(config, changeSetData, change, codeContextPolicy, pluginDataHandlerProvider);
         };
     }
 

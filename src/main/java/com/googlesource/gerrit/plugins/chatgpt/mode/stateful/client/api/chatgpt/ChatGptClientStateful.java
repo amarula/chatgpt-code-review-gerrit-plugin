@@ -9,13 +9,13 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.ResponseEmptyRepliesException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptThread;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptThreadMessage;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptThreadMessageResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +35,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
     private static final String TYPE_TOOL_CALLS = "tool_calls";
     private static final int MAX_REITERATION_REQUESTS = 2;
 
-    private final GitRepoFiles gitRepoFiles;
+    private final ICodeContextPolicy codeContextPolicy;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
     private ChatGptRunHandler chatGptRunHandler;
@@ -44,11 +44,11 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
     @Inject
     public ChatGptClientStateful(
             Configuration config,
-            GitRepoFiles gitRepoFiles,
+            ICodeContextPolicy codeContextPolicy,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         super(config);
-        this.gitRepoFiles = gitRepoFiles;
+        this.codeContextPolicy = codeContextPolicy;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         log.debug("Initialized ChatGptClientStateful.");
     }
@@ -102,6 +102,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
                 config,
                 changeSetData,
                 change,
+                codeContextPolicy,
                 patchSet
         );
         chatGptThreadMessage.addMessage();
@@ -119,7 +120,7 @@ public class ChatGptClientStateful extends ChatGptClient implements IChatGptClie
                 config,
                 changeSetData,
                 change,
-                gitRepoFiles,
+                codeContextPolicy,
                 pluginDataHandlerProvider
         );
         chatGptRunHandler.setupRun();

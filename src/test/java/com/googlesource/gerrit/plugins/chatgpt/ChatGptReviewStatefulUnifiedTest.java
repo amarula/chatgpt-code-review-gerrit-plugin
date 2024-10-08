@@ -10,7 +10,9 @@ import com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
@@ -31,6 +33,9 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
     private static final String CHAT_GPT_ASSISTANT_ID = "asst_TEST_ASSISTANT_ID";
     private static final String CHAT_GPT_RUN_ID = "run_TEST_RUN_ID";
 
+    @Rule
+    public TestName testName = new TestName();
+
     @Override
     protected void setupMockRequests() throws RestApiException {
         super.setupMockRequests();
@@ -38,6 +43,11 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
         setupMockRequestCreateAssistant(CHAT_GPT_ASSISTANT_ID);
         setupMockRequestCreateRun(CHAT_GPT_ASSISTANT_ID, CHAT_GPT_RUN_ID);
         setupMockRequestRetrieveRunSteps("chatGptRunStepsResponse.json");
+
+        if ("vectorStoreCreateFailure".equals(testName.getMethodName())) {
+            when(globalConfig.getInt(Mockito.eq("gptPollingTimeout"), Mockito.anyInt()))
+                    .thenReturn(0);
+        }
     }
 
     private void setupMockRequestRetrieveRunSteps(String bodyFile) {
@@ -109,8 +119,6 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
                         .withStatus(HTTP_OK)
                         .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
                         .withBody("{\"status\": " + FAILED_STATUS + "}")));
-        when(globalConfig.getInt(Mockito.eq("gptPollingTimeout"), Mockito.anyInt()))
-                .thenReturn(0);
 
         handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
@@ -187,7 +195,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
     @Test
     public void patchSetCreatedReiterateRequestForTextualResponse() throws Exception {
-        String reviewReiteratePrompt = new ChatGptPromptStatefulReviewReiterated(config, changeSetData, getGerritChange())
+        String reviewReiteratePrompt = new ChatGptPromptStatefulReviewReiterated(config, changeSetData, getGerritChange(), getCodeContextPolicy())
                 .getDefaultGptThreadReviewMessage("");
 
         setupMockRequestRetrieveRunSteps("chatGptResponseRequestMessageStateful.json");
@@ -205,7 +213,7 @@ public class ChatGptReviewStatefulUnifiedTest extends ChatGptReviewStatefulTestB
 
     @Test
     public void patchSetCreatedReiterateRequestForMalformedJson() throws Exception {
-        String reviewReiteratePrompt = new ChatGptPromptStatefulReviewReiterated(config, changeSetData, getGerritChange())
+        String reviewReiteratePrompt = new ChatGptPromptStatefulReviewReiterated(config, changeSetData, getGerritChange(), getCodeContextPolicy())
                 .getDefaultGptThreadReviewMessage("");
 
         setupMockRequestRetrieveRunSteps("chatGptRunStepsResponseMalformedJson.json");
