@@ -1,8 +1,8 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.code;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.code.patch;
 
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptReplyItem;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.code.CodeFinderDiff;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.code.patch.CodeFinderDiff;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.diff.DiffContent;
 import lombok.extern.slf4j.Slf4j;
 

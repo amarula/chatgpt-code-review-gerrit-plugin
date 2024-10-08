@@ -91,7 +91,7 @@ public class ChatGptVectorStoreHandler extends ClientBase {
 
     private boolean checkVectorStoreStatus(String vectorStoreId) throws OpenAiConnectionFailException {
         String vectorStoreFileBatchStatus = projectDataHandler.getValue(KEY_VECTOR_STORE_FILE_BATCH_STATUS);
-        if (chatGptPoller.isNotCompleted(vectorStoreFileBatchStatus)) {
+        if (ChatGptPoller.isNotCompleted(vectorStoreFileBatchStatus)) {
             String vectorStoreFileBatchId = projectDataHandler.getValue(KEY_VECTOR_STORE_FILE_BATCH_ID);
             ChatGptResponse vectorStoreFileBatchResponse = chatGptPoller.runPoll(
                     UriResourceLocatorStateful.vectorStoreFileBatchRetrieveUri(vectorStoreId, vectorStoreFileBatchId),

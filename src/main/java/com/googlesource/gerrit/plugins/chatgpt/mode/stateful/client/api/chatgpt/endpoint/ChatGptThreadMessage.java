@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptRequestMessage;
@@ -22,6 +23,7 @@ public class ChatGptThreadMessage extends ChatGptApiBase {
 
     private ChangeSetData changeSetData;
     private GerritChange change;
+    private ICodeContextPolicy codeContextPolicy;
     private String patchSet;
     private ChatGptRequestMessage addMessageRequestBody;
 
@@ -35,11 +37,13 @@ public class ChatGptThreadMessage extends ChatGptApiBase {
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
+            ICodeContextPolicy codeContextPolicy,
             String patchSet
     ) {
         this(threadId, config);
         this.changeSetData = changeSetData;
         this.change = change;
+        this.codeContextPolicy = codeContextPolicy;
         this.patchSet = patchSet;
     }
 
@@ -76,7 +80,12 @@ public class ChatGptThreadMessage extends ChatGptApiBase {
     private Request addMessageRequest() {
         String uri = UriResourceLocatorStateful.threadMessagesUri(threadId);
         log.debug("ChatGPT Add Message request URI: {}", uri);
-        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, change);
+        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(
+                config,
+                changeSetData,
+                change,
+                codeContextPolicy
+        );
         addMessageRequestBody = ChatGptRequestMessage.builder()
                 .role("user")
                 .content(chatGptPromptStateful.getDefaultGptThreadReviewMessage(patchSet))

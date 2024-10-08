@@ -8,6 +8,7 @@ import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.ClientMessageParser;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
@@ -32,6 +33,7 @@ public class GerritClientComments extends GerritClientAccount {
     private static final Integer MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT = 2;
 
     private final ChangeSetData changeSetData;
+    private final ICodeContextPolicy codeContextPolicy;
     private final GitRepoFiles gitRepoFiles;
     private final HashMap<String, GerritComment> commentMap;
     private final HashMap<String, GerritComment> patchSetCommentMap;
@@ -48,12 +50,14 @@ public class GerritClientComments extends GerritClientAccount {
             Configuration config,
             AccountCache accountCache,
             ChangeSetData changeSetData,
+            ICodeContextPolicy codeContextPolicy,
             GitRepoFiles gitRepoFiles,
             PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
     ) {
         super(config, accountCache);
         this.changeSetData = changeSetData;
+        this.codeContextPolicy = codeContextPolicy;
         this.gitRepoFiles = gitRepoFiles;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         this.localizer = localizer;
@@ -157,6 +161,7 @@ public class GerritClientComments extends GerritClientAccount {
                 config,
                 changeSetData,
                 change,
+                codeContextPolicy,
                 gitRepoFiles,
                 pluginDataHandlerProvider,
                 localizer
