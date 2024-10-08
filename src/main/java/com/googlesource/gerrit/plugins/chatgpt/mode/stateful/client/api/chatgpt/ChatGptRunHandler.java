@@ -3,13 +3,13 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseMessage;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptToolCall;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptRun;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
@@ -22,12 +22,11 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils.threadSl
 public class ChatGptRunHandler extends ChatGptApiBase {
     private static final int STEP_RETRIEVAL_INTERVAL = 10000;
     private static final int MAX_STEP_RETRIEVAL_RETRIES = 3;
-    private static final int MAX_ACTION_REQUIRED_RETRIES = 1;
 
     private final ChangeSetData changeSetData;
     private final GerritChange change;
     private final String threadId;
-    private final GitRepoFiles gitRepoFiles;
+    private final ICodeContextPolicy codeContextPolicy;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final ChatGptPoller chatGptPoller;
 
@@ -40,14 +39,14 @@ public class ChatGptRunHandler extends ChatGptApiBase {
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
-            GitRepoFiles gitRepoFiles,
+            ICodeContextPolicy codeContextPolicy,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
         super(config);
         this.changeSetData = changeSetData;
         this.change = change;
         this.threadId = threadId;
-        this.gitRepoFiles = gitRepoFiles;
+        this.codeContextPolicy = codeContextPolicy;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         chatGptPoller = new ChatGptPoller(config);
     }
@@ -57,7 +56,7 @@ public class ChatGptRunHandler extends ChatGptApiBase {
                 config,
                 changeSetData,
                 change,
-                gitRepoFiles,
+                codeContextPolicy,
                 pluginDataHandlerProvider
         );
         chatGptRun = new ChatGptRun(
@@ -70,26 +69,14 @@ public class ChatGptRunHandler extends ChatGptApiBase {
 
     public void pollRunStep() throws OpenAiConnectionFailException {
         OpenAiConnectionFailException exception = null;
-        int actionRequiredRetries = 0;
+        codeContextPolicy.setupRunAction(chatGptRun);
         for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
             runResponse = chatGptPoller.runPoll(
                     UriResourceLocatorStateful.runRetrieveUri(threadId, runResponse.getId()),
                     runResponse
             );
-            if (config.getCodeContextPolicy() == ChatGptCodeContextPolicies.CodeContextPolicies.ON_DEMAND &&
-                    chatGptPoller.isActionRequired(runResponse.getStatus())) {
-                actionRequiredRetries++;
-                if (actionRequiredRetries <= MAX_ACTION_REQUIRED_RETRIES) {
-                    log.debug("Action required for thread ID: {}", threadId);
-                    ChatGptRunToolOutputHandler chatGptRunToolOutputHandler = new ChatGptRunToolOutputHandler(
-                            config,
-                            chatGptRun
-                    );
-                    chatGptRunToolOutputHandler.submitToolOutput(getRunToolCalls());
-                    runResponse.setStatus(null);
-                    continue;
-                }
-                log.debug("Max Action required retries reached: {}", actionRequiredRetries);
+            if (codeContextPolicy.runActionRequired(runResponse)) {
+                continue;
             }
             Request stepsRequest = chatGptRun.getStepsRequest(runResponse.getId());
             log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
@@ -129,9 +116,5 @@ public class ChatGptRunHandler extends ChatGptApiBase {
 
     private ChatGptRunStepsResponse getFirstStep() {
         return stepResponse.getData().get(0);
-    }
-
-    private List<ChatGptToolCall> getRunToolCalls() {
-        return runResponse.getRequiredAction().getSubmitToolOutputs().getToolCalls();
     }
 }

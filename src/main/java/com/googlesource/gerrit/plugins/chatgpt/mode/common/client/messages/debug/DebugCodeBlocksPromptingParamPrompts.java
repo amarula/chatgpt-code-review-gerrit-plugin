@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -18,9 +19,10 @@ public class DebugCodeBlocksPromptingParamPrompts extends DebugCodeBlocksPrompti
             Localizer localizer,
             Configuration config,
             ChangeSetData changeSetData,
-            GerritChange change
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
     ) {
-        super(localizer, "message.dump.prompts.title", config, changeSetData, change);
+        super(localizer, "message.dump.prompts.title", config, changeSetData, change, codeContextPolicy);
         this.config = config;
         this.changeSetData = changeSetData;
     }

@@ -1,11 +1,11 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -27,10 +27,18 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
     protected final ChangeSetData changeSetData;
     protected final GerritChange change;
 
-    public ChatGptPromptStatefulBase(Configuration config, ChangeSetData changeSetData, GerritChange change) {
+    private final ICodeContextPolicy codeContextPolicy;
+
+    public ChatGptPromptStatefulBase(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
+    ) {
         super(config);
         this.changeSetData = changeSetData;
         this.change = change;
+        this.codeContextPolicy = codeContextPolicy;
         this.isCommentEvent = change.getIsCommentEvent();
         loadDefaultPrompts("promptsStateful");
         log.debug("Initialized ChatGptPromptStatefulBase with change ID: {}", change.getFullChangeId());
@@ -50,7 +58,7 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
         List<String> instructions = new ArrayList<>(List.of(
                 config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS) + DOT
         ));
-        addCodeContextPolicyAwareAssistantInstructions(instructions);
+        codeContextPolicy.addCodeContextPolicyAwareAssistantInstructions(instructions);
         addGptAssistantInstructions(instructions);
         String compiledInstructions = joinWithSpace(instructions);
         log.debug("Compiled GPT Assistant Instructions: {}", compiledInstructions);
@@ -68,17 +76,5 @@ public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements
             log.debug("Default Thread Review Message used: {}", defaultMessage);
             return defaultMessage;
         }
-    }
-
-    private void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions) {
-        if (config.getCodeContextPolicy() == ChatGptCodeContextPolicies.CodeContextPolicies.ON_DEMAND) {
-            return;
-        }
-        String contextAwareInstructions = switch (config.getCodeContextPolicy()) {
-            case NONE -> DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
-            case UPLOAD_ALL -> String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT, change.getProjectName());
-            default -> throw new IllegalStateException("Unexpected value: " + config.getCodeContextPolicy());
-        };
-        instructions.add(contextAwareInstructions);
     }
 }

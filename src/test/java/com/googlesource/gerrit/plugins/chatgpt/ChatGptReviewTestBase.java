@@ -32,6 +32,7 @@ import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
@@ -43,6 +44,9 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStatefulTaskSpecific;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyNone;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyOnDemand;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyUploadAll;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptClientStateless;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit.GerritClientPatchSetStateless;
 import lombok.NonNull;
@@ -292,7 +296,6 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                 install(new TestGerritEventContextModule(config, event));
 
                 bind(GerritClient.class).toInstance(gerritClient);
-                bind(GitRepoFiles.class).toInstance(gitRepoFiles);
                 bind(ConfigCreator.class).toInstance(mockConfigCreator);
                 bind(ChangeSetDataProvider.class).toInstance(changeSetDataProvider);
                 bind(PatchSetReviewer.class).toInstance(patchSetReviewer);
@@ -328,6 +331,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                             config,
                             accountCacheMock,
                             changeSetData,
+                            getCodeContextPolicy(),
                             gitRepoFiles,
                             pluginDataHandlerProvider,
                             localizer
@@ -343,6 +347,14 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
                 localizer
             );
         mockConfigCreator = mock(ConfigCreator.class);
+    }
+
+    protected ICodeContextPolicy getCodeContextPolicy() {
+        return switch (config.getCodeContextPolicy()){
+            case NONE -> new CodeContextPolicyNone(config);
+            case ON_DEMAND -> new CodeContextPolicyOnDemand(config);
+            case UPLOAD_ALL -> new CodeContextPolicyUploadAll(config, getGerritChange(), gitRepoFiles, pluginDataHandlerProvider);
+        };
     }
 
     private AccountAttribute createTestAccountAttribute() {
@@ -404,8 +416,8 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     private IChatGptClient getChatGptClient() {
         return switch (config.getGptMode()) {
             case STATEFUL -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
-                    new ChatGptClientStatefulTaskSpecific(config, gitRepoFiles, pluginDataHandlerProvider):
-                    new ChatGptClientStateful(config, gitRepoFiles, pluginDataHandlerProvider);
+                    new ChatGptClientStatefulTaskSpecific(config, getCodeContextPolicy(), pluginDataHandlerProvider):
+                    new ChatGptClientStateful(config, getCodeContextPolicy(), pluginDataHandlerProvider);
             case STATELESS -> new ChatGptClientStateless(config);
         };
     }

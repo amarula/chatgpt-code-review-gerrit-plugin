@@ -72,7 +72,7 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
         super.initTest();
 
         // Load the prompts
-        chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, getGerritChange());
+        chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, getGerritChange(), getCodeContextPolicy());
     }
 
     protected void setupMockRequests() throws RestApiException {
