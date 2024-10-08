@@ -8,7 +8,7 @@ import com.google.gerrit.server.util.OneOffRequestContext;
 import java.util.*;
 
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt.getJsonPromptValues;
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies.CodeContextPolicies;
+import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
 
 public class Configuration extends ConfigCore {

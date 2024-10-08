@@ -1,4 +1,4 @@
-package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.code;
+package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.code.patch;
 
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.patch.diff.DiffContent;
 import lombok.AllArgsConstructor;

@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.commands;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksConfiguration;
@@ -21,6 +22,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithDo
 public class ClientCommandShowExecutor extends ClientCommandBase {
     private final ChangeSetData changeSetData;
     private final GerritChange change;
+    private final ICodeContextPolicy codeContextPolicy;
     private final Localizer localizer;
     private final PluginDataHandlerProvider pluginDataHandlerProvider;
     private final List<String> itemsToShow = new ArrayList<>();
@@ -29,6 +31,7 @@ public class ClientCommandShowExecutor extends ClientCommandBase {
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
+            ICodeContextPolicy codeContextPolicy,
             PluginDataHandlerProvider pluginDataHandlerProvider,
             Localizer localizer
     ) {
@@ -36,6 +39,7 @@ public class ClientCommandShowExecutor extends ClientCommandBase {
         this.localizer = localizer;
         this.change = change;
         this.changeSetData = changeSetData;
+        this.codeContextPolicy = codeContextPolicy;
         this.pluginDataHandlerProvider = pluginDataHandlerProvider;
         log.debug("ClientShowCommandExecutor initialized.");
     }
@@ -68,13 +72,13 @@ public class ClientCommandShowExecutor extends ClientCommandBase {
 
     private void commandShowPrompts() {
         DebugCodeBlocksPromptingParamPrompts debugCodeBlocksPromptingParamPrompts =
-                new DebugCodeBlocksPromptingParamPrompts(localizer, config, changeSetData, change);
+                new DebugCodeBlocksPromptingParamPrompts(localizer, config, changeSetData, change, codeContextPolicy);
         itemsToShow.add(debugCodeBlocksPromptingParamPrompts.getDebugCodeBlock());
     }
 
     private void commandShowInstructions() {
         DebugCodeBlocksPromptingParamInstructions debugCodeBlocksPromptingParamInstructions =
-                new DebugCodeBlocksPromptingParamInstructions(localizer, config, changeSetData, change);
+                new DebugCodeBlocksPromptingParamInstructions(localizer, config, changeSetData, change, codeContextPolicy);
         itemsToShow.add(debugCodeBlocksPromptingParamInstructions.getDebugCodeBlock());
     }
 }

@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptParameters;
@@ -19,6 +20,7 @@ public abstract class DebugCodeBlocksPromptingParamBase extends DebugCodeBlocksC
     private final Configuration config;
     private final ChangeSetData changeSetData;
     private final GerritChange change;
+    private final ICodeContextPolicy codeContextPolicy;
     protected final LinkedHashMap<String, String> promptingParameters = new LinkedHashMap<>();
 
     protected IChatGptPromptStateful chatGptPromptStateful;
@@ -28,12 +30,14 @@ public abstract class DebugCodeBlocksPromptingParamBase extends DebugCodeBlocksC
             String titleKey,
             Configuration config,
             ChangeSetData changeSetData,
-            GerritChange change
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
     ) {
         super(localizer, titleKey);
         this.config = config;
         this.change = change;
         this.changeSetData = changeSetData;
+        this.codeContextPolicy = codeContextPolicy;
     }
 
     public String getDebugCodeBlock() {
@@ -56,6 +60,7 @@ public abstract class DebugCodeBlocksPromptingParamBase extends DebugCodeBlocksC
                 config,
                 changeSetData,
                 change,
+                codeContextPolicy,
                 ReviewAssistantStages.REVIEW_CODE
         );
         if (chatGptParameters.shouldSpecializeAssistants()) {
@@ -64,6 +69,7 @@ public abstract class DebugCodeBlocksPromptingParamBase extends DebugCodeBlocksC
                     config,
                     changeSetData,
                     change,
+                    codeContextPolicy,
                     ReviewAssistantStages.REVIEW_COMMIT_MESSAGE
             );
             populateStatefulSpecializedCommitMessageReviewParameters();
