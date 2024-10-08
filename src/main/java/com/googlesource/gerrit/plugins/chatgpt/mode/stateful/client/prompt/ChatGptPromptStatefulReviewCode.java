@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -13,8 +14,13 @@ import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.g
 @Slf4j
 public class ChatGptPromptStatefulReviewCode extends ChatGptPromptStatefulReview implements IChatGptPromptStateful {
 
-    public ChatGptPromptStatefulReviewCode(Configuration config, ChangeSetData changeSetData, GerritChange change) {
-        super(config, changeSetData, change);
+    public ChatGptPromptStatefulReviewCode(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
+    ) {
+        super(config, changeSetData, change, codeContextPolicy);
         log.debug("ChatGptPromptStatefulReviewCode initialized for project: {}", change.getProjectName());
     }
 

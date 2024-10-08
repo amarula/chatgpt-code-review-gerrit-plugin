@@ -2,11 +2,11 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptParameters;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptTool;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.UriResourceLocatorStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptApiBase;
@@ -31,15 +31,21 @@ public class ChatGptAssistant extends ChatGptApiBase {
     private final String model;
     @Getter
     private final Double temperature;
+    private final ICodeContextPolicy codeContextPolicy;
 
-    private ChatGptToolResources toolResources = null;
-    private List<ChatGptTool> tools;
+    private ChatGptAssistantTools chatGptAssistantTools;
 
-    public ChatGptAssistant(Configuration config, ChangeSetData changeSetData, GerritChange change) {
+    public ChatGptAssistant(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
+    ) {
         super(config);
         log.debug("Setting up assistant parameters based on current configuration and change set data.");
-        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, change);
+        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, change, codeContextPolicy);
         ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
+        this.codeContextPolicy = codeContextPolicy;
         description = chatGptPromptStateful.getDefaultGptAssistantDescription();
         instructions = chatGptPromptStateful.getDefaultGptAssistantInstructions();
         model = config.getGptModel();
@@ -69,8 +75,8 @@ public class ChatGptAssistant extends ChatGptApiBase {
                 .instructions(instructions)
                 .model(model)
                 .temperature(temperature)
-                .tools(tools)
-                .toolResources(toolResources)
+                .tools(chatGptAssistantTools.getTools())
+                .toolResources(chatGptAssistantTools.getToolResources())
                 .build();
         log.debug("Request body for creating assistant: {}", requestBody);
 
@@ -79,20 +85,9 @@ public class ChatGptAssistant extends ChatGptApiBase {
 
     private void updateTools(String vectorStoreId) {
         ChatGptTools chatGptFormatRepliesTools = new ChatGptTools(ChatGptTools.Functions.formatReplies);
-        tools = new ArrayList<>(List.of(chatGptFormatRepliesTools.retrieveFunctionTool()));
-        switch (config.getCodeContextPolicy()) {
-            case ON_DEMAND:
-                ChatGptTools chatGptGetContextTools = new ChatGptTools(ChatGptTools.Functions.getContext);
-                tools.add(chatGptGetContextTools.retrieveFunctionTool());
-                break;
-            case UPLOAD_ALL:
-                tools.add(new ChatGptTool("file_search"));
-                toolResources = new ChatGptToolResources(
-                        new ChatGptToolResources.VectorStoreIds(
-                                new String[]{vectorStoreId}
-                        )
-                );
-                break;
-        }
+        chatGptAssistantTools = ChatGptAssistantTools.builder()
+                .tools(new ArrayList<>(List.of(chatGptFormatRepliesTools.retrieveFunctionTool())))
+                .build();
+        codeContextPolicy.updateAssistantTools(chatGptAssistantTools, vectorStoreId);
     }
 }

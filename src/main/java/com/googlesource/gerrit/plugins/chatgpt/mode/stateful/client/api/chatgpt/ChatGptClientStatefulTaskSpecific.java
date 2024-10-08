@@ -7,11 +7,11 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptReplyItem;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -29,10 +29,10 @@ public class ChatGptClientStatefulTaskSpecific extends ChatGptClientStateful imp
     @Inject
     public ChatGptClientStatefulTaskSpecific(
             Configuration config,
-            GitRepoFiles gitRepoFiles,
+            ICodeContextPolicy codeContextPolicy,
             PluginDataHandlerProvider pluginDataHandlerProvider
     ) {
-        super(config, gitRepoFiles, pluginDataHandlerProvider);
+        super(config, codeContextPolicy, pluginDataHandlerProvider);
         log.debug("Initialized ChatGptClientStatefulTaskSpecific.");
     }
 

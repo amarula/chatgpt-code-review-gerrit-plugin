@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.prompt.IChatGptDataPrompt;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
@@ -20,11 +21,12 @@ public class ChatGptPromptFactory {
     public static IChatGptPromptStateful getChatGptPromptStateful(
             Configuration config,
             ChangeSetData changeSetData,
-            GerritChange change
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
     ) {
         if (change.getIsCommentEvent()) {
             log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulRequests");
-            return new ChatGptPromptStatefulRequests(config, changeSetData, change);
+            return new ChatGptPromptStatefulRequests(config, changeSetData, change, codeContextPolicy);
         }
         else {
             ChatGptParameters chatGptParameters = new ChatGptParameters(config, false);
@@ -32,21 +34,21 @@ public class ChatGptPromptFactory {
                 return switch (changeSetData.getReviewAssistantStage()) {
                     case REVIEW_CODE -> {
                         log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCode");
-                        yield new ChatGptPromptStatefulReviewCode(config, changeSetData, change);
+                        yield new ChatGptPromptStatefulReviewCode(config, changeSetData, change, codeContextPolicy);
                     }
                     case REVIEW_COMMIT_MESSAGE -> {
                         log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCommitMessage");
-                        yield new ChatGptPromptStatefulReviewCommitMessage(config, changeSetData, change);
+                        yield new ChatGptPromptStatefulReviewCommitMessage(config, changeSetData, change, codeContextPolicy);
                     }
                     case REVIEW_REITERATED -> {
                         log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewReiterate");
-                        yield new ChatGptPromptStatefulReviewReiterated(config, changeSetData, change);
+                        yield new ChatGptPromptStatefulReviewReiterated(config, changeSetData, change, codeContextPolicy);
                     }
                 };
             }
             else {
                 log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReview for Unified Review");
-                return new ChatGptPromptStatefulReview(config, changeSetData, change);
+                return new ChatGptPromptStatefulReview(config, changeSetData, change, codeContextPolicy);
             }
         }
     }
@@ -55,10 +57,11 @@ public class ChatGptPromptFactory {
             Configuration config,
             ChangeSetData changeSetData,
             GerritChange change,
+            ICodeContextPolicy codeContextPolicy,
             ReviewAssistantStages reviewAssistantStage
     ) {
         changeSetData.setReviewAssistantStage(reviewAssistantStage);
-        return getChatGptPromptStateful(config, changeSetData, change);
+        return getChatGptPromptStateful(config, changeSetData, change, codeContextPolicy);
     }
 
     public static IChatGptDataPrompt getChatGptDataPrompt(
