@@ -1,10 +1,10 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptCodeContextPolicies;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -27,8 +27,16 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY;
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET;
 
-    public ChatGptPromptStatefulReview(Configuration config, ChangeSetData changeSetData, GerritChange change) {
-        super(config, changeSetData, change);
+    private final ICodeContextPolicy codeContextPolicy;
+
+    public ChatGptPromptStatefulReview(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
+    ) {
+        super(config, changeSetData, change, codeContextPolicy);
+        this.codeContextPolicy = codeContextPolicy;
         loadDefaultPrompts("promptsStatefulReview");
         log.debug("ChatGptPromptStatefulReview initialized for change ID: {}", change.getFullChangeId());
     }
@@ -66,7 +74,7 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
     protected String getGptAssistantInstructionsReview(boolean... ruleFilter) {
         // Rules are applied by default unless the corresponding ruleFilter values is set to false
         List<String> rules = new ArrayList<>();
-        addCodeContextPolicyAwareRule(rules);
+        codeContextPolicy.addCodeContextPolicyAwareAssistantRule(rules);
         rules.addAll(List.of(
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY,
                 DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET
@@ -82,17 +90,5 @@ public class ChatGptPromptStatefulReview extends ChatGptPromptStatefulBase imple
                         .collect(Collectors.toList()),
                 RULE_NUMBER_PREFIX, COLON_SPACE
         ));
-    }
-
-    private void addCodeContextPolicyAwareRule(List<String> rules) {
-        if (config.getCodeContextPolicy() == ChatGptCodeContextPolicies.CodeContextPolicies.NONE) {
-            return;
-        }
-        String contextAwareRule = switch (config.getCodeContextPolicy()) {
-            case ON_DEMAND -> DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_ON_DEMAND_REQUEST;
-            case UPLOAD_ALL -> DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
-            default -> throw new IllegalStateException("Unexpected value: " + config.getCodeContextPolicy());
-        };
-        rules.add(contextAwareRule);
     }
 }

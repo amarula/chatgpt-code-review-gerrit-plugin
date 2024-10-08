@@ -1,6 +1,7 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.prompt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.prompt.IChatGptPromptStateful;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
@@ -15,8 +16,13 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithSp
 public class ChatGptPromptStatefulRequests extends ChatGptPromptStatefulBase implements IChatGptPromptStateful {
     public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS;
 
-    public ChatGptPromptStatefulRequests(Configuration config, ChangeSetData changeSetData, GerritChange change) {
-        super(config, changeSetData, change);
+    public ChatGptPromptStatefulRequests(
+            Configuration config,
+            ChangeSetData changeSetData,
+            GerritChange change,
+            ICodeContextPolicy codeContextPolicy
+    ) {
+        super(config, changeSetData, change, codeContextPolicy);
         loadDefaultPrompts("promptsStatefulRequests");
         log.debug("ChatGptPromptStatefulRequests initialized for change ID: {}", change.getFullChangeId());
     }

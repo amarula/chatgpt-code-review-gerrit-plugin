@@ -71,7 +71,7 @@ public class ChatGptReviewStatefulTaskSpecificTest extends ChatGptReviewStateful
         handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
         IChatGptPromptStateful chatGptPromptStatefulCommitMessage =
-                getChatGptPromptStateful(config, changeSetData, getGerritChange());
+                getChatGptPromptStateful(config, changeSetData, getGerritChange(), getCodeContextPolicy());
         String reviewPrompt = chatGptPromptStatefulCommitMessage.getDefaultGptThreadReviewMessage(formattedPatchContent);
 
         ArgumentCaptor<ReviewInput> captor = testRequestSent();

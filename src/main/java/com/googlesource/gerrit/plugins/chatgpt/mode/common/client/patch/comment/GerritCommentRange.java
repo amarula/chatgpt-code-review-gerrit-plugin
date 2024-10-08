@@ -3,7 +3,7 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.comment
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.code.InlineCode;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.code.patch.InlineCode;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptReplyItem;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
