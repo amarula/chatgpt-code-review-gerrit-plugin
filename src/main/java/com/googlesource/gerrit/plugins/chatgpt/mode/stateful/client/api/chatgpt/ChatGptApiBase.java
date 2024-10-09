@@ -7,7 +7,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.C
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClass;
 
 @Slf4j
 public abstract class ChatGptApiBase extends ClientBase {
@@ -25,7 +25,7 @@ public abstract class ChatGptApiBase extends ClientBase {
         clientResponse = httpClient.execute(request);
         log.debug("ChatGPT Client response: {}", clientResponse);
 
-        return getGson().fromJson(clientResponse, clazz);
+        return jsonToClass(clientResponse, clazz);
     }
 
     public ChatGptRunResponse getChatGptResponse(Request request) throws OpenAiConnectionFailException {
