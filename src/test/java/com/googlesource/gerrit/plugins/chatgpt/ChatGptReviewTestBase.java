@@ -71,7 +71,7 @@ import java.util.function.Consumer;
 
 import static com.google.gerrit.extensions.client.ChangeKind.REWORK;
 import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.EVENT_CLASS_MAP;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClass;
 import static org.mockito.Mockito.*;
 
 public class ChatGptReviewTestBase extends ChatGptTestBase {
@@ -309,7 +309,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
         ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
         verify(revisionApiMock).review(reviewInputCaptor.capture());
-        gptRequestBody = getGson().fromJson(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
+        gptRequestBody = jsonToClass(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
         return reviewInputCaptor;
     }
 

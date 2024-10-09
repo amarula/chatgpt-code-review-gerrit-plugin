@@ -18,6 +18,7 @@ import static com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask.
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClass;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -54,7 +55,7 @@ public class ChatGptReviewStatefulTaskSpecificTest extends ChatGptReviewStateful
     }
 
     private String filterOutSubsetRunStepsResponse(int from, int to) {
-        ChatGptListResponse runStepsResponse = getGson().fromJson(
+        ChatGptListResponse runStepsResponse = jsonToClass(
                 readTestFile(RESOURCE_STATEFUL_PATH + "chatGptRunStepsResponse.json"),
                 ChatGptListResponse.class
         );

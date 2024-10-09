@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClass;
 
 @Slf4j
 public class ChatGptTools {
@@ -31,7 +31,7 @@ public class ChatGptTools {
         try (InputStreamReader reader = FileUtils.getInputStreamReader(
                 String.format(FILENAME_TOOL_FORMAT, functionName)
         )) {
-            tools = getGson().fromJson(reader, ChatGptTool.class);
+            tools = jsonToClass(reader, ChatGptTool.class);
             log.debug("Successfully loaded format replies tool from JSON.");
         } catch (IOException e) {
             throw new RuntimeException("Failed to load data for ChatGPT `" + functionName + "` tool", e);
@@ -44,7 +44,7 @@ public class ChatGptTools {
         try (InputStreamReader reader = FileUtils.getInputStreamReader(
                 String.format(FILENAME_TOOL_CHOICE_FORMAT, functionName)
         )) {
-            toolChoice = getGson().fromJson(reader, ChatGptToolChoice.class);
+            toolChoice = jsonToClass(reader, ChatGptToolChoice.class);
             log.debug("Successfully loaded format replies tool choice from JSON.");
         } catch (IOException e) {
             throw new RuntimeException("Failed to load data for ChatGPT `" + functionName + "` tool choice", e);

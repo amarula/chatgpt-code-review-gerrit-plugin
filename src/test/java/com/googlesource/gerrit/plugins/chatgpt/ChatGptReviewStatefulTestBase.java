@@ -29,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPromptFactory.getChatGptPromptStateful;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptPoller.COMPLETED_STATUS;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClass;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -153,10 +154,10 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
     }
 
     protected String getReviewMessage(String responseFile, int tollCallId) {
-        ChatGptListResponse responseContent = getGson().fromJson(readTestFile(responseFile), ChatGptListResponse.class);
+        ChatGptListResponse responseContent = jsonToClass(readTestFile(responseFile), ChatGptListResponse.class);
         String reviewJsonResponse = responseContent.getData().get(0).getStepDetails().getToolCalls().get(tollCallId)
                 .getFunction().getArguments();
-        return getGson().fromJson(reviewJsonResponse, ChatGptResponseContent.class).getReplies().get(0).getReply();
+        return jsonToClass(reviewJsonResponse, ChatGptResponseContent.class).getReplies().get(0).getReply();
     }
 
     protected List<ReviewInput.CommentInput> getCapturedComments(ArgumentCaptor<ReviewInput> captor, String filename) {
