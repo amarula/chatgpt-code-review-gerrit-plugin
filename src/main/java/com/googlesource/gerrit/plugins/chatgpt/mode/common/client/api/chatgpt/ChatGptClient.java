@@ -12,7 +12,7 @@ import java.io.StringReader;
 import java.util.List;
 import java.util.Optional;
 
-import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
+import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClass;
 
 @Slf4j
 abstract public class ChatGptClient extends ClientBase {
@@ -38,8 +38,7 @@ abstract public class ChatGptClient extends ClientBase {
             return convertResponseContentFromJson(finalContent.toString());
         }
         else {
-            ChatGptResponseUnstreamed chatGptResponseUnstreamed =
-                    getGson().fromJson(body, ChatGptResponseUnstreamed.class);
+            ChatGptResponseUnstreamed chatGptResponseUnstreamed = jsonToClass(body, ChatGptResponseUnstreamed.class);
             return getResponseContent(chatGptResponseUnstreamed.getChoices().get(0).getMessage().getToolCalls());
         }
     }
@@ -74,7 +73,7 @@ abstract public class ChatGptClient extends ClientBase {
             return Optional.empty();
         }
         ChatGptResponseStreamed chatGptResponseStreamed =
-                getGson().fromJson(line.substring("data: ".length()), ChatGptResponseStreamed.class);
+                jsonToClass(line.substring("data: ".length()), ChatGptResponseStreamed.class);
         ChatGptResponseMessage delta = chatGptResponseStreamed.getChoices().get(0).getDelta();
         if (delta == null || delta.getToolCalls() == null) {
             return Optional.empty();
@@ -84,7 +83,7 @@ abstract public class ChatGptClient extends ClientBase {
     }
 
     private ChatGptResponseContent convertResponseContentFromJson(String content) {
-        return getGson().fromJson(content, ChatGptResponseContent.class);
+        return jsonToClass(content, ChatGptResponseContent.class);
     }
 
     private ChatGptToolCall.Function getFunction(List<ChatGptToolCall> toolCalls, int ind) {
