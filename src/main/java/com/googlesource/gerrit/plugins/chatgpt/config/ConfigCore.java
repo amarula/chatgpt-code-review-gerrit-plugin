@@ -180,6 +180,12 @@ public abstract class ConfigCore {
         return value.isEmpty() ? List.of() : TextUtils.splitString(value);
     }
 
+    protected List<String> splitConfigRemoveDots(String value) {
+        return splitConfig(value).stream()
+                .map(s -> s.replaceAll("^\\.", ""))
+                .toList();
+    }
+
     protected List<String> splitListIntoItems(String key, List<String> defaultValue) {
         log.debug("Retrieving and splitting Global and Project configuration items for key {}", key);
         List<String> items = new ArrayList<>();

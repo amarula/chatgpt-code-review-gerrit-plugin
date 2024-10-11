@@ -10,32 +10,32 @@ disabledTopicFilter:
 disabledUsers: 
 enableMessageDebugging: true
 enabledFileExtensions: 
-    .py
-    .java
-    .js
-    .ts
-    .html
-    .css
-    .cs
-    .cpp
-    .c
-    .h
-    .php
-    .rb
-    .swift
-    .kt
-    .r
-    .jl
-    .go
-    .scala
-    .pl
-    .pm
-    .rs
-    .dart
-    .lua
-    .sh
-    .vb
-    .bat
+    py
+    java
+    js
+    ts
+    html
+    css
+    cs
+    cpp
+    c
+    h
+    php
+    rb
+    swift
+    kt
+    r
+    jl
+    go
+    scala
+    pl
+    pm
+    rs
+    dart
+    lua
+    sh
+    vb
+    bat
 enabledGroups: 
     ALL
 enabledProjects: 

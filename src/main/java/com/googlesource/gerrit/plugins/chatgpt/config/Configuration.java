@@ -257,7 +257,7 @@ public class Configuration extends ConfigCore {
     }
 
     public List<String> getEnabledFileExtensions() {
-        return splitConfig(getString(KEY_ENABLED_FILE_EXTENSIONS, DEFAULT_ENABLED_FILE_EXTENSIONS));
+        return splitConfigRemoveDots(getString(KEY_ENABLED_FILE_EXTENSIONS, DEFAULT_ENABLED_FILE_EXTENSIONS));
     }
 
     public List<String> getDirective() {
