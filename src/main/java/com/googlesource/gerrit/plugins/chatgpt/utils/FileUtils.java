@@ -40,8 +40,7 @@ public class FileUtils {
     }
 
     public static boolean matchesExtensionList(String filename, List<String> extensions) {
-        int extIndex = filename.lastIndexOf('.');
-        boolean matches = extIndex >= 1 && extensions.contains(filename.substring(extIndex));
+        boolean matches = extensions.contains(getExtension(filename));
         log.debug("Filename '{}' matches extension list: {}", filename, matches);
         return matches;
     }
@@ -50,5 +49,13 @@ public class FileUtils {
         String sanitized = filename.replaceAll("[^-_a-zA-Z0-9]", "+");
         log.debug("Original filename: '{}', Sanitized filename: '{}'", filename, sanitized);
         return sanitized;
+    }
+
+    public static String getExtension(String filename) {
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex <= 0 || lastDotIndex == filename.length() - 1) {
+            return "";
+        }
+        return filename.substring(lastDotIndex + 1);
     }
 }
