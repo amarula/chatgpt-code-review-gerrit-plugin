@@ -195,6 +195,8 @@ directive = End each reply with \"Hope this helps!\"
 - `enabledFileExtensions`: This limits the reviewed files to the given types. Default file extensions are ".py, .java,
   .js, .ts, .html, .css, .cs, .cpp, .c, .h, .php, .rb, .swift, .kt, .r, .jl, .go, .scala, .pl, .pm, .rs, .dart, .lua,
   .sh, .vb, .bat".
+
+  **NOTE**: Extensions without a leading dot (e.g., 'py') are also accepted.
 - `enabledVoting`: Initially disabled (false). If set to true, allows ChatGPT to cast a vote on each reviewed Patch Set
   by assigning a score.
 - `votingMinScore`: The lowest possible score that can be given to a Patch Set (Default value: -1).
