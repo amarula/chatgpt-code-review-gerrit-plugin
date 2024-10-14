@@ -1,5 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +54,10 @@ public class ChatGptTool {
                             private Field filename;
                             private Field lineNumber;
                             private Field codeSnippet;
+                            private Field requestType;
+                            private Field otherDescription;
+                            private Field entityCategory;
+                            private Field contextRequiredEntity;
                         }
                     }
                 }
@@ -60,6 +65,9 @@ public class ChatGptTool {
                 @Data
                 public static class Field {
                     private String type;
+                    private String description;
+                    @SerializedName("enum")
+                    private List<String> enumeration;
                 }
             }
         }

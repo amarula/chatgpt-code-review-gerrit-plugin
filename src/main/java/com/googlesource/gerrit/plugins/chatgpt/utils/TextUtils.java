@@ -21,7 +21,7 @@ public class TextUtils extends StringUtils {
     public static final String COMMA_SPACE = ", ";
     public static final String COLON_SPACE = ": ";
     public static final String SEMICOLON_SPACE = "; ";
-    public static final String ITEM_COMMA_DELIMITED = "\\s*,\\s*";
+    public static final String ITEM_COMMA_DELIMITED_REGEX = "\\s*,\\s*";
     public static final String QUOTED_ENTIRE_ITEM = "^" + DOUBLE_QUOTES + "(.*)" + DOUBLE_QUOTES + "$";
 
 
@@ -112,7 +112,7 @@ public class TextUtils extends StringUtils {
     }
 
     public static List<String> splitString(String value) {
-        return splitString(value, ITEM_COMMA_DELIMITED);
+        return splitString(value, ITEM_COMMA_DELIMITED_REGEX);
     }
 
     public static List<String> splitString(String value, String delimiter) {
