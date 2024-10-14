@@ -6,8 +6,10 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptTools;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptRunActionHandler;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptRun;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptAssistantTools;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptRunResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -18,17 +20,22 @@ import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.promp
 
 @Slf4j
 public class CodeContextPolicyOnDemand extends CodeContextPolicyBase implements ICodeContextPolicy {
+    private final GerritChange change;
+    private final GitRepoFiles gitRepoFiles;
+
     private ChatGptRunActionHandler chatGptRunActionHandler;
 
     @VisibleForTesting
     @Inject
-    public CodeContextPolicyOnDemand(Configuration config) {
+    public CodeContextPolicyOnDemand(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
         super(config);
+        this.change = change;
+        this.gitRepoFiles = gitRepoFiles;
         log.debug("CodeContextPolicyOnDemand initialized");
     }
 
     public void setupRunAction(ChatGptRun chatGptRun) {
-        chatGptRunActionHandler = new ChatGptRunActionHandler(config, chatGptRun);
+        chatGptRunActionHandler = new ChatGptRunActionHandler(config, change, gitRepoFiles, chatGptRun);
         log.debug("Run Action setup with On-Demand code context policy");
     }
 
@@ -42,7 +49,7 @@ public class CodeContextPolicyOnDemand extends CodeContextPolicyBase implements 
     public void updateAssistantTools(ChatGptAssistantTools chatGptAssistantTools, String vectorStoreId) {
         ChatGptTools chatGptGetContextTools = new ChatGptTools(ChatGptTools.Functions.getContext);
         chatGptAssistantTools.getTools().add(chatGptGetContextTools.retrieveFunctionTool());
-        log.debug("Updated Assistant Tools for On-Demand code context policy");
+        log.debug("Updated Assistant Tools for On-Demand code context policy: {}", chatGptAssistantTools);
     }
 
     @Override
