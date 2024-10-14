@@ -29,6 +29,7 @@ public class Configuration extends ConfigCore {
     private static final boolean DEFAULT_REVIEW_COMMIT_MESSAGES = true;
     private static final boolean DEFAULT_FULL_FILE_REVIEW = true;
     private static final String DEFAULT_CODE_CONTEXT_POLICY = "UPLOAD_ALL";
+    private static final String DEFAULT_CODE_CONTEXT_ON_DEMAND_BASE_PATH = "";
     private static final boolean DEFAULT_STREAM_OUTPUT = false;
     private static final boolean DEFAULT_GLOBAL_ENABLE = false;
     private static final String DEFAULT_DISABLED_USERS = "";
@@ -118,6 +119,7 @@ public class Configuration extends ConfigCore {
     private static final String KEY_REVIEW_PATCH_SET = "gptReviewPatchSet";
     private static final String KEY_FULL_FILE_REVIEW = "gptFullFileReview";
     private static final String KEY_CODE_CONTEXT_POLICY = "codeContextPolicy";
+    private static final String KEY_CODE_CONTEXT_ON_DEMAND_BASE_PATH = "codeContextOnDemandBasePath";
     private static final String KEY_PROJECT_ENABLE = "isEnabled";
     private static final String KEY_GLOBAL_ENABLE = "globalEnable";
     private static final String KEY_DISABLED_USERS = "disabledUsers";
@@ -206,6 +208,10 @@ public class Configuration extends ConfigCore {
 
     public CodeContextPolicies getCodeContextPolicy() {
         return getEnum(KEY_CODE_CONTEXT_POLICY, DEFAULT_CODE_CONTEXT_POLICY, CodeContextPolicies.class);
+    }
+
+    public String getCodeContextOnDemandBasePath() {
+        return getString(KEY_CODE_CONTEXT_ON_DEMAND_BASE_PATH, DEFAULT_CODE_CONTEXT_ON_DEMAND_BASE_PATH);
     }
 
     public boolean getGptStreamOutput() {

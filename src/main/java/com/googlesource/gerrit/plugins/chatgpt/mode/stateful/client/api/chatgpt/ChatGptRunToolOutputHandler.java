@@ -2,9 +2,13 @@ package com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt.ChatGptClientBase;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptGetContextContent;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptToolCall;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.endpoint.ChatGptRun;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.ondemand.CodeContextBuilder;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.ChatGptToolOutput;
 import lombok.extern.slf4j.Slf4j;
 
@@ -12,38 +16,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class ChatGptRunToolOutputHandler extends ClientBase {
+public class ChatGptRunToolOutputHandler extends ChatGptClientBase {
     // ChatGPT may occasionally return the fixed string "multi_tool_use" as the function name when multiple tools are
     // utilized.
     private static final List<String> ON_DEMAND_FUNCTION_NAMES = List.of("get_context", "multi_tool_use");
 
     private final ChatGptRun chatGptRun;
+    private final CodeContextBuilder codeContextBuilder;
+
+    private List<ChatGptToolCall> chatGptToolCalls;
 
     public ChatGptRunToolOutputHandler(
             Configuration config,
+            GerritChange change,
+            GitRepoFiles gitRepoFiles,
             ChatGptRun chatGptRun
     ) {
         super(config);
         this.chatGptRun = chatGptRun;
+        codeContextBuilder = new CodeContextBuilder(config, change, gitRepoFiles);
     }
 
     public void submitToolOutput(List<ChatGptToolCall> chatGptToolCalls) throws OpenAiConnectionFailException {
+        this.chatGptToolCalls = chatGptToolCalls;
         List<ChatGptToolOutput> toolOutputs = new ArrayList<>();
         log.debug("ChatGpt Tool Calls: {}", chatGptToolCalls);
-        for (ChatGptToolCall chatGptToolCall : chatGptToolCalls) {
+        for (int i = 0; i < chatGptToolCalls.size(); i++) {
             toolOutputs.add(ChatGptToolOutput.builder()
-                    .toolCallId(chatGptToolCall.getId())
-                    .output(getOutput(chatGptToolCall))
+                    .toolCallId(chatGptToolCalls.get(i).getId())
+                    .output(getOutput(i))
                     .build());
         }
         log.debug("ChatGpt Tool Outputs: {}", toolOutputs);
         chatGptRun.submitToolOutputs(toolOutputs);
     }
 
-    private String getOutput(ChatGptToolCall chatGptToolCall) {
-        if (ON_DEMAND_FUNCTION_NAMES.contains(chatGptToolCall.getFunction().getName())) {
-            // Placeholder string, will be replaced by logic to calculate code context based on ChatGPT request
-            return "CONTEXT PROVIDED";
+    private String getOutput(int i) {
+        ChatGptToolCall.Function function = getFunction(chatGptToolCalls, i);
+        if (ON_DEMAND_FUNCTION_NAMES.contains(function.getName())) {
+            ChatGptGetContextContent getContextContent = getArgumentAsType(
+                    chatGptToolCalls,
+                    i,
+                    ChatGptGetContextContent.class
+            );
+            log.debug("ChatGpt `get_context` Response Content: {}", getContextContent);
+            return codeContextBuilder.buildCodeContext(getContextContent);
         }
         return "";
     }
