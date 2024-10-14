@@ -1,7 +1,6 @@
 package com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.chatgpt;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.*;
 
 import lombok.Getter;
@@ -15,7 +14,7 @@ import java.util.Optional;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClass;
 
 @Slf4j
-abstract public class ChatGptClient extends ClientBase {
+abstract public class ChatGptClient extends ChatGptClientBase {
     protected boolean isCommentEvent = false;
     @Getter
     protected String requestBody;
@@ -80,22 +79,6 @@ abstract public class ChatGptClient extends ClientBase {
         }
         String content = getArgumentAsString(delta.getToolCalls(), 0);
         return Optional.ofNullable(content);
-    }
-
-    private ChatGptResponseContent convertResponseContentFromJson(String content) {
-        return jsonToClass(content, ChatGptResponseContent.class);
-    }
-
-    private ChatGptToolCall.Function getFunction(List<ChatGptToolCall> toolCalls, int ind) {
-        return toolCalls.get(ind).getFunction();
-    }
-
-    private String getArgumentAsString(List<ChatGptToolCall> toolCalls, int ind) {
-        return getFunction(toolCalls, ind).getArguments();
-    }
-
-    private ChatGptResponseContent getArgumentAsResponse(List<ChatGptToolCall> toolCalls, int ind) {
-        return convertResponseContentFromJson(getArgumentAsString(toolCalls, ind));
     }
 
     private ChatGptResponseContent mergeToolCalls(List<ChatGptToolCall> toolCalls) {

@@ -3,6 +3,8 @@ package com.googlesource.gerrit.plugins.chatgpt.utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class StringUtils {
@@ -52,4 +54,26 @@ public class StringUtils {
         return camelCase.replaceAll("(?<!^)([A-Z])", "_$1").toLowerCase();
     }
 
+    public static String convertSnakeToPascalCase(String snakeCase) {
+        if (snakeCase == null || snakeCase.isEmpty()) {
+            return snakeCase;
+        }
+        snakeCase = snakeCase.toLowerCase();
+        Pattern pattern = Pattern.compile("(?:^|_)(.)");
+        Matcher matcher = pattern.matcher(snakeCase);
+        StringBuilder result = new StringBuilder();
+        while (matcher.find()) {
+            matcher.appendReplacement(result, matcher.group(1).toUpperCase());
+        }
+        matcher.appendTail(result);
+
+        return result.toString();
+    }
+
+    public static String cutString(String str, int length) {
+        if (str == null) {
+            return "";
+        }
+        return str.length() <= length ? str : str.substring(0, length) + "...";
+    }
 }

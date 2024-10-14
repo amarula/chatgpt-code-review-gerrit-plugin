@@ -2,6 +2,7 @@ package com.googlesource.gerrit.plugins.chatgpt.utils;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
@@ -9,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Slf4j
 public class FileUtils {
@@ -57,5 +59,9 @@ public class FileUtils {
             return "";
         }
         return filename.substring(lastDotIndex + 1);
+    }
+
+    public static String getDirName(String filename) {
+        return Optional.ofNullable(new File(filename).getParent()).orElse("");
     }
 }
