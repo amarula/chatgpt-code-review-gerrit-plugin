@@ -352,7 +352,7 @@ public class ChatGptReviewTestBase extends ChatGptTestBase {
     protected ICodeContextPolicy getCodeContextPolicy() {
         return switch (config.getCodeContextPolicy()){
             case NONE -> new CodeContextPolicyNone(config);
-            case ON_DEMAND -> new CodeContextPolicyOnDemand(config);
+            case ON_DEMAND -> new CodeContextPolicyOnDemand(config, getGerritChange(), gitRepoFiles);
             case UPLOAD_ALL -> new CodeContextPolicyUploadAll(config, getGerritChange(), gitRepoFiles, pluginDataHandlerProvider);
         };
     }
