@@ -10,6 +10,7 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.PathFilter;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 import java.io.File;
@@ -30,7 +31,8 @@ public class GitRepoFiles {
     private List<String> enabledFileExtensions;
     private long fileSize;
 
-    public List<String> getGitRepoFiles(Configuration config, GerritChange change) {
+    public List<String> getGitRepoFilesAsJson(Configuration config, GerritChange change) {
+        log.debug("Getting Repository files as JSON");
         gitFileChunkBuilder = new GitFileChunkBuilder(config);
         enabledFileExtensions = config.getEnabledFileExtensions();
         try (Repository repository = openRepository(change)) {
@@ -40,6 +42,18 @@ public class GitRepoFiles {
                     .collect(Collectors.toList());
         } catch (IOException | GitAPIException e) {
             throw new RuntimeException("Failed to retrieve files in master branch: ", e);
+        }
+    }
+
+    public List<FileEntry> getDirFiles(Configuration config, GerritChange change, String path) {
+        log.debug("Getting files from selected directory");
+        enabledFileExtensions = config.getEnabledFileExtensions();
+        try (Repository repository = openRepository(change)) {
+            Map<String, List<FileEntry>> dirFilesMap = getDirFilesMap(repository, PathFilter.create(path));
+            log.debug("Retrieved file directories: {}", dirFilesMap.keySet());
+            return dirFilesMap.get(path);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to retrieve files in path " + path, e);
         }
     }
 
@@ -59,6 +73,18 @@ public class GitRepoFiles {
     }
 
     private List<Map<String, String>> listFilesWithContent(Repository repository) throws IOException, GitAPIException {
+        Map<String, List<FileEntry>> dirFilesMap = getDirFilesMap(repository, TreeFilter.ANY_DIFF);
+        for (Map.Entry<String, List<FileEntry>> entry : dirFilesMap.entrySet()) {
+            String dirPath = entry.getKey();
+            log.debug("File from dirFilesMap processed: {}", dirPath);
+            List<FileEntry> fileEntries = entry.getValue();
+            gitFileChunkBuilder.addFiles(dirPath, fileEntries);
+        }
+
+        return gitFileChunkBuilder.getChunks();
+    }
+
+    private Map<String, List<FileEntry>> getDirFilesMap(Repository repository, TreeFilter filter) throws IOException {
         Map<String, List<FileEntry>> dirFilesMap = new LinkedHashMap<>();
 
         try (ObjectReader reader = repository.newObjectReader()) {
@@ -67,7 +93,7 @@ public class GitRepoFiles {
             try (TreeWalk treeWalk = new TreeWalk(repository)) {
                 treeWalk.addTree(tree);
                 treeWalk.setRecursive(true);
-                treeWalk.setFilter(TreeFilter.ANY_DIFF);
+                treeWalk.setFilter(filter);
 
                 while (treeWalk.next()) {
                     String path = treeWalk.getPathString();
@@ -82,14 +108,7 @@ public class GitRepoFiles {
                 }
             }
         }
-        for (Map.Entry<String, List<FileEntry>> entry : dirFilesMap.entrySet()) {
-            String dirPath = entry.getKey();
-            log.debug("File from dirFilesMap processed: {}", dirPath);
-            List<FileEntry> fileEntries = entry.getValue();
-            gitFileChunkBuilder.addFiles(dirPath, fileEntries);
-        }
-
-        return gitFileChunkBuilder.getChunks();
+        return dirFilesMap;
     }
 
     private Repository openRepository(GerritChange change) throws IOException {
