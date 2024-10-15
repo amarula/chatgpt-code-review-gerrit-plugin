@@ -34,7 +34,7 @@ public class ChatGptRepoUploader extends ClientBase {
 
     public List<String> uploadRepoFiles() throws OpenAiConnectionFailException {
         log.debug("Starting uploading repository files.");
-        List<String> repoFiles = gitRepoFiles.getGitRepoFiles(config, change);
+        List<String> repoFiles = gitRepoFiles.getGitRepoFilesAsJson(config, change);
         List<String> filesIds = new ArrayList<>();
         filenameBase = sanitizeFilename(change.getProjectName());
         filenameIndex = 0;
