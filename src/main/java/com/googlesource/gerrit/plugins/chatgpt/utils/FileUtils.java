@@ -61,6 +61,14 @@ public class FileUtils {
         return filename.substring(lastDotIndex + 1);
     }
 
+    public static String removeExtension(String filename) {
+        int lastDotIndex = filename.lastIndexOf('.');
+        if (lastDotIndex <= 0 || lastDotIndex == filename.length() - 1) {
+            return filename;
+        }
+        return filename.substring(0, lastDotIndex);
+    }
+
     public static String getDirName(String filename) {
         return Optional.ofNullable(new File(filename).getParent()).orElse("");
     }

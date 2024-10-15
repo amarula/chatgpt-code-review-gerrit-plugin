@@ -81,7 +81,7 @@ public class ChatGptReviewStatefulTestBase extends ChatGptReviewTestBase {
 
         // Mock the behavior of the Git Repository Manager
         String repoJson = readTestFile("__files/stateful/gitProjectFiles.json");
-        when(gitRepoFiles.getGitRepoFiles(any(), any())).thenReturn(List.of(repoJson));
+        when(gitRepoFiles.getGitRepoFilesAsJson(any(), any())).thenReturn(List.of(repoJson));
 
         // Mock the behavior of the ChatGPT create-file request
         WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateful.filesCreateUri()))
