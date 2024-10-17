@@ -17,14 +17,6 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.ITEM_COMMA
 @Slf4j
 public class CallableLocator extends CallableLocatorBase implements IEntityLocator {
     private static final String PYTHON_MODULE_EXTENSION = ".py";
-    private static final Pattern IMPORT_PATTERN = Pattern.compile(
-            String.format(
-                    "^(?:from\\s+(%1$s)\\s+import\\s+(\\*|\\w+(?:%2$s\\w+)*)|import\\s+(%1$s(?:%2$s%1$s))*)",
-                    DOT_NOTATION_REGEX,
-                    ITEM_COMMA_DELIMITED_REGEX
-            ),
-            Pattern.MULTILINE
-    );
 
     private final Map<String, String> fromModuleMap = new HashMap<>();
 
@@ -32,6 +24,14 @@ public class CallableLocator extends CallableLocatorBase implements IEntityLocat
         super(config, change, gitRepoFiles);
         log.debug("Initializing CallableLocator for Python projects");
         languageModuleExtension = PYTHON_MODULE_EXTENSION;
+        importPattern = Pattern.compile(
+                String.format(
+                        "^(?:from\\s+(%1$s)\\s+import\\s+(\\*|\\w+(?:%2$s\\w+)*)|import\\s+(%1$s(?:%2$s%1$s))*)",
+                        DOT_NOTATION_REGEX,
+                        ITEM_COMMA_DELIMITED_REGEX
+                ),
+                Pattern.MULTILINE
+        );
     }
 
     @Override
@@ -43,15 +43,9 @@ public class CallableLocator extends CallableLocatorBase implements IEntityLocat
     }
 
     @Override
-    protected String findImportedFunctionDefinition(String functionName, String content) {
-        parseImportStatements(content);
-
-        return findInImportModules(functionName);
-    }
-
-    private void parseImportStatements(String content) {
+    protected void parseImportStatements(String content) {
         log.debug("Parsing import statements");
-        Matcher importMatcher = IMPORT_PATTERN.matcher(content);
+        Matcher importMatcher = importPattern.matcher(content);
         while (importMatcher.find()) {
             String fromModuleGroup = importMatcher.group(1);
             String fromEntitiesGroup = importMatcher.group(2);
@@ -73,7 +67,8 @@ public class CallableLocator extends CallableLocatorBase implements IEntityLocat
         log.debug("Found importModules: {}", importModules);
     }
 
-    private String findInImportModules(String functionName) {
+    @Override
+    protected String findInImportModules(String functionName) {
         // Check if the function is directly imported via `from MODULE import ENTITY`
         if (fromModuleMap.containsKey(functionName)) {
             String module = fromModuleMap.get(functionName);
