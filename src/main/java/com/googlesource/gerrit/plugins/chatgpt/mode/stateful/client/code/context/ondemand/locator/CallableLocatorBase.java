@@ -28,6 +28,7 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
     protected final List<String> importModules = new ArrayList<>();
     protected final CodeFileFetcher codeFileFetcher;
 
+    protected Pattern importPattern;
     protected String languageModuleExtension;
     protected String rootFileDir;
 
@@ -52,7 +53,9 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
 
     protected abstract String getFunctionRegex(String functionName);
 
-    protected abstract String findImportedFunctionDefinition(String functionName, String content);
+    protected abstract void parseImportStatements(String content);
+
+    protected abstract String findInImportModules(String functionName);
 
     protected String getFunctionFromModule(String functionName, String module) {
         String modulePath = convertDotNotationToPath(module) + languageModuleExtension;
@@ -77,9 +80,16 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
         return null;
     }
 
+    private String findImportedFunctionDefinition(String functionName, String content) {
+        parseImportStatements(content);
+
+        return findInImportModules(functionName);
+    }
+
     private String findFunctionInFile(String filename, String functionName) {
         log.debug("Finding function {} in file {}", functionName, filename);
         if (visitedFiles.contains(filename)) {
+            log.debug("File {} already visited", filename);
             return null;
         }
         visitedFiles.add(filename);

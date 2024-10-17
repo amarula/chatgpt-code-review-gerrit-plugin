@@ -28,6 +28,7 @@ public class CodeLocatorFactory {
     private static final Map<String, String> MAP_EXTENSION = Map.of(
             "py", "python",
             "java", "java",
+            "kt", "kotlin",
             "c", "c",
             "h", "c"
     );
