@@ -32,8 +32,12 @@ public class CodeContextBuilder extends ClientBase {
 
     public String buildCodeContext(ChatGptGetContextContent getContextContent) {
         log.debug("Building code context for {}", getContextContent);
+        List<ChatGptGetContextItem> replies = getContextContent.getReplies();
+        if (replies == null || replies.isEmpty()) {
+            return CONTEXT_NOT_PROVIDED;
+        }
         List<GetContextOutputItem> getContextOutput = new ArrayList<>();
-        for (ChatGptGetContextItem chatGptGetContextItem : getContextContent.getReplies()) {
+        for (ChatGptGetContextItem chatGptGetContextItem : replies) {
             IEntityLocator entityLocator;
             try {
                 entityLocator = getEntityLocator(chatGptGetContextItem, config, change, gitRepoFiles);
