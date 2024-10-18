@@ -59,9 +59,11 @@ public class CodeLocatorFactory {
             entityLocator = clazz
                     .getDeclaredConstructor(Configuration.class, GerritChange.class, GitRepoFiles.class)
                     .newInstance(config, change, gitRepoFiles);
-        } catch (ClassNotFoundException | InvocationTargetException | InstantiationException | IllegalAccessException |
-                 NoSuchMethodException e) {
-            log.warn("Entity locator `{}` class not found for Get-Context Item: {}", className, chatGptGetContextItem);
+        } catch (ClassNotFoundException e) {
+            log.warn("Entity locator class not found for Get-Context Item: {}", chatGptGetContextItem);
+            throw new CodeContextOnDemandLocatorException(e);
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e) {
+            log.error("Error instantiating class: {}", className, e);
             throw new CodeContextOnDemandLocatorException(e);
         }
         return entityLocator;
