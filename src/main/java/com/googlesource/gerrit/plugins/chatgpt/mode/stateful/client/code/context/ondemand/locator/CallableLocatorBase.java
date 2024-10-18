@@ -8,6 +8,7 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.Cha
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.ondemand.CodeFileFetcher;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.set.ListOrderedSet;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,13 +26,14 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
     protected static final String DOT_NOTATION_REGEX = "[\\w.]+";
     private static final int LOG_MAX_CONTENT_SIZE = 256;
 
-    protected final List<String> importModules = new ArrayList<>();
+    protected final ListOrderedSet<String> importModules = new ListOrderedSet<>();
     protected final CodeFileFetcher codeFileFetcher;
 
     protected Pattern importPattern;
     protected String languageModuleExtension;
     protected String rootFileDir;
 
+    private int importModulesPointer = 0;
     private Set<String> visitedFiles;
 
     public CallableLocatorBase(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
@@ -47,6 +49,7 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
         String functionName = getSimpleName(chatGptGetContextItem.getContextRequiredEntity());
         rootFileDir = getDirName(filename);
         log.debug("Root file dir: {}", rootFileDir);
+        beforeSearchingFunction();
 
         return findFunctionInFile(filename, functionName);
     }
@@ -56,6 +59,9 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
     protected abstract void parseImportStatements(String content);
 
     protected abstract String findInImportModules(String functionName);
+
+    protected void beforeSearchingFunction() {
+    }
 
     protected String getFunctionFromModule(String functionName, String module) {
         String modulePath = convertDotNotationToPath(module) + languageModuleExtension;
@@ -72,10 +78,13 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
     }
 
     protected String findInModules(String functionName) {
-        for (String module : importModules) {
+        log.debug("Finding function in modules {} with index {}", importModules, importModulesPointer);
+        while (importModulesPointer < importModules.size()) {
+            String module = importModules.get(importModulesPointer);
             log.debug("Searching for function `{}` in module: {}", functionName, module);
             String result = getFunctionFromModule(functionName, module);
             if (result != null) return result;
+            importModulesPointer++;
         }
         return null;
     }

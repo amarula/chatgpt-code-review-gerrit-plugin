@@ -7,7 +7,9 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitR
 import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.ondemand.locator.CallableLocatorJVM;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class CallableLocator extends CallableLocatorJVM implements IEntityLocator {
@@ -37,12 +39,11 @@ public class CallableLocator extends CallableLocatorJVM implements IEntityLocato
 
     @Override
     protected void parseImportStatements(String content) {
-        parseDirectImportStatements(content, importModules);
-        importModules.addAll(importModules.stream()
+        parseDirectImportStatements(content);
+        Set<String> alternativePathModules = importModules.stream()
                 .filter(s -> !s.startsWith(NON_MODIFIABLE_BASE_PATH))
                 .map(s -> ALTERNATIVE_BASE_PATH + s)
-                .toList()
-        );
-        retrievePackageModules();
+                .collect(Collectors.toSet());
+        importModules.addAll(alternativePathModules);
     }
 }
