@@ -7,8 +7,9 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.git.GitR
 import com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
+import java.util.stream.Collectors;
 
 @Slf4j
 public abstract class CallableLocatorJVM extends CallableLocatorBase implements IEntityLocator {
@@ -19,8 +20,7 @@ public abstract class CallableLocatorJVM extends CallableLocatorBase implements 
 
     @Override
     protected void parseImportStatements(String content) {
-        parseDirectImportStatements(content, importModules);
-        retrievePackageModules();
+        parseDirectImportStatements(content);
     }
 
     @Override
@@ -28,7 +28,7 @@ public abstract class CallableLocatorJVM extends CallableLocatorBase implements 
         return findInModules(functionName);
     }
 
-    protected void parseDirectImportStatements(String content, List<String> importModules) {
+    protected void parseDirectImportStatements(String content) {
         log.debug("Parsing import statements");
         Matcher importMatcher = importPattern.matcher(content);
         while (importMatcher.find()) {
@@ -39,12 +39,13 @@ public abstract class CallableLocatorJVM extends CallableLocatorBase implements 
         log.debug("Found import modules from import statements: {}", importModules);
     }
 
-    protected void retrievePackageModules() {
+    @Override
+    protected void beforeSearchingFunction() {
         log.debug("Retrieving modules from current package");
-        List<String> packageModules = codeFileFetcher.getFilesInDir(rootFileDir)
+        Set<String> packageModules = codeFileFetcher.getFilesInDir(rootFileDir)
                 .stream()
                 .map(FileUtils::removeExtension)
-                .toList();
+                .collect(Collectors.toSet());
         log.debug("Modules retrieved from current package: {}", packageModules);
         importModules.addAll(packageModules);
     }
