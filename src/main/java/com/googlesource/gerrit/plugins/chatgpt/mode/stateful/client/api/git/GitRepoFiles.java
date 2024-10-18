@@ -127,6 +127,10 @@ public class GitRepoFiles {
         try (RevWalk revWalk = new RevWalk(repository)) {
             return revWalk.parseCommit(lastCommitId).getTree();
         }
+        catch (NullPointerException e) {
+            log.warn("Error retrieving Master Rev Tree for ID `{}`", lastCommitId, e);
+            throw new IOException(e);
+        }
     }
 
     private String readFileContent(ObjectReader reader, RevTree tree, String path) throws IOException {
