@@ -30,7 +30,7 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
     protected final CodeFileFetcher codeFileFetcher;
 
     protected Pattern importPattern;
-    protected String languageModuleExtension;
+    protected String[] languageModuleExtensions;
     protected String rootFileDir;
 
     private int importModulesPointer = 0;
@@ -63,12 +63,19 @@ public abstract class CallableLocatorBase extends ClientBase implements IEntityL
     protected void beforeSearchingFunction() {
     }
 
-    protected String getFunctionFromModule(String functionName, String module) {
-        String modulePath = convertDotNotationToPath(module) + languageModuleExtension;
-        modulePath = modulePath.replaceAll("^(?=/)", rootFileDir);
-        log.debug("Module path: {}", modulePath);
+    protected String convertModuleToPath(String module, String languageModuleExtension) {
+        return convertDotNotationToPath(module) + languageModuleExtension;
+    }
 
-        return findFunctionInFile(modulePath, functionName);
+    protected String getFunctionFromModule(String functionName, String module) {
+        for (String languageModuleExtension : languageModuleExtensions) {
+            String modulePath = convertModuleToPath(module, languageModuleExtension);
+            modulePath = modulePath.replaceAll("^(?=/)", rootFileDir);
+            log.debug("Module path: {}", modulePath);
+            String functionDefinition = findFunctionInFile(modulePath, functionName);
+            if (functionDefinition != null) return functionDefinition;
+        }
+        return null;
     }
 
     protected Stream<String> getGroupStream(String group) {

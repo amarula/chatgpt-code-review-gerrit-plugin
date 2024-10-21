@@ -20,7 +20,7 @@ public class CallableLocator extends CallableLocatorJVM implements IEntityLocato
     public CallableLocator(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
         super(config, change, gitRepoFiles);
         log.debug("Initializing CallableLocator for Kotlin projects");
-        languageModuleExtension = KOTLIN_MODULE_EXTENSION;
+        languageModuleExtensions = new String[]{KOTLIN_MODULE_EXTENSION};
         importPattern = Pattern.compile(
                 String.format("^import\\s+(%s)", DOT_NOTATION_REGEX),
                 Pattern.MULTILINE

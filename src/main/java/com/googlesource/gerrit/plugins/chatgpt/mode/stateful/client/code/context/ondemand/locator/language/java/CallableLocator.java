@@ -16,7 +16,7 @@ public class CallableLocator extends CallableLocatorJVM implements IEntityLocato
     public CallableLocator(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
         super(config, change, gitRepoFiles);
         log.debug("Initializing CallableLocator for Java projects");
-        languageModuleExtension = JAVA_MODULE_EXTENSION;
+        languageModuleExtensions = new String[]{JAVA_MODULE_EXTENSION};
         importPattern = Pattern.compile(
                 String.format("^import\\s+(?:static\\s+)?(%s)", DOT_NOTATION_REGEX),
                 Pattern.MULTILINE

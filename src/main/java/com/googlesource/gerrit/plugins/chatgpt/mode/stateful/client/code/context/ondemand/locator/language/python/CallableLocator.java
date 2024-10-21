@@ -23,7 +23,7 @@ public class CallableLocator extends CallableLocatorBase implements IEntityLocat
     public CallableLocator(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
         super(config, change, gitRepoFiles);
         log.debug("Initializing CallableLocator for Python projects");
-        languageModuleExtension = PYTHON_MODULE_EXTENSION;
+        languageModuleExtensions = new String[]{PYTHON_MODULE_EXTENSION};
         importPattern = Pattern.compile(
                 String.format(
                         "^(?:from\\s+(%1$s)\\s+import\\s+(\\*|\\w+(?:%2$s\\w+)*)|import\\s+(%1$s(?:%2$s%1$s))*)",
