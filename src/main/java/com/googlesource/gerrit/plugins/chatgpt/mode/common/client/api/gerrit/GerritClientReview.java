@@ -129,7 +129,7 @@ public class GerritClientReview extends GerritClientAccount {
                 messages.add(debugCodeBlocksDynamicConfiguration.getDebugCodeBlock(dynamicConfig));
             }
         }
-        if (emptyComments) {
+        if (emptyComments && !config.getHideEmptyCommentsMessage()) {
             messages.add(localizer.getText("system.message.prefix") + ' ' + systemMessage);
         }
         errorMessageHandler.updateErrorMessages(messages);
