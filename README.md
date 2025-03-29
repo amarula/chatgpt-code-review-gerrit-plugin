@@ -223,6 +223,8 @@ directive = End each reply with \"Hope this helps!\"
   logged even if their level is above the current setting. This is useful for debugging without the need to set the
   overall log level to DEBUG, which could result in excessive DEBUG messages from sources like gerrit and other plugins.
   Some usage examples can be found at [Selective Log Level Override](#selective-log-level-override) section.
+- `hideEmptyCommentsMessage`: Initially set to false, this options disables a comment from the plugin if no updates
+  are being made by the plugin, the empty comments system message.
 
 ### Optional Parameters Specific to Stateless Mode
 

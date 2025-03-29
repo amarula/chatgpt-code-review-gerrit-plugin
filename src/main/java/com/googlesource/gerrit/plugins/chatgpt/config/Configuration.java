@@ -92,6 +92,7 @@ public class Configuration extends ConfigCore {
     private static final int DEFAULT_GPT_UPLOADED_CHUNK_SIZE_MB = 5;
     private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
     private static final List<String> DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = new ArrayList<>();
+    private static final boolean DEFAULT_HIDE_EMPTY_COMMENTS_MESSAGE = false;
 
     // Config setting keys
     public static final String KEY_GPT_SYSTEM_PROMPT_INSTRUCTIONS = "gptSystemPromptInstructions";
@@ -150,6 +151,7 @@ public class Configuration extends ConfigCore {
     private static final String KEY_GPT_POLLING_INTERVAL = "gptPollingInterval";
     private static final String KEY_GPT_UPLOADED_CHUNK_SIZE_MB = "gptUploadedChunkSizeMb";
     private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
+    private static final String KEY_HIDE_EMPTY_COMMENTS_MESSAGE = "hideEmptyCommentsMessage";
 
     public Configuration(
             OneOffRequestContext context,
@@ -364,6 +366,10 @@ public class Configuration extends ConfigCore {
 
     public List<String> getSelectiveLogLevelOverride() {
         return splitListIntoItems(KEY_SELECTIVE_LOG_LEVEL_OVERRIDE, DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE);
+    }
+
+    public boolean getHideEmptyCommentsMessage() {
+        return getBoolean(KEY_HIDE_EMPTY_COMMENTS_MESSAGE, DEFAULT_HIDE_EMPTY_COMMENTS_MESSAGE);
     }
 
     public boolean isDefinedKey(String key) {

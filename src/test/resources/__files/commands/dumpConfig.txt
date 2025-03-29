@@ -67,6 +67,7 @@ gptReviewTemperature: 0.2
 gptStreamOutput: false
 gptSystemPromptInstructions: Act as a PatchSet Reviewer
 gptUploadedChunkSizeMb: 5
+hideEmptyCommentsMessage: false
 ignoreOutdatedInlineComments: false
 ignoreResolvedChatGptComments: true
 inlineCommentsAsResolved: false
