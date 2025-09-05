@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b028fbf_4862b466",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-05T20:45:33Z",
+      "side": 1,
+      "message": "@patrizio.gelosi@amarulasolutions.com Please gives more context to this change in the commit message. What is needed for? what is going to fix? what is the scope",
+      "revId": "cf8242d4c3784ed9eb3b3eedf90c41721e0bca7a",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
