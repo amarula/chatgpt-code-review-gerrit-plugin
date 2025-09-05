@@ -24,9 +24,9 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 public class ChatGptReplyItem extends ChatGptDialogueItem {
-    private String reply;
-    private Integer score;
-    private Double relevance;
-    private boolean repeated;
-    private boolean conflicting;
+  private String reply;
+  private Integer score;
+  private Double relevance;
+  private boolean repeated;
+  private boolean conflicting;
 }

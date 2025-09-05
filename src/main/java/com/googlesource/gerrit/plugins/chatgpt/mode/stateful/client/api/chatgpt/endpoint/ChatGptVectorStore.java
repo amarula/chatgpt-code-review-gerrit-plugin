@@ -27,32 +27,31 @@ import okhttp3.Request;
 
 @Slf4j
 public class ChatGptVectorStore extends ChatGptApiBase {
-    private final GerritChange change;
+  private final GerritChange change;
 
-    public ChatGptVectorStore(Configuration config, GerritChange change) {
-        super(config);
-        this.change = change;
-    }
+  public ChatGptVectorStore(Configuration config, GerritChange change) {
+    super(config);
+    this.change = change;
+  }
 
-    public ChatGptResponse createVectorStore() throws OpenAiConnectionFailException {
-        Request request = vectorStoreCreateRequest();
-        log.debug("ChatGPT Create Vector Store request: {}", request);
+  public ChatGptResponse createVectorStore() throws OpenAiConnectionFailException {
+    Request request = vectorStoreCreateRequest();
+    log.debug("ChatGPT Create Vector Store request: {}", request);
 
-        ChatGptResponse createVectorStoreResponse = getChatGptResponse(request);
-        log.info("Vector Store created: {}", createVectorStoreResponse);
+    ChatGptResponse createVectorStoreResponse = getChatGptResponse(request);
+    log.info("Vector Store created: {}", createVectorStoreResponse);
 
-        return createVectorStoreResponse;
-    }
+    return createVectorStoreResponse;
+  }
 
-    private Request vectorStoreCreateRequest() {
-        String uri = UriResourceLocatorStateful.vectorStoreCreateUri();
-        log.debug("ChatGPT Create Vector Store request URI: {}", uri);
+  private Request vectorStoreCreateRequest() {
+    String uri = UriResourceLocatorStateful.vectorStoreCreateUri();
+    log.debug("ChatGPT Create Vector Store request URI: {}", uri);
 
-        ChatGptCreateVectorStoreRequest requestBody = ChatGptCreateVectorStoreRequest.builder()
-                .name(change.getProjectName())
-                .build();
+    ChatGptCreateVectorStoreRequest requestBody =
+        ChatGptCreateVectorStoreRequest.builder().name(change.getProjectName()).build();
 
-        log.debug("ChatGPT Create Vector Store request body: {}", requestBody);
-        return httpClient.createRequestFromJson(uri, requestBody);
-    }
+    log.debug("ChatGPT Create Vector Store request body: {}", requestBody);
+    return httpClient.createRequestFromJson(uri, requestBody);
+  }
 }

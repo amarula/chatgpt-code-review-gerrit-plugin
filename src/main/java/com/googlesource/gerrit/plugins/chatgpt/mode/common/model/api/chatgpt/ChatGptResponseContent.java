@@ -25,8 +25,7 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 public class ChatGptResponseContent {
-    private List<ChatGptReplyItem> replies;
-    private String changeId;
-    @NonNull
-    private String messageContent;
+  private List<ChatGptReplyItem> replies;
+  private String changeId;
+  @NonNull private String messageContent;
 }

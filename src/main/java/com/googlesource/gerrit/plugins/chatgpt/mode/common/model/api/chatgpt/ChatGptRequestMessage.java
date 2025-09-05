@@ -22,8 +22,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ChatGptRequestMessage {
-    private String role;
-    private String content;
-    // PatchSet changeId passed in the request
-    private String changeId;
+  private String role;
+  private String content;
+  // PatchSet changeId passed in the request
+  private String changeId;
 }

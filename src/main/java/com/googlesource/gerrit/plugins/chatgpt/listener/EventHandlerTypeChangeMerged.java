@@ -28,49 +28,46 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class EventHandlerTypeChangeMerged implements IEventHandlerType {
-    private final Configuration config;
-    private final ChangeSetData changeSetData;
-    private final GerritChange change;
-    private final ICodeContextPolicy codeContextPolicy;
-    private final PluginDataHandlerProvider pluginDataHandlerProvider;
+  private final Configuration config;
+  private final ChangeSetData changeSetData;
+  private final GerritChange change;
+  private final ICodeContextPolicy codeContextPolicy;
+  private final PluginDataHandlerProvider pluginDataHandlerProvider;
 
-    EventHandlerTypeChangeMerged(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy,
-            PluginDataHandlerProvider pluginDataHandlerProvider
-    ) {
-        this.config = config;
-        this.changeSetData = changeSetData;
-        this.change = change;
-        this.codeContextPolicy = codeContextPolicy;
-        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        log.debug("Initialized EventHandlerTypeChangeMerged for change ID: {}", change.getFullChangeId());
-    }
+  EventHandlerTypeChangeMerged(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy,
+      PluginDataHandlerProvider pluginDataHandlerProvider) {
+    this.config = config;
+    this.changeSetData = changeSetData;
+    this.change = change;
+    this.codeContextPolicy = codeContextPolicy;
+    this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+    log.debug(
+        "Initialized EventHandlerTypeChangeMerged for change ID: {}", change.getFullChangeId());
+  }
 
-    @Override
-    public PreprocessResult preprocessEvent() {
-        log.debug("Preprocessing event for change merged: {}", change.getFullChangeId());
-        return PreprocessResult.OK;
-    }
+  @Override
+  public PreprocessResult preprocessEvent() {
+    log.debug("Preprocessing event for change merged: {}", change.getFullChangeId());
+    return PreprocessResult.OK;
+  }
 
-    @Override
-    public void processEvent() {
-        log.debug("Starting processing event for change merged: {}", change.getFullChangeId());
-        ChatGptAssistantHandler chatGptAssistantHandler = new ChatGptAssistantHandler(
-                config,
-                changeSetData,
-                change,
-                codeContextPolicy,
-                pluginDataHandlerProvider
-        );
-        try {
-            chatGptAssistantHandler.flushAssistantAndVectorIds();
-        } catch (OperationNotSupportedException e) {
-            log.error("Exception while flushing assistant and vector ids", e);
-            return;
-        }
-        log.debug("Flushed assistant and Vector Store IDs for change merged: {}", change.getFullChangeId());
+  @Override
+  public void processEvent() {
+    log.debug("Starting processing event for change merged: {}", change.getFullChangeId());
+    ChatGptAssistantHandler chatGptAssistantHandler =
+        new ChatGptAssistantHandler(
+            config, changeSetData, change, codeContextPolicy, pluginDataHandlerProvider);
+    try {
+      chatGptAssistantHandler.flushAssistantAndVectorIds();
+    } catch (OperationNotSupportedException e) {
+      log.error("Exception while flushing assistant and vector ids", e);
+      return;
     }
+    log.debug(
+        "Flushed assistant and Vector Store IDs for change merged: {}", change.getFullChangeId());
+  }
 }

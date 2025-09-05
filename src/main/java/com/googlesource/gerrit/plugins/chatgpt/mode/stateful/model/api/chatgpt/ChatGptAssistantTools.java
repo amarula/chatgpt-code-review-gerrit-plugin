@@ -25,6 +25,6 @@ import java.util.List;
 @Data
 @Builder
 public class ChatGptAssistantTools {
-    private ChatGptToolResources toolResources;
-    private List<ChatGptTool> tools;
+  private ChatGptToolResources toolResources;
+  private List<ChatGptTool> tools;
 }

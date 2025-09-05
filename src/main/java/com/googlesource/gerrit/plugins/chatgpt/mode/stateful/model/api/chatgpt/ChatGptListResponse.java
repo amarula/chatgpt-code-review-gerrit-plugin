@@ -22,6 +22,6 @@ import java.util.List;
 
 @Data
 public class ChatGptListResponse {
-    private String object;
-    private List<ChatGptRunStepsResponse> data;
+  private String object;
+  private List<ChatGptRunStepsResponse> data;
 }

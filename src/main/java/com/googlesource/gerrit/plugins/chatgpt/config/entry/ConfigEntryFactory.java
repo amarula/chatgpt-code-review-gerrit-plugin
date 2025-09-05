@@ -21,9 +21,9 @@ import com.googlesource.gerrit.plugins.chatgpt.interfaces.config.entry.IConfigEn
 
 public class ConfigEntryFactory {
 
-    public static IConfigEntry getConfigEntry(String key) {
-        return Configuration.LIST_TYPE_ENTRY_KEYS.contains(key) ?
-                new ConfigEntryList(key) :
-                new ConfigEntryString(key);
-    }
+  public static IConfigEntry getConfigEntry(String key) {
+    return Configuration.LIST_TYPE_ENTRY_KEYS.contains(key)
+        ? new ConfigEntryList(key)
+        : new ConfigEntryString(key);
+  }
 }

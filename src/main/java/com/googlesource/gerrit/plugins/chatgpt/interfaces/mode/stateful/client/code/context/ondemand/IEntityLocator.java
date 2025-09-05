@@ -19,5 +19,5 @@ package com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.stateful.client.
 import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptGetContextItem;
 
 public interface IEntityLocator {
-    String findDefinition(ChatGptGetContextItem chatGptGetContextItem);
+  String findDefinition(ChatGptGetContextItem chatGptGetContextItem);
 }

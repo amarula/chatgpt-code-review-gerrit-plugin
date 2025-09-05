@@ -28,10 +28,10 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 public class ChatGptMessageItem extends ChatGptDialogueItem {
-    private String request;
-    private List<ChatGptRequestMessage> history;
+  private String request;
+  private List<ChatGptRequestMessage> history;
 
-    public void appendToRequest(String appended) {
-        request += appended;
-    }
+  public void appendToRequest(String appended) {
+    request += appended;
+  }
 }

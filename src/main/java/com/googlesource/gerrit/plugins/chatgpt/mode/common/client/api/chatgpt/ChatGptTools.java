@@ -28,43 +28,42 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClas
 
 @Slf4j
 public class ChatGptTools {
-    public enum Functions {
-        formatReplies,
-        getContext
+  public enum Functions {
+    formatReplies,
+    getContext
+  }
+
+  private static final String FILENAME_TOOL_FORMAT = "config/%sTool.json";
+  private static final String FILENAME_TOOL_CHOICE_FORMAT = "config/%sToolChoice.json";
+
+  private final String functionName;
+
+  public ChatGptTools(Functions function) {
+    functionName = function.name();
+  }
+
+  public ChatGptTool retrieveFunctionTool() {
+    ChatGptTool tools;
+    try (InputStreamReader reader =
+        FileUtils.getInputStreamReader(String.format(FILENAME_TOOL_FORMAT, functionName))) {
+      tools = jsonToClass(reader, ChatGptTool.class);
+      log.debug("Successfully loaded format replies tool from JSON.");
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to load data for ChatGPT `" + functionName + "` tool", e);
     }
+    return tools;
+  }
 
-    private static final String FILENAME_TOOL_FORMAT = "config/%sTool.json";
-    private static final String FILENAME_TOOL_CHOICE_FORMAT = "config/%sToolChoice.json";
-
-    private final String functionName;
-
-    public ChatGptTools(Functions function) {
-        functionName = function.name();
+  public ChatGptToolChoice retrieveFunctionToolChoice() {
+    ChatGptToolChoice toolChoice;
+    try (InputStreamReader reader =
+        FileUtils.getInputStreamReader(String.format(FILENAME_TOOL_CHOICE_FORMAT, functionName))) {
+      toolChoice = jsonToClass(reader, ChatGptToolChoice.class);
+      log.debug("Successfully loaded format replies tool choice from JSON.");
+    } catch (IOException e) {
+      throw new RuntimeException(
+          "Failed to load data for ChatGPT `" + functionName + "` tool choice", e);
     }
-
-    public ChatGptTool retrieveFunctionTool() {
-        ChatGptTool tools;
-        try (InputStreamReader reader = FileUtils.getInputStreamReader(
-                String.format(FILENAME_TOOL_FORMAT, functionName)
-        )) {
-            tools = jsonToClass(reader, ChatGptTool.class);
-            log.debug("Successfully loaded format replies tool from JSON.");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load data for ChatGPT `" + functionName + "` tool", e);
-        }
-        return tools;
-    }
-
-    public ChatGptToolChoice retrieveFunctionToolChoice() {
-        ChatGptToolChoice toolChoice;
-        try (InputStreamReader reader = FileUtils.getInputStreamReader(
-                String.format(FILENAME_TOOL_CHOICE_FORMAT, functionName)
-        )) {
-            toolChoice = jsonToClass(reader, ChatGptToolChoice.class);
-            log.debug("Successfully loaded format replies tool choice from JSON.");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to load data for ChatGPT `" + functionName + "` tool choice", e);
-        }
-        return toolChoice;
-    }
+    return toolChoice;
+  }
 }

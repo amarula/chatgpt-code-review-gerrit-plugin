@@ -36,65 +36,65 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithDo
 
 @Slf4j
 public class ClientCommandShowExecutor extends ClientCommandBase {
-    private final ChangeSetData changeSetData;
-    private final GerritChange change;
-    private final ICodeContextPolicy codeContextPolicy;
-    private final Localizer localizer;
-    private final PluginDataHandlerProvider pluginDataHandlerProvider;
-    private final List<String> itemsToShow = new ArrayList<>();
+  private final ChangeSetData changeSetData;
+  private final GerritChange change;
+  private final ICodeContextPolicy codeContextPolicy;
+  private final Localizer localizer;
+  private final PluginDataHandlerProvider pluginDataHandlerProvider;
+  private final List<String> itemsToShow = new ArrayList<>();
 
-    public ClientCommandShowExecutor(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy,
-            PluginDataHandlerProvider pluginDataHandlerProvider,
-            Localizer localizer
-    ) {
-        super(config);
-        this.localizer = localizer;
-        this.change = change;
-        this.changeSetData = changeSetData;
-        this.codeContextPolicy = codeContextPolicy;
-        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        log.debug("ClientShowCommandExecutor initialized.");
-    }
+  public ClientCommandShowExecutor(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy,
+      PluginDataHandlerProvider pluginDataHandlerProvider,
+      Localizer localizer) {
+    super(config);
+    this.localizer = localizer;
+    this.change = change;
+    this.changeSetData = changeSetData;
+    this.codeContextPolicy = codeContextPolicy;
+    this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+    log.debug("ClientShowCommandExecutor initialized.");
+  }
 
-    public void executeShowCommand(Map<BaseOptionSet, String> baseOptions) {
-        log.debug("Executing Show Command: {}", baseOptions);
-        for (BaseOptionSet baseOption : baseOptions.keySet()) {
-            switch (baseOption) {
-                case CONFIG -> commandDumpConfig();
-                case LOCAL_DATA -> commandDumpStoredData();
-                case PROMPTS -> commandShowPrompts();
-                case INSTRUCTIONS -> commandShowInstructions();
-            }
-        }
-        changeSetData.setReviewSystemMessage(joinWithDoubleNewLine(itemsToShow));
+  public void executeShowCommand(Map<BaseOptionSet, String> baseOptions) {
+    log.debug("Executing Show Command: {}", baseOptions);
+    for (BaseOptionSet baseOption : baseOptions.keySet()) {
+      switch (baseOption) {
+        case CONFIG -> commandDumpConfig();
+        case LOCAL_DATA -> commandDumpStoredData();
+        case PROMPTS -> commandShowPrompts();
+        case INSTRUCTIONS -> commandShowInstructions();
+      }
     }
+    changeSetData.setReviewSystemMessage(joinWithDoubleNewLine(itemsToShow));
+  }
 
-    private void commandDumpConfig() {
-        DebugCodeBlocksConfiguration debugCodeBlocksConfiguration = new DebugCodeBlocksConfiguration(localizer);
-        itemsToShow.add(debugCodeBlocksConfiguration.getDebugCodeBlock(config));
-    }
+  private void commandDumpConfig() {
+    DebugCodeBlocksConfiguration debugCodeBlocksConfiguration =
+        new DebugCodeBlocksConfiguration(localizer);
+    itemsToShow.add(debugCodeBlocksConfiguration.getDebugCodeBlock(config));
+  }
 
-    private void commandDumpStoredData() {
-        DebugCodeBlocksDataDump debugCodeBlocksDataDump = new DebugCodeBlocksDataDump(
-                localizer,
-                pluginDataHandlerProvider
-        );
-        itemsToShow.add(debugCodeBlocksDataDump.getDebugCodeBlock());
-    }
+  private void commandDumpStoredData() {
+    DebugCodeBlocksDataDump debugCodeBlocksDataDump =
+        new DebugCodeBlocksDataDump(localizer, pluginDataHandlerProvider);
+    itemsToShow.add(debugCodeBlocksDataDump.getDebugCodeBlock());
+  }
 
-    private void commandShowPrompts() {
-        DebugCodeBlocksPromptingParamPrompts debugCodeBlocksPromptingParamPrompts =
-                new DebugCodeBlocksPromptingParamPrompts(localizer, config, changeSetData, change, codeContextPolicy);
-        itemsToShow.add(debugCodeBlocksPromptingParamPrompts.getDebugCodeBlock());
-    }
+  private void commandShowPrompts() {
+    DebugCodeBlocksPromptingParamPrompts debugCodeBlocksPromptingParamPrompts =
+        new DebugCodeBlocksPromptingParamPrompts(
+            localizer, config, changeSetData, change, codeContextPolicy);
+    itemsToShow.add(debugCodeBlocksPromptingParamPrompts.getDebugCodeBlock());
+  }
 
-    private void commandShowInstructions() {
-        DebugCodeBlocksPromptingParamInstructions debugCodeBlocksPromptingParamInstructions =
-                new DebugCodeBlocksPromptingParamInstructions(localizer, config, changeSetData, change, codeContextPolicy);
-        itemsToShow.add(debugCodeBlocksPromptingParamInstructions.getDebugCodeBlock());
-    }
+  private void commandShowInstructions() {
+    DebugCodeBlocksPromptingParamInstructions debugCodeBlocksPromptingParamInstructions =
+        new DebugCodeBlocksPromptingParamInstructions(
+            localizer, config, changeSetData, change, codeContextPolicy);
+    itemsToShow.add(debugCodeBlocksPromptingParamInstructions.getDebugCodeBlock());
+  }
 }

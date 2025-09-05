@@ -26,26 +26,26 @@ import java.util.List;
 @SuppressWarnings("UnstableApiUsage")
 @Slf4j
 public class LoggerFilterDeployed extends Filter {
-    private final LoggerFilterDecider loggerFilterDecider;
-    private final Level thresholdLevel;
+  private final LoggerFilterDecider loggerFilterDecider;
+  private final Level thresholdLevel;
 
-    public LoggerFilterDeployed(List<String> filter, Level thresholdLevel) {
-        loggerFilterDecider = new LoggerFilterDecider(filter);
-        this.thresholdLevel = thresholdLevel;
-        log.debug("LoggerFilters Level: {}", thresholdLevel);
+  public LoggerFilterDeployed(List<String> filter, Level thresholdLevel) {
+    loggerFilterDecider = new LoggerFilterDecider(filter);
+    this.thresholdLevel = thresholdLevel;
+    log.debug("LoggerFilters Level: {}", thresholdLevel);
+  }
+
+  @Override
+  public int decide(LoggingEvent event) {
+    String loggedClassName = event.getLoggerName();
+    String message = event.getMessage().toString();
+    Level level = event.getLevel();
+
+    if (level.isGreaterOrEqual(thresholdLevel)
+        || loggerFilterDecider.shouldOverrideLogLevel(loggedClassName, message)) {
+      return Filter.ACCEPT;
+    } else {
+      return Filter.DENY;
     }
-
-    @Override
-    public int decide(LoggingEvent event) {
-        String loggedClassName = event.getLoggerName();
-        String message = event.getMessage().toString();
-        Level level = event.getLevel();
-
-        if (level.isGreaterOrEqual(thresholdLevel) || loggerFilterDecider.shouldOverrideLogLevel(loggedClassName, message)) {
-            return Filter.ACCEPT;
-        }
-        else {
-            return Filter.DENY;
-        }
-    }
+  }
 }

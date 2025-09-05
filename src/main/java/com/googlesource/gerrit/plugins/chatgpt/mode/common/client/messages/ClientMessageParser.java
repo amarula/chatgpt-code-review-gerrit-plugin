@@ -30,44 +30,45 @@ import java.util.regex.Matcher;
 
 @Slf4j
 public class ClientMessageParser extends ClientMessageBase {
-    private final ClientCommandParser clientCommandParser;
+  private final ClientCommandParser clientCommandParser;
 
-    public ClientMessageParser(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy,
-            GitRepoFiles gitRepoFiles,
-            PluginDataHandlerProvider pluginDataHandlerProvider,
-            Localizer localizer
-    ) {
-        super(config);
-        clientCommandParser = new ClientCommandParser(
-                config,
-                changeSetData,
-                change,
-                codeContextPolicy,
-                gitRepoFiles,
-                pluginDataHandlerProvider,
-                localizer
-        );
-        log.debug("ClientMessageParser initialized with bot mention pattern: {}", botMentionPattern);
-    }
+  public ClientMessageParser(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy,
+      GitRepoFiles gitRepoFiles,
+      PluginDataHandlerProvider pluginDataHandlerProvider,
+      Localizer localizer) {
+    super(config);
+    clientCommandParser =
+        new ClientCommandParser(
+            config,
+            changeSetData,
+            change,
+            codeContextPolicy,
+            gitRepoFiles,
+            pluginDataHandlerProvider,
+            localizer);
+    log.debug("ClientMessageParser initialized with bot mention pattern: {}", botMentionPattern);
+  }
 
-    public boolean isBotAddressed(String message) {
-        log.debug("Checking if message addresses the bot: {}", message);
-        Matcher userMatcher = botMentionPattern.matcher(message);
-        if (!userMatcher.find()) {
-            log.debug("Skipping action since the comment does not mention the ChatGPT bot." +
-                            " Expected bot name in comment: {}, Actual comment text: {}",
-                    config.getGerritUserName(), message);
-            return false;
-        }
-        return true;
+  public boolean isBotAddressed(String message) {
+    log.debug("Checking if message addresses the bot: {}", message);
+    Matcher userMatcher = botMentionPattern.matcher(message);
+    if (!userMatcher.find()) {
+      log.debug(
+          "Skipping action since the comment does not mention the ChatGPT bot."
+              + " Expected bot name in comment: {}, Actual comment text: {}",
+          config.getGerritUserName(),
+          message);
+      return false;
     }
+    return true;
+  }
 
-    public boolean parseCommands(String comment) {
-        log.debug("Parsing commands from comment: {}", comment);
-        return clientCommandParser.parseCommands(comment);
-    }
+  public boolean parseCommands(String comment) {
+    log.debug("Parsing commands from comment: {}", comment);
+    return clientCommandParser.parseCommands(comment);
+  }
 }

@@ -46,187 +46,185 @@ import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_P
 
 @Slf4j
 public class GerritClientComments extends GerritClientAccount {
-    private static final Integer MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT = 2;
+  private static final Integer MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT = 2;
 
-    private final ChangeSetData changeSetData;
-    private final ICodeContextPolicy codeContextPolicy;
-    private final GitRepoFiles gitRepoFiles;
-    private final HashMap<String, GerritComment> commentMap;
-    private final HashMap<String, GerritComment> patchSetCommentMap;
-    private final PluginDataHandlerProvider pluginDataHandlerProvider;
-    private final Localizer localizer;
+  private final ChangeSetData changeSetData;
+  private final ICodeContextPolicy codeContextPolicy;
+  private final GitRepoFiles gitRepoFiles;
+  private final HashMap<String, GerritComment> commentMap;
+  private final HashMap<String, GerritComment> patchSetCommentMap;
+  private final PluginDataHandlerProvider pluginDataHandlerProvider;
+  private final Localizer localizer;
 
-    private String authorUsername;
-    @Getter
-    private List<GerritComment> commentProperties;
+  private String authorUsername;
+  @Getter private List<GerritComment> commentProperties;
 
-    @VisibleForTesting
-    @Inject
-    public GerritClientComments(
-            Configuration config,
-            AccountCache accountCache,
-            ChangeSetData changeSetData,
-            ICodeContextPolicy codeContextPolicy,
-            GitRepoFiles gitRepoFiles,
-            PluginDataHandlerProvider pluginDataHandlerProvider,
-            Localizer localizer
-    ) {
-        super(config, accountCache);
-        this.changeSetData = changeSetData;
-        this.codeContextPolicy = codeContextPolicy;
-        this.gitRepoFiles = gitRepoFiles;
-        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        this.localizer = localizer;
-        commentProperties = new ArrayList<>();
-        commentMap = new HashMap<>();
-        patchSetCommentMap = new HashMap<>();
+  @VisibleForTesting
+  @Inject
+  public GerritClientComments(
+      Configuration config,
+      AccountCache accountCache,
+      ChangeSetData changeSetData,
+      ICodeContextPolicy codeContextPolicy,
+      GitRepoFiles gitRepoFiles,
+      PluginDataHandlerProvider pluginDataHandlerProvider,
+      Localizer localizer) {
+    super(config, accountCache);
+    this.changeSetData = changeSetData;
+    this.codeContextPolicy = codeContextPolicy;
+    this.gitRepoFiles = gitRepoFiles;
+    this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+    this.localizer = localizer;
+    commentProperties = new ArrayList<>();
+    commentMap = new HashMap<>();
+    patchSetCommentMap = new HashMap<>();
+  }
+
+  public CommentData getCommentData() {
+    return new CommentData(commentProperties, commentMap, patchSetCommentMap);
+  }
+
+  public boolean retrieveLastComments(GerritChange change) {
+    CommentAddedEvent commentAddedEvent = (CommentAddedEvent) change.getEvent();
+    authorUsername = commentAddedEvent.author.get().username;
+    log.debug("Found comments by '{}' on {}", authorUsername, change.getEventTimeStamp());
+    if (authorUsername.equals(config.getGerritUserName())) {
+      log.debug("These are the Bot's own comments, do not process them.");
+      return false;
     }
-
-    public CommentData getCommentData() {
-        return new CommentData(commentProperties, commentMap, patchSetCommentMap);
+    if (isDisabledUser(authorUsername)) {
+      log.info("Review of comments from user '{}' is disabled.", authorUsername);
+      return false;
     }
+    addLastComments(change);
 
-    public boolean retrieveLastComments(GerritChange change) {
-        CommentAddedEvent commentAddedEvent = (CommentAddedEvent) change.getEvent();
-        authorUsername = commentAddedEvent.author.get().username;
-        log.debug("Found comments by '{}' on {}", authorUsername, change.getEventTimeStamp());
-        if (authorUsername.equals(config.getGerritUserName())) {
-            log.debug("These are the Bot's own comments, do not process them.");
-            return false;
+    return !commentProperties.isEmpty();
+  }
+
+  public void retrieveAllComments(GerritChange change) {
+    try {
+      retrieveComments(change);
+    } catch (Exception e) {
+      log.error("Error while retrieving all comments for change: {}", change.getFullChangeId(), e);
+    }
+  }
+
+  private List<GerritComment> retrieveComments(GerritChange change) throws Exception {
+    try (ManualRequestContext requestContext = config.openRequestContext()) {
+      Map<String, List<CommentInfo>> comments =
+          config
+              .getGerritApi()
+              .changes()
+              .id(
+                  change.getProjectName(),
+                  change.getBranchNameKey().shortName(),
+                  change.getChangeKey().get())
+              .commentsRequest()
+              .get();
+
+      // note that list of Map.Entry was used in order to keep the original response order
+      List<Map.Entry<String, List<GerritComment>>> lastCommentEntries =
+          comments.entrySet().stream()
+              .map(
+                  entry ->
+                      Map.entry(
+                          entry.getKey(),
+                          entry.getValue().stream()
+                              .map(GerritClientComments::toComment)
+                              .collect(toList())))
+              .collect(toList());
+
+      String latestChangeMessageId = null;
+      HashMap<String, List<GerritComment>> latestComments = new HashMap<>();
+      for (Map.Entry<String, List<GerritComment>> entry : lastCommentEntries) {
+        String filename = entry.getKey();
+        log.info("Commented filename: {}", filename);
+
+        List<GerritComment> commentsArray = entry.getValue();
+
+        for (GerritComment commentObject : commentsArray) {
+          commentObject.setFilename(filename);
+          String commentId = commentObject.getId();
+          String changeMessageId = commentObject.getChangeMessageId();
+          String commentAuthorUsername = commentObject.getAuthor().getUsername();
+          log.debug("Change Message Object: {}", commentObject);
+          long updatedTimeStamp = getEpochSeconds(commentObject.getUpdated());
+          if (commentAuthorUsername.equals(authorUsername)
+              && updatedTimeStamp
+                  >= change.getEventTimeStamp() - MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT) {
+            log.debug("Found comment with updatedTimeStamp : {}", updatedTimeStamp);
+            latestChangeMessageId = changeMessageId;
+          }
+          latestComments
+              .computeIfAbsent(changeMessageId, k -> new ArrayList<>())
+              .add(commentObject);
+          commentMap.put(commentId, commentObject);
+          if (filename.equals(GERRIT_PATCH_SET_FILENAME)) {
+            patchSetCommentMap.put(changeMessageId, commentObject);
+          }
         }
-        if (isDisabledUser(authorUsername)) {
-            log.info("Review of comments from user '{}' is disabled.", authorUsername);
-            return false;
+      }
+
+      return latestComments.getOrDefault(latestChangeMessageId, null);
+    }
+  }
+
+  private void addLastComments(GerritChange change) {
+    log.debug("Adding last comments for change: {}", change.getFullChangeId());
+    ClientMessageParser messageParser =
+        new ClientMessageParser(
+            config,
+            changeSetData,
+            change,
+            codeContextPolicy,
+            gitRepoFiles,
+            pluginDataHandlerProvider,
+            localizer);
+    try {
+      List<GerritComment> latestComments = retrieveComments(change);
+      if (latestComments == null) {
+        return;
+      }
+      for (GerritComment latestComment : latestComments) {
+        String commentMessage = latestComment.getMessage();
+        log.debug("Processing comment: {}", commentMessage);
+        if (messageParser.isBotAddressed(commentMessage)) {
+          if (messageParser.parseCommands(commentMessage)) {
+            commentProperties.clear();
+            return;
+          }
+          commentProperties.add(latestComment);
         }
-        addLastComments(change);
-
-        return !commentProperties.isEmpty();
+      }
+    } catch (Exception e) {
+      log.error("Error while retrieving last comments for change: {}", change.getFullChangeId(), e);
     }
+  }
 
-    public void retrieveAllComments(GerritChange change) {
-        try {
-            retrieveComments(change);
-        } catch (Exception e) {
-            log.error("Error while retrieving all comments for change: {}", change.getFullChangeId(), e);
-        }
-    }
-
-    private List<GerritComment> retrieveComments(GerritChange change) throws Exception {
-        try (ManualRequestContext requestContext = config.openRequestContext()) {
-            Map<String, List<CommentInfo>> comments =
-                config
-                    .getGerritApi()
-                    .changes()
-                    .id(
-                        change.getProjectName(),
-                        change.getBranchNameKey().shortName(),
-                        change.getChangeKey().get())
-                    .commentsRequest()
-                    .get();
-
-            // note that list of Map.Entry was used in order to keep the original response order
-            List<Map.Entry<String, List<GerritComment>>> lastCommentEntries =
-                comments.entrySet().stream()
-                    .map(
-                        entry ->
-                            Map.entry(
-                                entry.getKey(),
-                                entry.getValue().stream()
-                                    .map(GerritClientComments::toComment)
-                                    .collect(toList())))
-                    .collect(toList());
-
-            String latestChangeMessageId = null;
-            HashMap<String, List<GerritComment>> latestComments = new HashMap<>();
-            for (Map.Entry<String, List<GerritComment>> entry : lastCommentEntries) {
-                String filename = entry.getKey();
-                log.info("Commented filename: {}", filename);
-
-                List<GerritComment> commentsArray = entry.getValue();
-
-                for (GerritComment commentObject : commentsArray) {
-                    commentObject.setFilename(filename);
-                    String commentId = commentObject.getId();
-                    String changeMessageId = commentObject.getChangeMessageId();
-                    String commentAuthorUsername = commentObject.getAuthor().getUsername();
-                    log.debug("Change Message Object: {}", commentObject);
-                    long updatedTimeStamp = getEpochSeconds(commentObject.getUpdated());
-                    if (commentAuthorUsername.equals(authorUsername)
-                        && updatedTimeStamp
-                            >= change.getEventTimeStamp() - MAX_SECS_GAP_BETWEEN_EVENT_AND_COMMENT) {
-                      log.debug("Found comment with updatedTimeStamp : {}", updatedTimeStamp);
-                      latestChangeMessageId = changeMessageId;
-                    }
-                    latestComments
-                        .computeIfAbsent(changeMessageId, k -> new ArrayList<>())
-                        .add(commentObject);
-                    commentMap.put(commentId, commentObject);
-                    if (filename.equals(GERRIT_PATCH_SET_FILENAME)) {
-                        patchSetCommentMap.put(changeMessageId, commentObject);
-                    }
-                }
-            }
-
-            return latestComments.getOrDefault(latestChangeMessageId, null);
-        }
-    }
-
-    private void addLastComments(GerritChange change) {
-        log.debug("Adding last comments for change: {}", change.getFullChangeId());
-        ClientMessageParser messageParser = new ClientMessageParser(
-                config,
-                changeSetData,
-                change,
-                codeContextPolicy,
-                gitRepoFiles,
-                pluginDataHandlerProvider,
-                localizer
-        );
-        try {
-            List<GerritComment> latestComments = retrieveComments(change);
-            if (latestComments == null) {
-                return;
-            }
-            for (GerritComment latestComment : latestComments) {
-                String commentMessage = latestComment.getMessage();
-                log.debug("Processing comment: {}", commentMessage);
-                if (messageParser.isBotAddressed(commentMessage)) {
-                    if (messageParser.parseCommands(commentMessage)) {
-                        commentProperties.clear();
-                        return;
-                    }
-                    commentProperties.add(latestComment);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error while retrieving last comments for change: {}", change.getFullChangeId(), e);
-        }
-    }
-
-    private static GerritComment toComment(CommentInfo comment) {
-        GerritComment gerritComment = new GerritComment();
-        gerritComment.setAuthor(toAuthor(comment.author));
-        gerritComment.setChangeMessageId(comment.changeMessageId);
-        gerritComment.setUnresolved(comment.unresolved);
-        gerritComment.setPatchSet(comment.patchSet);
-        gerritComment.setId(comment.id);
-        gerritComment.setTag(comment.tag);
-        gerritComment.setLine(comment.line);
-        Optional.ofNullable(comment.range)
-            .ifPresent(
-                range ->
-                    gerritComment.setRange(
-                        GerritCodeRange.builder()
-                            .startLine(range.startLine)
-                            .endLine(range.endLine)
-                            .startCharacter(range.startCharacter)
-                            .endCharacter(range.endCharacter)
-                            .build()));
-        gerritComment.setInReplyTo(comment.inReplyTo);
-        Optional.ofNullable(comment.updated)
-            .ifPresent(updated -> gerritComment.setUpdated(toDateString(updated)));
-        gerritComment.setMessage(comment.message);
-        gerritComment.setCommitId(comment.commitId);
-        return gerritComment;
-    }
+  private static GerritComment toComment(CommentInfo comment) {
+    GerritComment gerritComment = new GerritComment();
+    gerritComment.setAuthor(toAuthor(comment.author));
+    gerritComment.setChangeMessageId(comment.changeMessageId);
+    gerritComment.setUnresolved(comment.unresolved);
+    gerritComment.setPatchSet(comment.patchSet);
+    gerritComment.setId(comment.id);
+    gerritComment.setTag(comment.tag);
+    gerritComment.setLine(comment.line);
+    Optional.ofNullable(comment.range)
+        .ifPresent(
+            range ->
+                gerritComment.setRange(
+                    GerritCodeRange.builder()
+                        .startLine(range.startLine)
+                        .endLine(range.endLine)
+                        .startCharacter(range.startCharacter)
+                        .endCharacter(range.endCharacter)
+                        .build()));
+    gerritComment.setInReplyTo(comment.inReplyTo);
+    Optional.ofNullable(comment.updated)
+        .ifPresent(updated -> gerritComment.setUpdated(toDateString(updated)));
+    gerritComment.setMessage(comment.message);
+    gerritComment.setCommitId(comment.commitId);
+    return gerritComment;
+  }
 }

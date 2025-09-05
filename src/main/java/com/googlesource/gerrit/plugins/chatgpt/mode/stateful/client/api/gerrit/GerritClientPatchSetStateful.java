@@ -30,58 +30,59 @@ import lombok.extern.slf4j.Slf4j;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetHelper.*;
 
 @Slf4j
-public class GerritClientPatchSetStateful extends GerritClientPatchSet implements IGerritClientPatchSet {
-    private GerritChange change;
+public class GerritClientPatchSetStateful extends GerritClientPatchSet
+    implements IGerritClientPatchSet {
+  private GerritChange change;
 
-    @VisibleForTesting
-    @Inject
-    public GerritClientPatchSetStateful(Configuration config, AccountCache accountCache) {
-        super(config, accountCache);
+  @VisibleForTesting
+  @Inject
+  public GerritClientPatchSetStateful(Configuration config, AccountCache accountCache) {
+    super(config, accountCache);
+  }
+
+  public String getPatchSet(ChangeSetData changeSetData, GerritChange change) throws Exception {
+    if (change.getIsCommentEvent()) {
+      log.debug("No patch set retrieval because the change is a comment event.");
+      return "";
     }
+    this.change = change;
 
-    public String getPatchSet(ChangeSetData changeSetData, GerritChange change) throws Exception {
-        if (change.getIsCommentEvent()) {
-            log.debug("No patch set retrieval because the change is a comment event.");
-            return "";
-        }
-        this.change = change;
+    String formattedPatch = getPatchFromGerrit();
+    patchSetFiles = extractFilesFromPatch(formattedPatch);
+    log.debug("Files extracted from patch: {}", patchSetFiles);
+    retrieveFileDiff(change, revisionBase);
 
-        String formattedPatch = getPatchFromGerrit();
-        patchSetFiles = extractFilesFromPatch(formattedPatch);
-        log.debug("Files extracted from patch: {}", patchSetFiles);
-        retrieveFileDiff(change, revisionBase);
+    return formattedPatch;
+  }
 
-        return formattedPatch;
+  private String getPatchFromGerrit() throws Exception {
+    try (ManualRequestContext requestContext = config.openRequestContext()) {
+      String formattedPatch =
+          config
+              .getGerritApi()
+              .changes()
+              .id(
+                  change.getProjectName(),
+                  change.getBranchNameKey().shortName(),
+                  change.getChangeKey().get())
+              .current()
+              .patch()
+              .asString();
+      log.debug("Formatted Patch retrieved: {}", formattedPatch);
+
+      return filterPatch(formattedPatch);
     }
+  }
 
-    private String getPatchFromGerrit() throws Exception {
-        try (ManualRequestContext requestContext = config.openRequestContext()) {
-            String formattedPatch = config
-                    .getGerritApi()
-                    .changes()
-                    .id(
-                            change.getProjectName(),
-                            change.getBranchNameKey().shortName(),
-                            change.getChangeKey().get())
-                    .current()
-                    .patch()
-                    .asString();
-            log.debug("Formatted Patch retrieved: {}", formattedPatch);
-
-            return filterPatch(formattedPatch);
-        }
+  private String filterPatch(String formattedPatch) {
+    if (config.getGptReviewCommitMessages()) {
+      String patchWithCommitMessage = filterPatchWithCommitMessage(formattedPatch);
+      log.debug("Patch filtered to include commit messages: {}", patchWithCommitMessage);
+      return patchWithCommitMessage;
+    } else {
+      String patchWithoutCommitMessage = filterPatchWithoutCommitMessage(change, formattedPatch);
+      log.debug("Patch filtered to exclude commit messages: {}", patchWithoutCommitMessage);
+      return patchWithoutCommitMessage;
     }
-
-    private String filterPatch(String formattedPatch) {
-        if (config.getGptReviewCommitMessages()) {
-            String patchWithCommitMessage = filterPatchWithCommitMessage(formattedPatch);
-            log.debug("Patch filtered to include commit messages: {}", patchWithCommitMessage);
-            return patchWithCommitMessage;
-        }
-        else {
-            String patchWithoutCommitMessage = filterPatchWithoutCommitMessage(change, formattedPatch);
-            log.debug("Patch filtered to exclude commit messages: {}", patchWithoutCommitMessage);
-            return patchWithoutCommitMessage;
-        }
-    }
+  }
 }

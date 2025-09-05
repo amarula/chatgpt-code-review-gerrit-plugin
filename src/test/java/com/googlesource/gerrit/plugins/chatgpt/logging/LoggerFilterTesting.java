@@ -8,28 +8,30 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class LoggerFilterTesting extends Filter<ILoggingEvent> {
-    private LoggerFilterDecider loggerFilterDecider;
-    private Level filterLevel;
+  private LoggerFilterDecider loggerFilterDecider;
+  private Level filterLevel;
 
-    public void setFilterLevel(String levelStr) {
-        this.filterLevel = Level.toLevel(levelStr, Level.DEBUG); // Default level is DEBUG if parsing fails
-    }
+  public void setFilterLevel(String levelStr) {
+    this.filterLevel =
+        Level.toLevel(levelStr, Level.DEBUG); // Default level is DEBUG if parsing fails
+  }
 
-    public void setFilterValue(String filterValue) {
-        if (loggerFilterDecider == null) {
-            log.debug("Initializing LoggerFilter decider");
-            loggerFilterDecider = new LoggerFilterDecider(filterValue);
-        }
+  public void setFilterValue(String filterValue) {
+    if (loggerFilterDecider == null) {
+      log.debug("Initializing LoggerFilter decider");
+      loggerFilterDecider = new LoggerFilterDecider(filterValue);
     }
+  }
 
-    @Override
-    public FilterReply decide(ILoggingEvent event) {
-        String loggedClassName = event.getLoggerName();
-        String message = event.getMessage();
-        Level level = event.getLevel();
-        if (level.isGreaterOrEqual(filterLevel) || loggerFilterDecider.shouldOverrideLogLevel(loggedClassName, message)) {
-            return FilterReply.ACCEPT;
-        }
-        return FilterReply.DENY;
+  @Override
+  public FilterReply decide(ILoggingEvent event) {
+    String loggedClassName = event.getLoggerName();
+    String message = event.getMessage();
+    Level level = event.getLevel();
+    if (level.isGreaterOrEqual(filterLevel)
+        || loggerFilterDecider.shouldOverrideLogLevel(loggedClassName, message)) {
+      return FilterReply.ACCEPT;
     }
+    return FilterReply.DENY;
+  }
 }

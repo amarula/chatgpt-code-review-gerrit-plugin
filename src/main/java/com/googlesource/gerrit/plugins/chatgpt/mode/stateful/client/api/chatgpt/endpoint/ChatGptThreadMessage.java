@@ -35,79 +35,75 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class ChatGptThreadMessage extends ChatGptApiBase {
-    private final String threadId;
+  private final String threadId;
 
-    private ChangeSetData changeSetData;
-    private GerritChange change;
-    private ICodeContextPolicy codeContextPolicy;
-    private String patchSet;
-    private ChatGptRequestMessage addMessageRequestBody;
+  private ChangeSetData changeSetData;
+  private GerritChange change;
+  private ICodeContextPolicy codeContextPolicy;
+  private String patchSet;
+  private ChatGptRequestMessage addMessageRequestBody;
 
-    public ChatGptThreadMessage(String threadId, Configuration config) {
-        super(config);
-        this.threadId = threadId;
-    }
+  public ChatGptThreadMessage(String threadId, Configuration config) {
+    super(config);
+    this.threadId = threadId;
+  }
 
-    public ChatGptThreadMessage(
-            String threadId,
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy,
-            String patchSet
-    ) {
-        this(threadId, config);
-        this.changeSetData = changeSetData;
-        this.change = change;
-        this.codeContextPolicy = codeContextPolicy;
-        this.patchSet = patchSet;
-    }
+  public ChatGptThreadMessage(
+      String threadId,
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy,
+      String patchSet) {
+    this(threadId, config);
+    this.changeSetData = changeSetData;
+    this.change = change;
+    this.codeContextPolicy = codeContextPolicy;
+    this.patchSet = patchSet;
+  }
 
-    public ChatGptThreadMessageResponse retrieveMessage(String messageId) throws OpenAiConnectionFailException {
-        Request request = createRetrieveMessageRequest(messageId);
-        log.debug("ChatGPT Retrieve Thread Message request: {}", request);
-        ChatGptThreadMessageResponse threadMessageResponse = getChatGptResponse(
-                request, ChatGptThreadMessageResponse.class
-        );
-        log.info("Thread Message retrieved: {}", threadMessageResponse);
+  public ChatGptThreadMessageResponse retrieveMessage(String messageId)
+      throws OpenAiConnectionFailException {
+    Request request = createRetrieveMessageRequest(messageId);
+    log.debug("ChatGPT Retrieve Thread Message request: {}", request);
+    ChatGptThreadMessageResponse threadMessageResponse =
+        getChatGptResponse(request, ChatGptThreadMessageResponse.class);
+    log.info("Thread Message retrieved: {}", threadMessageResponse);
 
-        return threadMessageResponse;
-    }
+    return threadMessageResponse;
+  }
 
-    public void addMessage() throws OpenAiConnectionFailException {
-        Request request = addMessageRequest();
-        log.debug("ChatGPT Add Message request: {}", request);
+  public void addMessage() throws OpenAiConnectionFailException {
+    Request request = addMessageRequest();
+    log.debug("ChatGPT Add Message request: {}", request);
 
-        ChatGptResponse addMessageResponse = getChatGptResponse(request);
-        log.info("Message added: {}", addMessageResponse);
-    }
+    ChatGptResponse addMessageResponse = getChatGptResponse(request);
+    log.info("Message added: {}", addMessageResponse);
+  }
 
-    public String getAddMessageRequestBody() {
-        return getGson().toJson(addMessageRequestBody);
-    }
+  public String getAddMessageRequestBody() {
+    return getGson().toJson(addMessageRequestBody);
+  }
 
-    private Request createRetrieveMessageRequest(String messageId) {
-        String uri = UriResourceLocatorStateful.threadMessageRetrieveUri(threadId, messageId);
-        log.debug("ChatGPT Retrieve Thread Message request URI: {}", uri);
+  private Request createRetrieveMessageRequest(String messageId) {
+    String uri = UriResourceLocatorStateful.threadMessageRetrieveUri(threadId, messageId);
+    log.debug("ChatGPT Retrieve Thread Message request URI: {}", uri);
 
-        return httpClient.createRequestFromJson(uri, null);
-    }
+    return httpClient.createRequestFromJson(uri, null);
+  }
 
-    private Request addMessageRequest() {
-        String uri = UriResourceLocatorStateful.threadMessagesUri(threadId);
-        log.debug("ChatGPT Add Message request URI: {}", uri);
-        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(
-                config,
-                changeSetData,
-                change,
-                codeContextPolicy
-        );
-        addMessageRequestBody = ChatGptRequestMessage.builder()
-                .role("user")
-                .content(chatGptPromptStateful.getDefaultGptThreadReviewMessage(patchSet))
-                .build();
-        log.debug("ChatGPT Add Message request body: {}", addMessageRequestBody);
+  private Request addMessageRequest() {
+    String uri = UriResourceLocatorStateful.threadMessagesUri(threadId);
+    log.debug("ChatGPT Add Message request URI: {}", uri);
+    IChatGptPromptStateful chatGptPromptStateful =
+        getChatGptPromptStateful(config, changeSetData, change, codeContextPolicy);
+    addMessageRequestBody =
+        ChatGptRequestMessage.builder()
+            .role("user")
+            .content(chatGptPromptStateful.getDefaultGptThreadReviewMessage(patchSet))
+            .build();
+    log.debug("ChatGPT Add Message request body: {}", addMessageRequestBody);
 
-        return httpClient.createRequestFromJson(uri, addMessageRequestBody);
-    }
+    return httpClient.createRequestFromJson(uri, addMessageRequestBody);
+  }
 }

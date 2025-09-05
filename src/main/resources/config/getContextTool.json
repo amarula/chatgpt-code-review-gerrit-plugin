@@ -14,7 +14,11 @@
             "properties": {
               "requestType": {
                 "type": "string",
-                "enum": ["definition", "body", "other"],
+                "enum": [
+                  "definition",
+                  "body",
+                  "other"
+                ],
                 "description": "The type of context request: `definition` requests the entity's definition (e.g., the function signature); `body` requests the full content of the entity (e.g., the function body); `other` refers to any request that doesn't fit the previous categories."
               },
               "otherDescription": {
@@ -23,7 +27,11 @@
               },
               "entityCategory": {
                 "type": "string",
-                "enum": ["callable", "data", "type"],
+                "enum": [
+                  "callable",
+                  "data",
+                  "type"
+                ],
                 "description": "The category of the entity: `callable` includes constructs that can be invoked or executed (e.g., functions, methods, ...); `data` includes elements that can hold, represent, or assume values during program execution (e.g., variables, constants, objects, arrays, ...); `type` refers to constructs that define the structure, blueprint, or schema of data types (e.g., classes, structs, enums, interfaces, ...)."
               },
               "contextRequiredEntity": {

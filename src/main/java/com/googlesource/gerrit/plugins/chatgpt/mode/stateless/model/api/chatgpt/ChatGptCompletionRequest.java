@@ -28,12 +28,13 @@ import java.util.List;
 @Data
 @Builder
 public class ChatGptCompletionRequest {
-    private String model;
-    private boolean stream;
-    private double temperature;
-    private int seed;
-    private List<ChatGptRequestMessage> messages;
-    private ChatGptTool[] tools;
-    @SerializedName("tool_choice")
-    private ChatGptToolChoice toolChoice;
+  private String model;
+  private boolean stream;
+  private double temperature;
+  private int seed;
+  private List<ChatGptRequestMessage> messages;
+  private ChatGptTool[] tools;
+
+  @SerializedName("tool_choice")
+  private ChatGptToolChoice toolChoice;
 }

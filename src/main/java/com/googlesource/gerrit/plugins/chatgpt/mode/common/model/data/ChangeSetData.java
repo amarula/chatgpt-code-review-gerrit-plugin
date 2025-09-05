@@ -26,31 +26,28 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 public class ChangeSetData {
-    @NonNull
-    private Integer gptAccountId;
-    private String gptDataPrompt;
-    private Integer commentPropertiesSize;
-    private ReviewAssistantStages reviewAssistantStage = ReviewAssistantStages.REVIEW_CODE;
-    private Boolean forcedStagedReview = false;
-    @NonNull
-    private Integer votingMinScore;
-    @NonNull
-    private Integer votingMaxScore;
+  @NonNull private Integer gptAccountId;
+  private String gptDataPrompt;
+  private Integer commentPropertiesSize;
+  private ReviewAssistantStages reviewAssistantStage = ReviewAssistantStages.REVIEW_CODE;
+  private Boolean forcedStagedReview = false;
+  @NonNull private Integer votingMinScore;
+  @NonNull private Integer votingMaxScore;
 
-    // Command variables
-    private Boolean forcedReview = false;
-    private Boolean forcedReviewLastPatchSet = false;
-    private Boolean replyFilterEnabled = true;
-    private Boolean debugReviewMode = false;
-    private Boolean hideChatGptReview = false;
-    private Boolean hideDynamicConfigMessage = false;
-    private String reviewSystemMessage;
+  // Command variables
+  private Boolean forcedReview = false;
+  private Boolean forcedReviewLastPatchSet = false;
+  private Boolean replyFilterEnabled = true;
+  private Boolean debugReviewMode = false;
+  private Boolean hideChatGptReview = false;
+  private Boolean hideDynamicConfigMessage = false;
+  private String reviewSystemMessage;
 
-    public Boolean shouldHideChatGptReview() {
-        return hideChatGptReview && !forcedReview;
-    }
+  public Boolean shouldHideChatGptReview() {
+    return hideChatGptReview && !forcedReview;
+  }
 
-    public Boolean shouldRequestChatGptReview() {
-        return reviewSystemMessage == null && !shouldHideChatGptReview();
-    }
+  public Boolean shouldRequestChatGptReview() {
+    return reviewSystemMessage == null && !shouldHideChatGptReview();
+  }
 }

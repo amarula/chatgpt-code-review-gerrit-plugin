@@ -39,71 +39,70 @@ import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.
 
 @Slf4j
 public class ChatGptAssistant extends ChatGptApiBase {
-    @Getter
-    private final String description;
-    @Getter
-    private final String instructions;
-    @Getter
-    private final String model;
-    @Getter
-    private final Double temperature;
-    private final ICodeContextPolicy codeContextPolicy;
+  @Getter private final String description;
+  @Getter private final String instructions;
+  @Getter private final String model;
+  @Getter private final Double temperature;
+  private final ICodeContextPolicy codeContextPolicy;
 
-    private ChatGptAssistantTools chatGptAssistantTools;
+  private ChatGptAssistantTools chatGptAssistantTools;
 
-    public ChatGptAssistant(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy
-    ) {
-        super(config);
-        log.debug("Setting up assistant parameters based on current configuration and change set data.");
-        IChatGptPromptStateful chatGptPromptStateful = getChatGptPromptStateful(config, changeSetData, change, codeContextPolicy);
-        ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
-        this.codeContextPolicy = codeContextPolicy;
-        description = chatGptPromptStateful.getDefaultGptAssistantDescription();
-        instructions = chatGptPromptStateful.getDefaultGptAssistantInstructions();
-        model = config.getGptModel();
-        temperature = chatGptParameters.getGptTemperature();
-    }
+  public ChatGptAssistant(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy) {
+    super(config);
+    log.debug(
+        "Setting up assistant parameters based on current configuration and change set data.");
+    IChatGptPromptStateful chatGptPromptStateful =
+        getChatGptPromptStateful(config, changeSetData, change, codeContextPolicy);
+    ChatGptParameters chatGptParameters = new ChatGptParameters(config, change.getIsCommentEvent());
+    this.codeContextPolicy = codeContextPolicy;
+    description = chatGptPromptStateful.getDefaultGptAssistantDescription();
+    instructions = chatGptPromptStateful.getDefaultGptAssistantInstructions();
+    model = config.getGptModel();
+    temperature = chatGptParameters.getGptTemperature();
+  }
 
-    public String createAssistant(String vectorStoreId) throws OpenAiConnectionFailException {
-        log.debug("Creating assistant with vector store ID: {}", vectorStoreId);
-        Request request = createRequest(vectorStoreId);
-        log.debug("ChatGPT Create Assistant request: {}", request);
+  public String createAssistant(String vectorStoreId) throws OpenAiConnectionFailException {
+    log.debug("Creating assistant with vector store ID: {}", vectorStoreId);
+    Request request = createRequest(vectorStoreId);
+    log.debug("ChatGPT Create Assistant request: {}", request);
 
-        ChatGptResponse assistantResponse = getChatGptResponse(request);
-        log.debug("Assistant created: {}", assistantResponse);
+    ChatGptResponse assistantResponse = getChatGptResponse(request);
+    log.debug("Assistant created: {}", assistantResponse);
 
-        return assistantResponse.getId();
-    }
+    return assistantResponse.getId();
+  }
 
-    private Request createRequest(String vectorStoreId) {
-        log.debug("Creating request to build new assistant.");
-        String uri = UriResourceLocatorStateful.assistantCreateUri();
-        log.debug("ChatGPT Create Assistant request URI: {}", uri);
-        updateTools(vectorStoreId);
+  private Request createRequest(String vectorStoreId) {
+    log.debug("Creating request to build new assistant.");
+    String uri = UriResourceLocatorStateful.assistantCreateUri();
+    log.debug("ChatGPT Create Assistant request URI: {}", uri);
+    updateTools(vectorStoreId);
 
-        ChatGptCreateAssistantRequestBody requestBody = ChatGptCreateAssistantRequestBody.builder()
-                .name(ChatGptPromptStatefulBase.DEFAULT_GPT_ASSISTANT_NAME)
-                .description(description)
-                .instructions(instructions)
-                .model(model)
-                .temperature(temperature)
-                .tools(chatGptAssistantTools.getTools())
-                .toolResources(chatGptAssistantTools.getToolResources())
-                .build();
-        log.debug("Request body for creating assistant: {}", requestBody);
+    ChatGptCreateAssistantRequestBody requestBody =
+        ChatGptCreateAssistantRequestBody.builder()
+            .name(ChatGptPromptStatefulBase.DEFAULT_GPT_ASSISTANT_NAME)
+            .description(description)
+            .instructions(instructions)
+            .model(model)
+            .temperature(temperature)
+            .tools(chatGptAssistantTools.getTools())
+            .toolResources(chatGptAssistantTools.getToolResources())
+            .build();
+    log.debug("Request body for creating assistant: {}", requestBody);
 
-        return httpClient.createRequestFromJson(uri, requestBody);
-    }
+    return httpClient.createRequestFromJson(uri, requestBody);
+  }
 
-    private void updateTools(String vectorStoreId) {
-        ChatGptTools chatGptFormatRepliesTools = new ChatGptTools(ChatGptTools.Functions.formatReplies);
-        chatGptAssistantTools = ChatGptAssistantTools.builder()
-                .tools(new ArrayList<>(List.of(chatGptFormatRepliesTools.retrieveFunctionTool())))
-                .build();
-        codeContextPolicy.updateAssistantTools(chatGptAssistantTools, vectorStoreId);
-    }
+  private void updateTools(String vectorStoreId) {
+    ChatGptTools chatGptFormatRepliesTools = new ChatGptTools(ChatGptTools.Functions.formatReplies);
+    chatGptAssistantTools =
+        ChatGptAssistantTools.builder()
+            .tools(new ArrayList<>(List.of(chatGptFormatRepliesTools.retrieveFunctionTool())))
+            .build();
+    codeContextPolicy.updateAssistantTools(chatGptAssistantTools, vectorStoreId);
+  }
 }

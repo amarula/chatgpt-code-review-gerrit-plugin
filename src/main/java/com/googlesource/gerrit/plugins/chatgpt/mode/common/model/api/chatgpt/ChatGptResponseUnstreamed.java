@@ -22,10 +22,10 @@ import java.util.List;
 
 @Data
 public class ChatGptResponseUnstreamed {
-    private List<MessageChoice> choices;
+  private List<MessageChoice> choices;
 
-    @Data
-    public static class MessageChoice {
-        private ChatGptResponseMessage message;
-    }
+  @Data
+  public static class MessageChoice {
+    private ChatGptResponseMessage message;
+  }
 }

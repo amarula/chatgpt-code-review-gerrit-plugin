@@ -25,10 +25,10 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class GerritReviewFileDiff extends GerritFileDiff {
-    private List<DiffContent> content;
+  private List<DiffContent> content;
 
-    public GerritReviewFileDiff(Meta metaA, Meta metaB) {
-        this.metaA = metaA;
-        this.metaB = metaB;
-    }
+  public GerritReviewFileDiff(Meta metaA, Meta metaB) {
+    this.metaA = metaA;
+    this.metaB = metaB;
+  }
 }

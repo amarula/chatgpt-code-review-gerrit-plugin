@@ -26,16 +26,16 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class GerritClientData {
-    private IGerritClientPatchSet gerritClientPatchSet;
-    private List<GerritComment> detailComments;
-    private CommentData commentData;
-    private Integer revisionBase;
+  private IGerritClientPatchSet gerritClientPatchSet;
+  private List<GerritComment> detailComments;
+  private CommentData commentData;
+  private Integer revisionBase;
 
-    public List<GerritComment> getCommentProperties() {
-        return commentData.getCommentProperties();
-    }
+  public List<GerritComment> getCommentProperties() {
+    return commentData.getCommentProperties();
+  }
 
-    public int getOneBasedRevisionBase() {
-        return revisionBase +1;
-    }
+  public int getOneBasedRevisionBase() {
+    return revisionBase + 1;
+  }
 }

@@ -30,44 +30,46 @@ import java.util.List;
 
 @Slf4j
 public abstract class CodeContextPolicyBase extends ClientBase implements ICodeContextPolicy {
-    public enum CodeContextPolicies {
-        NONE,
-        ON_DEMAND,
-        UPLOAD_ALL
-    }
+  public enum CodeContextPolicies {
+    NONE,
+    ON_DEMAND,
+    UPLOAD_ALL
+  }
 
-    public CodeContextPolicyBase(Configuration config) {
-        super(config);
-    }
+  public CodeContextPolicyBase(Configuration config) {
+    super(config);
+  }
 
-    public void setupRunAction(ChatGptRun chatGptRun) {
-        log.debug("Setup Run Action skipped with the current code context policy");
-    }
+  public void setupRunAction(ChatGptRun chatGptRun) {
+    log.debug("Setup Run Action skipped with the current code context policy");
+  }
 
-    public boolean runActionRequired(ChatGptRunResponse runResponse) throws OpenAiConnectionFailException {
-        log.debug("Run Action Required checking skipped with the current code context policy");
-        return false;
-    }
+  public boolean runActionRequired(ChatGptRunResponse runResponse)
+      throws OpenAiConnectionFailException {
+    log.debug("Run Action Required checking skipped with the current code context policy");
+    return false;
+  }
 
-    public String generateVectorStore() throws OpenAiConnectionFailException {
-        log.debug("Vector Store generating skipped with the current code context policy");
-        return null;
-    }
+  public String generateVectorStore() throws OpenAiConnectionFailException {
+    log.debug("Vector Store generating skipped with the current code context policy");
+    return null;
+  }
 
-    public void removeVectorStore() throws OperationNotSupportedException {
-        log.debug("Vector Store removal skipped with the current code context policy");
-        throw new OperationNotSupportedException();
-    }
+  public void removeVectorStore() throws OperationNotSupportedException {
+    log.debug("Vector Store removal skipped with the current code context policy");
+    throw new OperationNotSupportedException();
+  }
 
-    public void updateAssistantTools(ChatGptAssistantTools chatGptAssistantTools, String vectorStoreId) {
-        log.debug("Assistant Tools updating skipped with the current code context policy");
-    }
+  public void updateAssistantTools(
+      ChatGptAssistantTools chatGptAssistantTools, String vectorStoreId) {
+    log.debug("Assistant Tools updating skipped with the current code context policy");
+  }
 
-    public void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions) {
-        log.debug("Adding Assistant Instructions skipped with the current code context policy");
-    }
+  public void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions) {
+    log.debug("Adding Assistant Instructions skipped with the current code context policy");
+  }
 
-    public void addCodeContextPolicyAwareAssistantRule(List<String> rules) {
-        log.debug("Adding Assistant Rules skipped with the current code context policy");
-    }
+  public void addCodeContextPolicyAwareAssistantRule(List<String> rules) {
+    log.debug("Adding Assistant Rules skipped with the current code context policy");
+  }
 }

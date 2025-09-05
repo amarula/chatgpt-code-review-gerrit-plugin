@@ -28,19 +28,20 @@ import java.util.List;
 @Data
 @ToString(callSuper = true)
 public class ChatGptRunResponse extends ChatGptResponse {
-    @SerializedName("required_action")
-    private RequiredAction requiredAction;
+  @SerializedName("required_action")
+  private RequiredAction requiredAction;
+
+  @Data
+  public static class RequiredAction {
+    @SerializedName("submit_tool_outputs")
+    private SubmitToolOutputs submitToolOutputs;
+
+    private String type;
 
     @Data
-    public static class RequiredAction {
-        @SerializedName("submit_tool_outputs")
-        private SubmitToolOutputs submitToolOutputs;
-        private String type;
-
-        @Data
-        public static class SubmitToolOutputs {
-            @SerializedName("tool_calls")
-            private List<ChatGptToolCall> toolCalls;
-        }
+    public static class SubmitToolOutputs {
+      @SerializedName("tool_calls")
+      private List<ChatGptToolCall> toolCalls;
     }
+  }
 }

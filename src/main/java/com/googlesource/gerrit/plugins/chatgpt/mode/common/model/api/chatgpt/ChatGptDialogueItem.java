@@ -25,8 +25,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public abstract class ChatGptDialogueItem {
-    protected Integer id;
-    protected String filename;
-    protected Integer lineNumber;
-    protected String codeSnippet;
+  protected Integer id;
+  protected String filename;
+  protected Integer lineNumber;
+  protected String codeSnippet;
 }

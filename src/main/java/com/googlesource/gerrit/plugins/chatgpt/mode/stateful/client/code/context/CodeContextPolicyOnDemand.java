@@ -36,41 +36,45 @@ import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.promp
 
 @Slf4j
 public class CodeContextPolicyOnDemand extends CodeContextPolicyBase implements ICodeContextPolicy {
-    private final GerritChange change;
-    private final GitRepoFiles gitRepoFiles;
+  private final GerritChange change;
+  private final GitRepoFiles gitRepoFiles;
 
-    private ChatGptRunActionHandler chatGptRunActionHandler;
+  private ChatGptRunActionHandler chatGptRunActionHandler;
 
-    @VisibleForTesting
-    @Inject
-    public CodeContextPolicyOnDemand(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
-        super(config);
-        this.change = change;
-        this.gitRepoFiles = gitRepoFiles;
-        log.debug("CodeContextPolicyOnDemand initialized");
-    }
+  @VisibleForTesting
+  @Inject
+  public CodeContextPolicyOnDemand(
+      Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
+    super(config);
+    this.change = change;
+    this.gitRepoFiles = gitRepoFiles;
+    log.debug("CodeContextPolicyOnDemand initialized");
+  }
 
-    public void setupRunAction(ChatGptRun chatGptRun) {
-        chatGptRunActionHandler = new ChatGptRunActionHandler(config, change, gitRepoFiles, chatGptRun);
-        log.debug("Run Action setup with On-Demand code context policy");
-    }
+  public void setupRunAction(ChatGptRun chatGptRun) {
+    chatGptRunActionHandler = new ChatGptRunActionHandler(config, change, gitRepoFiles, chatGptRun);
+    log.debug("Run Action setup with On-Demand code context policy");
+  }
 
-    @Override
-    public boolean runActionRequired(ChatGptRunResponse runResponse) throws OpenAiConnectionFailException {
-        log.debug("Checking Run Action Required with On-Demand code context policy");
-        return chatGptRunActionHandler.runActionRequired(runResponse);
-    }
+  @Override
+  public boolean runActionRequired(ChatGptRunResponse runResponse)
+      throws OpenAiConnectionFailException {
+    log.debug("Checking Run Action Required with On-Demand code context policy");
+    return chatGptRunActionHandler.runActionRequired(runResponse);
+  }
 
-    @Override
-    public void updateAssistantTools(ChatGptAssistantTools chatGptAssistantTools, String vectorStoreId) {
-        ChatGptTools chatGptGetContextTools = new ChatGptTools(ChatGptTools.Functions.getContext);
-        chatGptAssistantTools.getTools().add(chatGptGetContextTools.retrieveFunctionTool());
-        log.debug("Updated Assistant Tools for On-Demand code context policy: {}", chatGptAssistantTools);
-    }
+  @Override
+  public void updateAssistantTools(
+      ChatGptAssistantTools chatGptAssistantTools, String vectorStoreId) {
+    ChatGptTools chatGptGetContextTools = new ChatGptTools(ChatGptTools.Functions.getContext);
+    chatGptAssistantTools.getTools().add(chatGptGetContextTools.retrieveFunctionTool());
+    log.debug(
+        "Updated Assistant Tools for On-Demand code context policy: {}", chatGptAssistantTools);
+  }
 
-    @Override
-    public void addCodeContextPolicyAwareAssistantRule(List<String> rules) {
-        rules.add(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_ON_DEMAND_REQUEST);
-        log.debug("Added Assistant Rules for On-Demand code context policy");
-    }
+  @Override
+  public void addCodeContextPolicyAwareAssistantRule(List<String> rules) {
+    rules.add(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_ON_DEMAND_REQUEST);
+    log.debug("Added Assistant Rules for On-Demand code context policy");
+  }
 }

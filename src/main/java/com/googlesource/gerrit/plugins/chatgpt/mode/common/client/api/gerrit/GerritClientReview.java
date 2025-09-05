@@ -48,154 +48,157 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.joinWithDo
 
 @Slf4j
 public class GerritClientReview extends GerritClientAccount {
-    private final PluginDataHandlerProvider pluginDataHandlerProvider;
-    private final Localizer localizer;
-    private final DebugCodeBlocksDynamicConfiguration debugCodeBlocksDynamicConfiguration;
-    private final ErrorMessageHandler errorMessageHandler;
+  private final PluginDataHandlerProvider pluginDataHandlerProvider;
+  private final Localizer localizer;
+  private final DebugCodeBlocksDynamicConfiguration debugCodeBlocksDynamicConfiguration;
+  private final ErrorMessageHandler errorMessageHandler;
 
-    private GerritChange change;
+  private GerritChange change;
 
-    @VisibleForTesting
-    @Inject
-    public GerritClientReview(
-            Configuration config,
-            AccountCache accountCache,
-            PluginDataHandlerProvider pluginDataHandlerProvider,
-            Localizer localizer
-    ) {
-        super(config, accountCache);
-        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        this.localizer = localizer;
-        debugCodeBlocksDynamicConfiguration = new DebugCodeBlocksDynamicConfiguration(localizer);
-        errorMessageHandler = new ErrorMessageHandler(config, localizer);
-        log.debug("GerritClientReview initialized.");
+  @VisibleForTesting
+  @Inject
+  public GerritClientReview(
+      Configuration config,
+      AccountCache accountCache,
+      PluginDataHandlerProvider pluginDataHandlerProvider,
+      Localizer localizer) {
+    super(config, accountCache);
+    this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+    this.localizer = localizer;
+    debugCodeBlocksDynamicConfiguration = new DebugCodeBlocksDynamicConfiguration(localizer);
+    errorMessageHandler = new ErrorMessageHandler(config, localizer);
+    log.debug("GerritClientReview initialized.");
+  }
+
+  public void setReview(
+      GerritChange change,
+      List<ReviewBatch> reviewBatches,
+      ChangeSetData changeSetData,
+      Integer reviewScore)
+      throws Exception {
+    log.debug("Setting review for change ID: {}", change.getFullChangeId());
+    this.change = change;
+    ReviewInput reviewInput = buildReview(reviewBatches, changeSetData, reviewScore);
+    if (reviewInput.comments == null && reviewInput.message == null) {
+      log.debug("No comments or messages to post for review.");
+      return;
     }
+    try (ManualRequestContext requestContext = config.openRequestContext()) {
+      ReviewResult result =
+          config
+              .getGerritApi()
+              .changes()
+              .id(
+                  change.getProjectName(),
+                  change.getBranchNameKey().shortName(),
+                  change.getChangeKey().get())
+              .current()
+              .review(reviewInput);
 
-    public void setReview(
-            GerritChange change,
-            List<ReviewBatch> reviewBatches,
-            ChangeSetData changeSetData,
-            Integer reviewScore
-    ) throws Exception {
-        log.debug("Setting review for change ID: {}", change.getFullChangeId());
-        this.change = change;
-        ReviewInput reviewInput = buildReview(reviewBatches, changeSetData, reviewScore);
-        if (reviewInput.comments == null && reviewInput.message == null) {
-            log.debug("No comments or messages to post for review.");
-            return;
-        }
-        try (ManualRequestContext requestContext = config.openRequestContext()) {
-            ReviewResult result = config
-                    .getGerritApi()
-                    .changes()
-                    .id(
-                            change.getProjectName(),
-                            change.getBranchNameKey().shortName(),
-                            change.getChangeKey().get())
-                    .current()
-                    .review(reviewInput);
-
-            if (!Strings.isNullOrEmpty(result.error)) {
-                log.error("Review setting failed with status code: {}", result.error);
-            }
-        }
+      if (!Strings.isNullOrEmpty(result.error)) {
+        log.error("Review setting failed with status code: {}", result.error);
+      }
     }
+  }
 
-    public void setReview(
-            GerritChange change,
-            List<ReviewBatch> reviewBatches,
-            ChangeSetData changeSetData
-    ) throws Exception {
-        setReview(change, reviewBatches, changeSetData, null);
+  public void setReview(
+      GerritChange change, List<ReviewBatch> reviewBatches, ChangeSetData changeSetData)
+      throws Exception {
+    setReview(change, reviewBatches, changeSetData, null);
+  }
+
+  private ReviewInput buildReview(
+      List<ReviewBatch> reviewBatches, ChangeSetData changeSetData, Integer reviewScore) {
+    log.debug("Building review input.");
+    ReviewInput reviewInput = ReviewInput.create();
+    Map<String, List<CommentInput>> comments = new HashMap<>();
+    String systemMessage = localizer.getText("message.empty.review");
+    if (changeSetData.getReviewSystemMessage() != null) {
+      systemMessage = changeSetData.getReviewSystemMessage();
+      reviewInput.notify = NotifyHandling.NONE;
+    } else if (!changeSetData.shouldHideChatGptReview()) {
+      comments = getReviewComments(reviewBatches);
+      if (reviewScore != null) {
+        reviewInput.label(LabelId.CODE_REVIEW, reviewScore);
+      }
     }
+    updateSystemMessage(changeSetData, reviewInput, comments.isEmpty(), systemMessage);
 
-    private ReviewInput buildReview(List<ReviewBatch> reviewBatches, ChangeSetData changeSetData, Integer reviewScore) {
-        log.debug("Building review input.");
-        ReviewInput reviewInput = ReviewInput.create();
-        Map<String, List<CommentInput>> comments = new HashMap<>();
-        String systemMessage = localizer.getText("message.empty.review");
-        if (changeSetData.getReviewSystemMessage() != null) {
-            systemMessage = changeSetData.getReviewSystemMessage();
-            reviewInput.notify = NotifyHandling.NONE;
-        }
-        else if (!changeSetData.shouldHideChatGptReview()) {
-            comments = getReviewComments(reviewBatches);
-            if (reviewScore != null) {
-                reviewInput.label(LabelId.CODE_REVIEW, reviewScore);
-            }
-        }
-        updateSystemMessage(changeSetData, reviewInput, comments.isEmpty(), systemMessage);
-
-        if (!comments.isEmpty()) {
-            reviewInput.comments = comments;
-        }
-        return reviewInput;
+    if (!comments.isEmpty()) {
+      reviewInput.comments = comments;
     }
+    return reviewInput;
+  }
 
-    private void updateSystemMessage(
-            ChangeSetData changeSetData,
-            ReviewInput reviewInput,
-            boolean emptyComments,
-            String systemMessage
-    ) {
-        List<String> messages = new ArrayList<>();
-        if (!change.getIsCommentEvent() && !changeSetData.getHideDynamicConfigMessage()) {
-            Map<String, String> dynamicConfig = new DynamicConfigManager(pluginDataHandlerProvider).getDynamicConfig();
-            if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
-                messages.add(debugCodeBlocksDynamicConfiguration.getDebugCodeBlock(dynamicConfig));
-            }
-        }
-        if (emptyComments) {
-            messages.add(localizer.getText("system.message.prefix") + ' ' + systemMessage);
-        }
-        errorMessageHandler.updateErrorMessages(messages);
-
-        if (!messages.isEmpty()) {
-            reviewInput.message(joinWithDoubleNewLine(messages));
-        }
-        log.debug("System messages for review set: {}", messages);
+  private void updateSystemMessage(
+      ChangeSetData changeSetData,
+      ReviewInput reviewInput,
+      boolean emptyComments,
+      String systemMessage) {
+    List<String> messages = new ArrayList<>();
+    if (!change.getIsCommentEvent() && !changeSetData.getHideDynamicConfigMessage()) {
+      Map<String, String> dynamicConfig =
+          new DynamicConfigManager(pluginDataHandlerProvider).getDynamicConfig();
+      if (dynamicConfig != null && !dynamicConfig.isEmpty()) {
+        messages.add(debugCodeBlocksDynamicConfiguration.getDebugCodeBlock(dynamicConfig));
+      }
     }
-
-    private Map<String, List<CommentInput>> getReviewComments(List<ReviewBatch> reviewBatches) {
-        log.debug("Getting review comments.");
-        Map<String, List<CommentInput>> comments = new HashMap<>();
-        for (ReviewBatch reviewBatch : reviewBatches) {
-            String message = sanitizeChatGptMessage(reviewBatch.getContent());
-            if (message.trim().isEmpty()) {
-                log.info("Empty message from review not submitted for batch with ID: {}", reviewBatch.getId());
-                continue;
-            }
-            boolean unresolved;
-            String filename = reviewBatch.getFilename();
-            List<CommentInput> filenameComments = comments.getOrDefault(filename, new ArrayList<>());
-            CommentInput filenameComment = new CommentInput();
-            filenameComment.message = message;
-            if (reviewBatch.getLine() != null || reviewBatch.getRange() != null) {
-                filenameComment.line = reviewBatch.getLine();
-                Optional.ofNullable(reviewBatch.getRange())
-                        .ifPresent(r -> {
-                            Comment.Range range = new Comment.Range();
-                            range.startLine = r.startLine;
-                            range.startCharacter = r.startCharacter;
-                            range.endLine = r.endLine;
-                            range.endCharacter = r.endCharacter;
-                            filenameComment.range = range;
-                            log.debug("Setting range for comment on file '{}': startLine {}, endLine {}",
-                                    filename, range.startLine, range.endLine);
-                        });
-                unresolved = !config.getInlineCommentsAsResolved();
-                log.debug("Comment for file '{}' is marked as unresolved: {}", filename, unresolved);
-            }
-            else {
-                unresolved = !config.getPatchSetCommentsAsResolved();
-                log.debug("Patch set comment for file '{}' is marked as unresolved: {}", filename, unresolved);
-            }
-            filenameComment.inReplyTo = reviewBatch.getId();
-            filenameComment.unresolved = unresolved;
-            filenameComments.add(filenameComment);
-            comments.putIfAbsent(filename, filenameComments);
-        }
-        log.debug("Review comments processed.");
-        return comments;
+    if (emptyComments) {
+      messages.add(localizer.getText("system.message.prefix") + ' ' + systemMessage);
     }
+    errorMessageHandler.updateErrorMessages(messages);
+
+    if (!messages.isEmpty()) {
+      reviewInput.message(joinWithDoubleNewLine(messages));
+    }
+    log.debug("System messages for review set: {}", messages);
+  }
+
+  private Map<String, List<CommentInput>> getReviewComments(List<ReviewBatch> reviewBatches) {
+    log.debug("Getting review comments.");
+    Map<String, List<CommentInput>> comments = new HashMap<>();
+    for (ReviewBatch reviewBatch : reviewBatches) {
+      String message = sanitizeChatGptMessage(reviewBatch.getContent());
+      if (message.trim().isEmpty()) {
+        log.info(
+            "Empty message from review not submitted for batch with ID: {}", reviewBatch.getId());
+        continue;
+      }
+      boolean unresolved;
+      String filename = reviewBatch.getFilename();
+      List<CommentInput> filenameComments = comments.getOrDefault(filename, new ArrayList<>());
+      CommentInput filenameComment = new CommentInput();
+      filenameComment.message = message;
+      if (reviewBatch.getLine() != null || reviewBatch.getRange() != null) {
+        filenameComment.line = reviewBatch.getLine();
+        Optional.ofNullable(reviewBatch.getRange())
+            .ifPresent(
+                r -> {
+                  Comment.Range range = new Comment.Range();
+                  range.startLine = r.startLine;
+                  range.startCharacter = r.startCharacter;
+                  range.endLine = r.endLine;
+                  range.endCharacter = r.endCharacter;
+                  filenameComment.range = range;
+                  log.debug(
+                      "Setting range for comment on file '{}': startLine {}, endLine {}",
+                      filename,
+                      range.startLine,
+                      range.endLine);
+                });
+        unresolved = !config.getInlineCommentsAsResolved();
+        log.debug("Comment for file '{}' is marked as unresolved: {}", filename, unresolved);
+      } else {
+        unresolved = !config.getPatchSetCommentsAsResolved();
+        log.debug(
+            "Patch set comment for file '{}' is marked as unresolved: {}", filename, unresolved);
+      }
+      filenameComment.inReplyTo = reviewBatch.getId();
+      filenameComment.unresolved = unresolved;
+      filenameComments.add(filenameComment);
+      comments.putIfAbsent(filename, filenameComments);
+    }
+    log.debug("Review comments processed.");
+    return comments;
+  }
 }

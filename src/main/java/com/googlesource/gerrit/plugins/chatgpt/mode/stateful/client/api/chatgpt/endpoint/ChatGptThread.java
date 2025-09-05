@@ -29,47 +29,45 @@ import okhttp3.Request;
 
 @Slf4j
 public class ChatGptThread extends ChatGptApiBase {
-    public static final String KEY_THREAD_ID = "threadId";
+  public static final String KEY_THREAD_ID = "threadId";
 
-    private final ChangeSetData changeSetData;
-    private final PluginDataHandler changeDataHandler;
+  private final ChangeSetData changeSetData;
+  private final PluginDataHandler changeDataHandler;
 
-    public ChatGptThread(
-            Configuration config,
-            ChangeSetData changeSetData,
-            PluginDataHandlerProvider pluginDataHandlerProvider
-    ) {
-        super(config);
-        this.changeSetData = changeSetData;
-        this.changeDataHandler = pluginDataHandlerProvider.getChangeScope();
+  public ChatGptThread(
+      Configuration config,
+      ChangeSetData changeSetData,
+      PluginDataHandlerProvider pluginDataHandlerProvider) {
+    super(config);
+    this.changeSetData = changeSetData;
+    this.changeDataHandler = pluginDataHandlerProvider.getChangeScope();
+  }
+
+  public String createThread() throws OpenAiConnectionFailException {
+    String threadId = changeDataHandler.getValue(KEY_THREAD_ID);
+    if (threadId == null
+        || !changeSetData.getForcedReview() && !changeSetData.getForcedStagedReview()) {
+      Request request = createThreadRequest();
+      log.debug("ChatGPT Create Thread request: {}", request);
+
+      ChatGptResponse threadResponse = getChatGptResponse(request);
+      threadId = threadResponse.getId();
+      if (threadId != null) {
+        log.info("Thread created: {}", threadResponse);
+        changeDataHandler.setValue(KEY_THREAD_ID, threadId);
+      } else {
+        log.error("Failed to create thread. Response: {}", threadResponse);
+      }
+    } else {
+      log.info("Existing thread found for the Change Set. Thread ID: {}", threadId);
     }
+    return threadId;
+  }
 
-    public String createThread() throws OpenAiConnectionFailException {
-        String threadId = changeDataHandler.getValue(KEY_THREAD_ID);
-        if (threadId == null || !changeSetData.getForcedReview() && !changeSetData.getForcedStagedReview()) {
-            Request request = createThreadRequest();
-            log.debug("ChatGPT Create Thread request: {}", request);
+  private Request createThreadRequest() {
+    String uri = UriResourceLocatorStateful.threadsUri();
+    log.debug("ChatGPT Create Thread request URI: {}", uri);
 
-            ChatGptResponse threadResponse = getChatGptResponse(request);
-            threadId = threadResponse.getId();
-            if (threadId != null) {
-                log.info("Thread created: {}", threadResponse);
-                changeDataHandler.setValue(KEY_THREAD_ID, threadId);
-            }
-            else {
-                log.error("Failed to create thread. Response: {}", threadResponse);
-            }
-        }
-        else {
-            log.info("Existing thread found for the Change Set. Thread ID: {}", threadId);
-        }
-        return threadId;
-    }
-
-    private Request createThreadRequest() {
-        String uri = UriResourceLocatorStateful.threadsUri();
-        log.debug("ChatGPT Create Thread request URI: {}", uri);
-
-        return httpClient.createRequestFromJson(uri, new Object());
-    }
+    return httpClient.createRequestFromJson(uri, new Object());
+  }
 }

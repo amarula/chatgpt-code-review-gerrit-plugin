@@ -34,72 +34,70 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ChatGptPromptFactory {
 
-    public static IChatGptPromptStateful getChatGptPromptStateful(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy
-    ) {
-        if (change.getIsCommentEvent()) {
-            log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulRequests");
-            return new ChatGptPromptStatefulRequests(config, changeSetData, change, codeContextPolicy);
-        }
-        else {
-            ChatGptParameters chatGptParameters = new ChatGptParameters(config, false);
-            if (chatGptParameters.shouldSpecializeAssistants() || changeSetData.getForcedStagedReview()) {
-                return switch (changeSetData.getReviewAssistantStage()) {
-                    case REVIEW_CODE -> {
-                        log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCode");
-                        yield new ChatGptPromptStatefulReviewCode(config, changeSetData, change, codeContextPolicy);
-                    }
-                    case REVIEW_COMMIT_MESSAGE -> {
-                        log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCommitMessage");
-                        yield new ChatGptPromptStatefulReviewCommitMessage(config, changeSetData, change, codeContextPolicy);
-                    }
-                    case REVIEW_REITERATED -> {
-                        log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewReiterate");
-                        yield new ChatGptPromptStatefulReviewReiterated(config, changeSetData, change, codeContextPolicy);
-                    }
-                };
-            }
-            else {
-                log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReview for Unified Review");
-                return new ChatGptPromptStatefulReview(config, changeSetData, change, codeContextPolicy);
-            }
-        }
+  public static IChatGptPromptStateful getChatGptPromptStateful(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy) {
+    if (change.getIsCommentEvent()) {
+      log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulRequests");
+      return new ChatGptPromptStatefulRequests(config, changeSetData, change, codeContextPolicy);
+    } else {
+      ChatGptParameters chatGptParameters = new ChatGptParameters(config, false);
+      if (chatGptParameters.shouldSpecializeAssistants() || changeSetData.getForcedStagedReview()) {
+        return switch (changeSetData.getReviewAssistantStage()) {
+          case REVIEW_CODE -> {
+            log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCode");
+            yield new ChatGptPromptStatefulReviewCode(
+                config, changeSetData, change, codeContextPolicy);
+          }
+          case REVIEW_COMMIT_MESSAGE -> {
+            log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewCommitMessage");
+            yield new ChatGptPromptStatefulReviewCommitMessage(
+                config, changeSetData, change, codeContextPolicy);
+          }
+          case REVIEW_REITERATED -> {
+            log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReviewReiterate");
+            yield new ChatGptPromptStatefulReviewReiterated(
+                config, changeSetData, change, codeContextPolicy);
+          }
+        };
+      } else {
+        log.info("ChatGptPromptFactory: Return ChatGptPromptStatefulReview for Unified Review");
+        return new ChatGptPromptStatefulReview(config, changeSetData, change, codeContextPolicy);
+      }
     }
+  }
 
-    public static IChatGptPromptStateful getChatGptPromptStateful(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy,
-            ReviewAssistantStages reviewAssistantStage
-    ) {
-        changeSetData.setReviewAssistantStage(reviewAssistantStage);
-        return getChatGptPromptStateful(config, changeSetData, change, codeContextPolicy);
-    }
+  public static IChatGptPromptStateful getChatGptPromptStateful(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy,
+      ReviewAssistantStages reviewAssistantStage) {
+    changeSetData.setReviewAssistantStage(reviewAssistantStage);
+    return getChatGptPromptStateful(config, changeSetData, change, codeContextPolicy);
+  }
 
-    public static IChatGptDataPrompt getChatGptDataPrompt(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            GerritClientData gerritClientData,
-            Localizer localizer
-    ) {
-        if (change.getIsCommentEvent()) {
-            if (config.getGptMode() == Settings.Modes.STATELESS) {
-                log.info("ChatGptPromptFactory: Return ChatGptDataPromptRequestsStateless");
-                return new ChatGptDataPromptRequestsStateless(config, changeSetData, gerritClientData, localizer);
-            }
-            else {
-                log.info("ChatGptPromptFactory: Return ChatGptDataPromptRequestsStateful");
-                return new ChatGptDataPromptRequestsStateful(config, changeSetData, gerritClientData, localizer);
-            }
-        }
-        else {
-            log.info("ChatGptPromptFactory: Return ChatGptDataPromptReview");
-            return new ChatGptDataPromptReview(config, changeSetData, gerritClientData, localizer);
-        }
+  public static IChatGptDataPrompt getChatGptDataPrompt(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      GerritClientData gerritClientData,
+      Localizer localizer) {
+    if (change.getIsCommentEvent()) {
+      if (config.getGptMode() == Settings.Modes.STATELESS) {
+        log.info("ChatGptPromptFactory: Return ChatGptDataPromptRequestsStateless");
+        return new ChatGptDataPromptRequestsStateless(
+            config, changeSetData, gerritClientData, localizer);
+      } else {
+        log.info("ChatGptPromptFactory: Return ChatGptDataPromptRequestsStateful");
+        return new ChatGptDataPromptRequestsStateful(
+            config, changeSetData, gerritClientData, localizer);
+      }
+    } else {
+      log.info("ChatGptPromptFactory: Return ChatGptDataPromptReview");
+      return new ChatGptDataPromptReview(config, changeSetData, gerritClientData, localizer);
     }
+  }
 }

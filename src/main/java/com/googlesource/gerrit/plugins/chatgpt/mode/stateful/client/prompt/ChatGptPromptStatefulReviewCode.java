@@ -28,28 +28,29 @@ import java.util.List;
 import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetHelper.filterPatchWithoutCommitMessage;
 
 @Slf4j
-public class ChatGptPromptStatefulReviewCode extends ChatGptPromptStatefulReview implements IChatGptPromptStateful {
+public class ChatGptPromptStatefulReviewCode extends ChatGptPromptStatefulReview
+    implements IChatGptPromptStateful {
 
-    public ChatGptPromptStatefulReviewCode(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy
-    ) {
-        super(config, changeSetData, change, codeContextPolicy);
-        log.debug("ChatGptPromptStatefulReviewCode initialized for project: {}", change.getProjectName());
-    }
+  public ChatGptPromptStatefulReviewCode(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy) {
+    super(config, changeSetData, change, codeContextPolicy);
+    log.debug(
+        "ChatGptPromptStatefulReviewCode initialized for project: {}", change.getProjectName());
+  }
 
-    @Override
-    public void addGptAssistantInstructions(List<String> instructions) {
-        addReviewInstructions(instructions);
-        log.debug("Review Code specific GPT Assistant Instructions added: {}", instructions);
-    }
+  @Override
+  public void addGptAssistantInstructions(List<String> instructions) {
+    addReviewInstructions(instructions);
+    log.debug("Review Code specific GPT Assistant Instructions added: {}", instructions);
+  }
 
-    @Override
-    public String getDefaultGptThreadReviewMessage(String patchSet) {
-        String filteredPatchSet = filterPatchWithoutCommitMessage(change, patchSet);
-        log.debug("Filtered Patch Set for Review Code: {}", filteredPatchSet);
-        return super.getDefaultGptThreadReviewMessage(filteredPatchSet);
-    }
+  @Override
+  public String getDefaultGptThreadReviewMessage(String patchSet) {
+    String filteredPatchSet = filterPatchWithoutCommitMessage(change, patchSet);
+    log.debug("Filtered Patch Set for Review Code: {}", filteredPatchSet);
+    return super.getDefaultGptThreadReviewMessage(filteredPatchSet);
+  }
 }

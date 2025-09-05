@@ -30,40 +30,43 @@ import java.util.Optional;
 
 @Slf4j
 public class GerritCommentRange {
-    private final HashMap<String, FileDiffProcessed> fileDiffsProcessed;
+  private final HashMap<String, FileDiffProcessed> fileDiffsProcessed;
 
-    public GerritCommentRange(GerritClient gerritClient, GerritChange change) {
-        log.debug("Initialized GerritCommentRange for change '{}'", change.getFullChangeId());
-        IGerritClientPatchSet gerritClientPatchSet = gerritClient.getClientData(change).getGerritClientPatchSet();
-        fileDiffsProcessed = gerritClientPatchSet.getFileDiffsProcessed();
-        log.debug("Initialized File Diffs processed : {}", fileDiffsProcessed);
-    }
+  public GerritCommentRange(GerritClient gerritClient, GerritChange change) {
+    log.debug("Initialized GerritCommentRange for change '{}'", change.getFullChangeId());
+    IGerritClientPatchSet gerritClientPatchSet =
+        gerritClient.getClientData(change).getGerritClientPatchSet();
+    fileDiffsProcessed = gerritClientPatchSet.getFileDiffsProcessed();
+    log.debug("Initialized File Diffs processed : {}", fileDiffsProcessed);
+  }
 
-    public Optional<GerritCodeRange> getGerritCommentRange(ChatGptReplyItem replyItem) {
-        log.debug("Retrieving Gerrit comment range for reply item: {}", replyItem);
-        Optional<GerritCodeRange> gerritCommentRange = Optional.empty();
-        String filename = replyItem.getFilename();
-        if (filename == null || filename.equals("/COMMIT_MSG")) {
-            log.debug("Filename is null or COMMIT_MSG, skipping code range extraction.");
-            return gerritCommentRange;
-        }
-        if (replyItem.getCodeSnippet() == null) {
-            log.info("CodeSnippet is null in reply '{}'.", replyItem);
-            return gerritCommentRange;
-        }
-        if (!fileDiffsProcessed.containsKey(filename)) {
-            log.info("Filename '{}' not found for reply '{}'.\nFileDiffsProcessed = {}", filename, replyItem,
-                    fileDiffsProcessed);
-            return gerritCommentRange;
-        }
-        InlineCode inlineCode = new InlineCode(fileDiffsProcessed.get(filename));
-        gerritCommentRange = inlineCode.findCommentRange(replyItem);
-        if (gerritCommentRange.isEmpty()) {
-            log.info("Inline code not found for reply {}", replyItem);
-        }
-        else {
-            log.debug("Found inline code range: {}", gerritCommentRange.get());
-        }
-        return gerritCommentRange;
+  public Optional<GerritCodeRange> getGerritCommentRange(ChatGptReplyItem replyItem) {
+    log.debug("Retrieving Gerrit comment range for reply item: {}", replyItem);
+    Optional<GerritCodeRange> gerritCommentRange = Optional.empty();
+    String filename = replyItem.getFilename();
+    if (filename == null || filename.equals("/COMMIT_MSG")) {
+      log.debug("Filename is null or COMMIT_MSG, skipping code range extraction.");
+      return gerritCommentRange;
     }
+    if (replyItem.getCodeSnippet() == null) {
+      log.info("CodeSnippet is null in reply '{}'.", replyItem);
+      return gerritCommentRange;
+    }
+    if (!fileDiffsProcessed.containsKey(filename)) {
+      log.info(
+          "Filename '{}' not found for reply '{}'.\nFileDiffsProcessed = {}",
+          filename,
+          replyItem,
+          fileDiffsProcessed);
+      return gerritCommentRange;
+    }
+    InlineCode inlineCode = new InlineCode(fileDiffsProcessed.get(filename));
+    gerritCommentRange = inlineCode.findCommentRange(replyItem);
+    if (gerritCommentRange.isEmpty()) {
+      log.info("Inline code not found for reply {}", replyItem);
+    } else {
+      log.debug("Found inline code range: {}", gerritCommentRange.get());
+    }
+    return gerritCommentRange;
+  }
 }

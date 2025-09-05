@@ -11,13 +11,13 @@ import java.nio.file.Paths;
 
 public class TestGerritEventContextModule extends GerritEventContextModule {
 
-    public TestGerritEventContextModule(Configuration config, Event event) {
-        super(config, event);
-    }
+  public TestGerritEventContextModule(Configuration config, Event event) {
+    super(config, event);
+  }
 
-    @Provides
-    @PluginData
-    Path providePluginDataPath() {
-        return Paths.get(System.getProperty("pluginDataPath", "test-plugin-data"));
-    }
+  @Provides
+  @PluginData
+  Path providePluginDataPath() {
+    return Paths.get(System.getProperty("pluginDataPath", "test-plugin-data"));
+  }
 }

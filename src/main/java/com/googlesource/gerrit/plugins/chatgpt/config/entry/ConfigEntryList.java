@@ -28,20 +28,20 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.jsonAr
 
 public class ConfigEntryList extends ConfigEntryBase implements IConfigEntry {
 
-    public ConfigEntryList(String key) {
-        super(key);
-    }
+  public ConfigEntryList(String key) {
+    super(key);
+  }
 
-    public void setCurrentConfigValue(Map<String, Object> configValues, PluginConfig projectConfig) {
-        configValues.put(key, new ArrayList<>(Arrays.asList(projectConfig.getStringList(key))));
-    }
+  public void setCurrentConfigValue(Map<String, Object> configValues, PluginConfig projectConfig) {
+    configValues.put(key, new ArrayList<>(Arrays.asList(projectConfig.getStringList(key))));
+  }
 
-    public void setDynamicConfigValue(Map<String, Object> configValues, String value) {
-        configValues.put(key, jsonArrayToList(value));
-    }
+  public void setDynamicConfigValue(Map<String, Object> configValues, String value) {
+    configValues.put(key, jsonArrayToList(value));
+  }
 
-    @SuppressWarnings("unchecked")
-    public void setMergedConfigValue(PluginConfig.Update configUpdater, Object value) {
-        configUpdater.setStringList(key, (List<String>) value);
-    }
+  @SuppressWarnings("unchecked")
+  public void setMergedConfigValue(PluginConfig.Update configUpdater, Object value) {
+    configUpdater.setStringList(key, (List<String>) value);
+  }
 }

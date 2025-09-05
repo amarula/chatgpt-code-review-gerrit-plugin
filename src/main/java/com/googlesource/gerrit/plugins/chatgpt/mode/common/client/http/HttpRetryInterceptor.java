@@ -26,50 +26,50 @@ import java.io.IOException;
 
 @Slf4j
 public class HttpRetryInterceptor implements Interceptor {
-    private final int maxRetries;
-    private final long retryInterval;
+  private final int maxRetries;
+  private final long retryInterval;
 
-    public HttpRetryInterceptor(int maxRetries, long retryInterval) {
-        this.maxRetries = maxRetries;
-        this.retryInterval = retryInterval * 1000;
+  public HttpRetryInterceptor(int maxRetries, long retryInterval) {
+    this.maxRetries = maxRetries;
+    this.retryInterval = retryInterval * 1000;
+  }
+
+  @Override
+  public @NonNull Response intercept(Chain chain) throws IOException {
+    Request request = chain.request();
+    Response response = null;
+    int retryIndex = 1;
+
+    while (true) {
+      try {
+        response = chain.proceed(request);
+        if (response.isSuccessful()) {
+          return response;
+        } else {
+          log.error(
+              "Retry because HTTP status code is not 200. The status code is: {}", response.code());
+          response.close();
+        }
+      } catch (IOException | IllegalStateException e) {
+        log.error("Retry failed with exception: {}", e.getMessage());
+      }
+
+      if (retryIndex >= maxRetries) {
+        break;
+      }
+      try {
+        Thread.sleep(retryInterval);
+      } catch (InterruptedException ie) {
+        Thread.currentThread().interrupt();
+        throw new IOException("Retry interrupted", ie);
+      }
+      retryIndex++;
     }
 
-    @Override
-    public @NonNull Response intercept(Chain chain) throws IOException {
-        Request request = chain.request();
-        Response response = null;
-        int retryIndex = 1;
-
-        while (true) {
-            try {
-                response = chain.proceed(request);
-                if (response.isSuccessful()) {
-                    return response;
-                } else {
-                    log.error("Retry because HTTP status code is not 200. The status code is: {}", response.code());
-                    response.close();
-                }
-            } catch (IOException| IllegalStateException e) {
-                log.error("Retry failed with exception: {}", e.getMessage());
-            }
-
-            if (retryIndex >= maxRetries) {
-                break;
-            }
-            try {
-                Thread.sleep(retryInterval);
-            } catch (InterruptedException ie) {
-                Thread.currentThread().interrupt();
-                throw new IOException("Retry interrupted", ie);
-            }
-            retryIndex++;
-        }
-
-        if (response == null) {
-            throw new IOException("Connection timed out");
-        }
-        else {
-            throw new IOException("Unexpected response code " + response.code());
-        }
+    if (response == null) {
+      throw new IOException("Connection timed out");
+    } else {
+      throw new IOException("Unexpected response code " + response.code());
     }
+  }
 }

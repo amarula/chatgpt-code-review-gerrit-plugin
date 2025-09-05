@@ -28,36 +28,32 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ChangeSetDataHandler {
-    public static void update(
-            Configuration config,
-            GerritChange change,
-            GerritClient gerritClient,
-            ChangeSetData changeSetData,
-            Localizer localizer
-    ) {
-        GerritClientData gerritClientData = gerritClient.getClientData(change);
-        ChatGptDataPrompt chatGptDataPrompt = new ChatGptDataPrompt(
-                config,
-                changeSetData,
-                change,
-                gerritClientData,
-                localizer);
+  public static void update(
+      Configuration config,
+      GerritChange change,
+      GerritClient gerritClient,
+      ChangeSetData changeSetData,
+      Localizer localizer) {
+    GerritClientData gerritClientData = gerritClient.getClientData(change);
+    ChatGptDataPrompt chatGptDataPrompt =
+        new ChatGptDataPrompt(config, changeSetData, change, gerritClientData, localizer);
 
-        changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
-        changeSetData.setGptDataPrompt(chatGptDataPrompt.buildPrompt());
-        if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
-            GerritPermittedVotingRange permittedVotingRange = gerritClient.getPermittedVotingRange(change);
-            if (permittedVotingRange != null) {
-                if (permittedVotingRange.getMin() > config.getVotingMinScore()) {
-                    log.debug("Minimum ChatGPT voting score set to {}", permittedVotingRange.getMin());
-                    changeSetData.setVotingMinScore(permittedVotingRange.getMin());
-                }
-                if (permittedVotingRange.getMax() < config.getVotingMaxScore()) {
-                    log.debug("Maximum ChatGPT voting score set to {}", permittedVotingRange.getMax());
-                    changeSetData.setVotingMaxScore(permittedVotingRange.getMax());
-                }
-            }
+    changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
+    changeSetData.setGptDataPrompt(chatGptDataPrompt.buildPrompt());
+    if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
+      GerritPermittedVotingRange permittedVotingRange =
+          gerritClient.getPermittedVotingRange(change);
+      if (permittedVotingRange != null) {
+        if (permittedVotingRange.getMin() > config.getVotingMinScore()) {
+          log.debug("Minimum ChatGPT voting score set to {}", permittedVotingRange.getMin());
+          changeSetData.setVotingMinScore(permittedVotingRange.getMin());
         }
-        log.debug("ChangeSetData updated: {}", changeSetData);
+        if (permittedVotingRange.getMax() < config.getVotingMaxScore()) {
+          log.debug("Maximum ChatGPT voting score set to {}", permittedVotingRange.getMax());
+          changeSetData.setVotingMaxScore(permittedVotingRange.getMax());
+        }
+      }
     }
+    log.debug("ChangeSetData updated: {}", changeSetData);
+  }
 }

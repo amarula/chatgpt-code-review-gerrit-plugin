@@ -75,357 +75,362 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClas
 import static org.mockito.Mockito.*;
 
 public class ChatGptReviewTestBase extends ChatGptTestBase {
-    protected static final Path basePath = Paths.get("src/test/resources");
-    protected static final int GERRIT_GPT_ACCOUNT_ID = 1000000;
-    protected static final String GERRIT_GPT_USERNAME = "gpt";
-    protected static final int GERRIT_USER_ACCOUNT_ID = 1000001;
-    protected static final String GERRIT_USER_ACCOUNT_NAME = "Test";
-    protected static final String GERRIT_USER_ACCOUNT_EMAIL = "test@example.com";
-    protected static final String GERRIT_USER_USERNAME = "test";
-    protected static final String GERRIT_USER_GROUP = "Test";
-    protected static final String GPT_TOKEN = "tk-test";
-    protected static final String GPT_DOMAIN = "http://localhost:9527";
-    protected static final boolean GPT_STREAM_OUTPUT = false;
-    protected static final long TEST_TIMESTAMP = 1699270812;
-    protected static final Type COMMENTS_GERRIT_TYPE = new TypeLiteral<Map<String, List<CommentInfo>>>() {}.getType();
+  protected static final Path basePath = Paths.get("src/test/resources");
+  protected static final int GERRIT_GPT_ACCOUNT_ID = 1000000;
+  protected static final String GERRIT_GPT_USERNAME = "gpt";
+  protected static final int GERRIT_USER_ACCOUNT_ID = 1000001;
+  protected static final String GERRIT_USER_ACCOUNT_NAME = "Test";
+  protected static final String GERRIT_USER_ACCOUNT_EMAIL = "test@example.com";
+  protected static final String GERRIT_USER_USERNAME = "test";
+  protected static final String GERRIT_USER_GROUP = "Test";
+  protected static final String GPT_TOKEN = "tk-test";
+  protected static final String GPT_DOMAIN = "http://localhost:9527";
+  protected static final boolean GPT_STREAM_OUTPUT = false;
+  protected static final long TEST_TIMESTAMP = 1699270812;
+  protected static final Type COMMENTS_GERRIT_TYPE =
+      new TypeLiteral<Map<String, List<CommentInfo>>>() {}.getType();
 
-    private static final int GPT_USER_ACCOUNT_ID = 1000000;
+  private static final int GPT_USER_ACCOUNT_ID = 1000000;
 
-    @Rule
-    public WireMockRule wireMockRule = new WireMockRule(9527);
+  @Rule public WireMockRule wireMockRule = new WireMockRule(9527);
 
-    @Mock
-    protected GitRepoFiles gitRepoFiles;
+  @Mock protected GitRepoFiles gitRepoFiles;
 
-    @Mock
-    protected PluginDataHandlerProvider pluginDataHandlerProvider;
+  @Mock protected PluginDataHandlerProvider pluginDataHandlerProvider;
 
-    @Mock
-    protected PluginDataHandler pluginDataHandler;
+  @Mock protected PluginDataHandler pluginDataHandler;
 
-    @Mock
-    protected OneOffRequestContext context;
-    @Mock
-    protected GerritApi gerritApi;
-    @Mock
-    protected Changes changesMock;
-    @Mock
-    protected ChangeApi changeApiMock;
-    @Mock
-    protected RevisionApi revisionApiMock;
-    @Mock
-    protected ReviewResult reviewResult;
-    @Mock
-    protected CommentsRequest commentsRequestMock;
-    @Mock
-    protected AccountCache accountCacheMock;
-    @Mock
-    protected ChangeSetDataProvider changeSetDataProvider;
+  @Mock protected OneOffRequestContext context;
+  @Mock protected GerritApi gerritApi;
+  @Mock protected Changes changesMock;
+  @Mock protected ChangeApi changeApiMock;
+  @Mock protected RevisionApi revisionApiMock;
+  @Mock protected ReviewResult reviewResult;
+  @Mock protected CommentsRequest commentsRequestMock;
+  @Mock protected AccountCache accountCacheMock;
+  @Mock protected ChangeSetDataProvider changeSetDataProvider;
 
-    protected PluginConfig globalConfig;
-    protected PluginConfig projectConfig;
-    protected Configuration config;
-    protected ChangeSetData changeSetData;
-    protected GerritClient gerritClient;
-    protected PatchSetReviewer patchSetReviewer;
-    protected ConfigCreator mockConfigCreator;
-    protected JsonObject gptRequestBody;
-    protected String promptTagComments;
-    protected Localizer localizer;
+  protected PluginConfig globalConfig;
+  protected PluginConfig projectConfig;
+  protected Configuration config;
+  protected ChangeSetData changeSetData;
+  protected GerritClient gerritClient;
+  protected PatchSetReviewer patchSetReviewer;
+  protected ConfigCreator mockConfigCreator;
+  protected JsonObject gptRequestBody;
+  protected String promptTagComments;
+  protected Localizer localizer;
 
-    @Before
-    public void before() throws RestApiException {
-        initGlobalAndProjectConfig();
-        initConfig();
-        setupMockRequests();
-        initComparisonContent();
-        initTest();
-    }
+  @Before
+  public void before() throws RestApiException {
+    initGlobalAndProjectConfig();
+    initConfig();
+    setupMockRequests();
+    initComparisonContent();
+    initTest();
+  }
 
-    protected void initGlobalAndProjectConfig() {
-        globalConfig = mock(PluginConfig.class);
-        Answer<Object> returnDefaultArgument = invocation -> {
-            // Return the second argument (i.e., the Default value) passed to the method
-            return invocation.getArgument(1);
+  protected void initGlobalAndProjectConfig() {
+    globalConfig = mock(PluginConfig.class);
+    Answer<Object> returnDefaultArgument =
+        invocation -> {
+          // Return the second argument (i.e., the Default value) passed to the method
+          return invocation.getArgument(1);
         };
 
-        // Mock the Global Config values not provided by Default
-        when(globalConfig.getString("gptToken")).thenReturn(GPT_TOKEN);
+    // Mock the Global Config values not provided by Default
+    when(globalConfig.getString("gptToken")).thenReturn(GPT_TOKEN);
 
-        // Mock the Global Config values to the Defaults passed as second arguments of the `get*` methods.
-        when(globalConfig.getString(Mockito.anyString(), Mockito.anyString())).thenAnswer(returnDefaultArgument);
-        when(globalConfig.getInt(Mockito.anyString(), Mockito.anyInt())).thenAnswer(returnDefaultArgument);
-        when(globalConfig.getBoolean(Mockito.anyString(), Mockito.anyBoolean())).thenAnswer(returnDefaultArgument);
+    // Mock the Global Config values to the Defaults passed as second arguments of the `get*`
+    // methods.
+    when(globalConfig.getString(Mockito.anyString(), Mockito.anyString()))
+        .thenAnswer(returnDefaultArgument);
+    when(globalConfig.getInt(Mockito.anyString(), Mockito.anyInt()))
+        .thenAnswer(returnDefaultArgument);
+    when(globalConfig.getBoolean(Mockito.anyString(), Mockito.anyBoolean()))
+        .thenAnswer(returnDefaultArgument);
 
-        // Mock the Global Config values that differ from the ones provided by Default
-        when(globalConfig.getString(Mockito.eq("gptDomain"), Mockito.anyString()))
-                .thenReturn(GPT_DOMAIN);
-        when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_GPT_USERNAME);
-        when(globalConfig.getInt(Mockito.eq("gptConnectionMaxRetryAttempts"), Mockito.anyInt()))
-                .thenReturn(1);
+    // Mock the Global Config values that differ from the ones provided by Default
+    when(globalConfig.getString(Mockito.eq("gptDomain"), Mockito.anyString()))
+        .thenReturn(GPT_DOMAIN);
+    when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_GPT_USERNAME);
+    when(globalConfig.getInt(Mockito.eq("gptConnectionMaxRetryAttempts"), Mockito.anyInt()))
+        .thenReturn(1);
 
-        projectConfig = mock(PluginConfig.class);
+    projectConfig = mock(PluginConfig.class);
 
-        // Mock the Project Config values
-        when(projectConfig.getBoolean(Mockito.eq("isEnabled"), Mockito.anyBoolean())).thenReturn(true);
+    // Mock the Project Config values
+    when(projectConfig.getBoolean(Mockito.eq("isEnabled"), Mockito.anyBoolean())).thenReturn(true);
+  }
+
+  protected void initConfig() {
+    config =
+        new Configuration(
+            context, gerritApi, globalConfig, projectConfig, "gpt@email.com", Account.id(1000000));
+  }
+
+  protected void setupMockRequests() throws RestApiException {
+    Accounts accountsMock = mockGerritAccountsRestEndpoint();
+    // Mock the behavior of the gerritAccountIdUri request
+    mockGerritAccountsQueryApiCall(GERRIT_GPT_USERNAME, GERRIT_GPT_ACCOUNT_ID);
+
+    // Mock the behavior of the gerritAccountIdUri request
+    mockGerritAccountsQueryApiCall(GERRIT_USER_USERNAME, GERRIT_USER_ACCOUNT_ID);
+
+    // Mock the behavior of the gerritAccountGroups request
+    mockGerritAccountGroupsApiCall(accountsMock, GERRIT_USER_ACCOUNT_ID);
+
+    mockGerritChangeApiRestEndpoint();
+
+    // Mock the behavior of the gerritGetPatchSetDetailUri request
+    mockGerritChangeDetailsApiCall();
+
+    // Mock the behavior of the gerritPatchSet comments request
+    mockGerritChangeCommentsApiCall("gerritPatchSetComments.json");
+
+    // Mock the behavior of the gerrit Review request
+    mockGerritReviewApiCall();
+
+    // Mock the GerritApi's revision API
+    lenient().when(changeApiMock.current()).thenReturn(revisionApiMock);
+
+    // Mock the pluginDataHandlerProvider to return the mocked Change pluginDataHandler
+    when(pluginDataHandlerProvider.getChangeScope()).thenReturn(pluginDataHandler);
+  }
+
+  private Accounts mockGerritAccountsRestEndpoint() {
+    Accounts accountsMock = mock(Accounts.class);
+    when(gerritApi.accounts()).thenReturn(accountsMock);
+    return accountsMock;
+  }
+
+  private void mockGerritAccountsQueryApiCall(String username, int expectedAccountId) {
+    AccountState accountStateMock = mock(AccountState.class);
+    Account accountMock = mock(Account.class);
+    when(accountStateMock.account()).thenReturn(accountMock);
+    when(accountMock.id()).thenReturn(Account.id(expectedAccountId));
+    when(accountCacheMock.getByUsername(username)).thenReturn(Optional.of(accountStateMock));
+  }
+
+  private void mockGerritAccountGroupsApiCall(Accounts accountsMock, int accountId)
+      throws RestApiException {
+    List<GroupInfo> groups =
+        readTestFileToType(
+            "__files/gerritAccountGroups.json", new TypeLiteral<List<GroupInfo>>() {}.getType());
+    AccountApi accountApiMock = mock(AccountApi.class);
+    when(accountsMock.id(accountId)).thenReturn(accountApiMock);
+    when(accountApiMock.getGroups()).thenReturn(groups);
+  }
+
+  private void mockGerritChangeDetailsApiCall() throws RestApiException {
+    ChangeInfo changeInfo =
+        readTestFileToClass("__files/gerritPatchSetDetail.json", ChangeInfo.class);
+    lenient().when(changeApiMock.get()).thenReturn(changeInfo);
+  }
+
+  private void mockGerritChangeCommentsApiCall(String patchSetCommentsFilename)
+      throws RestApiException {
+    Map<String, List<CommentInfo>> comments =
+        readTestFileToType("__files/" + patchSetCommentsFilename, COMMENTS_GERRIT_TYPE);
+    mockGerritChangeCommentsApiCall(comments);
+  }
+
+  private void mockGerritChangeApiRestEndpoint() throws RestApiException {
+    when(gerritApi.changes()).thenReturn(changesMock);
+    when(changesMock.id(PROJECT_NAME.get(), BRANCH_NAME.shortName(), CHANGE_ID.get()))
+        .thenReturn(changeApiMock);
+  }
+
+  private void mockGerritReviewApiCall() throws RestApiException {
+    ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
+    lenient().when(revisionApiMock.review(reviewInputCaptor.capture())).thenReturn(reviewResult);
+  }
+
+  protected void initComparisonContent() {}
+
+  protected <T> T readContentToType(String content, Type type) {
+    Gson gson = OutputFormat.JSON.newGson();
+    return gson.fromJson(content, type);
+  }
+
+  protected <T> T readTestFileToClass(String filename, Class<T> clazz) {
+    return readContentToType(readTestFile(filename), clazz);
+  }
+
+  protected <T> T readTestFileToType(String filename, Type type) {
+    return readContentToType(readTestFile(filename), type);
+  }
+
+  protected String readTestFile(String filename) {
+    try {
+      return new String(Files.readAllBytes(basePath.resolve(filename)));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 
-    protected void initConfig() {
-        config = new Configuration(
-                context,
-                gerritApi,
-                globalConfig,
-                projectConfig,
-                "gpt@email.com",
-                Account.id(1000000)
-        );
-    }
+  protected void mockGerritChangeCommentsApiCall(Map<String, List<CommentInfo>> comments)
+      throws RestApiException {
+    when(changeApiMock.commentsRequest()).thenReturn(commentsRequestMock);
+    when(commentsRequestMock.get()).thenReturn(comments);
+  }
 
-    protected void setupMockRequests() throws RestApiException {
-        Accounts accountsMock = mockGerritAccountsRestEndpoint();
-        // Mock the behavior of the gerritAccountIdUri request
-        mockGerritAccountsQueryApiCall(GERRIT_GPT_USERNAME, GERRIT_GPT_ACCOUNT_ID);
+  protected EventHandlerTask.Result handleEventBasedOnType(
+      EventHandlerTask.SupportedEvents triggeredEvent) {
+    Consumer<Event> typeSpecificSetup = getTypeSpecificSetup(triggeredEvent);
+    Event event = getMockedEvent(triggeredEvent);
+    setupCommonEventMocks((PatchSetEvent) event); // Apply common mock configurations
+    typeSpecificSetup.accept(event);
 
-        // Mock the behavior of the gerritAccountIdUri request
-        mockGerritAccountsQueryApiCall(GERRIT_USER_USERNAME, GERRIT_USER_ACCOUNT_ID);
+    EventHandlerTask task =
+        Guice.createInjector(
+                new AbstractModule() {
+                  @Override
+                  protected void configure() {
+                    install(new TestGerritEventContextModule(config, event));
 
-        // Mock the behavior of the gerritAccountGroups request
-        mockGerritAccountGroupsApiCall(accountsMock, GERRIT_USER_ACCOUNT_ID);
+                    bind(GerritClient.class).toInstance(gerritClient);
+                    bind(ConfigCreator.class).toInstance(mockConfigCreator);
+                    bind(ChangeSetDataProvider.class).toInstance(changeSetDataProvider);
+                    bind(PatchSetReviewer.class).toInstance(patchSetReviewer);
+                    bind(PluginDataHandlerProvider.class).toInstance(pluginDataHandlerProvider);
+                    bind(AccountCache.class).toInstance(mockAccountCache());
+                  }
+                })
+            .getInstance(EventHandlerTask.class);
+    return task.execute();
+  }
 
-        mockGerritChangeApiRestEndpoint();
+  protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
+    ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
+    verify(revisionApiMock).review(reviewInputCaptor.capture());
+    gptRequestBody =
+        jsonToClass(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
+    return reviewInputCaptor;
+  }
 
-        // Mock the behavior of the gerritGetPatchSetDetailUri request
-        mockGerritChangeDetailsApiCall();
+  protected void initTest() {
+    changeSetData =
+        new ChangeSetData(
+            GPT_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getMaxReviewFileSize());
+    when(changeSetDataProvider.get()).thenReturn(changeSetData);
 
-        // Mock the behavior of the gerritPatchSet comments request
-        mockGerritChangeCommentsApiCall("gerritPatchSetComments.json");
-
-        // Mock the behavior of the gerrit Review request
-        mockGerritReviewApiCall();
-
-        // Mock the GerritApi's revision API
-        lenient().when(changeApiMock.current()).thenReturn(revisionApiMock);
-
-        // Mock the pluginDataHandlerProvider to return the mocked Change pluginDataHandler
-        when(pluginDataHandlerProvider.getChangeScope()).thenReturn(pluginDataHandler);
-    }
-
-    private Accounts mockGerritAccountsRestEndpoint() {
-        Accounts accountsMock = mock(Accounts.class);
-        when(gerritApi.accounts()).thenReturn(accountsMock);
-        return accountsMock;
-    }
-
-    private void mockGerritAccountsQueryApiCall(String username, int expectedAccountId) {
-        AccountState accountStateMock = mock(AccountState.class);
-        Account accountMock = mock(Account.class);
-        when(accountStateMock.account()).thenReturn(accountMock);
-        when(accountMock.id()).thenReturn(Account.id(expectedAccountId));
-        when(accountCacheMock.getByUsername(username)).thenReturn(Optional.of(accountStateMock));
-    }
-
-    private void mockGerritAccountGroupsApiCall(Accounts accountsMock, int accountId)
-        throws RestApiException {
-        List<GroupInfo> groups = readTestFileToType(
-                "__files/gerritAccountGroups.json",
-                new TypeLiteral<List<GroupInfo>>() {}.getType()
-        );
-        AccountApi accountApiMock = mock(AccountApi.class);
-        when(accountsMock.id(accountId)).thenReturn(accountApiMock);
-        when(accountApiMock.getGroups()).thenReturn(groups);
-    }
-
-    private void mockGerritChangeDetailsApiCall() throws RestApiException {
-        ChangeInfo changeInfo = readTestFileToClass("__files/gerritPatchSetDetail.json", ChangeInfo.class);
-        lenient().when(changeApiMock.get()).thenReturn(changeInfo);
-    }
-
-    private void mockGerritChangeCommentsApiCall(String patchSetCommentsFilename) throws RestApiException {
-        Map<String, List<CommentInfo>> comments = readTestFileToType("__files/" + patchSetCommentsFilename,
-                COMMENTS_GERRIT_TYPE);
-        mockGerritChangeCommentsApiCall(comments);
-    }
-
-    private void mockGerritChangeApiRestEndpoint() throws RestApiException {
-        when(gerritApi.changes()).thenReturn(changesMock);
-        when(changesMock.id(PROJECT_NAME.get(), BRANCH_NAME.shortName(), CHANGE_ID.get())).thenReturn(changeApiMock);
-    }
-
-    private void mockGerritReviewApiCall() throws RestApiException {
-        ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
-        lenient().when(revisionApiMock.review(reviewInputCaptor.capture())).thenReturn(reviewResult);
-    }
-
-    protected void initComparisonContent() {}
-
-    protected <T> T readContentToType(String content, Type type) {
-        Gson gson = OutputFormat.JSON.newGson();
-        return gson.fromJson(content, type);
-    }
-
-    protected <T> T readTestFileToClass(String filename, Class<T> clazz) {
-        return readContentToType(readTestFile(filename), clazz);
-    }
-
-    protected <T> T readTestFileToType(String filename, Type type) {
-        return readContentToType(readTestFile(filename), type);
-    }
-
-    protected String readTestFile(String filename) {
-        try {
-            return new String(Files.readAllBytes(basePath.resolve(filename)));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    protected void mockGerritChangeCommentsApiCall(Map<String, List<CommentInfo>> comments) throws RestApiException {
-        when(changeApiMock.commentsRequest()).thenReturn(commentsRequestMock);
-        when(commentsRequestMock.get()).thenReturn(comments);
-    }
-
-    protected EventHandlerTask.Result handleEventBasedOnType(EventHandlerTask.SupportedEvents triggeredEvent) {
-        Consumer<Event> typeSpecificSetup = getTypeSpecificSetup(triggeredEvent);
-        Event event = getMockedEvent(triggeredEvent);
-        setupCommonEventMocks((PatchSetEvent) event); // Apply common mock configurations
-        typeSpecificSetup.accept(event);
-
-        EventHandlerTask task = Guice.createInjector(new AbstractModule() {
-            @Override
-            protected void configure() {
-                install(new TestGerritEventContextModule(config, event));
-
-                bind(GerritClient.class).toInstance(gerritClient);
-                bind(ConfigCreator.class).toInstance(mockConfigCreator);
-                bind(ChangeSetDataProvider.class).toInstance(changeSetDataProvider);
-                bind(PatchSetReviewer.class).toInstance(patchSetReviewer);
-                bind(PluginDataHandlerProvider.class).toInstance(pluginDataHandlerProvider);
-                bind(AccountCache.class).toInstance(mockAccountCache());
-            }
-        }).getInstance(EventHandlerTask.class);
-        return task.execute();
-    }
-
-    protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
-        ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
-        verify(revisionApiMock).review(reviewInputCaptor.capture());
-        gptRequestBody = jsonToClass(patchSetReviewer.getChatGptClient().getRequestBody(), JsonObject.class);
-        return reviewInputCaptor;
-    }
-
-    protected void initTest() {
-        changeSetData = new ChangeSetData(
-                GPT_USER_ACCOUNT_ID,
-                config.getVotingMinScore(),
-                config.getMaxReviewFileSize()
-        );
-        when(changeSetDataProvider.get()).thenReturn(changeSetData);
-
-        localizer = new Localizer(config);
-        gerritClient =
-            new GerritClient(
-                new GerritClientFacade(
-                    config,
-                    changeSetData,
-                    new GerritClientComments(
-                            config,
-                            accountCacheMock,
-                            changeSetData,
-                            getCodeContextPolicy(),
-                            gitRepoFiles,
-                            pluginDataHandlerProvider,
-                            localizer
-                    ),
-                    getGerritClientPatchSet()));
-        patchSetReviewer =
-            new PatchSetReviewer(
-                gerritClient,
+    localizer = new Localizer(config);
+    gerritClient =
+        new GerritClient(
+            new GerritClientFacade(
                 config,
                 changeSetData,
-                Providers.of(new GerritClientReview(config, accountCacheMock, pluginDataHandlerProvider, localizer)),
-                getChatGptClient(),
-                localizer
-            );
-        mockConfigCreator = mock(ConfigCreator.class);
-    }
+                new GerritClientComments(
+                    config,
+                    accountCacheMock,
+                    changeSetData,
+                    getCodeContextPolicy(),
+                    gitRepoFiles,
+                    pluginDataHandlerProvider,
+                    localizer),
+                getGerritClientPatchSet()));
+    patchSetReviewer =
+        new PatchSetReviewer(
+            gerritClient,
+            config,
+            changeSetData,
+            Providers.of(
+                new GerritClientReview(
+                    config, accountCacheMock, pluginDataHandlerProvider, localizer)),
+            getChatGptClient(),
+            localizer);
+    mockConfigCreator = mock(ConfigCreator.class);
+  }
 
-    protected ICodeContextPolicy getCodeContextPolicy() {
-        return switch (config.getCodeContextPolicy()){
-            case NONE -> new CodeContextPolicyNone(config);
-            case ON_DEMAND -> new CodeContextPolicyOnDemand(config, getGerritChange(), gitRepoFiles);
-            case UPLOAD_ALL -> new CodeContextPolicyUploadAll(config, getGerritChange(), gitRepoFiles, pluginDataHandlerProvider);
-        };
-    }
+  protected ICodeContextPolicy getCodeContextPolicy() {
+    return switch (config.getCodeContextPolicy()) {
+      case NONE -> new CodeContextPolicyNone(config);
+      case ON_DEMAND -> new CodeContextPolicyOnDemand(config, getGerritChange(), gitRepoFiles);
+      case UPLOAD_ALL ->
+          new CodeContextPolicyUploadAll(
+              config, getGerritChange(), gitRepoFiles, pluginDataHandlerProvider);
+    };
+  }
 
-    private AccountAttribute createTestAccountAttribute() {
-        AccountAttribute accountAttribute = new AccountAttribute();
-        accountAttribute.name = GERRIT_USER_ACCOUNT_NAME;
-        accountAttribute.username = GERRIT_USER_USERNAME;
-        accountAttribute.email = GERRIT_USER_ACCOUNT_EMAIL;
-        return accountAttribute;
-    }
+  private AccountAttribute createTestAccountAttribute() {
+    AccountAttribute accountAttribute = new AccountAttribute();
+    accountAttribute.name = GERRIT_USER_ACCOUNT_NAME;
+    accountAttribute.username = GERRIT_USER_USERNAME;
+    accountAttribute.email = GERRIT_USER_ACCOUNT_EMAIL;
+    return accountAttribute;
+  }
 
-    private PatchSetAttribute createPatchSetAttribute() {
-        PatchSetAttribute patchSetAttribute = new PatchSetAttribute();
-        patchSetAttribute.kind = REWORK;
-        patchSetAttribute.author = createTestAccountAttribute();
-        return patchSetAttribute;
-    }
+  private PatchSetAttribute createPatchSetAttribute() {
+    PatchSetAttribute patchSetAttribute = new PatchSetAttribute();
+    patchSetAttribute.kind = REWORK;
+    patchSetAttribute.author = createTestAccountAttribute();
+    return patchSetAttribute;
+  }
 
-    @NonNull
-    private Consumer<Event> getTypeSpecificSetup(EventHandlerTask.SupportedEvents triggeredEvent) {
-        return switch (triggeredEvent) {
-            case COMMENT_ADDED -> event -> {
-                CommentAddedEvent commentEvent = (CommentAddedEvent) event;
-                commentEvent.author = this::createTestAccountAttribute;
-                commentEvent.patchSet = this::createPatchSetAttribute;
-                commentEvent.eventCreatedOn = TEST_TIMESTAMP;
-                when(commentEvent.getType()).thenReturn("comment-added");
-            };
-            case PATCH_SET_CREATED -> event -> {
-                PatchSetCreatedEvent patchEvent = (PatchSetCreatedEvent) event;
-                patchEvent.patchSet = this::createPatchSetAttribute;
-                when(patchEvent.getType()).thenReturn("patchset-created");
-            };
-            case CHANGE_MERGED -> event -> {
-                ChangeMergedEvent mergedEvent = (ChangeMergedEvent) event;
-                when(mergedEvent.getType()).thenReturn("change-merged");
-            };
-        };
-    }
+  @NonNull
+  private Consumer<Event> getTypeSpecificSetup(EventHandlerTask.SupportedEvents triggeredEvent) {
+    return switch (triggeredEvent) {
+      case COMMENT_ADDED ->
+          event -> {
+            CommentAddedEvent commentEvent = (CommentAddedEvent) event;
+            commentEvent.author = this::createTestAccountAttribute;
+            commentEvent.patchSet = this::createPatchSetAttribute;
+            commentEvent.eventCreatedOn = TEST_TIMESTAMP;
+            when(commentEvent.getType()).thenReturn("comment-added");
+          };
+      case PATCH_SET_CREATED ->
+          event -> {
+            PatchSetCreatedEvent patchEvent = (PatchSetCreatedEvent) event;
+            patchEvent.patchSet = this::createPatchSetAttribute;
+            when(patchEvent.getType()).thenReturn("patchset-created");
+          };
+      case CHANGE_MERGED ->
+          event -> {
+            ChangeMergedEvent mergedEvent = (ChangeMergedEvent) event;
+            when(mergedEvent.getType()).thenReturn("change-merged");
+          };
+    };
+  }
 
-    private Event getMockedEvent(EventHandlerTask.SupportedEvents triggeredEvent) {
-        return (Event) mock(EVENT_CLASS_MAP.get(triggeredEvent));
-    }
+  private Event getMockedEvent(EventHandlerTask.SupportedEvents triggeredEvent) {
+    return (Event) mock(EVENT_CLASS_MAP.get(triggeredEvent));
+  }
 
-    private void setupCommonEventMocks(PatchSetEvent event) {
-        when(event.getProjectNameKey()).thenReturn(PROJECT_NAME);
-        when(event.getBranchNameKey()).thenReturn(BRANCH_NAME);
-        when(event.getChangeKey()).thenReturn(CHANGE_ID);
-    }
+  private void setupCommonEventMocks(PatchSetEvent event) {
+    when(event.getProjectNameKey()).thenReturn(PROJECT_NAME);
+    when(event.getBranchNameKey()).thenReturn(BRANCH_NAME);
+    when(event.getChangeKey()).thenReturn(CHANGE_ID);
+  }
 
-    private AccountCache mockAccountCache() {
-        AccountCache accountCache = mock(AccountCache.class);
-        Account account = Account.builder(Account.id(GPT_USER_ACCOUNT_ID), Instant.now()).build();
-        AccountState accountState = AccountState.forAccount(account, Collections.emptyList());
-        lenient().doReturn(Optional.of(accountState)).when(accountCache).getByUsername(GERRIT_GPT_USERNAME);
+  private AccountCache mockAccountCache() {
+    AccountCache accountCache = mock(AccountCache.class);
+    Account account = Account.builder(Account.id(GPT_USER_ACCOUNT_ID), Instant.now()).build();
+    AccountState accountState = AccountState.forAccount(account, Collections.emptyList());
+    lenient()
+        .doReturn(Optional.of(accountState))
+        .when(accountCache)
+        .getByUsername(GERRIT_GPT_USERNAME);
 
-        return accountCache;
-    }
+    return accountCache;
+  }
 
-    private IChatGptClient getChatGptClient() {
-        return switch (config.getGptMode()) {
-            case STATEFUL -> config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants() ?
-                    new ChatGptClientStatefulTaskSpecific(config, getCodeContextPolicy(), pluginDataHandlerProvider):
-                    new ChatGptClientStateful(config, getCodeContextPolicy(), pluginDataHandlerProvider);
-            case STATELESS -> new ChatGptClientStateless(config);
-        };
-    }
+  private IChatGptClient getChatGptClient() {
+    return switch (config.getGptMode()) {
+      case STATEFUL ->
+          config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants()
+              ? new ChatGptClientStatefulTaskSpecific(
+                  config, getCodeContextPolicy(), pluginDataHandlerProvider)
+              : new ChatGptClientStateful(
+                  config, getCodeContextPolicy(), pluginDataHandlerProvider);
+      case STATELESS -> new ChatGptClientStateless(config);
+    };
+  }
 
-    private IGerritClientPatchSet getGerritClientPatchSet() {
-        return switch (config.getGptMode()) {
-            case STATEFUL -> new GerritClientPatchSetStateful(config, accountCacheMock);
-            case STATELESS -> new GerritClientPatchSetStateless(config, accountCacheMock);
-        };
-    }
+  private IGerritClientPatchSet getGerritClientPatchSet() {
+    return switch (config.getGptMode()) {
+      case STATEFUL -> new GerritClientPatchSetStateful(config, accountCacheMock);
+      case STATELESS -> new GerritClientPatchSetStateless(config, accountCacheMock);
+    };
+  }
 }

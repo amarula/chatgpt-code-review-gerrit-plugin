@@ -26,16 +26,16 @@ import java.util.List;
 @Data
 @ToString(callSuper = true)
 public class ChatGptThreadMessageResponse extends ChatGptResponse {
-    private List<Content> content;
+  private List<Content> content;
+
+  @Data
+  public static class Content {
+    private String type;
+    private Text text;
 
     @Data
-    public static class Content {
-        private String type;
-        private Text text;
-
-        @Data
-        public static class Text {
-            private String value;
-        }
+    public static class Text {
+      private String value;
     }
+  }
 }

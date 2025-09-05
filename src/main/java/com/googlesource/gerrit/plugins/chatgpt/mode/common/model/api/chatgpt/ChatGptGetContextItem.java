@@ -26,8 +26,8 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @ToString(callSuper = true)
 public class ChatGptGetContextItem extends ChatGptDialogueItem {
-    private String requestType;
-    private String otherDescription;
-    private String entityCategory;
-    private String contextRequiredEntity;
+  private String requestType;
+  private String otherDescription;
+  private String entityCategory;
+  private String contextRequiredEntity;
 }

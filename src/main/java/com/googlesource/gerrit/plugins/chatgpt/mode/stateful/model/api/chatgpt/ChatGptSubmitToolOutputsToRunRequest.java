@@ -25,6 +25,6 @@ import java.util.List;
 @Data
 @Builder
 public class ChatGptSubmitToolOutputsToRunRequest {
-    @SerializedName("tool_outputs")
-    private List<ChatGptToolOutput> toolOutputs;
+  @SerializedName("tool_outputs")
+  private List<ChatGptToolOutput> toolOutputs;
 }

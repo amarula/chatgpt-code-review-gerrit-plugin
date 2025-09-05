@@ -15,58 +15,65 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PluginDataTest extends ChatGptTestBase {
 
-    @Before
-    public void setUp() {
-        setupPluginData();
+  @Before
+  public void setUp() {
+    setupPluginData();
 
-        // Mock the PluginData annotation global behavior
-        when(mockPluginDataPath.resolve("global.data")).thenReturn(realPluginDataPath);
-    }
+    // Mock the PluginData annotation global behavior
+    when(mockPluginDataPath.resolve("global.data")).thenReturn(realPluginDataPath);
+  }
 
-    @Test
-    public void testValueSetAndGet() {
-        PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
-        PluginDataHandler globalHandler = provider.getGlobalScope();
-        PluginDataHandler projectHandler = provider.getProjectScope();
+  @Test
+  public void testValueSetAndGet() {
+    PluginDataHandlerProvider provider =
+        new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
+    PluginDataHandler globalHandler = provider.getGlobalScope();
+    PluginDataHandler projectHandler = provider.getProjectScope();
 
-        String key = "testKey";
-        String value = "testValue";
+    String key = "testKey";
+    String value = "testValue";
 
-        // Test set value
-        globalHandler.setValue(key, value);
-        projectHandler.setValue(key, value);
+    // Test set value
+    globalHandler.setValue(key, value);
+    projectHandler.setValue(key, value);
 
-        // Test get value
-        assertEquals("The value retrieved should match the value set.", value, globalHandler.getValue(key));
-        assertEquals("The value retrieved should match the value set.", value, projectHandler.getValue(key));
-    }
+    // Test get value
+    assertEquals(
+        "The value retrieved should match the value set.", value, globalHandler.getValue(key));
+    assertEquals(
+        "The value retrieved should match the value set.", value, projectHandler.getValue(key));
+  }
 
-    @Test
-    public void testRemoveValue() {
-        PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
-        PluginDataHandler handler = provider.getGlobalScope();
+  @Test
+  public void testRemoveValue() {
+    PluginDataHandlerProvider provider =
+        new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
+    PluginDataHandler handler = provider.getGlobalScope();
 
-        String key = "testKey";
-        String value = "testValue";
+    String key = "testKey";
+    String value = "testValue";
 
-        // Set a value to ensure it can be removed
-        handler.setValue(key, value);
-        // Remove the value
-        handler.removeValue(key);
+    // Set a value to ensure it can be removed
+    handler.setValue(key, value);
+    // Remove the value
+    handler.removeValue(key);
 
-        // Verify the value is no longer available
-        assertNull("The value should be null after being removed.", handler.getValue(key));
-    }
+    // Verify the value is no longer available
+    assertNull("The value should be null after being removed.", handler.getValue(key));
+  }
 
-    @Test
-    public void testCreateFileOnNonexistent() throws Exception {
-        // Ensure the file doesn't exist before creating the handler
-        Files.deleteIfExists(realPluginDataPath);
+  @Test
+  public void testCreateFileOnNonexistent() throws Exception {
+    // Ensure the file doesn't exist before creating the handler
+    Files.deleteIfExists(realPluginDataPath);
 
-        PluginDataHandlerProvider provider = new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
-        provider.getGlobalScope();
+    PluginDataHandlerProvider provider =
+        new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
+    provider.getGlobalScope();
 
-        // The constructor should create the file if it doesn't exist
-        assertTrue("The config file should exist after initializing the handler.", Files.exists(realPluginDataPath));
-    }
+    // The constructor should create the file if it doesn't exist
+    assertTrue(
+        "The config file should exist after initializing the handler.",
+        Files.exists(realPluginDataPath));
+  }
 }

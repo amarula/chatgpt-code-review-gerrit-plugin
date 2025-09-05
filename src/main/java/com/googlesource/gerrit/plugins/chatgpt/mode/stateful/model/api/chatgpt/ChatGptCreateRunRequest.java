@@ -23,6 +23,6 @@ import lombok.Data;
 @Data
 @Builder
 public class ChatGptCreateRunRequest {
-    @SerializedName("assistant_id")
-    private String assistantId;
+  @SerializedName("assistant_id")
+  private String assistantId;
 }

@@ -34,54 +34,64 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-public class GerritClientPatchSetStateless extends GerritClientPatchSet implements IGerritClientPatchSet {
-    @VisibleForTesting
-    @Inject
-    public GerritClientPatchSetStateless(Configuration config, AccountCache accountCache) {
-        super(config, accountCache);
+public class GerritClientPatchSetStateless extends GerritClientPatchSet
+    implements IGerritClientPatchSet {
+  @VisibleForTesting
+  @Inject
+  public GerritClientPatchSetStateless(Configuration config, AccountCache accountCache) {
+    super(config, accountCache);
+  }
+
+  public String getPatchSet(ChangeSetData changeSetData, GerritChange change) throws Exception {
+    int revisionBase = getChangeSetRevisionBase(changeSetData);
+    log.debug("Revision base: {}", revisionBase);
+
+    patchSetFiles = getAffectedFiles(change, revisionBase);
+    log.debug("Affected files for Patch Set: {}", patchSetFiles);
+
+    String fileDiffsJson = getFileDiffsJson(change, revisionBase);
+    log.debug("File diffs JSON: {}", fileDiffsJson);
+
+    return fileDiffsJson;
+  }
+
+  private List<String> getAffectedFiles(GerritChange change, int revisionBase) throws Exception {
+    try (ManualRequestContext requestContext = config.openRequestContext()) {
+      Map<String, FileInfo> files =
+          config
+              .getGerritApi()
+              .changes()
+              .id(
+                  change.getProjectName(),
+                  change.getBranchNameKey().shortName(),
+                  change.getChangeKey().get())
+              .current()
+              .files(revisionBase);
+      return files.entrySet().stream()
+          .filter(
+              fileEntry -> {
+                String filename = fileEntry.getKey();
+                if (!filename.equals("/COMMIT_MSG") || config.getGptReviewCommitMessages()) {
+                  if (fileEntry.getValue().size > config.getMaxReviewFileSize()) {
+                    log.info(
+                        "File '{}' not reviewed due to its size exceeding the maximum allowable size"
+                            + " of {} bytes.",
+                        filename,
+                        config.getMaxReviewFileSize());
+                    return false;
+                  }
+                  return true;
+                }
+                return false;
+              })
+          .map(Map.Entry::getKey)
+          .collect(toList());
     }
+  }
 
-    public String getPatchSet(ChangeSetData changeSetData, GerritChange change) throws Exception {
-        int revisionBase = getChangeSetRevisionBase(changeSetData);
-        log.debug("Revision base: {}", revisionBase);
-
-        patchSetFiles = getAffectedFiles(change, revisionBase);
-        log.debug("Affected files for Patch Set: {}", patchSetFiles);
-
-        String fileDiffsJson = getFileDiffsJson(change, revisionBase);
-        log.debug("File diffs JSON: {}", fileDiffsJson);
-
-        return fileDiffsJson;
-    }
-
-    private List<String> getAffectedFiles(GerritChange change, int revisionBase) throws Exception {
-        try (ManualRequestContext requestContext = config.openRequestContext()) {
-            Map<String, FileInfo> files = config.getGerritApi()
-                    .changes()
-                    .id(change.getProjectName(), change.getBranchNameKey().shortName(), change.getChangeKey().get())
-                    .current()
-                    .files(revisionBase);
-            return files.entrySet().stream()
-                    .filter(fileEntry -> {
-                        String filename = fileEntry.getKey();
-                        if (!filename.equals("/COMMIT_MSG") || config.getGptReviewCommitMessages()) {
-                            if (fileEntry.getValue().size > config.getMaxReviewFileSize()) {
-                                log.info("File '{}' not reviewed due to its size exceeding the maximum allowable size" +
-                                                " of {} bytes.", filename, config.getMaxReviewFileSize());
-                                return false;
-                            }
-                            return true;
-                        }
-                        return false;
-                    })
-                    .map(Map.Entry::getKey)
-                    .collect(toList());
-        }
-    }
-
-    private String getFileDiffsJson(GerritChange change, int revisionBase) throws Exception {
-        retrieveFileDiff(change, revisionBase);
-        diffs.add(String.format("{\"changeId\": \"%s\"}", change.getFullChangeId()));
-        return "[" + String.join(",", diffs) + "]\n";
-    }
+  private String getFileDiffsJson(GerritChange change, int revisionBase) throws Exception {
+    retrieveFileDiff(change, revisionBase);
+    diffs.add(String.format("{\"changeId\": \"%s\"}", change.getFullChangeId()));
+    return "[" + String.join(",", diffs) + "]\n";
+  }
 }

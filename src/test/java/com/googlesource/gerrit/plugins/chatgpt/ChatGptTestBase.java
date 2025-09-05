@@ -13,27 +13,29 @@ import java.nio.file.Path;
 import static org.mockito.Mockito.lenient;
 
 public class ChatGptTestBase {
-    protected static final Project.NameKey PROJECT_NAME = Project.NameKey.parse("myProject");
-    protected static final Change.Key CHANGE_ID = Change.Key.parse("myChangeId");
-    protected static final BranchNameKey BRANCH_NAME = BranchNameKey.create(PROJECT_NAME, "myBranchName");
+  protected static final Project.NameKey PROJECT_NAME = Project.NameKey.parse("myProject");
+  protected static final Change.Key CHANGE_ID = Change.Key.parse("myChangeId");
+  protected static final BranchNameKey BRANCH_NAME =
+      BranchNameKey.create(PROJECT_NAME, "myBranchName");
 
-    @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder();
+  @Rule public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    @Mock
-    protected Path mockPluginDataPath;
+  @Mock protected Path mockPluginDataPath;
 
-    protected Path realPluginDataPath;
+  protected Path realPluginDataPath;
 
-    protected void setupPluginData() {
-        realPluginDataPath = tempFolder.getRoot().toPath().resolve("global.data");
-        Path realProjectDataPath = tempFolder.getRoot().toPath().resolve(PROJECT_NAME + ".data");
+  protected void setupPluginData() {
+    realPluginDataPath = tempFolder.getRoot().toPath().resolve("global.data");
+    Path realProjectDataPath = tempFolder.getRoot().toPath().resolve(PROJECT_NAME + ".data");
 
-        // Mock the PluginData annotation project behavior
-        lenient().when(mockPluginDataPath.resolve(PROJECT_NAME + ".data")).thenReturn(realProjectDataPath);
-    }
+    // Mock the PluginData annotation project behavior
+    lenient()
+        .when(mockPluginDataPath.resolve(PROJECT_NAME + ".data"))
+        .thenReturn(realProjectDataPath);
+  }
 
-    protected GerritChange getGerritChange() {
-        return new GerritChange(ChatGptTestBase.PROJECT_NAME, ChatGptTestBase.BRANCH_NAME, ChatGptTestBase.CHANGE_ID);
-    }
+  protected GerritChange getGerritChange() {
+    return new GerritChange(
+        ChatGptTestBase.PROJECT_NAME, ChatGptTestBase.BRANCH_NAME, ChatGptTestBase.CHANGE_ID);
+  }
 }

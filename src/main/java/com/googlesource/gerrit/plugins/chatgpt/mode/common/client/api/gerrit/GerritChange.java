@@ -33,57 +33,60 @@ import java.util.Optional;
 @Slf4j
 @Getter
 public class GerritChange {
-    private Event event;
-    private String eventType;
-    private long eventTimeStamp;
-    private PatchSetEvent patchSetEvent;
-    private Project.NameKey projectNameKey;
-    private BranchNameKey branchNameKey;
-    private Change.Key changeKey;
-    private String fullChangeId;
-    // "Boolean" is used instead of "boolean" to have "getIsCommentEvent" instead of "isCommentEvent" as getter method
-    // (due to Lombok's magic naming convention)
-    @Setter
-    private Boolean isCommentEvent = false;
+  private Event event;
+  private String eventType;
+  private long eventTimeStamp;
+  private PatchSetEvent patchSetEvent;
+  private Project.NameKey projectNameKey;
+  private BranchNameKey branchNameKey;
+  private Change.Key changeKey;
+  private String fullChangeId;
+  // "Boolean" is used instead of "boolean" to have "getIsCommentEvent" instead of "isCommentEvent"
+  // as getter method
+  // (due to Lombok's magic naming convention)
+  @Setter private Boolean isCommentEvent = false;
 
-    public GerritChange(Project.NameKey projectNameKey, BranchNameKey branchNameKey, Change.Key changeKey) {
-        this.projectNameKey = projectNameKey;
-        this.branchNameKey = branchNameKey;
-        this.changeKey = changeKey;
-        buildFullChangeId();
-    }
+  public GerritChange(
+      Project.NameKey projectNameKey, BranchNameKey branchNameKey, Change.Key changeKey) {
+    this.projectNameKey = projectNameKey;
+    this.branchNameKey = branchNameKey;
+    this.changeKey = changeKey;
+    buildFullChangeId();
+  }
 
-    public GerritChange(Event event) {
-        this(
-                ((PatchSetEvent) event).getProjectNameKey(),
-                ((PatchSetEvent) event).getBranchNameKey(),
-                ((PatchSetEvent) event).getChangeKey()
-        );
-        this.event = event;
-        eventType = event.getType();
-        eventTimeStamp = event.eventCreatedOn;
-        patchSetEvent = (PatchSetEvent) event;
-    }
+  public GerritChange(Event event) {
+    this(
+        ((PatchSetEvent) event).getProjectNameKey(),
+        ((PatchSetEvent) event).getBranchNameKey(),
+        ((PatchSetEvent) event).getChangeKey());
+    this.event = event;
+    eventType = event.getType();
+    eventTimeStamp = event.eventCreatedOn;
+    patchSetEvent = (PatchSetEvent) event;
+  }
 
-    public GerritChange(String fullChangeId) {
-        this.fullChangeId = fullChangeId;
-    }
+  public GerritChange(String fullChangeId) {
+    this.fullChangeId = fullChangeId;
+  }
 
-    public Optional<PatchSetAttribute> getPatchSetAttribute() {
-        try {
-            return Optional.ofNullable(patchSetEvent.patchSet.get());
-        }
-        catch (NullPointerException e) {
-            return Optional.empty();
-        }
+  public Optional<PatchSetAttribute> getPatchSetAttribute() {
+    try {
+      return Optional.ofNullable(patchSetEvent.patchSet.get());
+    } catch (NullPointerException e) {
+      return Optional.empty();
     }
+  }
 
-    public String getProjectName() {
-        return getProjectNameKey().toString();
-    }
+  public String getProjectName() {
+    return getProjectNameKey().toString();
+  }
 
-    private void buildFullChangeId() {
-        fullChangeId = String.join("~", URLEncoder.encode(projectNameKey.get(), StandardCharsets.UTF_8),
-                branchNameKey.shortName(), changeKey.get());
-    }
+  private void buildFullChangeId() {
+    fullChangeId =
+        String.join(
+            "~",
+            URLEncoder.encode(projectNameKey.get(), StandardCharsets.UTF_8),
+            branchNameKey.shortName(),
+            changeKey.get());
+  }
 }

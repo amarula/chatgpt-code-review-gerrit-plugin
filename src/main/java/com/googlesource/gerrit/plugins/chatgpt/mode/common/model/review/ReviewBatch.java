@@ -26,14 +26,13 @@ import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.GERRIT_P
 @Data
 @RequiredArgsConstructor
 public class ReviewBatch {
-    private String id;
-    @NonNull
-    private String content;
-    private String filename;
-    private Integer line;
-    private GerritCodeRange range;
+  private String id;
+  @NonNull private String content;
+  private String filename;
+  private Integer line;
+  private GerritCodeRange range;
 
-    public String getFilename() {
-        return filename == null ? GERRIT_PATCH_SET_FILENAME : filename;
-    }
+  public String getFilename() {
+    return filename == null ? GERRIT_PATCH_SET_FILENAME : filename;
+  }
 }

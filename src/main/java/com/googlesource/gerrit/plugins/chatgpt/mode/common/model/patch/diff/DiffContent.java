@@ -20,7 +20,7 @@ import lombok.Data;
 
 @Data
 public class DiffContent {
-    public String a;
-    public String b;
-    public String ab;
+  public String a;
+  public String b;
+  public String ab;
 }

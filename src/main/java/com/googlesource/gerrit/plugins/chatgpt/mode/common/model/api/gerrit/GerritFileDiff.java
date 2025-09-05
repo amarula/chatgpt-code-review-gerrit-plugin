@@ -21,15 +21,17 @@ import lombok.Data;
 
 @Data
 public abstract class GerritFileDiff {
-    @SerializedName("meta_a")
-    protected Meta metaA;
-    @SerializedName("meta_b")
-    protected Meta metaB;
+  @SerializedName("meta_a")
+  protected Meta metaA;
 
-    @Data
-    public static class Meta {
-        String name;
-        @SerializedName("content_type")
-        String contentType;
-    }
+  @SerializedName("meta_b")
+  protected Meta metaB;
+
+  @Data
+  public static class Meta {
+    String name;
+
+    @SerializedName("content_type")
+    String contentType;
+  }
 }

@@ -24,5 +24,5 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 public class ChatGptGetContextContent {
-    private List<ChatGptGetContextItem> replies;
+  private List<ChatGptGetContextItem> replies;
 }

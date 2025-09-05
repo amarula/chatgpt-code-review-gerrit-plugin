@@ -23,7 +23,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ChatGptToolOutput {
-    @SerializedName("tool_call_id")
-    private String toolCallId;
-    private String output;
+  @SerializedName("tool_call_id")
+  private String toolCallId;
+
+  private String output;
 }

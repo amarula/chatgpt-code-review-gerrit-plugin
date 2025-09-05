@@ -34,40 +34,40 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.FileUtils.sanitizeFi
 
 @Slf4j
 public class ChatGptRepoUploader extends ClientBase {
-    private static final String FILENAME_PATTERN = "%s_%05d_";
+  private static final String FILENAME_PATTERN = "%s_%05d_";
 
-    private final GerritChange change;
-    private final GitRepoFiles gitRepoFiles;
+  private final GerritChange change;
+  private final GitRepoFiles gitRepoFiles;
 
-    private String filenameBase;
-    private int filenameIndex;
+  private String filenameBase;
+  private int filenameIndex;
 
-    public ChatGptRepoUploader(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
-        super(config);
-        this.change = change;
-        this.gitRepoFiles = gitRepoFiles;
+  public ChatGptRepoUploader(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
+    super(config);
+    this.change = change;
+    this.gitRepoFiles = gitRepoFiles;
+  }
+
+  public List<String> uploadRepoFiles() throws OpenAiConnectionFailException {
+    log.debug("Starting uploading repository files.");
+    List<String> repoFiles = gitRepoFiles.getGitRepoFilesAsJson(config, change);
+    List<String> filesIds = new ArrayList<>();
+    filenameBase = sanitizeFilename(change.getProjectName());
+    filenameIndex = 0;
+    for (String repoFile : repoFiles) {
+      Path repoPath = createTempFileWithContent(getIndexedFilename(), ".json", repoFile);
+      log.debug("Uploading repository file `{}`", repoPath);
+      ChatGptFile chatGptFile = new ChatGptFile(config);
+      ChatGptFilesResponse chatGptFilesResponse = chatGptFile.uploadFile(repoPath);
+      filesIds.add(chatGptFilesResponse.getId());
     }
+    log.debug("IDs of the uploaded files: {}", filesIds);
 
-    public List<String> uploadRepoFiles() throws OpenAiConnectionFailException {
-        log.debug("Starting uploading repository files.");
-        List<String> repoFiles = gitRepoFiles.getGitRepoFilesAsJson(config, change);
-        List<String> filesIds = new ArrayList<>();
-        filenameBase = sanitizeFilename(change.getProjectName());
-        filenameIndex = 0;
-        for(String repoFile : repoFiles) {
-            Path repoPath = createTempFileWithContent(getIndexedFilename(), ".json", repoFile);
-            log.debug("Uploading repository file `{}`", repoPath);
-            ChatGptFile chatGptFile = new ChatGptFile(config);
-            ChatGptFilesResponse chatGptFilesResponse = chatGptFile.uploadFile(repoPath);
-            filesIds.add(chatGptFilesResponse.getId());
-        }
-        log.debug("IDs of the uploaded files: {}", filesIds);
+    return filesIds;
+  }
 
-        return filesIds;
-    }
-
-    private String getIndexedFilename() {
-        filenameIndex++;
-        return String.format(FILENAME_PATTERN, filenameBase, filenameIndex);
-    }
+  private String getIndexedFilename() {
+    filenameIndex++;
+    return String.format(FILENAME_PATTERN, filenameBase, filenameIndex);
+  }
 }

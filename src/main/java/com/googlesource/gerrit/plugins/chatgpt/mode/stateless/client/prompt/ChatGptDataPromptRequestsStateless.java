@@ -26,22 +26,22 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClie
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ChatGptDataPromptRequestsStateless extends ChatGptDataPromptRequests implements IChatGptDataPrompt {
-    public ChatGptDataPromptRequestsStateless(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritClientData gerritClientData,
-            Localizer localizer
-    ) {
-        super(config, changeSetData, gerritClientData, localizer);
-    }
+public class ChatGptDataPromptRequestsStateless extends ChatGptDataPromptRequests
+    implements IChatGptDataPrompt {
+  public ChatGptDataPromptRequestsStateless(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritClientData gerritClientData,
+      Localizer localizer) {
+    super(config, changeSetData, gerritClientData, localizer);
+  }
 
-    @Override
-    protected ChatGptMessageItem getMessageItem(int i) {
-        super.getMessageItem(i);
-        log.debug("Retrieving history for message item {}", messageItem);
-        setHistory(messageItem, messageHistory);
+  @Override
+  protected ChatGptMessageItem getMessageItem(int i) {
+    super.getMessageItem(i);
+    log.debug("Retrieving history for message item {}", messageItem);
+    setHistory(messageItem, messageHistory);
 
-        return messageItem;
-    }
+    return messageItem;
+  }
 }

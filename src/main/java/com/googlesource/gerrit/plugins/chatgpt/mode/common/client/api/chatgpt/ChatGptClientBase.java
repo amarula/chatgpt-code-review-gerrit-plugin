@@ -27,27 +27,27 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.jsonToClas
 
 public abstract class ChatGptClientBase extends ClientBase {
 
-    public ChatGptClientBase(Configuration config) {
-        super(config);
-    }
+  public ChatGptClientBase(Configuration config) {
+    super(config);
+  }
 
-    protected ChatGptResponseContent convertResponseContentFromJson(String content) {
-        return jsonToClass(content, ChatGptResponseContent.class);
-    }
+  protected ChatGptResponseContent convertResponseContentFromJson(String content) {
+    return jsonToClass(content, ChatGptResponseContent.class);
+  }
 
-    protected ChatGptToolCall.Function getFunction(List<ChatGptToolCall> toolCalls, int ind) {
-        return toolCalls.get(ind).getFunction();
-    }
+  protected ChatGptToolCall.Function getFunction(List<ChatGptToolCall> toolCalls, int ind) {
+    return toolCalls.get(ind).getFunction();
+  }
 
-    protected String getArgumentAsString(List<ChatGptToolCall> toolCalls, int ind) {
-        return getFunction(toolCalls, ind).getArguments();
-    }
+  protected String getArgumentAsString(List<ChatGptToolCall> toolCalls, int ind) {
+    return getFunction(toolCalls, ind).getArguments();
+  }
 
-    protected ChatGptResponseContent getArgumentAsResponse(List<ChatGptToolCall> toolCalls, int ind) {
-        return convertResponseContentFromJson(getArgumentAsString(toolCalls, ind));
-    }
+  protected ChatGptResponseContent getArgumentAsResponse(List<ChatGptToolCall> toolCalls, int ind) {
+    return convertResponseContentFromJson(getArgumentAsString(toolCalls, ind));
+  }
 
-    protected <T> T getArgumentAsType(List<ChatGptToolCall> toolCalls, int ind, Class<T> clazz) {
-        return jsonToClass(getArgumentAsString(toolCalls, ind), clazz);
-    }
+  protected <T> T getArgumentAsType(List<ChatGptToolCall> toolCalls, int ind, Class<T> clazz) {
+    return jsonToClass(getArgumentAsString(toolCalls, ind), clazz);
+  }
 }

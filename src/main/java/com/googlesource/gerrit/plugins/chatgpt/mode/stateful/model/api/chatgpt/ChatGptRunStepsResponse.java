@@ -26,6 +26,6 @@ import lombok.ToString;
 @Data
 @ToString(callSuper = true)
 public class ChatGptRunStepsResponse extends ChatGptResponse {
-    @SerializedName("step_details")
-    private ChatGptResponseMessage stepDetails;
+  @SerializedName("step_details")
+  private ChatGptResponseMessage stepDetails;
 }

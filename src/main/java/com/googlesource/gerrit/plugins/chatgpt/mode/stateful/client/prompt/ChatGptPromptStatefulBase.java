@@ -30,67 +30,68 @@ import java.util.List;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 @Slf4j
-public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt implements IChatGptPromptStateful {
-    public static String DEFAULT_GPT_ASSISTANT_NAME;
-    public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT;
-    public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES;
-    public static String DEFAULT_GPT_MESSAGE_REQUEST_RESEND_FORMATTED;
-    public static String DEFAULT_GPT_MESSAGE_REVIEW;
+public abstract class ChatGptPromptStatefulBase extends ChatGptPrompt
+    implements IChatGptPromptStateful {
+  public static String DEFAULT_GPT_ASSISTANT_NAME;
+  public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
+  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT;
+  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
+  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT;
+  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES;
+  public static String DEFAULT_GPT_MESSAGE_REQUEST_RESEND_FORMATTED;
+  public static String DEFAULT_GPT_MESSAGE_REVIEW;
 
-    protected final ChangeSetData changeSetData;
-    protected final GerritChange change;
+  protected final ChangeSetData changeSetData;
+  protected final GerritChange change;
 
-    private final ICodeContextPolicy codeContextPolicy;
+  private final ICodeContextPolicy codeContextPolicy;
 
-    public ChatGptPromptStatefulBase(
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy
-    ) {
-        super(config);
-        this.changeSetData = changeSetData;
-        this.change = change;
-        this.codeContextPolicy = codeContextPolicy;
-        this.isCommentEvent = change.getIsCommentEvent();
-        loadDefaultPrompts("promptsStateful");
-        log.debug("Initialized ChatGptPromptStatefulBase with change ID: {}", change.getFullChangeId());
+  public ChatGptPromptStatefulBase(
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy) {
+    super(config);
+    this.changeSetData = changeSetData;
+    this.change = change;
+    this.codeContextPolicy = codeContextPolicy;
+    this.isCommentEvent = change.getIsCommentEvent();
+    loadDefaultPrompts("promptsStateful");
+    log.debug("Initialized ChatGptPromptStatefulBase with change ID: {}", change.getFullChangeId());
+  }
+
+  public String getDefaultGptAssistantDescription() {
+    String description = String.format(DEFAULT_GPT_ASSISTANT_DESCRIPTION, change.getProjectName());
+    log.debug("Generated GPT Assistant Description: {}", description);
+    return description;
+  }
+
+  public abstract void addGptAssistantInstructions(List<String> instructions);
+
+  public abstract String getGptRequestDataPrompt();
+
+  public String getDefaultGptAssistantInstructions() {
+    List<String> instructions =
+        new ArrayList<>(
+            List.of(
+                config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS)
+                    + DOT));
+    codeContextPolicy.addCodeContextPolicyAwareAssistantInstructions(instructions);
+    addGptAssistantInstructions(instructions);
+    String compiledInstructions = joinWithSpace(instructions);
+    log.debug("Compiled GPT Assistant Instructions: {}", compiledInstructions);
+    return compiledInstructions;
+  }
+
+  public String getDefaultGptThreadReviewMessage(String patchSet) {
+    String gptRequestDataPrompt = getGptRequestDataPrompt();
+    if (gptRequestDataPrompt != null && !gptRequestDataPrompt.isEmpty()) {
+      log.debug("Request User Prompt retrieved: {}", gptRequestDataPrompt);
+      return gptRequestDataPrompt;
+    } else {
+      String defaultMessage = String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
+      log.debug("Default Thread Review Message used: {}", defaultMessage);
+      return defaultMessage;
     }
-
-    public String getDefaultGptAssistantDescription() {
-        String description = String.format(DEFAULT_GPT_ASSISTANT_DESCRIPTION, change.getProjectName());
-        log.debug("Generated GPT Assistant Description: {}", description);
-        return description;
-    }
-
-    public abstract void addGptAssistantInstructions(List<String> instructions);
-
-    public abstract String getGptRequestDataPrompt();
-
-    public String getDefaultGptAssistantInstructions() {
-        List<String> instructions = new ArrayList<>(List.of(
-                config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS) + DOT
-        ));
-        codeContextPolicy.addCodeContextPolicyAwareAssistantInstructions(instructions);
-        addGptAssistantInstructions(instructions);
-        String compiledInstructions = joinWithSpace(instructions);
-        log.debug("Compiled GPT Assistant Instructions: {}", compiledInstructions);
-        return compiledInstructions;
-    }
-
-    public String getDefaultGptThreadReviewMessage(String patchSet) {
-        String gptRequestDataPrompt = getGptRequestDataPrompt();
-        if (gptRequestDataPrompt != null && !gptRequestDataPrompt.isEmpty()) {
-            log.debug("Request User Prompt retrieved: {}", gptRequestDataPrompt);
-            return gptRequestDataPrompt;
-        }
-        else {
-            String defaultMessage = String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
-            log.debug("Default Thread Review Message used: {}", defaultMessage);
-            return defaultMessage;
-        }
-    }
+  }
 }

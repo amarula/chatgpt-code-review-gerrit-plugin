@@ -23,7 +23,8 @@ import lombok.Data;
 @Data
 @Builder
 public class ChatGptCreateVectorStoreRequest {
-    private String name;
-    @SerializedName("file_ids")
-    private String[] fileIds;
+  private String name;
+
+  @SerializedName("file_ids")
+  private String[] fileIds;
 }

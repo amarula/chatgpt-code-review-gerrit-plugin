@@ -30,28 +30,31 @@ import java.nio.file.Path;
 @Slf4j
 public class ChatGptFile extends ChatGptApiBase {
 
-    public ChatGptFile(Configuration config) {
-        super(config);
-    }
+  public ChatGptFile(Configuration config) {
+    super(config);
+  }
 
-    public ChatGptFilesResponse uploadFile(Path repoPath) throws OpenAiConnectionFailException {
-        Request request = createUploadFileRequest(repoPath);
-        log.debug("ChatGPT Upload File request: {}", request);
+  public ChatGptFilesResponse uploadFile(Path repoPath) throws OpenAiConnectionFailException {
+    Request request = createUploadFileRequest(repoPath);
+    log.debug("ChatGPT Upload File request: {}", request);
 
-        return getChatGptResponse(request, ChatGptFilesResponse.class);
-    }
+    return getChatGptResponse(request, ChatGptFilesResponse.class);
+  }
 
-    private Request createUploadFileRequest(Path repoPath) {
-        String uri = UriResourceLocatorStateful.filesCreateUri();
-        log.debug("ChatGPT Upload File request URI: {}", uri);
-        File file = repoPath.toFile();
-        RequestBody requestBody = new MultipartBody.Builder()
-                .setType(MultipartBody.FORM)
-                .addFormDataPart("purpose", "assistants")
-                .addFormDataPart("file", file.getName(),
-                        RequestBody.create(file, MediaType.parse("application/json")))
-                .build();
+  private Request createUploadFileRequest(Path repoPath) {
+    String uri = UriResourceLocatorStateful.filesCreateUri();
+    log.debug("ChatGPT Upload File request URI: {}", uri);
+    File file = repoPath.toFile();
+    RequestBody requestBody =
+        new MultipartBody.Builder()
+            .setType(MultipartBody.FORM)
+            .addFormDataPart("purpose", "assistants")
+            .addFormDataPart(
+                "file",
+                file.getName(),
+                RequestBody.create(file, MediaType.parse("application/json")))
+            .build();
 
-        return httpClient.createRequest(uri, requestBody, null);
-    }
+    return httpClient.createRequest(uri, requestBody, null);
+  }
 }

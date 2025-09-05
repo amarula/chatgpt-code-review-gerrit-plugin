@@ -23,14 +23,15 @@ import okhttp3.Request;
 import java.util.Map;
 
 public class ChatGptHttpClient extends HttpClient {
-    private static final Map<String, String> BETA_VERSION_HEADER = Map.of("OpenAI-Beta", "assistants=v2");
+  private static final Map<String, String> BETA_VERSION_HEADER =
+      Map.of("OpenAI-Beta", "assistants=v2");
 
-    public ChatGptHttpClient(Configuration config) {
-        super(config);
-    }
+  public ChatGptHttpClient(Configuration config) {
+    super(config);
+  }
 
-    @Override
-    public Request createRequestFromJson(String uri, Object requestObject) {
-        return createRequestFromJson(uri, requestObject, BETA_VERSION_HEADER);
-    }
+  @Override
+  public Request createRequestFromJson(String uri, Object requestObject) {
+    return createRequestFromJson(uri, requestObject, BETA_VERSION_HEADER);
+  }
 }

@@ -24,12 +24,19 @@ import java.util.HashMap;
 import java.util.List;
 
 public interface IGerritClientPatchSet {
-    String getPatchSet(ChangeSetData changeSetData, GerritChange gerritChange) throws Exception;
-    boolean isDisabledUser(String authorUsername);
-    boolean isDisabledTopic(String topic);
-    void retrieveRevisionBase(GerritChange change);
-    Integer getNotNullAccountId(String authorUsername);
-    HashMap<String, FileDiffProcessed> getFileDiffsProcessed();
-    List<String> getPatchSetFiles();
-    Integer getRevisionBase();
+  String getPatchSet(ChangeSetData changeSetData, GerritChange gerritChange) throws Exception;
+
+  boolean isDisabledUser(String authorUsername);
+
+  boolean isDisabledTopic(String topic);
+
+  void retrieveRevisionBase(GerritChange change);
+
+  Integer getNotNullAccountId(String authorUsername);
+
+  HashMap<String, FileDiffProcessed> getFileDiffsProcessed();
+
+  List<String> getPatchSetFiles();
+
+  Integer getRevisionBase();
 }

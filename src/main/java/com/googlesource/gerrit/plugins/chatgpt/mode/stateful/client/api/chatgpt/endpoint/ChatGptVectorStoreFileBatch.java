@@ -30,30 +30,29 @@ import java.util.List;
 @Slf4j
 public class ChatGptVectorStoreFileBatch extends ChatGptApiBase {
 
-    public ChatGptVectorStoreFileBatch(Configuration config) {
-        super(config);
-    }
+  public ChatGptVectorStoreFileBatch(Configuration config) {
+    super(config);
+  }
 
-    public ChatGptResponse createVectorStoreFileBatch(String vectorStoreId, List<String> fileIds)
-            throws OpenAiConnectionFailException {
-        Request request = vectorStoreFileBatchCreateRequest(vectorStoreId, fileIds);
-        log.debug("ChatGPT Create Vector Store File Batch request: {}", request);
+  public ChatGptResponse createVectorStoreFileBatch(String vectorStoreId, List<String> fileIds)
+      throws OpenAiConnectionFailException {
+    Request request = vectorStoreFileBatchCreateRequest(vectorStoreId, fileIds);
+    log.debug("ChatGPT Create Vector Store File Batch request: {}", request);
 
-        ChatGptResponse createVectorStoreFileBatchResponse = getChatGptResponse(request);
-        log.info("Vector Store File Batch created: {}", createVectorStoreFileBatchResponse);
+    ChatGptResponse createVectorStoreFileBatchResponse = getChatGptResponse(request);
+    log.info("Vector Store File Batch created: {}", createVectorStoreFileBatchResponse);
 
-        return createVectorStoreFileBatchResponse;
-    }
+    return createVectorStoreFileBatchResponse;
+  }
 
-    private Request vectorStoreFileBatchCreateRequest(String vectorStoreId, List<String> fileIds) {
-        String uri = UriResourceLocatorStateful.vectorStoreFileBatchCreateUri(vectorStoreId);
-        log.debug("ChatGPT Create Vector Store File Batch request URI: {}", uri);
+  private Request vectorStoreFileBatchCreateRequest(String vectorStoreId, List<String> fileIds) {
+    String uri = UriResourceLocatorStateful.vectorStoreFileBatchCreateUri(vectorStoreId);
+    log.debug("ChatGPT Create Vector Store File Batch request URI: {}", uri);
 
-        ChatGptCreateVectorStoreRequest requestBody = ChatGptCreateVectorStoreRequest.builder()
-                .fileIds(fileIds.toArray(String[]::new))
-                .build();
+    ChatGptCreateVectorStoreRequest requestBody =
+        ChatGptCreateVectorStoreRequest.builder().fileIds(fileIds.toArray(String[]::new)).build();
 
-        log.debug("ChatGPT Create Vector Store File Batch request body: {}", requestBody);
-        return httpClient.createRequestFromJson(uri, requestBody);
-    }
+    log.debug("ChatGPT Create Vector Store File Batch request body: {}", requestBody);
+    return httpClient.createRequestFromJson(uri, requestBody);
+  }
 }

@@ -1,8 +1,8 @@
 {
-  "test_file_1.py":{
-    "old_mode":33188,
-    "new_mode":33188,
-    "lines_inserted":1,
-    "lines_deleted":1
+  "test_file_1.py": {
+    "old_mode": 33188,
+    "new_mode": 33188,
+    "lines_inserted": 1,
+    "lines_deleted": 1
   }
 }

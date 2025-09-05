@@ -25,11 +25,17 @@ import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.model.api.chatgpt.C
 import java.util.List;
 
 public interface ICodeContextPolicy {
-    void setupRunAction(ChatGptRun chatGptRun);
-    boolean runActionRequired(ChatGptRunResponse runResponse) throws OpenAiConnectionFailException;
-    String generateVectorStore() throws OpenAiConnectionFailException;
-    void removeVectorStore() throws OperationNotSupportedException;
-    void updateAssistantTools(ChatGptAssistantTools chatGptAssistantTools, String vectorStoreId);
-    void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions);
-    void addCodeContextPolicyAwareAssistantRule(List<String> rules);
+  void setupRunAction(ChatGptRun chatGptRun);
+
+  boolean runActionRequired(ChatGptRunResponse runResponse) throws OpenAiConnectionFailException;
+
+  String generateVectorStore() throws OpenAiConnectionFailException;
+
+  void removeVectorStore() throws OperationNotSupportedException;
+
+  void updateAssistantTools(ChatGptAssistantTools chatGptAssistantTools, String vectorStoreId);
+
+  void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions);
+
+  void addCodeContextPolicyAwareAssistantRule(List<String> rules);
 }

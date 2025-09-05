@@ -23,13 +23,13 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class ChatGptToolResources {
-    @SerializedName("file_search")
-    private VectorStoreIds fileSearch;
+  @SerializedName("file_search")
+  private VectorStoreIds fileSearch;
 
-    @Data
-    @AllArgsConstructor
-    public static class VectorStoreIds {
-        @SerializedName("vector_store_ids")
-        private String[] vectorStoreIds;
-    }
+  @Data
+  @AllArgsConstructor
+  public static class VectorStoreIds {
+    @SerializedName("vector_store_ids")
+    private String[] vectorStoreIds;
+  }
 }

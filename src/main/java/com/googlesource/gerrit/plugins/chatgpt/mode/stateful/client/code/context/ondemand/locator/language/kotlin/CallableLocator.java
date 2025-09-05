@@ -29,37 +29,41 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class CallableLocator extends CallableLocatorJVM implements IEntityLocator {
-    private static final String KOTLIN_MODULE_EXTENSION = ".kt";
-    private static final String ALTERNATIVE_BASE_PATH = "app/src/main/kotlin/";
-    private static final String NON_MODIFIABLE_BASE_PATH = "app/src/";
+  private static final String KOTLIN_MODULE_EXTENSION = ".kt";
+  private static final String ALTERNATIVE_BASE_PATH = "app/src/main/kotlin/";
+  private static final String NON_MODIFIABLE_BASE_PATH = "app/src/";
 
-    public CallableLocator(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
-        super(config, change, gitRepoFiles);
-        log.debug("Initializing CallableLocator for Kotlin projects");
-        languageModuleExtensions = new String[]{KOTLIN_MODULE_EXTENSION};
-        importPattern = Pattern.compile(
-                String.format("^import\\s+(%s)", DOT_NOTATION_REGEX),
-                Pattern.MULTILINE
-        );
-    }
+  public CallableLocator(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
+    super(config, change, gitRepoFiles);
+    log.debug("Initializing CallableLocator for Kotlin projects");
+    languageModuleExtensions = new String[] {KOTLIN_MODULE_EXTENSION};
+    importPattern =
+        Pattern.compile(String.format("^import\\s+(%s)", DOT_NOTATION_REGEX), Pattern.MULTILINE);
+  }
 
-    @Override
-    protected String getFunctionRegex(String functionName) {
-        return "^\\s*(?:@\\w+(?:\\(.*?\\))?\\s*)*" +  // Optional annotations
-                "(?:\\w+\\s+)*" +                      // Optional modifiers
-                "fun\\s+" +                            // 'fun' keyword
-                Pattern.quote(functionName) +          // Function name
-                "\\s*\\(.*?\\)" +                      // Parameters
-                "(?:\\s*:\\s*\\S+)?";                  // Optional return type
-    }
+  @Override
+  protected String getFunctionRegex(String functionName) {
+    return "^\\s*(?:@\\w+(?:\\(.*?\\))?\\s*)*"
+        + // Optional annotations
+        "(?:\\w+\\s+)*"
+        + // Optional modifiers
+        "fun\\s+"
+        + // 'fun' keyword
+        Pattern.quote(functionName)
+        + // Function name
+        "\\s*\\(.*?\\)"
+        + // Parameters
+        "(?:\\s*:\\s*\\S+)?"; // Optional return type
+  }
 
-    @Override
-    protected void parseImportStatements(String content) {
-        parseDirectImportStatements(content);
-        Set<String> alternativePathModules = importModules.stream()
-                .filter(s -> !s.startsWith(NON_MODIFIABLE_BASE_PATH))
-                .map(s -> ALTERNATIVE_BASE_PATH + s)
-                .collect(Collectors.toSet());
-        importModules.addAll(alternativePathModules);
-    }
+  @Override
+  protected void parseImportStatements(String content) {
+    parseDirectImportStatements(content);
+    Set<String> alternativePathModules =
+        importModules.stream()
+            .filter(s -> !s.startsWith(NON_MODIFIABLE_BASE_PATH))
+            .map(s -> ALTERNATIVE_BASE_PATH + s)
+            .collect(Collectors.toSet());
+    importModules.addAll(alternativePathModules);
+  }
 }

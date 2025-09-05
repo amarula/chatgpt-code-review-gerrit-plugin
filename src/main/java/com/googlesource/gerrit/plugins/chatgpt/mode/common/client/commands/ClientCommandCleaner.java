@@ -23,22 +23,22 @@ import java.util.regex.Matcher;
 
 @Slf4j
 public class ClientCommandCleaner extends ClientCommandBase {
-    public ClientCommandCleaner(Configuration config) {
-        super(config);
-    }
+  public ClientCommandCleaner(Configuration config) {
+    super(config);
+  }
 
-    public String removeCommands(String comment) {
-        log.debug("Removing commands from comment: {}", comment);
+  public String removeCommands(String comment) {
+    log.debug("Removing commands from comment: {}", comment);
 
-        Matcher messageCommandMatcher = MESSAGE_COMMAND_PATTERN.matcher(comment);
-        if (messageCommandMatcher.find()) {
-            return messageCommandMatcher.replaceAll("$1");
-        }
-        Matcher directiveCommandMatcher = DIRECTIVE_COMMAND_PATTERN.matcher(comment);
-        if (directiveCommandMatcher.find()) {
-            return directiveCommandMatcher.replaceAll("");
-        }
-        Matcher commandMatcher = COMMAND_PATTERN.matcher(comment);
-        return commandMatcher.replaceAll("");
+    Matcher messageCommandMatcher = MESSAGE_COMMAND_PATTERN.matcher(comment);
+    if (messageCommandMatcher.find()) {
+      return messageCommandMatcher.replaceAll("$1");
     }
+    Matcher directiveCommandMatcher = DIRECTIVE_COMMAND_PATTERN.matcher(comment);
+    if (directiveCommandMatcher.find()) {
+      return directiveCommandMatcher.replaceAll("");
+    }
+    Matcher commandMatcher = COMMAND_PATTERN.matcher(comment);
+    return commandMatcher.replaceAll("");
+  }
 }

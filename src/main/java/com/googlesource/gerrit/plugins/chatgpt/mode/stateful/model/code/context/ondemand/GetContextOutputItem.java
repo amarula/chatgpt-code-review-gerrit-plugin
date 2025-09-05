@@ -27,6 +27,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @ToString(callSuper = true)
 public class GetContextOutputItem extends ChatGptGetContextItem {
-    private String definition;
-    private String body;
+  private String definition;
+  private String body;
 }

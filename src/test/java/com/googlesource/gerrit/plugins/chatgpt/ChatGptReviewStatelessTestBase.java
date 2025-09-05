@@ -23,61 +23,66 @@ import static org.mockito.Mockito.when;
 
 public class ChatGptReviewStatelessTestBase extends ChatGptReviewTestBase {
 
-    protected ChatGptPromptStateless chatGptPromptStateless;
-    protected JsonArray prompts;
-    protected ReviewInput gerritPatchSetReview;
+  protected ChatGptPromptStateless chatGptPromptStateless;
+  protected JsonArray prompts;
+  protected ReviewInput gerritPatchSetReview;
 
-    protected void initConfig() {
-        super.initConfig();
-        when(globalConfig.getBoolean(Mockito.eq("gptStreamOutput"), Mockito.anyBoolean()))
-                .thenReturn(GPT_STREAM_OUTPUT);
-        chatGptPromptStateless = new ChatGptPromptStateless(config);
-    }
+  protected void initConfig() {
+    super.initConfig();
+    when(globalConfig.getBoolean(Mockito.eq("gptStreamOutput"), Mockito.anyBoolean()))
+        .thenReturn(GPT_STREAM_OUTPUT);
+    chatGptPromptStateless = new ChatGptPromptStateless(config);
+  }
 
-    protected void initComparisonContent() {
-        super.initComparisonContent();
-        gerritPatchSetReview = readTestFileToClass("__files/stateless/gerritPatchSetReview.json", ReviewInput.class);
-    }
+  protected void initComparisonContent() {
+    super.initComparisonContent();
+    gerritPatchSetReview =
+        readTestFileToClass("__files/stateless/gerritPatchSetReview.json", ReviewInput.class);
+  }
 
-    protected void mockChatCompletion(String fileName) {
-        WireMock.stubFor(WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateless.chatCompletionsUri()))
-                .willReturn(WireMock.aResponse()
-                        .withStatus(HTTP_OK)
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
-                        .withBodyFile(fileName)));
-    }
+  protected void mockChatCompletion(String fileName) {
+    WireMock.stubFor(
+        WireMock.post(WireMock.urlEqualTo(UriResourceLocatorStateless.chatCompletionsUri()))
+            .willReturn(
+                WireMock.aResponse()
+                    .withStatus(HTTP_OK)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+                    .withBodyFile(fileName)));
+  }
 
-    protected void setupMockRequests() throws RestApiException {
-        super.setupMockRequests();
+  protected void setupMockRequests() throws RestApiException {
+    super.setupMockRequests();
 
-        // Mock the behavior of the gerritPatchSetFiles request
-        Map<String, FileInfo> files = readTestFileToType(
-                "__files/stateless/gerritPatchSetFiles.json",
-                new TypeLiteral<Map<String, FileInfo>>() {}.getType()
-        );
-        when(revisionApiMock.files(0)).thenReturn(files);
+    // Mock the behavior of the gerritPatchSetFiles request
+    Map<String, FileInfo> files =
+        readTestFileToType(
+            "__files/stateless/gerritPatchSetFiles.json",
+            new TypeLiteral<Map<String, FileInfo>>() {}.getType());
+    when(revisionApiMock.files(0)).thenReturn(files);
 
-        // Mock the behavior of the gerritPatchSet diff requests
-        FileApi commitMsgFileMock = mock(FileApi.class);
-        when(revisionApiMock.file("/COMMIT_MSG")).thenReturn(commitMsgFileMock);
-        DiffInfo commitMsgFileDiff = readTestFileToClass("__files/stateless/gerritPatchSetDiffCommitMsg.json", DiffInfo.class);
-        when(commitMsgFileMock.diff(0)).thenReturn(commitMsgFileDiff);
-        FileApi testFileMock = mock(FileApi.class);
-        when(revisionApiMock.file("test_file.py")).thenReturn(testFileMock);
-        DiffInfo testFileDiff = readTestFileToClass("__files/stateless/gerritPatchSetDiffTestFile.json", DiffInfo.class);
-        when(testFileMock.diff(0)).thenReturn(testFileDiff);
+    // Mock the behavior of the gerritPatchSet diff requests
+    FileApi commitMsgFileMock = mock(FileApi.class);
+    when(revisionApiMock.file("/COMMIT_MSG")).thenReturn(commitMsgFileMock);
+    DiffInfo commitMsgFileDiff =
+        readTestFileToClass("__files/stateless/gerritPatchSetDiffCommitMsg.json", DiffInfo.class);
+    when(commitMsgFileMock.diff(0)).thenReturn(commitMsgFileDiff);
+    FileApi testFileMock = mock(FileApi.class);
+    when(revisionApiMock.file("test_file.py")).thenReturn(testFileMock);
+    DiffInfo testFileDiff =
+        readTestFileToClass("__files/stateless/gerritPatchSetDiffTestFile.json", DiffInfo.class);
+    when(testFileMock.diff(0)).thenReturn(testFileDiff);
 
-        // Mock the behavior of the askGpt request
-        mockChatCompletion("chatGptResponseStreamed.txt");
-    }
+    // Mock the behavior of the askGpt request
+    mockChatCompletion("chatGptResponseStreamed.txt");
+  }
 
-    protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
-        ArgumentCaptor<ReviewInput> reviewInputCaptor = super.testRequestSent();
-        prompts = gptRequestBody.get("messages").getAsJsonArray();
-        return reviewInputCaptor;
-    }
+  protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
+    ArgumentCaptor<ReviewInput> reviewInputCaptor = super.testRequestSent();
+    prompts = gptRequestBody.get("messages").getAsJsonArray();
+    return reviewInputCaptor;
+  }
 
-    protected String getUserPrompt() {
-        return prompts.get(1).getAsJsonObject().get("content").getAsString();
-    }
+  protected String getUserPrompt() {
+    return prompts.get(1).getAsJsonObject().get("content").getAsString();
+  }
 }

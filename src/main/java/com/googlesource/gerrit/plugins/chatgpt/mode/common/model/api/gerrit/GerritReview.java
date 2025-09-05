@@ -25,14 +25,14 @@ import java.util.Map;
 
 @Data
 public class GerritReview {
-    private Map<String, List<GerritComment>> comments;
-    private String message;
-    private Labels labels;
+  private Map<String, List<GerritComment>> comments;
+  private String message;
+  private Labels labels;
 
-    @AllArgsConstructor
-    @Data
-    public static class Labels {
-        @SerializedName("Code-Review")
-        private int codeReview;
-    }
+  @AllArgsConstructor
+  @Data
+  public static class Labels {
+    @SerializedName("Code-Review")
+    private int codeReview;
+  }
 }

@@ -25,6 +25,6 @@ import java.util.TreeMap;
 @AllArgsConstructor
 @Data
 public class CodeFinderDiff {
-    private DiffContent content;
-    private TreeMap<Integer, Integer> charToLineMap;
+  private DiffContent content;
+  private TreeMap<Integer, Integer> charToLineMap;
 }

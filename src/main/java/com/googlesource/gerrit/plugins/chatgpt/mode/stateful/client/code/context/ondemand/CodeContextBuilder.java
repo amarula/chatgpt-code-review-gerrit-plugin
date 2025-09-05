@@ -35,45 +35,47 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
 
 @Slf4j
 public class CodeContextBuilder extends ClientBase {
-    private static final String CONTEXT_NOT_PROVIDED = "CONTEXT NOT PROVIDED";
+  private static final String CONTEXT_NOT_PROVIDED = "CONTEXT NOT PROVIDED";
 
-    private final GerritChange change;
-    private final GitRepoFiles gitRepoFiles;
+  private final GerritChange change;
+  private final GitRepoFiles gitRepoFiles;
 
-    public CodeContextBuilder(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
-        super(config);
-        this.change = change;
-        this.gitRepoFiles = gitRepoFiles;
+  public CodeContextBuilder(Configuration config, GerritChange change, GitRepoFiles gitRepoFiles) {
+    super(config);
+    this.change = change;
+    this.gitRepoFiles = gitRepoFiles;
+  }
+
+  public String buildCodeContext(ChatGptGetContextContent getContextContent) {
+    log.debug("Building code context for {}", getContextContent);
+    List<ChatGptGetContextItem> replies = getContextContent.getReplies();
+    if (replies == null || replies.isEmpty()) {
+      return CONTEXT_NOT_PROVIDED;
     }
-
-    public String buildCodeContext(ChatGptGetContextContent getContextContent) {
-        log.debug("Building code context for {}", getContextContent);
-        List<ChatGptGetContextItem> replies = getContextContent.getReplies();
-        if (replies == null || replies.isEmpty()) {
-            return CONTEXT_NOT_PROVIDED;
-        }
-        List<GetContextOutputItem> getContextOutput = new ArrayList<>();
-        for (ChatGptGetContextItem chatGptGetContextItem : replies) {
-            IEntityLocator entityLocator;
-            try {
-                entityLocator = getEntityLocator(chatGptGetContextItem, config, change, gitRepoFiles);
-            } catch (CodeContextOnDemandLocatorException e) {
-                continue;
-            }
-            String definition = entityLocator.findDefinition(chatGptGetContextItem);
-            if (definition == null) {
-                log.warn("Unable to find definition for `{}`", chatGptGetContextItem.getContextRequiredEntity());
-                definition = CONTEXT_NOT_PROVIDED;
-            }
-            GetContextOutputItem getContextOutputItem = GetContextOutputItem.builder()
-                    .requestType(chatGptGetContextItem.getRequestType())
-                    .entityCategory(chatGptGetContextItem.getEntityCategory())
-                    .contextRequiredEntity(chatGptGetContextItem.getContextRequiredEntity())
-                    .definition(definition)
-                    .build();
-            log.debug("Added code context: {}", getContextOutputItem);
-            getContextOutput.add(getContextOutputItem);
-        }
-        return getGson().toJson(getContextOutput);
+    List<GetContextOutputItem> getContextOutput = new ArrayList<>();
+    for (ChatGptGetContextItem chatGptGetContextItem : replies) {
+      IEntityLocator entityLocator;
+      try {
+        entityLocator = getEntityLocator(chatGptGetContextItem, config, change, gitRepoFiles);
+      } catch (CodeContextOnDemandLocatorException e) {
+        continue;
+      }
+      String definition = entityLocator.findDefinition(chatGptGetContextItem);
+      if (definition == null) {
+        log.warn(
+            "Unable to find definition for `{}`", chatGptGetContextItem.getContextRequiredEntity());
+        definition = CONTEXT_NOT_PROVIDED;
+      }
+      GetContextOutputItem getContextOutputItem =
+          GetContextOutputItem.builder()
+              .requestType(chatGptGetContextItem.getRequestType())
+              .entityCategory(chatGptGetContextItem.getEntityCategory())
+              .contextRequiredEntity(chatGptGetContextItem.getContextRequiredEntity())
+              .definition(definition)
+              .build();
+      log.debug("Added code context: {}", getContextOutputItem);
+      getContextOutput.add(getContextOutputItem);
     }
+    return getGson().toJson(getContextOutput);
+  }
 }

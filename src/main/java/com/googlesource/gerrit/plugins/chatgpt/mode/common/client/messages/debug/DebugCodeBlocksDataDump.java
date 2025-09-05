@@ -29,39 +29,39 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.JsonTextUtils.pretty
 
 @Slf4j
 public class DebugCodeBlocksDataDump extends DebugCodeBlocksComposer {
-    private final List<String> dataDump = new ArrayList<>();
+  private final List<String> dataDump = new ArrayList<>();
 
-    public DebugCodeBlocksDataDump(Localizer localizer, PluginDataHandlerProvider pluginDataHandlerProvider) {
-        super(localizer, "message.dump.stored.data.title");
-        retrieveStoredData(pluginDataHandlerProvider);
-    }
+  public DebugCodeBlocksDataDump(
+      Localizer localizer, PluginDataHandlerProvider pluginDataHandlerProvider) {
+    super(localizer, "message.dump.stored.data.title");
+    retrieveStoredData(pluginDataHandlerProvider);
+  }
 
-    public String getDebugCodeBlock() {
-        return super.getDebugCodeBlock(dataDump);
-    }
+  public String getDebugCodeBlock() {
+    return super.getDebugCodeBlock(dataDump);
+  }
 
-    private void retrieveStoredData(PluginDataHandlerProvider pluginDataHandlerProvider) {
-        for (Method method : pluginDataHandlerProvider.getClass().getDeclaredMethods()) {
-            method.setAccessible(true);
-            try {
-                String methodName = method.getName();
-                log.debug("Retrieving stored method {}", methodName);
-                if (!methodName.startsWith("get") || !methodName.endsWith("Scope")) continue;
-                String dataKey = methodName.replaceAll("^get", "");
-                log.debug("Populating data key {}", dataKey);
-                dataDump.add(getAsTitle(dataKey));
-                PluginDataHandler dataHandler = (PluginDataHandler) method.invoke(pluginDataHandlerProvider);
-                try {
-                    dataDump.add(prettyStringifyMap(dataHandler.getAllValues()) + "\n");
-                }
-                catch (Exception e) {
-                    log.warn("Exception while retrieving data", e);
-                }
-            }
-            catch (Exception e) {
-                log.error("Error while invoking method: {}", method.getName(), e);
-                throw new RuntimeException("Error while retrieving stored data", e);
-            }
+  private void retrieveStoredData(PluginDataHandlerProvider pluginDataHandlerProvider) {
+    for (Method method : pluginDataHandlerProvider.getClass().getDeclaredMethods()) {
+      method.setAccessible(true);
+      try {
+        String methodName = method.getName();
+        log.debug("Retrieving stored method {}", methodName);
+        if (!methodName.startsWith("get") || !methodName.endsWith("Scope")) continue;
+        String dataKey = methodName.replaceAll("^get", "");
+        log.debug("Populating data key {}", dataKey);
+        dataDump.add(getAsTitle(dataKey));
+        PluginDataHandler dataHandler =
+            (PluginDataHandler) method.invoke(pluginDataHandlerProvider);
+        try {
+          dataDump.add(prettyStringifyMap(dataHandler.getAllValues()) + "\n");
+        } catch (Exception e) {
+          log.warn("Exception while retrieving data", e);
         }
+      } catch (Exception e) {
+        log.error("Error while invoking method: {}", method.getName(), e);
+        throw new RuntimeException("Error while retrieving stored data", e);
+      }
     }
+  }
 }

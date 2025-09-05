@@ -26,7 +26,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class CommentData {
-    private List<GerritComment> commentProperties;
-    private HashMap<String, GerritComment> commentMap;
-    private HashMap<String, GerritComment> patchSetCommentMap;
+  private List<GerritComment> commentProperties;
+  private HashMap<String, GerritComment> commentMap;
+  private HashMap<String, GerritComment> patchSetCommentMap;
 }

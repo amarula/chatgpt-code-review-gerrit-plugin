@@ -24,26 +24,26 @@ import java.util.regex.Pattern;
 
 @Slf4j
 public abstract class ClientMessageBase extends ClientBase {
-    protected final Pattern botMentionPattern;
+  protected final Pattern botMentionPattern;
 
-    public ClientMessageBase(Configuration config) {
-        super(config);
-        botMentionPattern = getBotMentionPattern();
-        log.debug("ClientMessageBase initialized with bot mention pattern: {}", botMentionPattern);
-    }
+  public ClientMessageBase(Configuration config) {
+    super(config);
+    botMentionPattern = getBotMentionPattern();
+    log.debug("ClientMessageBase initialized with bot mention pattern: {}", botMentionPattern);
+  }
 
-    private Pattern getBotMentionPattern() {
-        String emailRegex = "^(?!>).*?(?:@" + getUserNameOrEmail() + ")\\b";
-        log.debug("Generated bot mention pattern: {}", emailRegex);
-        return Pattern.compile(emailRegex, Pattern.MULTILINE);
-    }
+  private Pattern getBotMentionPattern() {
+    String emailRegex = "^(?!>).*?(?:@" + getUserNameOrEmail() + ")\\b";
+    log.debug("Generated bot mention pattern: {}", emailRegex);
+    return Pattern.compile(emailRegex, Pattern.MULTILINE);
+  }
 
-    private String getUserNameOrEmail() {
-        String escapedUserName = Pattern.quote(config.getGerritUserName());
-        String userEmail = config.getGerritUserEmail();
-        if (userEmail.isBlank()) {
-            return  escapedUserName;
-        }
-        return escapedUserName + "|" + Pattern.quote(userEmail);
+  private String getUserNameOrEmail() {
+    String escapedUserName = Pattern.quote(config.getGerritUserName());
+    String userEmail = config.getGerritUserEmail();
+    if (userEmail.isBlank()) {
+      return escapedUserName;
     }
+    return escapedUserName + "|" + Pattern.quote(userEmail);
+  }
 }

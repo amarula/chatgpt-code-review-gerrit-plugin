@@ -24,26 +24,29 @@ import java.util.List;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.*;
 
 public abstract class DebugCodeBlocksComposer {
-    private static final String TITLE_PREFIX = "### ";
+  private static final String TITLE_PREFIX = "### ";
 
-    protected final Localizer localizer;
-    protected final String commentOpening;
+  protected final Localizer localizer;
+  protected final String commentOpening;
 
-    public DebugCodeBlocksComposer(Localizer localizer, String openingTitleKey) {
-        this.localizer = localizer;
-        String openingTitle = localizer.getText(openingTitleKey);
-        commentOpening = CODE_DELIMITER_BEGIN + openingTitle + "\n";
-    }
+  public DebugCodeBlocksComposer(Localizer localizer, String openingTitleKey) {
+    this.localizer = localizer;
+    String openingTitle = localizer.getText(openingTitleKey);
+    commentOpening = CODE_DELIMITER_BEGIN + openingTitle + "\n";
+  }
 
-    protected String getDebugCodeBlock(List<String> panelItems) {
-        return joinWithNewLine(new ArrayList<>() {{
+  protected String getDebugCodeBlock(List<String> panelItems) {
+    return joinWithNewLine(
+        new ArrayList<>() {
+          {
             add(commentOpening);
             addAll(panelItems);
             add(CODE_DELIMITER);
-        }});
-    }
+          }
+        });
+  }
 
-    protected String getAsTitle(String title) {
-        return TITLE_PREFIX + convertPascalCaseToWords(title);
-    }
+  protected String getAsTitle(String title) {
+    return TITLE_PREFIX + convertPascalCaseToWords(title);
+  }
 }

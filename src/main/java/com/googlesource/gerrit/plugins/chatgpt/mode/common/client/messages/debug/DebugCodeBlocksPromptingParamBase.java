@@ -33,73 +33,67 @@ import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.distanceCodeDelimiter;
 
 public abstract class DebugCodeBlocksPromptingParamBase extends DebugCodeBlocksComposer {
-    private final Configuration config;
-    private final ChangeSetData changeSetData;
-    private final GerritChange change;
-    private final ICodeContextPolicy codeContextPolicy;
-    protected final LinkedHashMap<String, String> promptingParameters = new LinkedHashMap<>();
+  private final Configuration config;
+  private final ChangeSetData changeSetData;
+  private final GerritChange change;
+  private final ICodeContextPolicy codeContextPolicy;
+  protected final LinkedHashMap<String, String> promptingParameters = new LinkedHashMap<>();
 
-    protected IChatGptPromptStateful chatGptPromptStateful;
+  protected IChatGptPromptStateful chatGptPromptStateful;
 
-    public DebugCodeBlocksPromptingParamBase(
-            Localizer localizer,
-            String titleKey,
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy
-    ) {
-        super(localizer, titleKey);
-        this.config = config;
-        this.change = change;
-        this.changeSetData = changeSetData;
-        this.codeContextPolicy = codeContextPolicy;
+  public DebugCodeBlocksPromptingParamBase(
+      Localizer localizer,
+      String titleKey,
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy) {
+    super(localizer, titleKey);
+    this.config = config;
+    this.change = change;
+    this.changeSetData = changeSetData;
+    this.codeContextPolicy = codeContextPolicy;
+  }
+
+  public String getDebugCodeBlock() {
+    return super.getDebugCodeBlock(getPromptingParameters());
+  }
+
+  private List<String> getPromptingParameters() {
+    switch (config.getGptMode()) {
+      case STATEFUL -> populateStatefulParameters();
+      case STATELESS -> populateStatelessParameters();
     }
+    return promptingParameters.entrySet().stream()
+        .map(e -> getAsTitle(e.getKey()) + "\n" + distanceCodeDelimiter(e.getValue()) + "\n")
+        .collect(Collectors.toList());
+  }
 
-    public String getDebugCodeBlock() {
-        return super.getDebugCodeBlock(getPromptingParameters());
+  protected void populateStatefulParameters() {
+    ChatGptParameters chatGptParameters = new ChatGptParameters(config, false);
+    chatGptPromptStateful =
+        getChatGptPromptStateful(
+            config, changeSetData, change, codeContextPolicy, ReviewAssistantStages.REVIEW_CODE);
+    if (chatGptParameters.shouldSpecializeAssistants()) {
+      populateStatefulSpecializedCodeReviewParameters();
+      chatGptPromptStateful =
+          getChatGptPromptStateful(
+              config,
+              changeSetData,
+              change,
+              codeContextPolicy,
+              ReviewAssistantStages.REVIEW_COMMIT_MESSAGE);
+      populateStatefulSpecializedCommitMessageReviewParameters();
+    } else {
+      populateStatefulReviewParameters();
     }
+  }
 
-    private List<String> getPromptingParameters() {
-        switch (config.getGptMode()) {
-            case STATEFUL -> populateStatefulParameters();
-            case STATELESS -> populateStatelessParameters();
-        }
-        return promptingParameters.entrySet().stream()
-                .map(e -> getAsTitle(e.getKey()) + "\n" + distanceCodeDelimiter(e.getValue()) + "\n")
-                .collect(Collectors.toList());
-    }
+  protected abstract void populateStatefulSpecializedCodeReviewParameters();
 
-    protected void populateStatefulParameters() {
-        ChatGptParameters chatGptParameters = new ChatGptParameters(config, false);
-        chatGptPromptStateful = getChatGptPromptStateful(
-                config,
-                changeSetData,
-                change,
-                codeContextPolicy,
-                ReviewAssistantStages.REVIEW_CODE
-        );
-        if (chatGptParameters.shouldSpecializeAssistants()) {
-            populateStatefulSpecializedCodeReviewParameters();
-            chatGptPromptStateful = getChatGptPromptStateful(
-                    config,
-                    changeSetData,
-                    change,
-                    codeContextPolicy,
-                    ReviewAssistantStages.REVIEW_COMMIT_MESSAGE
-            );
-            populateStatefulSpecializedCommitMessageReviewParameters();
-        }
-        else {
-            populateStatefulReviewParameters();
-        }
-    }
+  protected abstract void populateStatefulSpecializedCommitMessageReviewParameters();
 
-    protected abstract void populateStatefulSpecializedCodeReviewParameters();
+  protected abstract void populateStatefulReviewParameters();
 
-    protected abstract void populateStatefulSpecializedCommitMessageReviewParameters();
-
-    protected abstract void populateStatefulReviewParameters();
-
-    protected abstract void populateStatelessParameters();
+  protected abstract void populateStatelessParameters();
 }

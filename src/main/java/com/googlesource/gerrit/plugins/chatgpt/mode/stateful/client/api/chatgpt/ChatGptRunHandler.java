@@ -36,101 +36,95 @@ import static com.googlesource.gerrit.plugins.chatgpt.utils.ThreadUtils.threadSl
 
 @Slf4j
 public class ChatGptRunHandler extends ChatGptApiBase {
-    private static final int STEP_RETRIEVAL_INTERVAL = 10000;
-    private static final int MAX_STEP_RETRIEVAL_RETRIES = 3;
+  private static final int STEP_RETRIEVAL_INTERVAL = 10000;
+  private static final int MAX_STEP_RETRIEVAL_RETRIES = 3;
 
-    private final ChangeSetData changeSetData;
-    private final GerritChange change;
-    private final String threadId;
-    private final ICodeContextPolicy codeContextPolicy;
-    private final PluginDataHandlerProvider pluginDataHandlerProvider;
-    private final ChatGptPoller chatGptPoller;
+  private final ChangeSetData changeSetData;
+  private final GerritChange change;
+  private final String threadId;
+  private final ICodeContextPolicy codeContextPolicy;
+  private final PluginDataHandlerProvider pluginDataHandlerProvider;
+  private final ChatGptPoller chatGptPoller;
 
-    private ChatGptRun chatGptRun;
-    private ChatGptRunResponse runResponse;
-    private ChatGptListResponse stepResponse;
+  private ChatGptRun chatGptRun;
+  private ChatGptRunResponse runResponse;
+  private ChatGptListResponse stepResponse;
 
-    public ChatGptRunHandler(
-            String threadId,
-            Configuration config,
-            ChangeSetData changeSetData,
-            GerritChange change,
-            ICodeContextPolicy codeContextPolicy,
-            PluginDataHandlerProvider pluginDataHandlerProvider
-    ) {
-        super(config);
-        this.changeSetData = changeSetData;
-        this.change = change;
-        this.threadId = threadId;
-        this.codeContextPolicy = codeContextPolicy;
-        this.pluginDataHandlerProvider = pluginDataHandlerProvider;
-        chatGptPoller = new ChatGptPoller(config);
+  public ChatGptRunHandler(
+      String threadId,
+      Configuration config,
+      ChangeSetData changeSetData,
+      GerritChange change,
+      ICodeContextPolicy codeContextPolicy,
+      PluginDataHandlerProvider pluginDataHandlerProvider) {
+    super(config);
+    this.changeSetData = changeSetData;
+    this.change = change;
+    this.threadId = threadId;
+    this.codeContextPolicy = codeContextPolicy;
+    this.pluginDataHandlerProvider = pluginDataHandlerProvider;
+    chatGptPoller = new ChatGptPoller(config);
+  }
+
+  public void setupRun() throws OpenAiConnectionFailException {
+    ChatGptAssistantHandler chatGptAssistantHandler =
+        new ChatGptAssistantHandler(
+            config, changeSetData, change, codeContextPolicy, pluginDataHandlerProvider);
+    chatGptRun = new ChatGptRun(config, chatGptAssistantHandler.setupAssistant(), threadId);
+    runResponse = chatGptRun.createRun();
+  }
+
+  public void pollRunStep() throws OpenAiConnectionFailException {
+    OpenAiConnectionFailException exception = null;
+    codeContextPolicy.setupRunAction(chatGptRun);
+    for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
+      runResponse =
+          chatGptPoller.runPoll(
+              UriResourceLocatorStateful.runRetrieveUri(threadId, runResponse.getId()),
+              runResponse);
+      if (codeContextPolicy.runActionRequired(runResponse)) {
+        continue;
+      }
+      Request stepsRequest = chatGptRun.getStepsRequest(runResponse.getId());
+      log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
+      try {
+        stepResponse = getChatGptResponse(stepsRequest, ChatGptListResponse.class);
+      } catch (OpenAiConnectionFailException e) {
+        exception = e;
+        log.warn("Error retrieving run steps from ChatGPT: {}", e.getMessage());
+        threadSleep(STEP_RETRIEVAL_INTERVAL);
+        continue;
+      }
+      log.debug("ChatGPT Response: {}", clientResponse);
+      log.info(
+          "Run executed after {} seconds ({} polling requests); Step response: {}",
+          chatGptPoller.getElapsedTime(),
+          chatGptPoller.getPollingCount(),
+          stepResponse);
+      if (stepResponse.getData().isEmpty()) {
+        log.warn("Empty response from ChatGPT");
+        threadSleep(STEP_RETRIEVAL_INTERVAL);
+        continue;
+      }
+      return;
     }
+    throw new OpenAiConnectionFailException(exception);
+  }
 
-    public void setupRun() throws OpenAiConnectionFailException {
-        ChatGptAssistantHandler chatGptAssistantHandler = new ChatGptAssistantHandler(
-                config,
-                changeSetData,
-                change,
-                codeContextPolicy,
-                pluginDataHandlerProvider
-        );
-        chatGptRun = new ChatGptRun(
-                config,
-                chatGptAssistantHandler.setupAssistant(),
-                threadId
-        );
-        runResponse = chatGptRun.createRun();
-    }
+  public ChatGptResponseMessage getFirstStepDetails() {
+    return getFirstStep().getStepDetails();
+  }
 
-    public void pollRunStep() throws OpenAiConnectionFailException {
-        OpenAiConnectionFailException exception = null;
-        codeContextPolicy.setupRunAction(chatGptRun);
-        for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
-            runResponse = chatGptPoller.runPoll(
-                    UriResourceLocatorStateful.runRetrieveUri(threadId, runResponse.getId()),
-                    runResponse
-            );
-            if (codeContextPolicy.runActionRequired(runResponse)) {
-                continue;
-            }
-            Request stepsRequest = chatGptRun.getStepsRequest(runResponse.getId());
-            log.debug("ChatGPT Retrieve Run Steps request: {}", stepsRequest);
-            try {
-                stepResponse = getChatGptResponse(stepsRequest, ChatGptListResponse.class);
-            } catch (OpenAiConnectionFailException e) {
-                exception = e;
-                log.warn("Error retrieving run steps from ChatGPT: {}", e.getMessage());
-                threadSleep(STEP_RETRIEVAL_INTERVAL);
-                continue;
-            }
-            log.debug("ChatGPT Response: {}", clientResponse);
-            log.info("Run executed after {} seconds ({} polling requests); Step response: {}",
-                    chatGptPoller.getElapsedTime(), chatGptPoller.getPollingCount(), stepResponse);
-            if (stepResponse.getData().isEmpty()) {
-                log.warn("Empty response from ChatGPT");
-                threadSleep(STEP_RETRIEVAL_INTERVAL);
-                continue;
-            }
-            return;
-        }
-        throw new OpenAiConnectionFailException(exception);
-    }
+  public List<ChatGptToolCall> getFirstStepToolCalls() {
+    return getFirstStepDetails().getToolCalls();
+  }
 
-    public ChatGptResponseMessage getFirstStepDetails() {
-        return getFirstStep().getStepDetails();
-    }
+  public void cancelRun() {
+    if (getFirstStep().getStatus().equals(ChatGptPoller.COMPLETED_STATUS)) return;
+    chatGptRun.cancelRun(runResponse.getId());
+  }
 
-    public List<ChatGptToolCall> getFirstStepToolCalls() {
-        return getFirstStepDetails().getToolCalls();
-    }
-
-    public void cancelRun() {
-        if (getFirstStep().getStatus().equals(ChatGptPoller.COMPLETED_STATUS)) return;
-        chatGptRun.cancelRun(runResponse.getId());
-    }
-
-    private ChatGptRunStepsResponse getFirstStep() {
-        return stepResponse.getData().get(0);
-    }
+  private ChatGptRunStepsResponse getFirstStep() {
+    return stepResponse.getData().get(0);
+  }
 }
