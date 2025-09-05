@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4791f901_e850b406",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-05T20:51:26Z",
+      "side": 1,
+      "message": "@patrizio.gelosi@amarulasolutions.com what is the status of this change? is still valid?",
+      "revId": "6de90fe6e9a233d3e21e16b38efa6c6927aa6f9c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
