@@ -16,6 +16,24 @@
       "message": "@patrizio.gelosi@amarulasolutions.com what is the status of this change? is still valid?",
       "revId": "6de90fe6e9a233d3e21e16b38efa6c6927aa6f9c",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1ad14a0_23fa7725",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-08T07:35:11Z",
+      "side": 1,
+      "message": "Not really. The goal is to fetch the comment(s) tied to a comment event. The method we use is timestamp comparison: usually the difference is below one second, ideally zero. I set a two-second window just as a safeguard.",
+      "parentUuid": "4791f901_e850b406",
+      "revId": "6de90fe6e9a233d3e21e16b38efa6c6927aa6f9c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
