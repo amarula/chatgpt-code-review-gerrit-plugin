@@ -10,7 +10,7 @@
     <version>3.0.2</version>
     <properties>
         <Gerrit-ApiType>plugin</Gerrit-ApiType>
-        <Gerrit-ApiVersion>3.10.0-rc3</Gerrit-ApiVersion>
+        <Gerrit-ApiVersion>3.12.2</Gerrit-ApiVersion>
         <maven.test.skip>false</maven.test.skip>
     </properties>
     <distributionManagement>
@@ -52,7 +52,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.14.0</version>
                 <configuration>
-                    <release>17</release>
+                    <release>21</release>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -152,7 +152,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+            <version>1.18.40</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -175,8 +175,8 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-inline</artifactId>
-            <version>5.2.0</version>
+            <artifactId>mockito-core</artifactId>
+            <version>5.19.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
