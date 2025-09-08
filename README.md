@@ -192,9 +192,8 @@ directive = End each reply with \"Hope this helps!\"
 
 **NOTE**: Double quotes need to be escaped in directives content.
 
-- `enabledFileExtensions`: This limits the reviewed files to the given types. Default file extensions are ".py, .java,
-  .js, .ts, .html, .css, .cs, .cpp, .c, .h, .php, .rb, .swift, .kt, .r, .jl, .go, .scala, .pl, .pm, .rs, .dart, .lua,
-  .sh, .vb, .bat".
+- `enabledFileExtensions`: This limits the reviewed files to the given types. Default file extensions are "py, java, js,
+  ts, html, css, cs, cpp, c, h, php, rb, swift, kt, r, jl, go, scala, pl, pm, rs, dart, lua, sh, vb, bat".
 
   **NOTE**: Extensions without a leading dot (e.g., 'py') are also accepted.
 - `enabledVoting`: Initially disabled (false). If set to true, allows ChatGPT to cast a vote on each reviewed Patch Set
@@ -244,6 +243,9 @@ directive = End each reply with \"Hope this helps!\"
 
 - `codeContextPolicy`: Defines the code context policy to provide ChatGPT with the missing code context from the
   ChangeSet when operating in Stateful mode. The currently supported policies are:
+    - **ON_DEMAND**: Fetches just the minimal set of code artifacts requested by the Model. These artifacts can be
+      function signatures, type declarations, or similar entities that provide sufficient context for reasoning about
+      the change.
     - **UPLOAD_ALL**: Uploads the entire codebase during each merge event, giving ChatGPT full access to the necessary
       context for its reviews.
     - **NONE**: Skips file uploads entirely, relying solely on the formatted patch for reviews and interactions with
@@ -522,9 +524,9 @@ disabledTopicFilter:
 disabledUsers:
 enableMessageDebugging: true
 enabledFileExtensions:
-    .py
-    .java
-    .js
+    py
+    java
+    js
     (...)
 enabledGroups:
     ALL
