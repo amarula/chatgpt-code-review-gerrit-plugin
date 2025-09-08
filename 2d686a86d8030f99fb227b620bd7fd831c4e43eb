@@ -16,6 +16,24 @@
       "message": "@patrizio.gelosi@amarulasolutions.com is the formatter should be run on this file?",
       "revId": "2d686a86d8030f99fb227b620bd7fd831c4e43eb",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b36d0fe8_5b8322cf",
+        "filename": ".github/workflows/maven-publish.yml",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-08T09:25:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3147e052_1c126e38",
+      "revId": "2d686a86d8030f99fb227b620bd7fd831c4e43eb",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
