@@ -21,21 +21,21 @@ import com.google.inject.Provider;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OpenAiConnectionFailException;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.client.api.chatgpt.IChatGptClient;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClientReview;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.messages.debug.DebugCodeBlocksReview;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.comment.GerritCommentRange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.patch.filename.FilenameSanitizer;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptReplyItem;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.chatgpt.ChatGptResponseContent;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritCodeRange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritComment;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.review.ReviewBatch;
-import com.googlesource.gerrit.plugins.chatgpt.settings.Settings;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClientReview;
+import com.googlesource.gerrit.plugins.chatgpt.client.messages.debug.DebugCodeBlocksReview;
+import com.googlesource.gerrit.plugins.chatgpt.client.patch.comment.GerritCommentRange;
+import com.googlesource.gerrit.plugins.chatgpt.client.patch.filename.FilenameSanitizer;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.chatgpt.ChatGptReplyItem;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.chatgpt.ChatGptResponseContent;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritCodeRange;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritComment;
+import com.googlesource.gerrit.plugins.chatgpt.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.model.review.ReviewBatch;
+
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -85,10 +85,6 @@ public class PatchSetReviewer {
     commentProperties = gerritClient.getClientData(change).getCommentProperties();
     gerritCommentRange = new GerritCommentRange(gerritClient, change);
     String patchSet = gerritClient.getPatchSet(change);
-    if (patchSet.isEmpty() && config.getGptMode() == Settings.Modes.STATELESS) {
-      log.info("No file to review has been found in the PatchSet");
-      return;
-    }
     ChangeSetDataHandler.update(config, change, gerritClient, changeSetData, localizer);
 
     if (changeSetData.shouldRequestChatGptReview()) {

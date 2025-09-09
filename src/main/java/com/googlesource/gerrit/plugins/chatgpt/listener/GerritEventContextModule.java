@@ -23,19 +23,18 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.ChangeSetDataProvider;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.chatgpt.IChatGptClient;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.api.gerrit.IGerritClientPatchSet;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyNone;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyOnDemand;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyUploadAll;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStateful;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptClientStatefulTaskSpecific;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.gerrit.GerritClientPatchSetStateful;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.chatgpt.ChatGptClientStateless;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateless.client.api.gerrit.GerritClientPatchSetStateless;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.client.api.chatgpt.IChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.client.api.gerrit.IGerritClientPatchSet;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.client.code.context.ICodeContextPolicy;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.code.context.CodeContextPolicyNone;
+import com.googlesource.gerrit.plugins.chatgpt.client.code.context.CodeContextPolicyOnDemand;
+import com.googlesource.gerrit.plugins.chatgpt.client.code.context.CodeContextPolicyUploadAll;
+import com.googlesource.gerrit.plugins.chatgpt.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.chatgpt.ChatGptClient;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.chatgpt.ChatGptClientTaskSpecific;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClientPatchSet;
+
 import lombok.extern.slf4j.Slf4j;
 
 import static com.google.inject.Scopes.SINGLETON;
@@ -76,20 +75,13 @@ public class GerritEventContextModule extends FactoryModule {
   }
 
   private Class<? extends IChatGptClient> getChatGptClient() {
-    return switch (config.getGptMode()) {
-      case STATEFUL ->
-          config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants()
-              ? ChatGptClientStatefulTaskSpecific.class
-              : ChatGptClientStateful.class;
-      case STATELESS -> ChatGptClientStateless.class;
-    };
+    return config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants()
+        ? ChatGptClientTaskSpecific.class
+        : ChatGptClient.class;
   }
 
   private Class<? extends IGerritClientPatchSet> getClientPatchSet() {
-    return switch (config.getGptMode()) {
-      case STATEFUL -> GerritClientPatchSetStateful.class;
-      case STATELESS -> GerritClientPatchSetStateless.class;
-    };
+    return GerritClientPatchSet.class;
   }
 
   private Class<? extends ICodeContextPolicy> getCodeContextPolicy() {

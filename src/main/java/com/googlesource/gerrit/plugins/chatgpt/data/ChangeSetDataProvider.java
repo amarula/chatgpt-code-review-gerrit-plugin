@@ -21,7 +21,7 @@ import com.google.gerrit.server.account.AccountState;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
