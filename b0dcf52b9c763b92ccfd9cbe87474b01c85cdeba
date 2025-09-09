@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0ac6dea_fbda359e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-09T15:09:41Z",
+      "side": 1,
+      "message": "@patrizio.gelosi@amarulasolutions.com Please explain in the commit message why we drop stateless mode",
+      "revId": "b0dcf52b9c763b92ccfd9cbe87474b01c85cdeba",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
