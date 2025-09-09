@@ -56,7 +56,6 @@ gptConnectionRetryInterval: 10
 gptConnectionTimeout: 30
 gptDomain: http://localhost:9527
 gptFullFileReview: true
-gptMode: STATELESS
 gptModel: gpt-4o
 gptPollingInterval: 1000
 gptPollingTimeout: 180
@@ -64,13 +63,11 @@ gptRelevanceRules:
 gptReviewCommitMessages: true
 gptReviewPatchSet: true
 gptReviewTemperature: 0.2
-gptStreamOutput: false
 gptSystemPromptInstructions: Act as a PatchSet Reviewer
 gptUploadedChunkSizeMb: 5
 ignoreOutdatedInlineComments: false
 ignoreResolvedChatGptComments: true
 inlineCommentsAsResolved: false
-maxReviewFileSize: 10000
 maxReviewLines: 1000
 patchSetCommentsAsResolved: false
 selectiveLogLevelOverride: 

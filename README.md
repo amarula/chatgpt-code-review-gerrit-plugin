@@ -122,44 +122,11 @@ To add the following content, please edit the `project.config` file in `refs/met
 Please ensure **strict control over the access permissions of `refs/meta/config`** since sensitive information such as
 `gptToken` is configured in the `project.config` file within `refs/meta/config`.
 
-## Stateful and Stateless modes
-
-Starting from version 3, the plugin introduces a new Stateful interaction mode with ChatGPT is available alongside the
-traditional Stateless mode.
-
-### Stateless Mode
-
-In Stateless mode, each request to ChatGPT must include all contextual information and instructions necessary for
-ChatGPT to provide insights, utilizing the **Chat Completion** API calls made available by OpenAI.
-
-### Stateful Mode:
-
-Conversely, Stateful mode uses the **Assistant** resource, recently made available in beta by OpenAI, to maintain a
-richer interaction context. This mode is designed to:
-
-- Leverage ChatGPT Threads to preserve the memory of conversations related to each Change Set.
-- Link these Threads with ChatGPT Assistants that are specialized according to the response needed.
-- Associate the Assistants with the complete Codebase of the Git project related to the Change, which is updated
-  each time commits are merged in Gerrit.
-
-The advantages of the Stateful mode over the Stateless are twofold:
-
-1. To minimize the payload sent to ChatGPT, as it eliminates the need to send contextual information and instructions
-   with every single request.
-2. To enhance the quality of responses from ChatGPT by expanding the context to encompass the entire project and
-   allowing for the preprocessing of this context along with instructions. This enables ChatGPT to focus more
-   effectively
-   on the specific requests made.
-
 ## Optional Parameters
 
-### Optional Parameters Common to Both Modes
-
-- `gptMode`: Select whether requests are processed in Stateless or Stateful mode. For backward compatibility, the
-  default value is `STATELESS`. To enable Stateful mode, set this parameter to `STATEFUL`.
 - `gptModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
-- `gptSystemPromptInstructions`: You can customize the default Stateless system prompt ("Act as a PatchSet Reviewer") to
-  your preferred prompt. This same prompt is also used as the assistant instructions in Stateful mode.
+- `gptSystemPromptInstructions`: You can customize the default instructions ("Act as a PatchSet Reviewer") to
+  your preferred prompt.
 - `gptReviewTemperature`: Specifies the temperature setting for ChatGPT when reviewing a Patch Set, with a default
   setting of 0.2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more
   focused and deterministic.
@@ -222,13 +189,9 @@ directive = End each reply with \"Hope this helps!\"
   logged even if their level is above the current setting. This is useful for debugging without the need to set the
   overall log level to DEBUG, which could result in excessive DEBUG messages from sources like gerrit and other plugins.
   Some usage examples can be found at [Selective Log Level Override](#selective-log-level-override) section.
-
-### Optional Parameters Specific to Stateless Mode
-
 - `gptFullFileReview`: Enabled by default. Activating this option sends both unchanged lines and changes to ChatGPT for
   review, offering additional context information. Deactivating it (set to false) results in only the changed lines
   being submitted for review.
-- `gptStreamOutput`: The default value is false. Whether the response is expected in stream output mode or not.
 - `ignoreResolvedChatGptComments`: Determines if resolved comments from ChatGPT should be disregarded. The default
   setting is true, which means resolved ChatGPT comments are not used for generating new comments or identifying
   duplicate content. If set to false, resolved ChatGPT comments are factored into these processes.
@@ -236,13 +199,8 @@ directive = End each reply with \"Hope this helps!\"
   default, this is set to false, meaning all inline comments are used for generating new responses and identifying
   repetitions. If enabled (true), inline comments from previous Patch Sets are excluded from these considerations.
 - `maxReviewLines`: The default value is 1000. This sets a limit on the number of lines of code included in the review.
-- `maxReviewFileSize`: Set with a default value of 10000, this parameter establishes a cap on the file size that can be
-  included in reviews.
-
-### Optional Parameters Specific to Stateful Mode
-
 - `codeContextPolicy`: Defines the code context policy to provide ChatGPT with the missing code context from the
-  ChangeSet when operating in Stateful mode. The currently supported policies are:
+  ChangeSet. The currently supported policies are:
     - **ON_DEMAND**: Fetches just the minimal set of code artifacts requested by the Model. These artifacts can be
       function signatures, type declarations, or similar entities that provide sufficient context for reasoning about
       the change.
@@ -280,11 +238,11 @@ These parameters are specific to connecting with the OpenAI server and should on
 
 - `gptDomain`: Specifies the default domain for OpenAI, set to `https://api.openai.com`.
 - `gptConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
-- `gptPollingTimeout`: Sets the timeout for terminating ChatGPT polling on Stateful requests, defaulting to 180 seconds.
-- `getPollingInterval`: Sets the interval for ChatGPT polling on Stateful requests, defaulting to 1 second.
+- `gptPollingTimeout`: Sets the timeout for terminating ChatGPT polling on requests, defaulting to 180 seconds.
+- `getPollingInterval`: Sets the interval for ChatGPT polling on requests, defaulting to 1 second.
 - `gptConnectionRetryInterval`: Sets the interval between two connection attempts, with a default of 10 seconds.
 - `gptConnectionMaxRetryAttempts`: Determines the maximum number of retry attempts, defaulting to 2.
-- `gptUploadedChunkSizeMb`: When uploading project repositories to ChatGPT in Stateful mode, the repositories are
+- `gptUploadedChunkSizeMb`: When uploading project repositories to ChatGPT, the repositories are
   packaged and split into chunk files. This setting specifies the maximum size of each chunk file, with a default of 5
   MB.
 
@@ -410,7 +368,7 @@ The index in the response to `/directives` query can be used to remove single dy
 
 Threads capture all prior interactions and evaluations involving ChatGPT within each Change Set. The history stored in
 these threads can be removed with the `/forget_thread` command. This functionality is crucial for preventing ChatGPT
-from merely recycling old responses in Stateful mode, particularly following modifications to configuration parameters.
+from merely recycling old responses, particularly following modifications to configuration parameters.
 
 #### Basic Syntax
 
@@ -435,23 +393,16 @@ fine-tuning purposes. Below are the currently supported options and their associ
 The `/show` command also enables you to view the prompts and assistant instructions used with your current
 configuration.
 
-For example, running `@gpt /show --prompts` in Stateless mode will return something like:
+For example, running `@gpt /show --prompts` will return something like:
 
 ```
 PROMPTS CURRENTLY USED
 
-### System Prompt
-Act as a PatchSet Reviewer. I will provide you with PatchSet Diffs for various files in a JSON format. ...
-
-### User Prompt
-To conduct your review, follow these steps in the given order:
-Begin with examining the PatchSet Diff, focusing exclusively on the "a" and "b" items, and using the "ab" items ...
-You MUST review the commit message of the PatchSet and provide your feedback in an additional reply. The commit ...
-Here are the PatchSet Diffs:
-Subject: <COMMIT_MESSAGE> Change-Id: ... <PATCH_SET>
+### Review Prompt
+Review the following Patch Set:  ` ` `Subject: <COMMIT_MESSAGE> Change-Id: ... <PATCH_SET> ` ` `
 ```
 
-Similarly, running `@gpt /show --instructions` in Stateless mode will display something like:
+Similarly, running `@gpt /show --instructions` will display something like:
 
 ```
 INSTRUCTIONS CURRENTLY USED
@@ -496,7 +447,6 @@ fileId: vs_XXXXXXXXXXXXXXXXXXXX
 ### Change Scope
 threadId: thread_XXXXXXXXXXXXXXXXXXXX
 dynamicConfig:
-    gptMode: STATEFUL
     enabledVoting: true
 assistantIdLog:
     2024-08-09 10:28:46.973108457: asst_XXXXXXXXXXXXXXXXXXXXXXXX
@@ -544,16 +494,13 @@ gerritUserName: gpt
 gptCommentTemperature: 1.0
 gptDomain: https://api.openai.com
 gptFullFileReview: true
-gptMode: STATEFUL
 gptModel: gpt-4-turbo
 gptReviewCommitMessages: true
 gptReviewPatchSet: true
 gptReviewTemperature: 0.2
-gptStreamOutput: false
 ignoreOutdatedInlineComments: false
 ignoreResolvedChatGptComments: true
 inlineCommentsAsResolved: false
-maxReviewFileSize: 20000
 maxReviewLines: 1000
 patchSetCommentsAsResolved: false
 selectiveLogLevelOverride:
@@ -719,7 +666,7 @@ Following this configuration, a new Change Set review can be initiated with:
 It's also possible to make multiple changes at once:
 
 ```
-@gpt /configure --gptMode=STATEFUL --gptModel=gpt-4-turbo
+@gpt /configure --gptModel=gpt-4-turbo --gptReviewTemperature=0.5
 ```
 
 ## License

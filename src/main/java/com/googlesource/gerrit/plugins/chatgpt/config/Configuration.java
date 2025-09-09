@@ -23,9 +23,8 @@ import com.google.gerrit.server.util.OneOffRequestContext;
 
 import java.util.*;
 
-import static com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptPrompt.getJsonPromptValues;
-import static com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
-import static com.googlesource.gerrit.plugins.chatgpt.settings.Settings.Modes;
+import static com.googlesource.gerrit.plugins.chatgpt.client.prompt.ChatGptPrompt.getJsonPromptValues;
+import static com.googlesource.gerrit.plugins.chatgpt.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
 
 public class Configuration extends ConfigCore {
   // Config Constants
@@ -40,7 +39,6 @@ public class Configuration extends ConfigCore {
   public static final double DEFAULT_GPT_REVIEW_TEMPERATURE = 0.2;
   public static final double DEFAULT_GPT_COMMENT_TEMPERATURE = 1.0;
 
-  private static final String DEFAULT_GPT_MODE = "STATELESS";
   private static final boolean DEFAULT_REVIEW_PATCH_SET = true;
   private static final boolean DEFAULT_REVIEW_COMMIT_MESSAGES = true;
   private static final boolean DEFAULT_FULL_FILE_REVIEW = true;
@@ -107,8 +105,6 @@ public class Configuration extends ConfigCore {
   private static final String KEY_GPT_TOKEN = "gptToken";
   private static final String KEY_GPT_DOMAIN = "gptDomain";
   private static final String KEY_GPT_MODEL = "gptModel";
-  private static final String KEY_STREAM_OUTPUT = "gptStreamOutput";
-  private static final String KEY_GPT_MODE = "gptMode";
   private static final String KEY_REVIEW_COMMIT_MESSAGES = "gptReviewCommitMessages";
   private static final String KEY_REVIEW_PATCH_SET = "gptReviewPatchSet";
   private static final String KEY_FULL_FILE_REVIEW = "gptFullFileReview";
@@ -124,7 +120,6 @@ public class Configuration extends ConfigCore {
   private static final String KEY_ENABLED_TOPIC_FILTER = "enabledTopicFilter";
   private static final String KEY_ENABLED_PROJECTS = "enabledProjects";
   private static final String KEY_MAX_REVIEW_LINES = "maxReviewLines";
-  private static final String KEY_MAX_REVIEW_FILE_SIZE = "maxReviewFileSize";
   private static final String KEY_ENABLED_FILE_EXTENSIONS = "enabledFileExtensions";
   private static final String KEY_ENABLED_VOTING = "enabledVoting";
   private static final String KEY_FILTER_NEGATIVE_COMMENTS = "filterNegativeComments";
@@ -181,20 +176,16 @@ public class Configuration extends ConfigCore {
   }
 
   // If the default system prompt/instructions are not available in the caller's scope (e.g., when
-  // displaying the
-  // configuration after a command request), they are retrieved from the prompt files.
+  // displaying the configuration after a command request), they are retrieved from the prompt
+  // files.
   public String getGptSystemPromptInstructions() {
-    Map<String, Object> systemPrompts = getJsonPromptValues("prompts");
+    Map<String, Object> systemPrompts = getJsonPromptValues("promptsBase");
     return getGptSystemPromptInstructions(
         systemPrompts.get("DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS").toString());
   }
 
   public boolean getGptReviewPatchSet() {
     return getBoolean(KEY_REVIEW_PATCH_SET, DEFAULT_REVIEW_PATCH_SET);
-  }
-
-  public Modes getGptMode() {
-    return getEnum(KEY_GPT_MODE, DEFAULT_GPT_MODE, Modes.class);
   }
 
   public boolean getGptReviewCommitMessages() {
@@ -212,10 +203,6 @@ public class Configuration extends ConfigCore {
   public String getCodeContextOnDemandBasePath() {
     return getString(
         KEY_CODE_CONTEXT_ON_DEMAND_BASE_PATH, DEFAULT_CODE_CONTEXT_ON_DEMAND_BASE_PATH);
-  }
-
-  public boolean getGptStreamOutput() {
-    return getBoolean(KEY_STREAM_OUTPUT, DEFAULT_STREAM_OUTPUT);
   }
 
   public boolean isProjectEnable() {
@@ -256,10 +243,6 @@ public class Configuration extends ConfigCore {
 
   public int getMaxReviewLines() {
     return getInt(KEY_MAX_REVIEW_LINES, DEFAULT_MAX_REVIEW_LINES);
-  }
-
-  public int getMaxReviewFileSize() {
-    return getInt(KEY_MAX_REVIEW_FILE_SIZE, DEFAULT_MAX_REVIEW_FILE_SIZE);
   }
 
   public List<String> getEnabledFileExtensions() {

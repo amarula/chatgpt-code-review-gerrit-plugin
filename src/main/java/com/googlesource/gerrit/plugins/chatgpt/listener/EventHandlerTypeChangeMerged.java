@@ -20,10 +20,10 @@ import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.chatgpt.errors.exceptions.OperationNotSupportedException;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
-import com.googlesource.gerrit.plugins.chatgpt.interfaces.mode.common.client.code.context.ICodeContextPolicy;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.stateful.client.api.chatgpt.ChatGptAssistantHandler;
+import com.googlesource.gerrit.plugins.chatgpt.interfaces.client.code.context.ICodeContextPolicy;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.chatgpt.ChatGptAssistantHandler;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
