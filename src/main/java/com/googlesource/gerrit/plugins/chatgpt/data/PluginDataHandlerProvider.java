@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.chatgpt.data;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.file.Path;
