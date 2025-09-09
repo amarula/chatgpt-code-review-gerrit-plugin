@@ -11,10 +11,8 @@ import com.googlesource.gerrit.plugins.chatgpt.listener.EventHandlerTask;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -23,13 +21,11 @@ import java.util.Map;
 import static com.googlesource.gerrit.plugins.chatgpt.config.Configuration.KEY_DIRECTIVES;
 import static com.googlesource.gerrit.plugins.chatgpt.config.dynamic.DynamicConfigManager.KEY_DYNAMIC_CONFIG;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.GsonUtils.getGson;
-import static com.googlesource.gerrit.plugins.chatgpt.utils.StringUtils.backslashDoubleQuotes;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TemplateUtils.renderTemplate;
 import static com.googlesource.gerrit.plugins.chatgpt.utils.TextUtils.sortTextLines;
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CommandTest extends ChatGptReviewStatelessTestBase {
+public class CommandTest extends ChatGptReviewUnifiedTest {
 
   @Before
   public void setUp() {
@@ -42,7 +38,7 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
   protected void initTest() {
     super.initTest();
 
-    chatGptPromptStateless.setCommentEvent(true);
+    chatGptPrompt.setCommentEvent(true);
   }
 
   private void setupCommandComment(String command) throws RestApiException {
@@ -60,8 +56,8 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
 
   private PluginDataHandler getChangeDataHandler() {
     Path realChangeDataPath =
-        tempFolder.getRoot().toPath().resolve(ChatGptTestBase.CHANGE_ID + ".data");
-    when(mockPluginDataPath.resolve(ChatGptTestBase.CHANGE_ID + ".data"))
+        tempFolder.getRoot().toPath().resolve(TestBase.CHANGE_ID + ".data");
+    when(mockPluginDataPath.resolve(TestBase.CHANGE_ID + ".data"))
         .thenReturn(realChangeDataPath);
     PluginDataHandlerProvider provider =
         new PluginDataHandlerProvider(mockPluginDataPath, getGerritChange());
@@ -75,13 +71,13 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
   public void commandMessage() throws RestApiException {
     String message = "is it OK to use \"and/or\"?";
     setupCommandComment("/message " + message);
-    mockChatCompletion("chatGptResponseRequestStateless.json");
+    setupMockRequestRetrieveRunSteps("chatGptResponseRequest.json");
 
     handleEventBasedOnType(EventHandlerTask.SupportedEvents.COMMENT_ADDED);
 
     testRequestSent();
     String userPrompt = getUserPrompt();
-    Assert.assertTrue(userPrompt.contains(backslashDoubleQuotes(message)));
+    Assert.assertTrue(userPrompt.contains(message));
   }
 
   @Test
@@ -90,15 +86,15 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
         .thenReturn(true);
 
     setupCommandComment("/review");
-    mockChatCompletion("chatGptResponseReview.json");
+    String reviewMessage = readTestFile("__files/commands/review.json");
+    setupMockRequestRetrieveRunSteps("chatGptResponseRequest.json");
 
     handleEventBasedOnType(EventHandlerTask.SupportedEvents.COMMENT_ADDED);
 
     ArgumentCaptor<ReviewInput> captor = testRequestSent();
 
     Gson gson = OutputFormat.JSON_COMPACT.newGson();
-    Assert.assertEquals(
-        gson.toJson(gerritPatchSetReview), gson.toJson(captor.getAllValues().get(0)));
+    Assert.assertEquals(reviewMessage, gson.toJson(captor.getAllValues().get(0)));
   }
 
   @Test
@@ -168,7 +164,7 @@ public class CommandTest extends ChatGptReviewStatelessTestBase {
   public void commandUnknown() throws Exception {
     String command = "/UNKNOWN";
     setupCommandComment(command);
-    mockChatCompletion("chatGptResponseRequestStateless.json");
+    setupMockRequestRetrieveRunSteps("chatGptResponseRequest.json");
 
     handleEventBasedOnType(EventHandlerTask.SupportedEvents.COMMENT_ADDED);
 

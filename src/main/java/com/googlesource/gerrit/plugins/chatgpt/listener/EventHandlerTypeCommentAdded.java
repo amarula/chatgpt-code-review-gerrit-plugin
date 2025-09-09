@@ -18,9 +18,9 @@ package com.googlesource.gerrit.plugins.chatgpt.listener;
 
 import com.googlesource.gerrit.plugins.chatgpt.PatchSetReviewer;
 import com.googlesource.gerrit.plugins.chatgpt.interfaces.listener.IEventHandlerType;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

@@ -18,12 +18,12 @@ package com.googlesource.gerrit.plugins.chatgpt.data;
 
 import com.googlesource.gerrit.plugins.chatgpt.config.Configuration;
 import com.googlesource.gerrit.plugins.chatgpt.localization.Localizer;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.client.prompt.ChatGptDataPrompt;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.api.gerrit.GerritPermittedVotingRange;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.chatgpt.mode.common.model.data.GerritClientData;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.chatgpt.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.chatgpt.client.prompt.ChatGptDataPrompt;
+import com.googlesource.gerrit.plugins.chatgpt.model.api.gerrit.GerritPermittedVotingRange;
+import com.googlesource.gerrit.plugins.chatgpt.model.data.ChangeSetData;
+import com.googlesource.gerrit.plugins.chatgpt.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
