@@ -67,7 +67,10 @@ public class StringUtils {
     if (camelCase == null || camelCase.isEmpty()) {
       return camelCase;
     }
-    return camelCase.replaceAll("(?<!^)([A-Z])", "_$1").toLowerCase();
+    return camelCase
+        .replaceAll("([a-z0-9])([A-Z])", "$1_$2")
+        .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
+        .toLowerCase();
   }
 
   public static String convertSnakeToPascalCase(String snakeCase) {
