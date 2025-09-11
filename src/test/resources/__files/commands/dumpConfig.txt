@@ -3,6 +3,7 @@
 ```
 CONFIGURATION SETTINGS
 
+backendAI: OPENAI
 codeContextOnDemandBasePath: 
 codeContextPolicy: UPLOAD_ALL
 directive: 
@@ -66,7 +67,7 @@ gptReviewTemperature: 0.2
 gptSystemPromptInstructions: Act as a PatchSet Reviewer
 gptUploadedChunkSizeMb: 5
 ignoreOutdatedInlineComments: false
-ignoreResolvedChatGptComments: true
+ignoreResolvedOpenAIComments: true
 inlineCommentsAsResolved: false
 maxReviewLines: 1000
 patchSetCommentsAsResolved: false
