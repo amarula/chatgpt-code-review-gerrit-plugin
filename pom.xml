@@ -30,7 +30,7 @@
                     <archive>
                         <manifestEntries>
                             <Gerrit-PluginName>chatgpt-code-review-gerrit-plugin</Gerrit-PluginName>
-                            <Gerrit-Module>com.googlesource.gerrit.plugins.chatgpt.Module</Gerrit-Module>
+                            <Gerrit-Module>com.googlesource.gerrit.plugins.reviewai.Module</Gerrit-Module>
 
                             <Implementation-Vendor>Amarula</Implementation-Vendor>
                             <Implementation-URL>
@@ -85,11 +85,11 @@
                             <relocations>
                                 <relocation>
                                     <pattern>okhttp3</pattern>
-                                    <shadedPattern>com.googlesource.gerrit.plugins.chatgpt.okhttp3</shadedPattern>
+                                    <shadedPattern>com.googlesource.gerrit.plugins.reviewai.okhttp3</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okio</pattern>
-                                    <shadedPattern>com.googlesource.gerrit.plugins.chatgpt.okio</shadedPattern>
+                                    <shadedPattern>com.googlesource.gerrit.plugins.reviewai.okio</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
@@ -112,7 +112,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Gerrit-PluginName>chatgpt-code-review-gerrit-plugin</Gerrit-PluginName>
-                                        <Gerrit-Module>com.googlesource.gerrit.plugins.chatgpt.Module</Gerrit-Module>
+                                        <Gerrit-Module>com.googlesource.gerrit.plugins.reviewai.Module</Gerrit-Module>
                                         <Implementation-Vendor>Amarula</Implementation-Vendor>
                                         <Implementation-URL>
                                             https://github.com/amarula/chatgpt-code-review-gerrit-plugin
