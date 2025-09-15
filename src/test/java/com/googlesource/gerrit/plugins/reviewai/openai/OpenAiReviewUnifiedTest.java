@@ -58,7 +58,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
     setupMockRequestRetrieveRunSteps("openAiRunStepsResponse.json");
 
     if ("vectorStoreCreateFailure".equals(testName.getMethodName())) {
-      when(globalConfig.getInt(Mockito.eq("gptPollingTimeout"), Mockito.anyInt())).thenReturn(0);
+      when(globalConfig.getInt(Mockito.eq("aiPollingTimeout"), Mockito.anyInt())).thenReturn(0);
     }
   }
 
@@ -78,7 +78,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
                             + ", \"status\": "
                             + FAILED_STATUS
                             + "}")));
-    when(globalConfig.getInt(Mockito.eq("gptPollingInterval"), Mockito.anyInt())).thenReturn(0);
+    when(globalConfig.getInt(Mockito.eq("aiPollingInterval"), Mockito.anyInt())).thenReturn(0);
   }
 
   @Test
@@ -88,7 +88,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
     String reviewMessageCommitMessage =
         getReviewMessage(RESOURCE_OPENAI_PATH + "openAiRunStepsResponse.json", 1);
 
-    String reviewPrompt = openAiPrompt.getDefaultGptThreadReviewMessage(formattedPatchContent);
+    String reviewPrompt = openAiPrompt.getDefaultAiThreadReviewMessage(formattedPatchContent);
 
     handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
@@ -109,9 +109,9 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
                     .withHeader(
                         HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())));
     // This test executes 2 retries with the retry interval configured to 0.
-    when(globalConfig.getInt(Mockito.eq("gptConnectionMaxRetryAttempts"), Mockito.anyInt()))
+    when(globalConfig.getInt(Mockito.eq("aiConnectionMaxRetryAttempts"), Mockito.anyInt()))
         .thenReturn(2);
-    when(globalConfig.getInt(Mockito.eq("gptConnectionRetryInterval"), Mockito.anyInt()))
+    when(globalConfig.getInt(Mockito.eq("aiConnectionRetryInterval"), Mockito.anyInt()))
         .thenReturn(0);
 
     handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
@@ -211,7 +211,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
       String reviewMessageCommitMessage =
           getReviewMessage(RESOURCE_OPENAI_PATH + "openAiRunStepsResponse.json", 1);
 
-      String reviewPrompt = openAiPrompt.getDefaultGptThreadReviewMessage(formattedPatchContent);
+      String reviewPrompt = openAiPrompt.getDefaultAiThreadReviewMessage(formattedPatchContent);
 
       handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
@@ -251,7 +251,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
     String reviewReiteratePrompt =
         new AiPromptReviewReiterated(
                 config, changeSetData, getGerritChange(), getCodeContextPolicy())
-            .getDefaultGptThreadReviewMessage("");
+            .getDefaultAiThreadReviewMessage("");
 
     setupMockRequestRetrieveRunSteps("openAiResponseRequestMessage.json");
     WireMock.stubFor(
@@ -276,7 +276,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
     String reviewReiteratePrompt =
         new AiPromptReviewReiterated(
                 config, changeSetData, getGerritChange(), getCodeContextPolicy())
-            .getDefaultGptThreadReviewMessage("");
+            .getDefaultAiThreadReviewMessage("");
 
     setupMockRequestRetrieveRunSteps("openAiRunStepsResponseMalformedJson.json");
 
@@ -287,7 +287,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
   }
 
   @Test
-  public void gptMentionedInComment() throws RestApiException {
+  public void aiMentionedInComment() throws RestApiException {
     String reviewMessageCommitMessage =
         getReviewMessage(RESOURCE_OPENAI_PATH + "openAiResponseRequest.json", 0);
 
@@ -303,7 +303,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
   }
 
   @Test
-  public void gptMentionedInCommentMessageResponseText() throws RestApiException {
+  public void aiMentionedInCommentMessageResponseText() throws RestApiException {
     String reviewMessageCommitMessage =
         getReviewMessage(RESOURCE_OPENAI_PATH + "openAiResponseRequest.json", 0);
 
@@ -329,7 +329,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
   }
 
   @Test
-  public void gptMentionedInCommentMessageResponseText400() {
+  public void aiMentionedInCommentMessageResponseText400() {
     openAiPrompt.setCommentEvent(true);
     setupMockRequestRetrieveRunSteps("openAiResponseRequestMessage.json");
     WireMock.stubFor(
@@ -351,7 +351,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
   }
 
   @Test
-  public void gptMentionedInCommentMessageResponseJson() throws RestApiException {
+  public void aiMentionedInCommentMessageResponseJson() throws RestApiException {
     String reviewMessageCommitMessage =
         getReviewMessage(RESOURCE_OPENAI_PATH + "openAiResponseRequest.json", 0);
 

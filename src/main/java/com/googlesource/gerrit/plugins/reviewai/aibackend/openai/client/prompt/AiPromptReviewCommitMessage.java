@@ -31,8 +31,8 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.TextUtils.joinWithN
 
 @Slf4j
 public class AiPromptReviewCommitMessage extends AiPromptReview implements IAiPrompt {
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES_GUIDELINES;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES_GUIDELINES;
 
   public AiPromptReviewCommitMessage(
       Configuration config,
@@ -46,27 +46,27 @@ public class AiPromptReviewCommitMessage extends AiPromptReview implements IAiPr
   }
 
   @Override
-  public void addGptAssistantInstructions(List<String> instructions) {
+  public void addAiAssistantInstructions(List<String> instructions) {
     instructions.addAll(
         List.of(
             joinWithNewLine(
                 new ArrayList<>(
                     List.of(
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES,
-                        getGptAssistantInstructionsReview(false, true, false),
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES))),
-            DEFAULT_GPT_REVIEW_PROMPT_INSTRUCTIONS_COMMIT_MESSAGES,
+                        DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REVIEW_RULES,
+                        getAiAssistantInstructionsReview(false, true, false),
+                        DEFAULT_AI_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES))),
+            DEFAULT_AI_REVIEW_PROMPT_INSTRUCTIONS_COMMIT_MESSAGES,
             getPatchSetReviewPromptInstructions(),
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES_GUIDELINES,
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES));
-    log.debug("Commit Message Review specific GPT Assistant Instructions added: {}", instructions);
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_COMMIT_MESSAGES_GUIDELINES,
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES));
+    log.debug("Commit Message Review specific AI Assistant Instructions added: {}", instructions);
   }
 
   @Override
-  public String getDefaultGptThreadReviewMessage(String patchSet) {
+  public String getDefaultAiThreadReviewMessage(String patchSet) {
     String filteredPatchSet = filterCommitMessage(patchSet);
     log.debug("Filtered Commit Message for Patch Set: {}", filteredPatchSet);
-    return super.getDefaultGptThreadReviewMessage(filteredPatchSet);
+    return super.getDefaultAiThreadReviewMessage(filteredPatchSet);
   }
 }

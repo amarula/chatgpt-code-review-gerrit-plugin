@@ -40,11 +40,11 @@ public class AiPromptReviewReiterated extends AiPromptReview implements IAiPromp
   }
 
   @Override
-  public String getDefaultGptThreadReviewMessage(String patchSet) {
+  public String getDefaultAiThreadReviewMessage(String patchSet) {
     return joinWithNewLine(
         List.of(
-            DEFAULT_GPT_MESSAGE_REQUEST_RESEND_FORMATTED,
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES));
+            DEFAULT_AI_MESSAGE_REQUEST_RESEND_FORMATTED,
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES));
   }
 }

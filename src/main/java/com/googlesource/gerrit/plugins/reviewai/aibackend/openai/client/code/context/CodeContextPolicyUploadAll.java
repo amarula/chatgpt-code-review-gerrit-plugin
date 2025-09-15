@@ -33,8 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.prompt.AiPromptBase.DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT;
-import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.prompt.AiPromptReview.DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
+import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.prompt.AiPromptBase.DEFAULT_AI_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT;
+import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.prompt.AiPromptReview.DEFAULT_AI_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
 
 @Slf4j
 public class CodeContextPolicyUploadAll extends CodeContextPolicyBase
@@ -84,13 +84,13 @@ public class CodeContextPolicyUploadAll extends CodeContextPolicyBase
   @Override
   public void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions) {
     instructions.add(
-        String.format(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT, change.getProjectName()));
+        String.format(DEFAULT_AI_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT, change.getProjectName()));
     log.debug("Added Assistant Instructions for Upload-All code context policy");
   }
 
   @Override
   public void addCodeContextPolicyAwareAssistantRule(List<String> rules) {
-    rules.add(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE);
+    rules.add(DEFAULT_AI_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE);
     log.debug("Added Assistant Rules for Upload-All code context policy");
   }
 }

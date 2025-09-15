@@ -91,20 +91,20 @@ import static org.mockito.Mockito.*;
 
 public class ReviewTestBase extends TestBase {
   protected static final Path basePath = Paths.get("src/test/resources");
-  protected static final int GERRIT_GPT_ACCOUNT_ID = 1000000;
-  protected static final String GERRIT_GPT_USERNAME = "gpt";
+  protected static final int GERRIT_AI_ACCOUNT_ID = 1000000;
+  protected static final String GERRIT_AI_USERNAME = "gpt";
   protected static final int GERRIT_USER_ACCOUNT_ID = 1000001;
   protected static final String GERRIT_USER_ACCOUNT_NAME = "Test";
   protected static final String GERRIT_USER_ACCOUNT_EMAIL = "test@example.com";
   protected static final String GERRIT_USER_USERNAME = "test";
   protected static final String GERRIT_USER_GROUP = "Test";
-  protected static final String GPT_TOKEN = "tk-test";
-  protected static final String GPT_DOMAIN = "http://localhost:9527";
+  protected static final String AI_TOKEN = "tk-test";
+  protected static final String AI_DOMAIN = "http://localhost:9527";
   protected static final long TEST_TIMESTAMP = 1699270812;
   protected static final Type COMMENTS_GERRIT_TYPE =
       new TypeLiteral<Map<String, List<CommentInfo>>>() {}.getType();
 
-  private static final int GPT_USER_ACCOUNT_ID = 1000000;
+  private static final int AI_USER_ACCOUNT_ID = 1000000;
 
   @Rule public WireMockRule wireMockRule = new WireMockRule(9527);
 
@@ -131,7 +131,7 @@ public class ReviewTestBase extends TestBase {
   protected GerritClient gerritClient;
   protected PatchSetReviewer patchSetReviewer;
   protected ConfigCreator mockConfigCreator;
-  protected JsonObject gptRequestBody;
+  protected JsonObject aiRequestBody;
   protected String promptTagComments;
   protected Localizer localizer;
 
@@ -153,7 +153,7 @@ public class ReviewTestBase extends TestBase {
         };
 
     // Mock the Global Config values not provided by Default
-    when(globalConfig.getString("gptToken")).thenReturn(GPT_TOKEN);
+    when(globalConfig.getString("aiToken")).thenReturn(AI_TOKEN);
 
     // Mock the Global Config values to the Defaults passed as second arguments of the `get*`
     // methods.
@@ -165,10 +165,10 @@ public class ReviewTestBase extends TestBase {
         .thenAnswer(returnDefaultArgument);
 
     // Mock the Global Config values that differ from the ones provided by Default
-    when(globalConfig.getString(Mockito.eq("gptDomain"), Mockito.anyString()))
-        .thenReturn(GPT_DOMAIN);
-    when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_GPT_USERNAME);
-    when(globalConfig.getInt(Mockito.eq("gptConnectionMaxRetryAttempts"), Mockito.anyInt()))
+    when(globalConfig.getString(Mockito.eq("aiDomain"), Mockito.anyString()))
+        .thenReturn(AI_DOMAIN);
+    when(globalConfig.getString("gerritUserName")).thenReturn(GERRIT_AI_USERNAME);
+    when(globalConfig.getInt(Mockito.eq("aiConnectionMaxRetryAttempts"), Mockito.anyInt()))
         .thenReturn(1);
 
     projectConfig = mock(PluginConfig.class);
@@ -180,13 +180,13 @@ public class ReviewTestBase extends TestBase {
   protected void initConfig() {
     config =
         new Configuration(
-            context, gerritApi, globalConfig, projectConfig, "gpt@email.com", Account.id(1000000));
+            context, gerritApi, globalConfig, projectConfig, "ai@email.com", Account.id(1000000));
   }
 
   protected void setupMockRequests() throws RestApiException {
     Accounts accountsMock = mockGerritAccountsRestEndpoint();
     // Mock the behavior of the gerritAccountIdUri request
-    mockGerritAccountsQueryApiCall(GERRIT_GPT_USERNAME, GERRIT_GPT_ACCOUNT_ID);
+    mockGerritAccountsQueryApiCall(GERRIT_AI_USERNAME, GERRIT_AI_ACCOUNT_ID);
 
     // Mock the behavior of the gerritAccountIdUri request
     mockGerritAccountsQueryApiCall(GERRIT_USER_USERNAME, GERRIT_USER_ACCOUNT_ID);
@@ -318,7 +318,7 @@ public class ReviewTestBase extends TestBase {
   protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
     ArgumentCaptor<ReviewInput> reviewInputCaptor = ArgumentCaptor.forClass(ReviewInput.class);
     verify(revisionApiMock).review(reviewInputCaptor.capture());
-    gptRequestBody =
+    aiRequestBody =
         jsonToClass(patchSetReviewer.getOpenAiClient().getRequestBody(), JsonObject.class);
     return reviewInputCaptor;
   }
@@ -326,7 +326,7 @@ public class ReviewTestBase extends TestBase {
   protected void initTest() {
     changeSetData =
         new ChangeSetData(
-            GPT_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getVotingMaxScore());
+            AI_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getVotingMaxScore());
     when(changeSetDataProvider.get()).thenReturn(changeSetData);
 
     localizer = new Localizer(config);
@@ -419,12 +419,12 @@ public class ReviewTestBase extends TestBase {
 
   private AccountCache mockAccountCache() {
     AccountCache accountCache = mock(AccountCache.class);
-    Account account = Account.builder(Account.id(GPT_USER_ACCOUNT_ID), Instant.now()).build();
+    Account account = Account.builder(Account.id(AI_USER_ACCOUNT_ID), Instant.now()).build();
     AccountState accountState = AccountState.forAccount(account, Collections.emptyList());
     lenient()
         .doReturn(Optional.of(accountState))
         .when(accountCache)
-        .getByUsername(GERRIT_GPT_USERNAME);
+        .getByUsername(GERRIT_AI_USERNAME);
 
     return accountCache;
   }
@@ -432,7 +432,7 @@ public class ReviewTestBase extends TestBase {
   private IAiClient getOpenAIClient() {
     return switch (config.getAiBackend()) {
       case OPENAI ->
-          config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants()
+          config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants()
               ? new OpenAiClientTaskSpecific(
                   config, getCodeContextPolicy(), pluginDataHandlerProvider)
               : new OpenAiClient(config, getCodeContextPolicy(), pluginDataHandlerProvider);

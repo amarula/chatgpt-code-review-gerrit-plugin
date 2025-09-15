@@ -26,8 +26,8 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 public class ChangeSetData {
-  @NonNull private Integer gptAccountId;
-  private String gptDataPrompt;
+  @NonNull private Integer aiAccountId;
+  private String aiDataPrompt;
   private Integer commentPropertiesSize;
   private ReviewAssistantStages reviewAssistantStage = ReviewAssistantStages.REVIEW_CODE;
   private Boolean forcedStagedReview = false;

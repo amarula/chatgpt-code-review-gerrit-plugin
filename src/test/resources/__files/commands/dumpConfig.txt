@@ -4,6 +4,21 @@
 CONFIGURATION SETTINGS
 
 aiBackend: OPENAI
+aiCommentTemperature: 1.0
+aiConnectionMaxRetryAttempts: 1
+aiConnectionRetryInterval: 10
+aiConnectionTimeout: 30
+aiDomain: http://localhost:9527
+aiFullFileReview: true
+aiModel: gpt-4o
+aiPollingInterval: 1000
+aiPollingTimeout: 180
+aiRelevanceRules: 
+aiReviewCommitMessages: true
+aiReviewPatchSet: true
+aiReviewTemperature: 0.2
+aiSystemPromptInstructions: Act as a PatchSet Reviewer
+aiUploadedChunkSizeMb: 5
 codeContextOnDemandBasePath: 
 codeContextPolicy: UPLOAD_ALL
 directive: 
@@ -51,21 +66,6 @@ filterNegativeComments: true
 filterRelevantComments: true
 forceCreateAssistant: false
 gerritUserName: gpt
-gptCommentTemperature: 1.0
-gptConnectionMaxRetryAttempts: 1
-gptConnectionRetryInterval: 10
-gptConnectionTimeout: 30
-gptDomain: http://localhost:9527
-gptFullFileReview: true
-gptModel: gpt-4o
-gptPollingInterval: 1000
-gptPollingTimeout: 180
-gptRelevanceRules: 
-gptReviewCommitMessages: true
-gptReviewPatchSet: true
-gptReviewTemperature: 0.2
-gptSystemPromptInstructions: Act as a PatchSet Reviewer
-gptUploadedChunkSizeMb: 5
 ignoreOutdatedInlineComments: false
 ignoreResolvedAiComments: true
 inlineCommentsAsResolved: false

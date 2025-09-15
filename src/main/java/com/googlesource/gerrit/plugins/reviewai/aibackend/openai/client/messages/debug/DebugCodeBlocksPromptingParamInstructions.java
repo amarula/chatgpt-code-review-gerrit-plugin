@@ -42,18 +42,18 @@ public class DebugCodeBlocksPromptingParamInstructions extends DebugCodeBlocksPr
   @Override
   protected void populateOpenAISpecializedCodeReviewParameters() {
     promptingParameters.put(
-        "AssistantCodeInstructions", aIPrompt.getDefaultGptAssistantInstructions());
+        "AssistantCodeInstructions", aIPrompt.getDefaultAiAssistantInstructions());
   }
 
   @Override
   protected void populateOpenAISpecializedCommitMessageReviewParameters() {
     promptingParameters.put(
-        "AssistantCommitMessageInstructions", aIPrompt.getDefaultGptAssistantInstructions());
+        "AssistantCommitMessageInstructions", aIPrompt.getDefaultAiAssistantInstructions());
   }
 
   @Override
   protected void populateOpenAIReviewParameters() {
     promptingParameters.put(
-        "AssistantInstructions", aIPrompt.getDefaultGptAssistantInstructions());
+        "AssistantInstructions", aIPrompt.getDefaultAiAssistantInstructions());
   }
 }

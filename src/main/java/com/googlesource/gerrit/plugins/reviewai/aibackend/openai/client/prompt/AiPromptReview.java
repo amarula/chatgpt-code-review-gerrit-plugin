@@ -34,13 +34,13 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.TextUtils.*;
 public class AiPromptReview extends AiPromptBase implements IAiPrompt {
   private static final String RULE_NUMBER_PREFIX = "RULE #";
 
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_TASKS;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_ON_DEMAND_REQUEST;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REVIEW_TASKS;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REVIEW_RULES;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_DONT_GUESS_CODE;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_ON_DEMAND_REQUEST;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_HISTORY;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET;
 
   private final ICodeContextPolicy codeContextPolicy;
 
@@ -56,16 +56,16 @@ public class AiPromptReview extends AiPromptBase implements IAiPrompt {
   }
 
   @Override
-  public void addGptAssistantInstructions(List<String> instructions) {
+  public void addAiAssistantInstructions(List<String> instructions) {
     addReviewInstructions(instructions);
-    if (config.getGptReviewCommitMessages()) {
+    if (config.getAiReviewCommitMessages()) {
       instructions.add(getReviewPromptCommitMessages());
     }
-    log.debug("GPT Assistant Review Instructions added: {}", instructions);
+    log.debug("AI Assistant Review Instructions added: {}", instructions);
   }
 
   @Override
-  public String getGptRequestDataPrompt() {
+  public String getAiRequestDataPrompt() {
     log.debug("No specific request data prompt for reviews.");
     return null;
   }
@@ -73,27 +73,27 @@ public class AiPromptReview extends AiPromptBase implements IAiPrompt {
   protected void addReviewInstructions(List<String> instructions) {
     instructions.addAll(
         List.of(
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_TASKS,
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REVIEW_TASKS,
             joinWithNewLine(
                 new ArrayList<>(
                     List.of(
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_RULES,
-                        getGptAssistantInstructionsReview(),
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES,
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
-                        DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES))),
+                        DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REVIEW_RULES,
+                        getAiAssistantInstructionsReview(),
+                        DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REVIEW_GUIDELINES,
+                        DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
+                        DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES))),
             getPatchSetReviewPrompt()));
     log.debug("Review instructions formed: {}", instructions);
   }
 
-  protected String getGptAssistantInstructionsReview(boolean... ruleFilter) {
+  protected String getAiAssistantInstructionsReview(boolean... ruleFilter) {
     // Rules are applied by default unless the corresponding ruleFilter values is set to false
     List<String> rules = new ArrayList<>();
     codeContextPolicy.addCodeContextPolicyAwareAssistantRule(rules);
     rules.addAll(
         List.of(
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_HISTORY,
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET));
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_HISTORY,
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET));
     if (config.getDirective() != null) {
       rules.addAll(config.getDirective());
     }

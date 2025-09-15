@@ -190,7 +190,7 @@ public class OpenAiReviewTestBase extends ReviewTestBase {
 
   protected ArgumentCaptor<ReviewInput> testRequestSent() throws RestApiException {
     ArgumentCaptor<ReviewInput> reviewInputCaptor = super.testRequestSent();
-    requestContent = gptRequestBody.getAsJsonObject().get("content").getAsString();
+    requestContent = aiRequestBody.getAsJsonObject().get("content").getAsString();
     return reviewInputCaptor;
   }
 
@@ -309,7 +309,7 @@ public class OpenAiReviewTestBase extends ReviewTestBase {
 
   protected String getUserPrompt() {
     JsonArray prompts =
-        readContentToType(gptRequestBody.get("content").getAsString(), JsonArray.class);
+        readContentToType(aiRequestBody.get("content").getAsString(), JsonArray.class);
     return prompts.get(0).getAsJsonObject().get("request").getAsString();
   }
 }

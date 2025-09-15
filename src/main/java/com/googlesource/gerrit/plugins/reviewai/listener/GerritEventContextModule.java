@@ -76,7 +76,7 @@ public class GerritEventContextModule extends FactoryModule {
   private Class<? extends IAiClient> getAiClient() {
     return switch (config.getAiBackend()) {
       case OPENAI ->
-          config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants()
+          config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants()
               ? OpenAiClientTaskSpecific.class
               : OpenAiClient.class;
     };

@@ -62,7 +62,7 @@ public class OpenAiDataPromptRequests extends AiDataPromptRequests implements IA
     if (inReplyToId == null || inReplyToId.isEmpty()) {
       return null;
     }
-    HashMap<String, GerritComment> commentMap = gptMessageHistory.getCommentMap();
+    HashMap<String, GerritComment> commentMap = aiMessageHistory.getCommentMap();
     log.debug("Getting Comment Map: {}", commentMap);
     if (commentMap.isEmpty()) {
       return null;
@@ -73,7 +73,7 @@ public class OpenAiDataPromptRequests extends AiDataPromptRequests implements IA
     }
     String referenceToLastMessage =
         String.format(
-            REPLY_MESSAGE_REFERENCE, gptMessageHistory.getCleanedMessage(inReplyToComment));
+            REPLY_MESSAGE_REFERENCE, aiMessageHistory.getCleanedMessage(inReplyToComment));
     log.debug("Reference to last message: {}", referenceToLastMessage);
     return referenceToLastMessage;
   }

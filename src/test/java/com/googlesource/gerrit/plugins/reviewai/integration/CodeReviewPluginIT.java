@@ -40,7 +40,7 @@ import static junit.framework.TestCase.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @Ignore(
-    "This test suite is designed to demonstrate how to test the Gerrit and GPT interfaces in a real environment. "
+    "This test suite is designed to demonstrate how to test the Gerrit and AI interfaces in a real environment. "
         + "It is not intended to be executed during the regular build process")
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)

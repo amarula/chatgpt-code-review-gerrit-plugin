@@ -57,7 +57,7 @@ public class AiDataPromptReview extends AiDataPromptBase implements IAiDataPromp
     log.debug("Retrieving message item for review at index: {}", i);
     OpenAiMessageItem messageItem = super.getMessageItem(i);
     List<OpenAiRequestMessage> messageHistory =
-        gptMessageHistory.retrieveHistory(commentProperties.get(i), true);
+        aiMessageHistory.retrieveHistory(commentProperties.get(i), true);
     setHistory(messageItem, messageHistory);
     log.debug("Message item populated with history for review: {}", messageItem);
     return messageItem;

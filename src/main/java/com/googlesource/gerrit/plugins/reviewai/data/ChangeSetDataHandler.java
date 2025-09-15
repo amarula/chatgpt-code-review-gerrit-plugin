@@ -39,7 +39,7 @@ public class ChangeSetDataHandler {
         new AiDataPrompt(config, changeSetData, change, gerritClientData, localizer);
 
     changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
-    changeSetData.setGptDataPrompt(aiDataPrompt.buildPrompt());
+    changeSetData.setAiDataPrompt(aiDataPrompt.buildPrompt());
     if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
       GerritPermittedVotingRange permittedVotingRange =
           gerritClient.getPermittedVotingRange(change);

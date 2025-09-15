@@ -98,7 +98,7 @@ public class OpenAiReviewTaskSpecificTest extends OpenAiReviewTestBase {
         AiPromptFactory.getAiPrompt(
             config, changeSetData, getGerritChange(), getCodeContextPolicy());
     String reviewPrompt =
-        openAiPromptOpenAICommitMessage.getDefaultGptThreadReviewMessage(formattedPatchContent);
+        openAiPromptOpenAICommitMessage.getDefaultAiThreadReviewMessage(formattedPatchContent);
 
     ArgumentCaptor<ReviewInput> captor = testRequestSent();
     // Ensure that each of code and commit message reviews are performed only once

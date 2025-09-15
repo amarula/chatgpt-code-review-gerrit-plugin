@@ -56,7 +56,7 @@ public class AiDataPromptRequests extends AiDataPromptBase {
   protected OpenAiMessageItem getMessageItem(int i) {
     messageItem = super.getMessageItem(i);
     log.debug("Retrieving extended message item for index: {}", i);
-    messageHistory = gptMessageHistory.retrieveHistory(commentProperties.get(i));
+    messageHistory = aiMessageHistory.retrieveHistory(commentProperties.get(i));
     OpenAiRequestMessage request = extractLastUserMessageFromHistory();
     if (request != null) {
       messageItem.setRequest(request.getContent());
@@ -69,7 +69,7 @@ public class AiDataPromptRequests extends AiDataPromptBase {
 
   protected void setRequestFromCommentProperty(OpenAiMessageItem messageItem, int i) {
     GerritComment gerritComment = commentProperties.get(i);
-    String cleanedMessage = gptMessageHistory.getCleanedMessage(gerritComment);
+    String cleanedMessage = aiMessageHistory.getCleanedMessage(gerritComment);
     log.debug("Getting cleaned Message: {}", cleanedMessage);
     messageItem.setRequest(cleanedMessage);
   }

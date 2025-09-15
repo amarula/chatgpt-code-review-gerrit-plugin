@@ -30,19 +30,19 @@ public class OpenAiParameters extends ClientBase {
     log.debug("OpenAiParameters initialized with isCommentEvent: {}", isCommentEvent);
   }
 
-  public double getGptTemperature() {
-    log.debug("Getting GPT temperature");
+  public double getAiTemperature() {
+    log.debug("Getting AI temperature");
     if (isCommentEvent) {
       return retrieveTemperature(
-          Configuration.KEY_GPT_COMMENT_TEMPERATURE, Configuration.DEFAULT_GPT_COMMENT_TEMPERATURE);
+          Configuration.KEY_AI_COMMENT_TEMPERATURE, Configuration.DEFAULT_AI_COMMENT_TEMPERATURE);
     } else {
       return retrieveTemperature(
-          Configuration.KEY_GPT_REVIEW_TEMPERATURE, Configuration.DEFAULT_GPT_REVIEW_TEMPERATURE);
+          Configuration.KEY_AI_REVIEW_TEMPERATURE, Configuration.DEFAULT_AI_REVIEW_TEMPERATURE);
     }
   }
 
   public boolean shouldSpecializeAssistants() {
-    return config.getGptReviewCommitMessages() && config.getTaskSpecificAssistants();
+    return config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants();
   }
 
   private Double retrieveTemperature(String temperatureKey, Double defaultTemperature) {

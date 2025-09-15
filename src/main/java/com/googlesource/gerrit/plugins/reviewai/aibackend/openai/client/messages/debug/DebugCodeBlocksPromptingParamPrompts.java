@@ -45,20 +45,20 @@ public class DebugCodeBlocksPromptingParamPrompts extends DebugCodeBlocksPrompti
   @Override
   protected void populateOpenAISpecializedCodeReviewParameters() {
     promptingParameters.put(
-        "ReviewCodePrompt", aIPrompt.getDefaultGptThreadReviewMessage(PATCH_SET_PLACEHOLDER));
+        "ReviewCodePrompt", aIPrompt.getDefaultAiThreadReviewMessage(PATCH_SET_PLACEHOLDER));
   }
 
   @Override
   protected void populateOpenAISpecializedCommitMessageReviewParameters() {
     promptingParameters.put(
         "ReviewCommitMessagePrompt",
-        aIPrompt.getDefaultGptThreadReviewMessage(COMMIT_MESSAGE_PATCH_TEMPLATE));
+        aIPrompt.getDefaultAiThreadReviewMessage(COMMIT_MESSAGE_PATCH_TEMPLATE));
   }
 
   @Override
   protected void populateOpenAIReviewParameters() {
     promptingParameters.put(
         "ReviewPrompt",
-        aIPrompt.getDefaultGptThreadReviewMessage(COMMIT_MESSAGE_PATCH_TEMPLATE));
+        aIPrompt.getDefaultAiThreadReviewMessage(COMMIT_MESSAGE_PATCH_TEMPLATE));
   }
 }

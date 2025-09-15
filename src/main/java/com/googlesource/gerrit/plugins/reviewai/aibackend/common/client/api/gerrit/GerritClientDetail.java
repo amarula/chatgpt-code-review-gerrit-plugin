@@ -47,13 +47,13 @@ public class GerritClientDetail {
   private static final SimpleDateFormat DATE_FORMAT = newFormat();
 
   private GerritPatchSetDetail gerritPatchSetDetail;
-  private final int gptAccountId;
+  private final int aiAccountId;
   private final Configuration config;
 
   public GerritClientDetail(Configuration config, ChangeSetData changeSetData) {
-    this.gptAccountId = changeSetData.getGptAccountId();
+    this.aiAccountId = changeSetData.getAiAccountId();
     this.config = config;
-    log.debug("Initialized GerritClientDetail for GPT account ID: {}", gptAccountId);
+    log.debug("Initialized GerritClientDetail for AI account ID: {}", aiAccountId);
   }
 
   public List<GerritComment> getMessages(GerritChange change) {
@@ -80,7 +80,7 @@ public class GerritClientDetail {
       return null;
     }
     for (GerritPatchSetDetail.Permission permission : permissions) {
-      if (permission.getAccountId() == gptAccountId) {
+      if (permission.getAccountId() == aiAccountId) {
         log.debug(
             "PatchSet voting range detected for AI user: {}",
             permission.getPermittedVotingRange());

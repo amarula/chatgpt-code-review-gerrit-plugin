@@ -58,10 +58,10 @@ public class OpenAiAssistant extends OpenAiApiBase {
         AiPromptFactory.getAiPrompt(config, changeSetData, change, codeContextPolicy);
     OpenAiParameters openAiParameters = new OpenAiParameters(config, change.getIsCommentEvent());
     this.codeContextPolicy = codeContextPolicy;
-    description = aiPromptOpenAi.getDefaultGptAssistantDescription();
-    instructions = aiPromptOpenAi.getDefaultGptAssistantInstructions();
-    model = config.getGptModel();
-    temperature = openAiParameters.getGptTemperature();
+    description = aiPromptOpenAi.getDefaultAiAssistantDescription();
+    instructions = aiPromptOpenAi.getDefaultAiAssistantInstructions();
+    model = config.getAiModel();
+    temperature = openAiParameters.getAiTemperature();
   }
 
   public String createAssistant(String vectorStoreId) throws OpenAiConnectionFailException {
@@ -83,7 +83,7 @@ public class OpenAiAssistant extends OpenAiApiBase {
 
     OpenAiCreateAssistantRequestBody requestBody =
         OpenAiCreateAssistantRequestBody.builder()
-            .name(AiPromptBase.DEFAULT_GPT_ASSISTANT_NAME)
+            .name(AiPromptBase.DEFAULT_AI_ASSISTANT_NAME)
             .description(description)
             .instructions(instructions)
             .model(model)

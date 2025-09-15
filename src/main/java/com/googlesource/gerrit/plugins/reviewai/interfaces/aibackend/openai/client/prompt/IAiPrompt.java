@@ -19,15 +19,15 @@ package com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.cli
 import java.util.List;
 
 public interface IAiPrompt {
-  void addGptAssistantInstructions(List<String> instructions);
+  void addAiAssistantInstructions(List<String> instructions);
 
-  String getDefaultGptAssistantDescription();
+  String getDefaultAiAssistantDescription();
 
-  String getDefaultGptAssistantInstructions();
+  String getDefaultAiAssistantInstructions();
 
-  String getDefaultGptThreadReviewMessage(String patchSet);
+  String getDefaultAiThreadReviewMessage(String patchSet);
 
-  String getGptRequestDataPrompt();
+  String getAiRequestDataPrompt();
 
   void setCommentEvent(boolean isCommentEvent);
 }

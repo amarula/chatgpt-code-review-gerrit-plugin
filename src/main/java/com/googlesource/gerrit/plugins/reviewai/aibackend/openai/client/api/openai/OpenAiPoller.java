@@ -48,8 +48,8 @@ public class OpenAiPoller extends OpenAiApiBase {
 
   public OpenAiPoller(Configuration config) {
     super(config);
-    pollingTimeout = config.getGptPollingTimeout();
-    pollingInterval = config.getGptPollingInterval();
+    pollingTimeout = config.getAiPollingTimeout();
+    pollingInterval = config.getAiPollingInterval();
     elapsedTime = 0.0;
     pollingCount = 0;
   }

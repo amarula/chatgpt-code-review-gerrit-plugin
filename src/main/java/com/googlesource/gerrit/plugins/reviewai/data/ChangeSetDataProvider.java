@@ -28,7 +28,7 @@ import java.util.Optional;
 
 @Slf4j
 public class ChangeSetDataProvider implements Provider<ChangeSetData> {
-  private final int gptAccountId;
+  private final int aiAccountId;
   private final Configuration config;
 
   @Inject
@@ -36,11 +36,11 @@ public class ChangeSetDataProvider implements Provider<ChangeSetData> {
     this.config = config;
     Optional<AccountState> accountState = accountCache.getByUsername(config.getGerritUserName());
     if (accountState.isPresent()) {
-      gptAccountId = accountState.get().account().id().get();
-      log.debug("GPT account ID set to {}", gptAccountId);
+      aiAccountId = accountState.get().account().id().get();
+      log.debug("AI account ID set to {}", aiAccountId);
     } else {
-      log.error("Failed to retrieve GPT account ID for username {}", config.getGerritUserName());
-      throw new IllegalStateException("GPT account not found for given username");
+      log.error("Failed to retrieve AI account ID for username {}", config.getGerritUserName());
+      throw new IllegalStateException("AI account not found for given username");
     }
   }
 
@@ -48,9 +48,9 @@ public class ChangeSetDataProvider implements Provider<ChangeSetData> {
   public ChangeSetData get() {
     log.debug(
         "Providing ChangeSetData with accountId: {}, minScore: {}, maxScore: {}",
-        gptAccountId,
+        aiAccountId,
         config.getVotingMinScore(),
         config.getVotingMaxScore());
-    return new ChangeSetData(gptAccountId, config.getVotingMinScore(), config.getVotingMaxScore());
+    return new ChangeSetData(aiAccountId, config.getVotingMinScore(), config.getVotingMaxScore());
   }
 }

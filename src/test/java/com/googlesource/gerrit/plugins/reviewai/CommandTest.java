@@ -125,7 +125,7 @@ public class CommandTest extends OpenAiReviewTestBase {
 
   @Test
   public void commandConfigure() throws Exception {
-    String dynamicKey = "gptModel";
+    String dynamicKey = "aiModel";
     String dynamicValue = "DUMMY_MODEL";
     setupCommandComment(String.format("/configure --%s=%s", dynamicKey, dynamicValue));
     enableMessageDebugging();
@@ -197,7 +197,7 @@ public class CommandTest extends OpenAiReviewTestBase {
     String systemMessage =
         String.format(
             localizer.getText("message.command.unknown"),
-            "@" + GERRIT_GPT_USERNAME + " " + command);
+            "@" + GERRIT_AI_USERNAME + " " + command);
     Assert.assertEquals(systemMessage, changeSetData.getReviewSystemMessage());
   }
 }

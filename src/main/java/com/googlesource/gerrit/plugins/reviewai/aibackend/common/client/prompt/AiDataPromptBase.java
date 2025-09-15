@@ -41,7 +41,7 @@ public abstract class AiDataPromptBase implements IAiDataPrompt {
   protected final CommentData commentData;
   @Getter protected final List<OpenAiMessageItem> messageItems;
 
-  protected AiHistory gptMessageHistory;
+  protected AiHistory aiMessageHistory;
   @Getter protected List<GerritComment> commentProperties;
 
   public AiDataPromptBase(
@@ -52,7 +52,7 @@ public abstract class AiDataPromptBase implements IAiDataPrompt {
     this.gerritClientData = gerritClientData;
     fileDiffsProcessed = gerritClientData.getGerritClientPatchSet().getFileDiffsProcessed();
     commentData = gerritClientData.getCommentData();
-    gptMessageHistory = new AiHistory(config, changeSetData, gerritClientData, localizer);
+    aiMessageHistory = new AiHistory(config, changeSetData, gerritClientData, localizer);
     messageItems = new ArrayList<>();
     log.debug("Initialized AiDataPromptBase with file diffs and comment data.");
   }

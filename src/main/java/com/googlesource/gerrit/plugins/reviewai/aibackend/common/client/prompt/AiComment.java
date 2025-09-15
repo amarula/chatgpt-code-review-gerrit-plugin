@@ -55,7 +55,7 @@ public class AiComment extends ClientBase {
 
   protected boolean isFromAssistant(GerritComment commentProperty) {
     boolean fromAssistant =
-        commentProperty.getAuthor().getAccountId() == changeSetData.getGptAccountId();
+        commentProperty.getAuthor().getAccountId() == changeSetData.getAiAccountId();
     log.debug("Checking if comment is from assistant: {}", fromAssistant);
     return fromAssistant;
   }

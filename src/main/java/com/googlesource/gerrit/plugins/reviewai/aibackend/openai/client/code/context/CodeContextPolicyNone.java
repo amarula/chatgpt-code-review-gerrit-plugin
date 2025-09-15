@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.prompt.AiPromptBase.DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
+import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.prompt.AiPromptBase.DEFAULT_AI_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
 
 @Slf4j
 public class CodeContextPolicyNone extends CodeContextPolicyBase implements ICodeContextPolicy {
@@ -38,7 +38,7 @@ public class CodeContextPolicyNone extends CodeContextPolicyBase implements ICod
 
   @Override
   public void addCodeContextPolicyAwareAssistantInstructions(List<String> instructions) {
-    instructions.add(DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT);
+    instructions.add(DEFAULT_AI_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT);
     log.debug("Added Assistant Instructions for `None` code context policy");
   }
 }

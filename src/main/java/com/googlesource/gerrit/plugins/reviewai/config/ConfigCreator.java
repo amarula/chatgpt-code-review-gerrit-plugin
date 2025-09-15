@@ -91,10 +91,10 @@ public class ConfigCreator {
       log.info("DynamicConfig found for change '{}': {}", changeKey, dynamicConfig);
       projectConfig = updateDynamicConfig(projectConfig, pluginName, dynamicConfig);
     }
-    Optional<AccountState> gptAccount = getAccount(globalConfig);
-    String email = gptAccount.map(a -> a.account().preferredEmail()).orElse("");
+    Optional<AccountState> aiAccount = getAccount(globalConfig);
+    String email = aiAccount.map(a -> a.account().preferredEmail()).orElse("");
     Account.Id accountId =
-        gptAccount
+        aiAccount
             .map(a -> a.account().id())
             .orElseThrow(
                 () ->
@@ -106,9 +106,9 @@ public class ConfigCreator {
   }
 
   private Optional<AccountState> getAccount(PluginConfig globalConfig) {
-    String gptUser = globalConfig.getString(Configuration.KEY_GERRIT_USERNAME);
-    log.debug("Retrieving account for username: {}", gptUser);
-    return accountCache.getByUsername(gptUser);
+    String aiUser = globalConfig.getString(Configuration.KEY_GERRIT_USERNAME);
+    log.debug("Retrieving account for username: {}", aiUser);
+    return accountCache.getByUsername(aiUser);
   }
 
   private PluginConfig updateDynamicConfig(

@@ -100,7 +100,7 @@ public class OpenAiThreadMessage extends OpenAiApiBase {
     addMessageRequestBody =
         OpenAiRequestMessage.builder()
             .role("user")
-            .content(openAiPromptOpenAI.getDefaultGptThreadReviewMessage(patchSet))
+            .content(openAiPromptOpenAI.getDefaultAiThreadReviewMessage(patchSet))
             .build();
     log.debug("OpenAI Add Message request body: {}", addMessageRequestBody);
 

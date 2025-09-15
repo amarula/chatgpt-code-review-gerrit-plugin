@@ -31,14 +31,14 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.TextUtils.*;
 
 @Slf4j
 public abstract class AiPromptBase extends AiPrompt implements IAiPrompt {
-  public static String DEFAULT_GPT_ASSISTANT_NAME;
-  public static String DEFAULT_GPT_ASSISTANT_DESCRIPTION;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT;
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES;
-  public static String DEFAULT_GPT_MESSAGE_REQUEST_RESEND_FORMATTED;
-  public static String DEFAULT_GPT_MESSAGE_REVIEW;
+  public static String DEFAULT_AI_ASSISTANT_NAME;
+  public static String DEFAULT_AI_ASSISTANT_DESCRIPTION;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_FILE_CONTEXT;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_NO_FILE_CONTEXT;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES;
+  public static String DEFAULT_AI_MESSAGE_REQUEST_RESEND_FORMATTED;
+  public static String DEFAULT_AI_MESSAGE_REVIEW;
 
   protected final ChangeSetData changeSetData;
   protected final GerritChange change;
@@ -59,36 +59,36 @@ public abstract class AiPromptBase extends AiPrompt implements IAiPrompt {
     log.debug("Initialized AiPromptBase with change ID: {}", change.getFullChangeId());
   }
 
-  public String getDefaultGptAssistantDescription() {
-    String description = String.format(DEFAULT_GPT_ASSISTANT_DESCRIPTION, change.getProjectName());
-    log.debug("Generated GPT Assistant Description: {}", description);
+  public String getDefaultAiAssistantDescription() {
+    String description = String.format(DEFAULT_AI_ASSISTANT_DESCRIPTION, change.getProjectName());
+    log.debug("Generated AI Assistant Description: {}", description);
     return description;
   }
 
-  public abstract void addGptAssistantInstructions(List<String> instructions);
+  public abstract void addAiAssistantInstructions(List<String> instructions);
 
-  public abstract String getGptRequestDataPrompt();
+  public abstract String getAiRequestDataPrompt();
 
-  public String getDefaultGptAssistantInstructions() {
+  public String getDefaultAiAssistantInstructions() {
     List<String> instructions =
         new ArrayList<>(
             List.of(
-                config.getGptSystemPromptInstructions(DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS)
+                config.getAiSystemPromptInstructions(DEFAULT_AI_SYSTEM_PROMPT_INSTRUCTIONS)
                     + DOT));
     codeContextPolicy.addCodeContextPolicyAwareAssistantInstructions(instructions);
-    addGptAssistantInstructions(instructions);
+    addAiAssistantInstructions(instructions);
     String compiledInstructions = joinWithSpace(instructions);
-    log.debug("Compiled GPT Assistant Instructions: {}", compiledInstructions);
+    log.debug("Compiled AI Assistant Instructions: {}", compiledInstructions);
     return compiledInstructions;
   }
 
-  public String getDefaultGptThreadReviewMessage(String patchSet) {
-    String gptRequestDataPrompt = getGptRequestDataPrompt();
-    if (gptRequestDataPrompt != null && !gptRequestDataPrompt.isEmpty()) {
-      log.debug("Request User Prompt retrieved: {}", gptRequestDataPrompt);
-      return gptRequestDataPrompt;
+  public String getDefaultAiThreadReviewMessage(String patchSet) {
+    String aiRequestDataPrompt = getAiRequestDataPrompt();
+    if (aiRequestDataPrompt != null && !aiRequestDataPrompt.isEmpty()) {
+      log.debug("Request User Prompt retrieved: {}", aiRequestDataPrompt);
+      return aiRequestDataPrompt;
     } else {
-      String defaultMessage = String.format(DEFAULT_GPT_MESSAGE_REVIEW, patchSet);
+      String defaultMessage = String.format(DEFAULT_AI_MESSAGE_REVIEW, patchSet);
       log.debug("Default Thread Review Message used: {}", defaultMessage);
       return defaultMessage;
     }

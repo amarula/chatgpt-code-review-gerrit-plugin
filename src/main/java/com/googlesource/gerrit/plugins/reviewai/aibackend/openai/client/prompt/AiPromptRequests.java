@@ -30,7 +30,7 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.TextUtils.joinWithS
 
 @Slf4j
 public class AiPromptRequests extends AiPromptBase implements IAiPrompt {
-  public static String DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS;
+  public static String DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REQUESTS;
 
   public AiPromptRequests(
       Configuration config,
@@ -43,22 +43,22 @@ public class AiPromptRequests extends AiPromptBase implements IAiPrompt {
   }
 
   @Override
-  public void addGptAssistantInstructions(List<String> instructions) {
+  public void addAiAssistantInstructions(List<String> instructions) {
     instructions.addAll(
         List.of(
-            DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_REQUESTS,
+            DEFAULT_AI_ASSISTANT_INSTRUCTIONS_REQUESTS,
             getCommentRequestPrompt(changeSetData.getCommentPropertiesSize())));
-    log.debug("GPT Assistant Instructions for requests added: {}", instructions);
+    log.debug("AI Assistant Instructions for requests added: {}", instructions);
   }
 
   @Override
-  public String getGptRequestDataPrompt() {
+  public String getAiRequestDataPrompt() {
     if (changeSetData == null) {
       log.warn("ChangeSetData is null, returning no prompt");
       return null;
     }
-    String requestDataPrompt = changeSetData.getGptDataPrompt();
-    log.debug("GPT Request Data Prompt retrieved: {}", requestDataPrompt);
+    String requestDataPrompt = changeSetData.getAiDataPrompt();
+    log.debug("AI Request Data Prompt retrieved: {}", requestDataPrompt);
     return requestDataPrompt;
   }
 
@@ -70,10 +70,10 @@ public class AiPromptRequests extends AiPromptBase implements IAiPrompt {
         new ArrayList<>(
             List.of(
                 buildFieldSpecifications(REQUEST_REPLY_ATTRIBUTES),
-                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
-                DEFAULT_GPT_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES,
-                DEFAULT_GPT_REPLIES_PROMPT_INLINE,
+                DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_FORMAT,
+                DEFAULT_AI_ASSISTANT_INSTRUCTIONS_RESPONSE_EXAMPLES,
+                DEFAULT_AI_REPLIES_PROMPT_INLINE,
                 String.format(
-                    DEFAULT_GPT_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize))));
+                    DEFAULT_AI_REPLIES_PROMPT_ENFORCE_RESPONSE_CHECK, commentPropertiesSize))));
   }
 }

@@ -29,12 +29,12 @@ Reviews can be also triggered by directing a comment with the `/review` command 
 
    `[plugin "chatgpt-code-review-gerrit-plugin"]`:
 
-- `gptToken`: AI token.
+- `aiToken`: AI token.
 - `gerritUserName`: Gerrit username of AI user.
 - `globalEnable`: Default value is false. The plugin will only review specified repositories. If set to true, the plugin
   will by default review all pull requests.
 
-  For enhanced security, consider storing sensitive information like gptToken in a secure location
+  For enhanced security, consider storing sensitive information like aiToken in a secure location
   or file. Detailed instructions on how to do this will be provided later in this document.
 
 4. **Verify:** After restarting Gerrit, you can see the following information in Gerrit's logs:
@@ -79,23 +79,23 @@ as follows:
 ```
 [plugin "chatgpt-code-review-gerrit-plugin"]
     # Required parameters
-    gptToken = {gptToken}
+    aiToken = {aiToken}
     ...
 
     # Optional parameters
-    gptModel = {gptModel}
-    gptSystemPromptInstructions = {gptSystemPromptInstructions}
+    aiModel = {aiModel}
+    aiSystemPromptInstructions = {aiSystemPromptInstructions}
     ...
 ```
 
 #### Secure Configuration
 
-It is highly recommended to store sensitive information such as `gptToken` in the `secure.config`
+It is highly recommended to store sensitive information such as `aiToken` in the `secure.config`
 file. Please edit the file at $gerrit_site/etc/`secure.config` and include the following details:
 
 ```
 [plugin "chatgpt-code-review-gerrit-plugin"]
-    gptToken = {gptToken}
+    aiToken = {aiToken}
 ```
 
 If you wish to encrypt the information within the `secure.config` file, you can refer
@@ -112,15 +112,15 @@ To add the following content, please edit the `project.config` file in `refs/met
     ...
 
     # Optional parameters
-    gptModel = {gptModel}
-    gptSystemPromptInstructions = {gptSystemPromptInstructions}
+    aiModel = {aiModel}
+    aiSystemPromptInstructions = {aiSystemPromptInstructions}
     ...
 ```
 
 #### Secure Configuration
 
 Please ensure **strict control over the access permissions of `refs/meta/config`** since sensitive information such as
-`gptToken` is configured in the `project.config` file within `refs/meta/config`.
+`aiToken` is configured in the `project.config` file within `refs/meta/config`.
 
 ## OpenAI Backend
 
@@ -134,17 +134,17 @@ OpenAI Backend uses the **Assistant** resource to maintain a richer interaction 
 ## Optional Parameters
 
 - `aiBackend`: Selects the AI Backend for request processing. The default value is `OPENAI`.
-- `gptModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
-    - `gptSystemPromptInstructions`: You can customize the default instructions ("Act as a PatchSet Reviewer") to your
-      preferred prompt.
-- `gptReviewTemperature`: Specifies the temperature setting for AI when reviewing a Patch Set, with a default
+- `aiModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
+- `aiSystemPromptInstructions`: You can customize the default instructions ("Act as a PatchSet Reviewer") to your
+  preferred prompt.
+- `aiReviewTemperature`: Specifies the temperature setting for AI when reviewing a Patch Set, with a default
   setting of 0.2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more
   focused and deterministic.
-- `gptCommentTemperature`: Specifies the temperature setting for AI when replying to a comment, with a default
+- `aiCommentTemperature`: Specifies the temperature setting for AI when replying to a comment, with a default
   setting of 1.0.
-- `gptReviewPatchSet`: Set to true by default. When switched to false, it disables the automatic review of Patch Sets as
+- `aiReviewPatchSet`: Set to true by default. When switched to false, it disables the automatic review of Patch Sets as
   they are created or updated.
-- `gptReviewCommitMessages`: The default value is true. When enabled, this option also verifies if the commit message
+- `aiReviewCommitMessages`: The default value is true. When enabled, this option also verifies if the commit message
   matches with the content of the Change Set.
 - `enabledUsers`: By default, every user is enabled to have their Patch Sets and comments reviewed. To limit review
   capabilities to specific users, list their usernames in this setting, separated by commas.
@@ -187,7 +187,7 @@ directive = End each reply with \"Hope this helps!\"
   below. Turning off this option (false) allows the display of comments AI marks as irrelevant.
 - `filterCommentsRelevanceThreshold`: When `filterRelevantComments` is enabled, any review comment assigned a relevance
   score by AI below this threshold will not be shown. The default threshold is set at 0.6.
-- `gptRelevanceRules`: This option allows customization of the rules AI uses to determine the relevance of a task.
+- `aiRelevanceRules`: This option allows customization of the rules AI uses to determine the relevance of a task.
 - `patchSetCommentsAsResolved`: Initially set to false, this option leaves AI's Patch Set comments as unresolved,
   inviting further discussion. If activated, it marks AI's Patch Set comments as resolved.
 - `inlineCommentsAsResolved`: Initially set to false, this option leaves AI's inline comments as unresolved, inviting
@@ -199,7 +199,7 @@ directive = End each reply with \"Hope this helps!\"
   logged even if their level is above the current setting. This is useful for debugging without the need to set the
   overall log level to DEBUG, which could result in excessive DEBUG messages from sources like gerrit and other plugins.
   Some usage examples can be found at [Selective Log Level Override](#selective-log-level-override) section.
-- `gptFullFileReview`: Enabled by default. Activating this option sends both unchanged lines and changes to AI for
+- `aiFullFileReview`: Enabled by default. Activating this option sends both unchanged lines and changes to AI for
   review, offering additional context information. Deactivating it (set to false) results in only the changed lines
   being submitted for review.
 - `ignoreResolvedAiComments`: Determines if resolved comments from AI should be disregarded. The default setting is
@@ -245,13 +245,13 @@ directive = End each reply with \"Hope this helps!\"
 
 These parameters are specific to connecting with the OpenAI server and should only be modified by advanced users:
 
-- `gptDomain`: Specifies the default domain for OpenAI, set to `https://api.openai.com`.
-- `gptConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
-- `gptPollingTimeout`: Sets the timeout for terminating OpenAI polling on requests, defaulting to 180 seconds.
+- `aiDomain`: Specifies the default domain for OpenAI, set to `https://api.openai.com`.
+- `aiConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
+- `aiPollingTimeout`: Sets the timeout for terminating OpenAI polling on requests, defaulting to 180 seconds.
 - `getPollingInterval`: Sets the interval for OpenAI polling on requests, defaulting to 1 second.
-- `gptConnectionRetryInterval`: Sets the interval between two connection attempts, with a default of 10 seconds.
-- `gptConnectionMaxRetryAttempts`: Determines the maximum number of retry attempts, defaulting to 2.
-- `gptUploadedChunkSizeMb`: When uploading project repositories to OpenAI, the repositories are packaged and split into
+- `aiConnectionRetryInterval`: Sets the interval between two connection attempts, with a default of 10 seconds.
+- `aiConnectionMaxRetryAttempts`: Determines the maximum number of retry attempts, defaulting to 2.
+- `aiUploadedChunkSizeMb`: When uploading project repositories to OpenAI, the repositories are packaged and split into
   chunk files. This setting specifies the maximum size of each chunk file, with a default of 5 MB.
 
 ## Commands
@@ -318,7 +318,7 @@ debugging purposes. This feature becomes available when the `enableMessageDebugg
 - `/configure --<CONFIG_KEY_1>=<CONFIG_VALUE_1> [... --<CONFIG_KEY_N>=<CONFIG_VALUE_N>]` assigns new values to one or
   more configuration keys.
 
-  **NOTE**: Values that include spaces, such as `gptSystemPromptInstructions`, must be enclosed in double quotes.
+  **NOTE**: Values that include spaces, such as `aiSystemPromptInstructions`, must be enclosed in double quotes.
 
 #### Command Options
 
@@ -475,6 +475,14 @@ Example of the response:
 CONFIGURATION SETTINGS
 
 aiBackend: OPENAI
+aiCommentTemperature: 1.0
+aiDomain: https://api.openai.com
+aiFullFileReview: true
+aiModel: gpt-4-turbo
+aiReviewCommitMessages: true
+aiReviewPatchSet: true
+aiReviewTemperature: 0.2
+aiStreamOutput: false
 directive:
     First directive
     Second directive
@@ -500,14 +508,6 @@ filterNegativeComments: true
 filterRelevantComments: true
 forceCreateAssistant: false
 gerritUserName: gpt
-gptCommentTemperature: 1.0
-gptDomain: https://api.openai.com
-gptFullFileReview: true
-gptModel: gpt-4-turbo
-gptReviewCommitMessages: true
-gptReviewPatchSet: true
-gptReviewTemperature: 0.2
-gptStreamOutput: false
 ignoreOutdatedInlineComments: false
 ignoreResolvedAiComments: true
 inlineCommentsAsResolved: false
@@ -544,27 +544,27 @@ increase AI API usage and should be used for **testing or debugging purposes onl
 ### Log Level Override
 
 During tests, the default log level is set to DEBUG, which may result in a surplus of DEBUG messages. To manage this,
-adjust the log level by setting the `GERRIT_CHATGPT_TEST_FILTER_LEVEL` environment variable. For instance, to set the
+adjust the log level by setting the `GERRIT_AI_TEST_FILTER_LEVEL` environment variable. For instance, to set the
 testing log level to INFO on a Linux-based OS:
 
 ```
-$ export GERRIT_CHATGPT_TEST_FILTER_LEVEL=INFO
+$ export GERRIT_AI_TEST_FILTER_LEVEL=INFO
 ```
 
 ### Selective Log Level Override
 
 To continue receiving certain DEBUG-leveled messages after elevating the test log level, use
-the `GERRIT_CHATGPT_TEST_FILTER_VALUE` environment variable. For example, to keep seeing DEBUG messages from the
+the `GERRIT_AI_TEST_FILTER_VALUE` environment variable. For example, to keep seeing DEBUG messages from the
 class `ClientMessage` even with the log level set to INFO:
 
 ```
-$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=ClientMessage
+$ export GERRIT_AI_TEST_FILTER_VALUE=ClientMessage
 ```
 
 The syntax for the filter value is as follows:
 
 ```
-export GERRIT_CHATGPT_TEST_FILTER_VALUE="[<class_name_1>]|[<message_1>], ..., [<class_name_N>]|[<message_N>]"
+export GERRIT_AI_TEST_FILTER_VALUE="[<class_name_1>]|[<message_1>], ..., [<class_name_N>]|[<message_N>]"
 ```
 
 Double quotes are required when specifying multiple filter items. Each filter item can include a `className` and
@@ -572,23 +572,23 @@ a `message` filter. Since the filter uses a "contain" criterion, you can select 
 such as all DEBUG messages in classes containing `EventHandler`:
 
 ```
-$ export GERRIT_CHATGPT_TEST_FILTER_VALUE=EventHandler
+$ export GERRIT_AI_TEST_FILTER_VALUE=EventHandler
 ```
 
 For example, to filter DEBUG messages containing the OpenAI request and response bodies, the pipe ("|") prefix must be
 used:
 
 ```
-$ export GERRIT_CHATGPT_TEST_FILTER_VALUE="|OpenAI request body, |OpenAI response body"
+$ export GERRIT_AI_TEST_FILTER_VALUE="|OpenAI request body, |OpenAI response body"
 ```
 
 For multiple items with spaces, enclose the settings string in double quotes and escape any internal double quotes:
 
 ```
-$ export GERRIT_CHATGPT_TEST_FILTER_VALUE="|OpenAI request body, ChatGptRun|OpenAI Retrieve Run"
+$ export GERRIT_AI_TEST_FILTER_VALUE="|OpenAI request body, ChatGptRun|OpenAI Retrieve Run"
 ```
 
-This setting shows the DEBUG log messages containing the string "OpenAI request body" and the ones in `ChatGptRun`
+This setting shows the DEBUG log messages containing the string "OpenAI request body" and the ones in `OpenAiRun`
 containing "OpenAI Retrieve Run".
 
 ## Debugging
@@ -622,7 +622,7 @@ relevance and scores, by using the `--debug` command option. For example:
 
 As with testing, setting the general log level to DEBUG in operational environments can lead to an excess of DEBUG
 messages from various sources in the Gerrit log file. The `selectiveLogLevelOverride` configuration option functions
-similarly to the `GERRIT_CHATGPT_TEST_FILTER_VALUE`, permitting the logging of specific messages below the current log
+similarly to the `GERRIT_AI_TEST_FILTER_VALUE`, permitting the logging of specific messages below the current log
 level threshold.
 
 For instance, to log all DEBUG messages from the `ClientMessage` and `ClientCommandExecutor` classes for a specific
@@ -666,7 +666,7 @@ Settings can be locally modified for the current Change Set using the `/configur
 review temperature to "1.0," you can use:
 
 ```
-@gpt /configure --gptReviewTemperature=1.0
+@gpt /configure --aiReviewTemperature=1.0
 ```
 
 Following this configuration, a new Change Set review can be initiated with:
@@ -678,7 +678,7 @@ Following this configuration, a new Change Set review can be initiated with:
 It's also possible to make multiple changes at once:
 
 ```
-@gpt /configure --aiBackend=OPENAI --gptModel=gpt-4-turbo
+@gpt /configure --aiBackend=OPENAI --aiModel=gpt-4-turbo
 ```
 
 ## License

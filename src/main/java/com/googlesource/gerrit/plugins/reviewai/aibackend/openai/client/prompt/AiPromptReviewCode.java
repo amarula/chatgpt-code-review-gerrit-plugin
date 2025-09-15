@@ -40,15 +40,15 @@ public class AiPromptReviewCode extends AiPromptReview implements IAiPrompt {
   }
 
   @Override
-  public void addGptAssistantInstructions(List<String> instructions) {
+  public void addAiAssistantInstructions(List<String> instructions) {
     addReviewInstructions(instructions);
-    log.debug("Review Code specific GPT Assistant Instructions added: {}", instructions);
+    log.debug("Review Code specific AI Assistant Instructions added: {}", instructions);
   }
 
   @Override
-  public String getDefaultGptThreadReviewMessage(String patchSet) {
+  public String getDefaultAiThreadReviewMessage(String patchSet) {
     String filteredPatchSet = filterPatchWithoutCommitMessage(change, patchSet);
     log.debug("Filtered Patch Set for Review Code: {}", filteredPatchSet);
-    return super.getDefaultGptThreadReviewMessage(filteredPatchSet);
+    return super.getDefaultAiThreadReviewMessage(filteredPatchSet);
   }
 }

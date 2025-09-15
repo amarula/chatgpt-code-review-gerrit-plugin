@@ -36,9 +36,9 @@ public class Configuration extends ConfigCore {
 
   // Default Config values
   public static final String OPENAI_DOMAIN = "https://api.openai.com";
-  public static final String DEFAULT_GPT_MODEL = "gpt-4o";
-  public static final double DEFAULT_GPT_REVIEW_TEMPERATURE = 0.2;
-  public static final double DEFAULT_GPT_COMMENT_TEMPERATURE = 1.0;
+  public static final String DEFAULT_AI_MODEL = "gpt-4o";
+  public static final double DEFAULT_AI_REVIEW_TEMPERATURE = 0.2;
+  public static final double DEFAULT_AI_COMMENT_TEMPERATURE = 1.0;
 
   private static final String DEFAULT_AI_BACKEND = "OPENAI";
   private static final boolean DEFAULT_REVIEW_PATCH_SET = true;
@@ -78,20 +78,20 @@ public class Configuration extends ConfigCore {
   private static final boolean DEFAULT_IGNORE_RESOLVED_AI_COMMENTS = true;
   private static final boolean DEFAULT_FORCE_CREATE_ASSISTANT = false;
   private static final boolean DEFAULT_TASK_SPECIFIC_ASSISTANTS = false;
-  private static final int DEFAULT_GPT_CONNECTION_TIMEOUT = 30;
-  private static final int DEFAULT_GPT_CONNECTION_RETRY_INTERVAL = 10;
-  private static final int DEFAULT_GPT_CONNECTION_MAX_RETRY_ATTEMPTS = 2;
-  private static final int DEFAULT_GPT_POLLING_TIMEOUT = 180;
-  private static final int DEFAULT_GPT_POLLING_INTERVAL = 1000;
-  private static final int DEFAULT_GPT_UPLOADED_CHUNK_SIZE_MB = 5;
+  private static final int DEFAULT_AI_CONNECTION_TIMEOUT = 30;
+  private static final int DEFAULT_AI_CONNECTION_RETRY_INTERVAL = 10;
+  private static final int DEFAULT_AI_CONNECTION_MAX_RETRY_ATTEMPTS = 2;
+  private static final int DEFAULT_AI_POLLING_TIMEOUT = 180;
+  private static final int DEFAULT_AI_POLLING_INTERVAL = 1000;
+  private static final int DEFAULT_AI_UPLOADED_CHUNK_SIZE_MB = 5;
   private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
   private static final List<String> DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = new ArrayList<>();
 
   // Config setting keys
-  public static final String KEY_GPT_SYSTEM_PROMPT_INSTRUCTIONS = "gptSystemPromptInstructions";
-  public static final String KEY_GPT_RELEVANCE_RULES = "gptRelevanceRules";
-  public static final String KEY_GPT_REVIEW_TEMPERATURE = "gptReviewTemperature";
-  public static final String KEY_GPT_COMMENT_TEMPERATURE = "gptCommentTemperature";
+  public static final String KEY_AI_SYSTEM_PROMPT_INSTRUCTIONS = "aiSystemPromptInstructions";
+  public static final String KEY_AI_RELEVANCE_RULES = "aiRelevanceRules";
+  public static final String KEY_AI_REVIEW_TEMPERATURE = "aiReviewTemperature";
+  public static final String KEY_AI_COMMENT_TEMPERATURE = "aiCommentTemperature";
   public static final String KEY_DIRECTIVES = "directive";
   public static final String KEY_VOTING_MIN_SCORE = "votingMinScore";
   public static final String KEY_VOTING_MAX_SCORE = "votingMaxScore";
@@ -102,13 +102,13 @@ public class Configuration extends ConfigCore {
   public static final Set<String> LIST_TYPE_ENTRY_KEYS =
       Set.of(KEY_DIRECTIVES, KEY_SELECTIVE_LOG_LEVEL_OVERRIDE);
 
-  private static final String KEY_GPT_TOKEN = "gptToken";
-  private static final String KEY_GPT_DOMAIN = "gptDomain";
-  private static final String KEY_GPT_MODEL = "gptModel";
+  private static final String KEY_AI_TOKEN = "aiToken";
+  private static final String KEY_AI_DOMAIN = "aiDomain";
+  private static final String KEY_AI_MODEL = "aiModel";
   private static final String KEY_AI_BACKEND = "aiBackend";
-  private static final String KEY_REVIEW_COMMIT_MESSAGES = "gptReviewCommitMessages";
-  private static final String KEY_REVIEW_PATCH_SET = "gptReviewPatchSet";
-  private static final String KEY_FULL_FILE_REVIEW = "gptFullFileReview";
+  private static final String KEY_REVIEW_COMMIT_MESSAGES = "aiReviewCommitMessages";
+  private static final String KEY_REVIEW_PATCH_SET = "aiReviewPatchSet";
+  private static final String KEY_FULL_FILE_REVIEW = "aiFullFileReview";
   private static final String KEY_CODE_CONTEXT_POLICY = "codeContextPolicy";
   private static final String KEY_CODE_CONTEXT_ON_DEMAND_BASE_PATH = "codeContextOnDemandBasePath";
   private static final String KEY_PROJECT_ENABLE = "isEnabled";
@@ -134,13 +134,12 @@ public class Configuration extends ConfigCore {
   private static final String KEY_IGNORE_RESOLVED_AI_COMMENTS = "ignoreResolvedAiComments";
   private static final String KEY_FORCE_CREATE_ASSISTANT = "forceCreateAssistant";
   private static final String KEY_TASK_SPECIFIC_ASSISTANTS = "taskSpecificAssistants";
-  private static final String KEY_GPT_CONNECTION_TIMEOUT = "gptConnectionTimeout";
-  private static final String KEY_GPT_CONNECTION_RETRY_INTERVAL = "gptConnectionRetryInterval";
-  private static final String KEY_GPT_CONNECTION_MAX_RETRY_ATTEMPTS =
-      "gptConnectionMaxRetryAttempts";
-  private static final String KEY_GPT_POLLING_TIMEOUT = "gptPollingTimeout";
-  private static final String KEY_GPT_POLLING_INTERVAL = "gptPollingInterval";
-  private static final String KEY_GPT_UPLOADED_CHUNK_SIZE_MB = "gptUploadedChunkSizeMb";
+  private static final String KEY_AI_CONNECTION_TIMEOUT = "aiConnectionTimeout";
+  private static final String KEY_AI_CONNECTION_RETRY_INTERVAL = "aiConnectionRetryInterval";
+  private static final String KEY_AI_CONNECTION_MAX_RETRY_ATTEMPTS = "aiConnectionMaxRetryAttempts";
+  private static final String KEY_AI_POLLING_TIMEOUT = "aiPollingTimeout";
+  private static final String KEY_AI_POLLING_INTERVAL = "aiPollingInterval";
+  private static final String KEY_AI_UPLOADED_CHUNK_SIZE_MB = "aiUploadedChunkSizeMb";
   private static final String KEY_ENABLE_MESSAGE_DEBUGGING = "enableMessageDebugging";
 
   public Configuration(
@@ -153,38 +152,38 @@ public class Configuration extends ConfigCore {
     super(context, gerritApi, globalConfig, projectConfig, gerritUserEmail, userId);
   }
 
-  public String getGptToken() {
-    return getValidatedOrThrow(KEY_GPT_TOKEN);
+  public String getAiToken() {
+    return getValidatedOrThrow(KEY_AI_TOKEN);
   }
 
   public String getGerritUserName() {
     return getValidatedOrThrow(KEY_GERRIT_USERNAME);
   }
 
-  public String getGptDomain() {
-    return getString(KEY_GPT_DOMAIN, OPENAI_DOMAIN);
+  public String getAiDomain() {
+    return getString(KEY_AI_DOMAIN, OPENAI_DOMAIN);
   }
 
-  public String getGptModel() {
-    return getString(KEY_GPT_MODEL, DEFAULT_GPT_MODEL);
+  public String getAiModel() {
+    return getString(KEY_AI_MODEL, DEFAULT_AI_MODEL);
   }
 
   // The default system prompt/instructions are specified in the prompt files and are passed as a
   // parameter
-  public String getGptSystemPromptInstructions(String defaultGptSystemPromptInstructions) {
-    return getString(KEY_GPT_SYSTEM_PROMPT_INSTRUCTIONS, defaultGptSystemPromptInstructions);
+  public String getAiSystemPromptInstructions(String defaultAiSystemPromptInstructions) {
+    return getString(KEY_AI_SYSTEM_PROMPT_INSTRUCTIONS, defaultAiSystemPromptInstructions);
   }
 
   // If the default system prompt/instructions are not available in the caller's scope (e.g., when
   // displaying the configuration after a command request), they are retrieved from the prompt
   // files.
-  public String getGptSystemPromptInstructions() {
+  public String getAiSystemPromptInstructions() {
     Map<String, Object> systemPrompts = getJsonPromptValues("prompts");
-    return getGptSystemPromptInstructions(
-        systemPrompts.get("DEFAULT_GPT_SYSTEM_PROMPT_INSTRUCTIONS").toString());
+    return getAiSystemPromptInstructions(
+        systemPrompts.get("DEFAULT_AI_SYSTEM_PROMPT_INSTRUCTIONS").toString());
   }
 
-  public boolean getGptReviewPatchSet() {
+  public boolean getAiReviewPatchSet() {
     return getBoolean(KEY_REVIEW_PATCH_SET, DEFAULT_REVIEW_PATCH_SET);
   }
 
@@ -192,11 +191,11 @@ public class Configuration extends ConfigCore {
     return getEnum(KEY_AI_BACKEND, DEFAULT_AI_BACKEND, AiBackends.class);
   }
 
-  public boolean getGptReviewCommitMessages() {
+  public boolean getAiReviewCommitMessages() {
     return getBoolean(KEY_REVIEW_COMMIT_MESSAGES, DEFAULT_REVIEW_COMMIT_MESSAGES);
   }
 
-  public boolean getGptFullFileReview() {
+  public boolean getAiFullFileReview() {
     return getBoolean(KEY_FULL_FILE_REVIEW, DEFAULT_FULL_FILE_REVIEW);
   }
 
@@ -279,16 +278,16 @@ public class Configuration extends ConfigCore {
         KEY_FILTER_COMMENTS_RELEVANCE_THRESHOLD, DEFAULT_FILTER_COMMENTS_RELEVANCE_THRESHOLD);
   }
 
-  public String getGptRelevanceRules() {
-    return getString(KEY_GPT_RELEVANCE_RULES, DEFAULT_EMPTY_SETTING);
+  public String getAiRelevanceRules() {
+    return getString(KEY_AI_RELEVANCE_RULES, DEFAULT_EMPTY_SETTING);
   }
 
-  public String getGptReviewTemperature() {
-    return getString(KEY_GPT_REVIEW_TEMPERATURE, String.valueOf(DEFAULT_GPT_REVIEW_TEMPERATURE));
+  public String getAiReviewTemperature() {
+    return getString(KEY_AI_REVIEW_TEMPERATURE, String.valueOf(DEFAULT_AI_REVIEW_TEMPERATURE));
   }
 
-  public String getGptCommentTemperature() {
-    return getString(KEY_GPT_COMMENT_TEMPERATURE, String.valueOf(DEFAULT_GPT_COMMENT_TEMPERATURE));
+  public String getAiCommentTemperature() {
+    return getString(KEY_AI_COMMENT_TEMPERATURE, String.valueOf(DEFAULT_AI_COMMENT_TEMPERATURE));
   }
 
   public int getVotingMinScore() {
@@ -319,28 +318,28 @@ public class Configuration extends ConfigCore {
     return getBoolean(KEY_TASK_SPECIFIC_ASSISTANTS, DEFAULT_TASK_SPECIFIC_ASSISTANTS);
   }
 
-  public int getGptConnectionTimeout() {
-    return getInt(KEY_GPT_CONNECTION_TIMEOUT, DEFAULT_GPT_CONNECTION_TIMEOUT);
+  public int getAiConnectionTimeout() {
+    return getInt(KEY_AI_CONNECTION_TIMEOUT, DEFAULT_AI_CONNECTION_TIMEOUT);
   }
 
-  public int getGptConnectionRetryInterval() {
-    return getInt(KEY_GPT_CONNECTION_RETRY_INTERVAL, DEFAULT_GPT_CONNECTION_RETRY_INTERVAL);
+  public int getAiConnectionRetryInterval() {
+    return getInt(KEY_AI_CONNECTION_RETRY_INTERVAL, DEFAULT_AI_CONNECTION_RETRY_INTERVAL);
   }
 
-  public int getGptConnectionMaxRetryAttempts() {
-    return getInt(KEY_GPT_CONNECTION_MAX_RETRY_ATTEMPTS, DEFAULT_GPT_CONNECTION_MAX_RETRY_ATTEMPTS);
+  public int getAiConnectionMaxRetryAttempts() {
+    return getInt(KEY_AI_CONNECTION_MAX_RETRY_ATTEMPTS, DEFAULT_AI_CONNECTION_MAX_RETRY_ATTEMPTS);
   }
 
-  public int getGptPollingTimeout() {
-    return getInt(KEY_GPT_POLLING_TIMEOUT, DEFAULT_GPT_POLLING_TIMEOUT);
+  public int getAiPollingTimeout() {
+    return getInt(KEY_AI_POLLING_TIMEOUT, DEFAULT_AI_POLLING_TIMEOUT);
   }
 
-  public int getGptPollingInterval() {
-    return getInt(KEY_GPT_POLLING_INTERVAL, DEFAULT_GPT_POLLING_INTERVAL);
+  public int getAiPollingInterval() {
+    return getInt(KEY_AI_POLLING_INTERVAL, DEFAULT_AI_POLLING_INTERVAL);
   }
 
-  public int getGptUploadedChunkSizeMb() {
-    return getInt(KEY_GPT_UPLOADED_CHUNK_SIZE_MB, DEFAULT_GPT_UPLOADED_CHUNK_SIZE_MB);
+  public int getAiUploadedChunkSizeMb() {
+    return getInt(KEY_AI_UPLOADED_CHUNK_SIZE_MB, DEFAULT_AI_UPLOADED_CHUNK_SIZE_MB);
   }
 
   public boolean getEnableMessageDebugging() {
