@@ -13,20 +13,20 @@ aiFullFileReview: true
 aiModel: gpt-4o
 aiPollingInterval: 1000
 aiPollingTimeout: 180
-aiRelevanceRules: 
+aiRelevanceRules:
 aiReviewCommitMessages: true
 aiReviewPatchSet: true
 aiReviewTemperature: 0.2
 aiSystemPromptInstructions: Act as a PatchSet Reviewer
 aiUploadedChunkSizeMb: 5
-codeContextOnDemandBasePath: 
+codeContextOnDemandBasePath:
 codeContextPolicy: UPLOAD_ALL
-directive: 
-disabledGroups: 
-disabledTopicFilter: 
-disabledUsers: 
+directive:
+disabledGroups:
+disabledTopicFilter:
+disabledUsers:
 enableMessageDebugging: true
-enabledFileExtensions: 
+enabledFileExtensions:
     py
     java
     js
@@ -53,12 +53,12 @@ enabledFileExtensions:
     sh
     vb
     bat
-enabledGroups: 
+enabledGroups:
     ALL
-enabledProjects: 
-enabledTopicFilter: 
+enabledProjects:
+enabledTopicFilter:
     ALL
-enabledUsers: 
+enabledUsers:
     ALL
 filterCommentsBelowScore: 0
 filterCommentsRelevanceThreshold: 0.6
@@ -71,7 +71,7 @@ ignoreResolvedAiComments: true
 inlineCommentsAsResolved: false
 maxReviewLines: 1000
 patchSetCommentsAsResolved: false
-selectiveLogLevelOverride: 
+selectiveLogLevelOverride:
 taskSpecificAssistants: false
 votingMaxScore: 1
 votingMinScore: -1
