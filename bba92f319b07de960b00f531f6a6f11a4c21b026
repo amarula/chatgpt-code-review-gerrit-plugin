@@ -16,6 +16,23 @@
       "message": "The patch of the year 😀",
       "revId": "bba92f319b07de960b00f531f6a6f11a4c21b026",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "efb8e3ea_f2c55de5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-16T06:48:17Z",
+      "side": 1,
+      "message": "Tests for the config dump break with this patch, because trailing spaces remain in the dumped messages.",
+      "revId": "bba92f319b07de960b00f531f6a6f11a4c21b026",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
