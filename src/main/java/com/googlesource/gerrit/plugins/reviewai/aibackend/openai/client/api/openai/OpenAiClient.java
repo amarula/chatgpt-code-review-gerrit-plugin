@@ -148,7 +148,7 @@ public class OpenAiClient extends OpenAiClientImpl implements IAiClient {
       }
       default ->
           throw new IllegalStateException(
-              "Unexpected Step Type in OpenAI OpenAI response: " + openAiRunHandler);
+              "Unexpected Step MessageType in OpenAI OpenAI response: " + openAiRunHandler);
     };
   }
 

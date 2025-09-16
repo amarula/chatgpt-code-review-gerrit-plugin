@@ -20,6 +20,7 @@ import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.server.events.Event;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiClientTaskSpecific;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.client.api.LangChainClient;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.ChangeSetDataProvider;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
@@ -79,12 +80,13 @@ public class GerritEventContextModule extends FactoryModule {
           config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants()
               ? OpenAiClientTaskSpecific.class
               : OpenAiClient.class;
+      case LANGCHAIN -> LangChainClient.class;
     };
   }
 
   private Class<? extends IGerritClientPatchSet> getClientPatchSet() {
     return switch (config.getAiBackend()) {
-      case OPENAI -> GerritClientPatchSetOpenAi.class;
+      case OPENAI, LANGCHAIN -> GerritClientPatchSetOpenAi.class;
     };
   }
 

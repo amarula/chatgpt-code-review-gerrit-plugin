@@ -38,6 +38,7 @@ public class Settings {
   public static final String OPENAI_ROLE_ASSISTANT = "assistant";
 
   public enum AiBackends {
-    OPENAI
+    OPENAI,
+    LANGCHAIN
   }
 }

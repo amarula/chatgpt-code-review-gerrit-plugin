@@ -41,6 +41,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.TypeLiteral;
 import com.google.inject.util.Providers;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.client.api.LangChainClient;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiClientTaskSpecific;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiClient;
 import com.googlesource.gerrit.plugins.reviewai.config.ConfigCreator;
@@ -436,12 +437,14 @@ public class ReviewTestBase extends TestBase {
               ? new OpenAiClientTaskSpecific(
                   config, getCodeContextPolicy(), pluginDataHandlerProvider)
               : new OpenAiClient(config, getCodeContextPolicy(), pluginDataHandlerProvider);
+      case LANGCHAIN ->
+          new LangChainClient(config, getCodeContextPolicy(), pluginDataHandlerProvider);
     };
   }
 
   private IGerritClientPatchSet getGerritClientPatchSet() {
     return switch (config.getAiBackend()) {
-      case OPENAI -> new GerritClientPatchSetOpenAi(config, accountCacheMock);
+      case OPENAI, LANGCHAIN -> new GerritClientPatchSetOpenAi(config, accountCacheMock);
     };
   }
 }
