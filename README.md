@@ -245,6 +245,10 @@ directive = End each reply with \"Hope this helps!\"
   **NOTE**: Enabling this feature may increase AI API usage and should be used for **testing or debugging purposes
   only**.
 
+### Optional Parameters Specific to LangChain Backend
+
+- `lcMaxMemoryTokens`: Maximum number of tokens retained in memory per Change. The default value is 16K.
+
 ### Optional Parameters for Global Configuration only
 
 - `globalEnable`: Set to false by default, meaning the plugin will review only designated repositories. If enabled, the

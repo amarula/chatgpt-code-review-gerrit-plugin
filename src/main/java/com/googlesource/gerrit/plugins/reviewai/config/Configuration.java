@@ -84,6 +84,7 @@ public class Configuration extends ConfigCore {
   private static final int DEFAULT_AI_POLLING_TIMEOUT = 180;
   private static final int DEFAULT_AI_POLLING_INTERVAL = 1000;
   private static final int DEFAULT_AI_UPLOADED_CHUNK_SIZE_MB = 5;
+  private static final int DEFAULT_LC_MAX_MEMORY_TOKENS = 16384;
   private static final boolean DEFAULT_ENABLE_MESSAGE_DEBUGGING = false;
   private static final List<String> DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE = new ArrayList<>();
 
@@ -128,6 +129,7 @@ public class Configuration extends ConfigCore {
   private static final String KEY_FILTER_RELEVANT_COMMENTS = "filterRelevantComments";
   private static final String KEY_FILTER_COMMENTS_RELEVANCE_THRESHOLD =
       "filterCommentsRelevanceThreshold";
+  private static final String KEY_LC_MAX_MEMORY_TOKENS = "lcMaxMemoryTokens";
   private static final String KEY_INLINE_COMMENTS_AS_RESOLVED = "inlineCommentsAsResolved";
   private static final String KEY_PATCH_SET_COMMENTS_AS_RESOLVED = "patchSetCommentsAsResolved";
   private static final String KEY_IGNORE_OUTDATED_INLINE_COMMENTS = "ignoreOutdatedInlineComments";
@@ -320,6 +322,10 @@ public class Configuration extends ConfigCore {
 
   public int getAiConnectionTimeout() {
     return getInt(KEY_AI_CONNECTION_TIMEOUT, DEFAULT_AI_CONNECTION_TIMEOUT);
+  }
+
+  public int getLcMaxMemoryTokens() {
+    return getInt(KEY_LC_MAX_MEMORY_TOKENS, DEFAULT_LC_MAX_MEMORY_TOKENS);
   }
 
   public int getAiConnectionRetryInterval() {

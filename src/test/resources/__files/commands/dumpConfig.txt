@@ -69,6 +69,7 @@ gerritUserName: gpt
 ignoreOutdatedInlineComments: false
 ignoreResolvedAiComments: true
 inlineCommentsAsResolved: false
+lcMaxMemoryTokens: 16384
 maxReviewLines: 1000
 patchSetCommentsAsResolved: false
 selectiveLogLevelOverride: 
