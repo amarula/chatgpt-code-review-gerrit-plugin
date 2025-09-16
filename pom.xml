@@ -80,6 +80,8 @@
                                     <include>com.squareup.*</include>
                                     <include>org.apache.commons*</include>
                                     <include>org.jetbrains*</include>
+                                    <include>dev.langchain4j*</include>
+                                    <include>com.fasterxml.jackson*</include>
                                 </includes>
                             </artifactSet>
                             <relocations>
@@ -90,6 +92,10 @@
                                 <relocation>
                                     <pattern>okio</pattern>
                                     <shadedPattern>com.googlesource.gerrit.plugins.reviewai.okio</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com.fasterxml.jackson</pattern>
+                                    <shadedPattern>com.googlesource.gerrit.plugins.chatgpt.jackson</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
@@ -137,6 +143,16 @@
             <groupId>com.google.gerrit</groupId>
             <artifactId>gerrit-${Gerrit-ApiType}-api</artifactId>
             <version>${Gerrit-ApiVersion}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-open-ai</artifactId>
+            <version>1.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

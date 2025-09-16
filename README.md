@@ -112,6 +112,7 @@ To add the following content, please edit the `project.config` file in `refs/met
     ...
 
     # Optional parameters
+    aiBackend = {aiBackend}
     aiModel = {aiModel}
     aiSystemPromptInstructions = {aiSystemPromptInstructions}
     ...
@@ -122,7 +123,12 @@ To add the following content, please edit the `project.config` file in `refs/met
 Please ensure **strict control over the access permissions of `refs/meta/config`** since sensitive information such as
 `aiToken` is configured in the `project.config` file within `refs/meta/config`.
 
-## OpenAI Backend
+## AI Backends
+
+The plugin supports multiple Backends, giving flexibility in selecting an AI provider. Backends may represent AI
+providers themselves or frameworks that connect to them.
+
+### OpenAI Backend
 
 OpenAI Backend uses the **Assistant** resource to maintain a richer interaction context. This backend is designed to:
 
@@ -131,9 +137,16 @@ OpenAI Backend uses the **Assistant** resource to maintain a richer interaction 
 - Associate the Assistants with the complete Codebase of the Git project related to the Change, which is updated
   each time commits are merged in Gerrit.
 
+### LangChain Backend
+
+The LangChain backend relies on the LangChain framework to connect with an AI provider.
+Currently, only OpenAI is supported as a LangChain AI provider.
+
 ## Optional Parameters
 
-- `aiBackend`: Selects the AI Backend for request processing. The default value is `OPENAI`.
+- `aiBackend`: Selects the AI Backend for request processing. The currently supported Backend options are:
+    - **OPENAI** (The default value)
+    - **LANGCHAIN**
 - `aiModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
 - `aiSystemPromptInstructions`: You can customize the default instructions ("Act as a PatchSet Reviewer") to your
   preferred prompt.
@@ -217,6 +230,9 @@ directive = End each reply with \"Hope this helps!\"
     - **UPLOAD_ALL**: Uploads the entire codebase during each merge event, giving AI full access to the necessary
       context for its reviews.
     - **NONE**: Skips file uploads entirely, relying solely on the formatted patch for reviews and interactions with AI.
+
+### Optional Parameters Specific to OpenAI Backend
+
 - `taskSpecificAssistants`: This option allows for dividing the Patch Set review between two specialized assistants: one
   focused to the Patch's code and another to the commit message. When this option is set to false (default value), the
   Patch Set review is unified into one single request processed by one assistant instructed for both tasks.
