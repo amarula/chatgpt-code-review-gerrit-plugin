@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.errors.exceptions;
+package com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider;
 
-public class ResponseEmptyRepliesException extends AiConnectionFailException {
-  public ResponseEmptyRepliesException() {
-    super("Invalid JSON format in response");
-  }
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model.LangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
+import dev.langchain4j.model.TokenCountEstimator;
+import java.util.Optional;
+
+public interface ILangChainProvider {
+
+  LangChainProvider buildChatModel(Configuration config, double temperature);
+
+  Optional<TokenCountEstimator> createTokenEstimator(Configuration config);
 }

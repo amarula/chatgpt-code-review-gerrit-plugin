@@ -29,13 +29,14 @@ Reviews can be also triggered by directing a comment with the `/review` command 
 
    `[plugin "chatgpt-code-review-gerrit-plugin"]`:
 
-- `aiToken`: AI token.
+- `openAiToken`: API token used for OpenAI requests (including the default backend).
+- `geminiToken`: API token for Google Gemini, required when `lcProvider = GEMINI`.
 - `gerritUserName`: Gerrit username of AI user.
 - `globalEnable`: Default value is false. The plugin will only review specified repositories. If set to true, the plugin
   will by default review all pull requests.
 
-  For enhanced security, consider storing sensitive information like aiToken in a secure location
-  or file. Detailed instructions on how to do this will be provided later in this document.
+  For enhanced security, consider storing sensitive information like these API tokens in a secure location or file.
+  Detailed instructions on how to do this will be provided later in this document.
 
 4. **Verify:** After restarting Gerrit, you can see the following information in Gerrit's logs:
 
@@ -79,7 +80,9 @@ as follows:
 ```
 [plugin "chatgpt-code-review-gerrit-plugin"]
     # Required parameters
-    aiToken = {aiToken}
+    openAiToken = {openAiToken}
+    # geminiToken is required only when using Google Gemini via LangChain
+    # geminiToken = {geminiToken}
     ...
 
     # Optional parameters
@@ -90,13 +93,18 @@ as follows:
 
 #### Secure Configuration
 
-It is highly recommended to store sensitive information such as `aiToken` in the `secure.config`
-file. Please edit the file at $gerrit_site/etc/`secure.config` and include the following details:
+It is highly recommended to store sensitive information such as `openAiToken` and `geminiToken` in the `secure.config`
+file. Please edit the file at $gerrit_site/etc/`secure.config` and include the following details (omit entries you do
+not use):
 
 ```
 [plugin "chatgpt-code-review-gerrit-plugin"]
-    aiToken = {aiToken}
+    openAiToken = {openAiToken}
+    geminiToken = {geminiToken}
 ```
+
+Legacy configurations that still rely on the `aiToken` entry continue to work, but new setups are encouraged to migrate
+to the provider-specific tokens above.
 
 If you wish to encrypt the information within the `secure.config` file, you can refer
 to: https://gerrit.googlesource.com/plugins/secure-config
@@ -121,7 +129,7 @@ To add the following content, please edit the `project.config` file in `refs/met
 #### Secure Configuration
 
 Please ensure **strict control over the access permissions of `refs/meta/config`** since sensitive information such as
-`aiToken` is configured in the `project.config` file within `refs/meta/config`.
+provider-specific API tokens is configured in the `project.config` file within `refs/meta/config`.
 
 ## AI Backends
 
@@ -140,7 +148,7 @@ OpenAI Backend uses the **Assistant** resource to maintain a richer interaction 
 ### LangChain Backend
 
 The LangChain backend relies on the LangChain framework to connect with an AI provider.
-Currently, only OpenAI is supported as a LangChain AI provider.
+OpenAI is used by default, and Google Gemini can also be selected when configuring the `lcProvider` parameter.
 
 ## Optional Parameters
 
@@ -247,6 +255,9 @@ directive = End each reply with \"Hope this helps!\"
 
 ### Optional Parameters Specific to LangChain Backend
 
+- `lcProvider`: Selects the LangChain provider (requires `aiBackend = LANGCHAIN`). Supported providers are `OPENAI`
+  (default) and `GEMINI`. When `GEMINI` is selected, the plugin connects to Google Gemini using the provided API token.
+  If `aiDomain` retains its default value, the Gemini endpoint is applied automatically.
 - `lcMaxMemoryTokens`: Maximum number of tokens retained in memory per Change. The default value is 16K.
 
 ### Optional Parameters for Global Configuration only
@@ -265,7 +276,8 @@ directive = End each reply with \"Hope this helps!\"
 
 These parameters are specific to connecting with the OpenAI server and should only be modified by advanced users:
 
-- `aiDomain`: Specifies the default domain for OpenAI, set to `https://api.openai.com`.
+- `aiDomain`: Specifies the base domain for the OpenAI-compatible API. By default it points to `https://api.openai.com`;
+  when `lcProvider = GEMINI` and this value is unchanged, the plugin uses the Google Gemini endpoint automatically.
 - `aiConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
 - `aiPollingTimeout`: Sets the timeout for terminating OpenAI polling on requests, defaulting to 180 seconds.
 - `getPollingInterval`: Sets the interval for OpenAI polling on requests, defaulting to 1 second.

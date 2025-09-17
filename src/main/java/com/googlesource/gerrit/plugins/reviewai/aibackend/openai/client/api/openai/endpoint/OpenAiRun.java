@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiApiBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiPoller;
@@ -40,7 +40,7 @@ public class OpenAiRun extends OpenAiApiBase {
     this.threadId = threadId;
   }
 
-  public OpenAiRunResponse createRun() throws OpenAiConnectionFailException {
+  public OpenAiRunResponse createRun() throws AiConnectionFailException {
     Request createRunRequest = createRunRequest();
     log.info("OpenAI Create Run request: {}", createRunRequest);
 
@@ -72,7 +72,7 @@ public class OpenAiRun extends OpenAiApiBase {
   }
 
   public void submitToolOutputs(List<OpenAiToolOutput> toolOutputs)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     Request submitToolOutputsRequest = submitToolOutputsRequest(toolOutputs);
     log.debug("OpenAI Submit Tool Outputs request: {}", submitToolOutputsRequest);
 

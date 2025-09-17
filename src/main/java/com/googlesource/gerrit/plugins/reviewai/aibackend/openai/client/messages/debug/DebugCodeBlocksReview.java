@@ -18,7 +18,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.message
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.messages.debug.DebugCodeBlocksComposer;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiReplyItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiReplyItem;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class DebugCodeBlocksReview extends DebugCodeBlocksComposer {
     super(localizer, "message.debugging.review.title");
   }
 
-  public String getDebugCodeBlock(OpenAiReplyItem replyItem, boolean isHidden) {
+  public String getDebugCodeBlock(AiReplyItem replyItem, boolean isHidden) {
     return super.getDebugCodeBlock(
         List.of(String.format(HIDDEN_REPLY, isHidden), prettyStringifyObject(replyItem)));
   }

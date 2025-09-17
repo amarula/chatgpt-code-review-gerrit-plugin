@@ -16,7 +16,7 @@
 
 package com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.patch;
 
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiReplyItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiReplyItem;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritCodeRange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.code.patch.CodeFinderDiff;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.patch.diff.DiffContent;
@@ -52,7 +52,7 @@ public class CodeFinder {
     log.debug("Initialized CodeFinder with placeholder patterns.");
   }
 
-  public GerritCodeRange findCommentedCode(OpenAiReplyItem replyItem, int commentedLine) {
+  public GerritCodeRange findCommentedCode(AiReplyItem replyItem, int commentedLine) {
     this.commentedLine = commentedLine;
     updateCodePattern(replyItem);
     currentCodeRange = null;
@@ -77,7 +77,7 @@ public class CodeFinder {
     return closestCodeRange;
   }
 
-  private void updateCodePattern(OpenAiReplyItem replyItem) {
+  private void updateCodePattern(AiReplyItem replyItem) {
     log.debug("Updating code pattern based on the reply item's code snippet.");
     String commentedCode =
         replyItem

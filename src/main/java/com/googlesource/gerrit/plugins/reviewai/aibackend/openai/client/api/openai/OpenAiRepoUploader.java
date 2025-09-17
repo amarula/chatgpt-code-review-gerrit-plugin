@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint.OpenAiFile;
@@ -48,7 +48,7 @@ public class OpenAiRepoUploader extends ClientBase {
     this.gitRepoFiles = gitRepoFiles;
   }
 
-  public List<String> uploadRepoFiles() throws OpenAiConnectionFailException {
+  public List<String> uploadRepoFiles() throws AiConnectionFailException {
     log.debug("Starting uploading repository files.");
     List<String> repoFiles = gitRepoFiles.getGitRepoFilesAsJson(config, change);
     List<String> filesIds = new ArrayList<>();

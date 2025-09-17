@@ -18,7 +18,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.ope
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPromptFactory;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
@@ -63,7 +63,7 @@ public class OpenAiThreadMessage extends OpenAiApiBase {
   }
 
   public OpenAiThreadMessageResponse retrieveMessage(String messageId)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     Request request = createRetrieveMessageRequest(messageId);
     log.debug("OpenAI Retrieve Thread Message request: {}", request);
     OpenAiThreadMessageResponse threadMessageResponse =
@@ -73,7 +73,7 @@ public class OpenAiThreadMessage extends OpenAiApiBase {
     return threadMessageResponse;
   }
 
-  public void addMessage() throws OpenAiConnectionFailException {
+  public void addMessage() throws AiConnectionFailException {
     Request request = addMessageRequest();
     log.debug("OpenAI Add Message request: {}", request);
 

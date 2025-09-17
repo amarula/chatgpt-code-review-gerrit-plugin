@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiApiBase;
@@ -34,7 +34,7 @@ public class OpenAiVectorStore extends OpenAiApiBase {
     this.change = change;
   }
 
-  public OpenAiResponse createVectorStore() throws OpenAiConnectionFailException {
+  public OpenAiResponse createVectorStore() throws AiConnectionFailException {
     Request request = vectorStoreCreateRequest();
     log.debug("OpenAI Create Vector Store request: {}", request);
 

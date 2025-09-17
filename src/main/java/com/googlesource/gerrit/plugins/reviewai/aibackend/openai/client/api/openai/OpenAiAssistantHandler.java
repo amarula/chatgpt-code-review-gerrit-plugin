@@ -20,7 +20,7 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.open
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OperationNotSupportedException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
@@ -59,7 +59,7 @@ public class OpenAiAssistantHandler extends ClientBase {
     log.debug("Initialized OpenAiAssistant with project and assistants data handlers.");
   }
 
-  public String setupAssistant() throws OpenAiConnectionFailException {
+  public String setupAssistant() throws AiConnectionFailException {
     log.debug("Setting up the assistant parameters.");
     String assistantIdHashKey = calculateAssistantIdHashKey();
     log.info("Calculated assistant id hash key: {}", assistantIdHashKey);
