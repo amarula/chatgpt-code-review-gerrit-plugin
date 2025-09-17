@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f46d920_8c1eff2a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:20:22Z",
+      "side": 1,
+      "message": "@patrizio.gelosi@amarulasolutions.com You should split next time the patch and now you should improve the commit message ;)",
+      "revId": "79299bea58ec81f04be2310b2bec2b3506a4847c",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
