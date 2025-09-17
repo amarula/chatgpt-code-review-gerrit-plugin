@@ -1,0 +1,174 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5aa463b9_d3c040bd",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Please drop getGeminiToken getOpenAiToken and all the documenation, code will be more simple and i can not figure out use case in this direction. We need to avoid to merge this change with this extra change",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0a9817a_a4244255",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Dont\u0027 create a token for AI. It\u0027s not a usecase",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7c20432a_5ebbf3a4",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Drop then this change",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9c9669f8_5169a210",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Drop here",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0aa96428_7c539408",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Here",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f605bb23_a3be36f6",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Here",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b8f42071_5b0a2eb5",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Here",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6d602325_fa701c66",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/reviewai/aibackend/common/client/http/HttpClient.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "This is not neededd",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "638f4ff8_3c5a56c0",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/reviewai/aibackend/langchain/provider/gemini/GeminiLangChainProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "This is not needed",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a4d5af00_3cc65868",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/reviewai/aibackend/langchain/provider/gemini/GeminiLangChainProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-17T16:44:47Z",
+      "side": 1,
+      "message": "Again",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
