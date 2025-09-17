@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai;
 
+import lombok.AccessLevel;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder
-public class OpenAiReplyItem extends OpenAiDialogueItem {
-  private String reply;
-  private Integer score;
-  private Double relevance;
-  private boolean repeated;
-  private boolean conflicting;
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public abstract class AiDialogueItem {
+  protected Integer id;
+  protected String filename;
+  protected Integer lineNumber;
+  protected String codeSnippet;
 }

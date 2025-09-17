@@ -41,4 +41,9 @@ public class Settings {
     OPENAI,
     LANGCHAIN
   }
+
+  public enum LangChainProviders {
+    OPENAI,
+    GEMINI
+  }
 }

@@ -26,6 +26,7 @@ import java.util.*;
 import static com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPrompt.getJsonPromptValues;
 import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
 import static com.googlesource.gerrit.plugins.reviewai.settings.Settings.AiBackends;
+import static com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
 
 public class Configuration extends ConfigCore {
   // Config Constants
@@ -36,11 +37,13 @@ public class Configuration extends ConfigCore {
 
   // Default Config values
   public static final String OPENAI_DOMAIN = "https://api.openai.com";
+  public static final String GEMINI_DOMAIN = "https://generativelanguage.googleapis.com";
   public static final String DEFAULT_AI_MODEL = "gpt-4o";
   public static final double DEFAULT_AI_REVIEW_TEMPERATURE = 0.2;
   public static final double DEFAULT_AI_COMMENT_TEMPERATURE = 1.0;
 
   private static final String DEFAULT_AI_BACKEND = "OPENAI";
+  private static final String DEFAULT_LC_PROVIDER = "OPENAI";
   private static final boolean DEFAULT_REVIEW_PATCH_SET = true;
   private static final boolean DEFAULT_REVIEW_COMMIT_MESSAGES = true;
   private static final boolean DEFAULT_FULL_FILE_REVIEW = true;
@@ -130,6 +133,7 @@ public class Configuration extends ConfigCore {
   private static final String KEY_FILTER_COMMENTS_RELEVANCE_THRESHOLD =
       "filterCommentsRelevanceThreshold";
   private static final String KEY_LC_MAX_MEMORY_TOKENS = "lcMaxMemoryTokens";
+  private static final String KEY_LC_PROVIDER = "lcProvider";
   private static final String KEY_INLINE_COMMENTS_AS_RESOLVED = "inlineCommentsAsResolved";
   private static final String KEY_PATCH_SET_COMMENTS_AS_RESOLVED = "patchSetCommentsAsResolved";
   private static final String KEY_IGNORE_OUTDATED_INLINE_COMMENTS = "ignoreOutdatedInlineComments";
@@ -191,6 +195,10 @@ public class Configuration extends ConfigCore {
 
   public AiBackends getAiBackend() {
     return getEnum(KEY_AI_BACKEND, DEFAULT_AI_BACKEND, AiBackends.class);
+  }
+
+  public LangChainProviders getLcProvider() {
+    return getEnum(KEY_LC_PROVIDER, DEFAULT_LC_PROVIDER, LangChainProviders.class);
   }
 
   public boolean getAiReviewCommitMessages() {

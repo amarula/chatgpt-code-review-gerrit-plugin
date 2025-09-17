@@ -17,11 +17,11 @@
 package com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.ai;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiResponseContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 
 public interface IAiClient {
-  OpenAiResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet)
+  AiResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet)
       throws Exception;
 
   String getRequestBody();

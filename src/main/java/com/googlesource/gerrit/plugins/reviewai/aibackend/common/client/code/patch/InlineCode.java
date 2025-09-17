@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.patch;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.patch.diff.FileDiffProcessed;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiReplyItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiReplyItem;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritCodeRange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class InlineCode {
     }
   }
 
-  public Optional<GerritCodeRange> findCommentRange(OpenAiReplyItem replyItem) {
+  public Optional<GerritCodeRange> findCommentRange(AiReplyItem replyItem) {
     log.debug("Finding comment range for AI reply.");
     int commentedLine;
     try {

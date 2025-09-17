@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OperationNotSupportedException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
@@ -45,12 +45,12 @@ public abstract class CodeContextPolicyBase extends ClientBase implements ICodeC
   }
 
   public boolean runActionRequired(OpenAiRunResponse runResponse)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     log.debug("Run Action Required checking skipped with the current code context policy");
     return false;
   }
 
-  public String generateVectorStore() throws OpenAiConnectionFailException {
+  public String generateVectorStore() throws AiConnectionFailException {
     log.debug("Vector Store generating skipped with the current code context policy");
     return null;
   }

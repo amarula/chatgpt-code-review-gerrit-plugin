@@ -20,7 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiTool;
@@ -60,7 +60,7 @@ public class CodeContextPolicyUploadAll extends CodeContextPolicyBase
   }
 
   @Override
-  public String generateVectorStore() throws OpenAiConnectionFailException {
+  public String generateVectorStore() throws AiConnectionFailException {
     log.debug("Generating Vector Store");
     return openAiVectorStoreHandler.generateVectorStore();
   }

@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.ope
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiApiBase;
@@ -43,7 +43,7 @@ public class OpenAiThread extends OpenAiApiBase {
     this.changeDataHandler = pluginDataHandlerProvider.getChangeScope();
   }
 
-  public String createThread() throws OpenAiConnectionFailException {
+  public String createThread() throws AiConnectionFailException {
     String threadId = changeDataHandler.getValue(KEY_THREAD_ID);
     if (threadId == null
         || !changeSetData.getForcedReview() && !changeSetData.getForcedStagedReview()) {

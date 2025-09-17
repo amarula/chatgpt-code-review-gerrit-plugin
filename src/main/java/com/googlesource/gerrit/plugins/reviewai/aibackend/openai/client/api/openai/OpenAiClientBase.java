@@ -16,38 +16,40 @@
 
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai;
 
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai.AiClientBase;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiResponseContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
-import static com.googlesource.gerrit.plugins.reviewai.utils.GsonUtils.jsonToClass;
-
-public abstract class OpenAiClientBase extends ClientBase {
+@Slf4j
+public abstract class OpenAiClientBase extends AiClientBase {
+  protected boolean isCommentEvent = false;
+  @Getter protected String requestBody;
 
   public OpenAiClientBase(Configuration config) {
     super(config);
+    log.debug("OpenAiClientBase initialized with configuration.");
   }
 
-  protected OpenAiResponseContent convertResponseContentFromJson(String content) {
-    return jsonToClass(content, OpenAiResponseContent.class);
+  protected AiResponseContent getResponseContent(List<OpenAiToolCall> toolCalls) {
+    log.debug("Getting response content from tool calls: {}", toolCalls);
+    if (toolCalls.size() > 1) {
+      return mergeToolCalls(toolCalls);
+    } else {
+      return getArgumentAsResponse(toolCalls, 0);
+    }
   }
 
-  protected OpenAiToolCall.Function getFunction(List<OpenAiToolCall> toolCalls, int ind) {
-    return toolCalls.get(ind).getFunction();
-  }
-
-  protected String getArgumentAsString(List<OpenAiToolCall> toolCalls, int ind) {
-    return getFunction(toolCalls, ind).getArguments();
-  }
-
-  protected OpenAiResponseContent getArgumentAsResponse(List<OpenAiToolCall> toolCalls, int ind) {
-    return convertResponseContentFromJson(getArgumentAsString(toolCalls, ind));
-  }
-
-  protected <T> T getArgumentAsType(List<OpenAiToolCall> toolCalls, int ind, Class<T> clazz) {
-    return jsonToClass(getArgumentAsString(toolCalls, ind), clazz);
+  private AiResponseContent mergeToolCalls(List<OpenAiToolCall> toolCalls) {
+    log.debug("Merging responses from multiple tool calls.");
+    AiResponseContent responseContent = getArgumentAsResponse(toolCalls, 0);
+    for (int ind = 1; ind < toolCalls.size(); ind++) {
+      responseContent.getReplies().addAll(getArgumentAsResponse(toolCalls, ind).getReplies());
+    }
+    return responseContent;
   }
 }

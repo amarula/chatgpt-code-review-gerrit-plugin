@@ -70,6 +70,7 @@ ignoreOutdatedInlineComments: false
 ignoreResolvedAiComments: true
 inlineCommentsAsResolved: false
 lcMaxMemoryTokens: 16384
+lcProvider: OPENAI
 maxReviewLines: 1000
 patchSetCommentsAsResolved: false
 selectiveLogLevelOverride: 
