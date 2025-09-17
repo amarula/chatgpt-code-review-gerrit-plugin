@@ -35,7 +35,8 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.StringUtils.*;
 
 @Slf4j
 public abstract class ConfigCore {
-  private static final Set<String> EXCLUDE_FROM_DUMP = Set.of("KEY_AI_TOKEN");
+  private static final Set<String> EXCLUDE_FROM_DUMP =
+      Set.of("KEY_AI_TOKEN", "KEY_OPENAI_TOKEN", "KEY_GEMINI_TOKEN");
   private static final String GLOBAL_CONFIG = "GlobalConfig";
   private static final String PROJECT_CONFIG = "ProjectConfig";
 
@@ -155,6 +156,21 @@ public abstract class ConfigCore {
       throw new RuntimeException(String.format(NOT_CONFIGURED_ERROR_MSG, key));
     }
     return value;
+  }
+
+  protected String getNonEmptyConfigValue(String key) {
+    if (key == null) {
+      return null;
+    }
+    String projectValue = projectConfig.getString(key);
+    if (projectValue != null && !projectValue.isBlank()) {
+      return projectValue;
+    }
+    String globalValue = globalConfig.getString(key);
+    if (globalValue != null && !globalValue.isBlank()) {
+      return globalValue;
+    }
+    return null;
   }
 
   protected int getInt(String key, int defaultValue) {

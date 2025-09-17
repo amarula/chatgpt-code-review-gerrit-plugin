@@ -16,8 +16,9 @@
 
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai;
 
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai.AiClientBase;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
@@ -31,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class OpenAiRunToolOutputHandler extends OpenAiClientBase {
+public class OpenAiRunToolOutputHandler extends AiClientBase {
   // OpenAI may occasionally return the fixed string "multi_tool_use" as the function name when
   // multiple tools are
   // utilized.
@@ -51,7 +52,7 @@ public class OpenAiRunToolOutputHandler extends OpenAiClientBase {
   }
 
   public void submitToolOutput(List<OpenAiToolCall> openAiToolCalls)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     this.openAiToolCalls = openAiToolCalls;
     List<OpenAiToolOutput> toolOutputs = new ArrayList<>();
     log.debug("OpenAI Tool Calls: {}", openAiToolCalls);

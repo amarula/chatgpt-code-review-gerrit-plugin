@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.ChangeSetDataHandler;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.ai.IAiClient;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
@@ -29,8 +29,8 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerr
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.messages.debug.DebugCodeBlocksReview;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.patch.comment.GerritCommentRange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.patch.filename.FilenameSanitizer;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiReplyItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiResponseContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiReplyItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritCodeRange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
@@ -87,11 +87,11 @@ public class PatchSetReviewer {
     ChangeSetDataHandler.update(config, change, gerritClient, changeSetData, localizer);
 
     if (changeSetData.shouldRequestAiReview()) {
-      OpenAiResponseContent reviewReply = null;
+      AiResponseContent reviewReply = null;
       try {
         reviewReply = getReviewReply(change, patchSet);
         log.debug("OpenAI response: {}", reviewReply);
-      } catch (OpenAiConnectionFailException e) {
+      } catch (AiConnectionFailException e) {
         changeSetData.setReviewSystemMessage(localizer.getText("message.openai.connection.error"));
       }
       if (reviewReply != null) {
@@ -122,7 +122,7 @@ public class PatchSetReviewer {
     }
   }
 
-  private void setPatchSetReviewBatchMap(ReviewBatch batchMap, OpenAiReplyItem replyItem) {
+  private void setPatchSetReviewBatchMap(ReviewBatch batchMap, AiReplyItem replyItem) {
     Optional<GerritCodeRange> optGerritCommentRange =
         gerritCommentRange.getGerritCommentRange(replyItem);
     if (optGerritCommentRange.isPresent()) {
@@ -133,7 +133,7 @@ public class PatchSetReviewer {
     }
   }
 
-  private void retrieveReviewBatches(OpenAiResponseContent reviewReply, GerritChange change) {
+  private void retrieveReviewBatches(AiResponseContent reviewReply, GerritChange change) {
     FilenameSanitizer filenameSanitizer = new FilenameSanitizer(gerritClient, change);
     log.debug("Retrieving review batches for change: {}", change.getFullChangeId());
     if (reviewReply.getMessageContent() != null && !reviewReply.getMessageContent().isEmpty()) {
@@ -141,7 +141,7 @@ public class PatchSetReviewer {
       log.debug("Added single message content to review batches.");
       return;
     }
-    for (OpenAiReplyItem replyItem : reviewReply.getReplies()) {
+    for (AiReplyItem replyItem : reviewReply.getReplies()) {
       String reply = replyItem.getReply();
       Integer score = replyItem.getScore();
       boolean isNotNegative = isNotNegativeReply(score);
@@ -171,7 +171,7 @@ public class PatchSetReviewer {
     }
   }
 
-  private OpenAiResponseContent getReviewReply(GerritChange change, String patchSet)
+  private AiResponseContent getReviewReply(GerritChange change, String patchSet)
       throws Exception {
     log.debug("Generating review reply for patch set.");
     List<String> patchLines = Arrays.asList(patchSet.split("\n"));
@@ -180,7 +180,7 @@ public class PatchSetReviewer {
           "Patch set too large for review, size: {}, max allowed: {}",
           patchLines.size(),
           config.getMaxReviewLines());
-      return new OpenAiResponseContent(String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines()));
+      return new AiResponseContent(String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines()));
     }
 
     return openAiClient.ask(changeSetData, change, patchSet);
@@ -203,7 +203,7 @@ public class PatchSetReviewer {
         && score >= config.getFilterCommentsBelowScore();
   }
 
-  private boolean isIrrelevantReply(OpenAiReplyItem replyItem) {
+  private boolean isIrrelevantReply(AiReplyItem replyItem) {
     return config.getFilterRelevantComments()
         && replyItem.getRelevance() != null
         && replyItem.getRelevance() < config.getFilterCommentsRelevanceThreshold();

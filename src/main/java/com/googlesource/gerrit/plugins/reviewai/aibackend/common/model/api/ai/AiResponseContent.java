@@ -14,18 +14,18 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.errors.exceptions;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai;
 
-public class OpenAiConnectionFailException extends Exception {
-  public OpenAiConnectionFailException() {
-    super("Failed to connect to OpenAI services");
-  }
+import lombok.Data;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
-  public OpenAiConnectionFailException(String message) {
-    super(message);
-  }
+import java.util.List;
 
-  public OpenAiConnectionFailException(Throwable cause) {
-    super(cause);
-  }
+@Data
+@RequiredArgsConstructor
+public class AiResponseContent {
+  private List<AiReplyItem> replies;
+  private String changeId;
+  @NonNull private String messageContent;
 }

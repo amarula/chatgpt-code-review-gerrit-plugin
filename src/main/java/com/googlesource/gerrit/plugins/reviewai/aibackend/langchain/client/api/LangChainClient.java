@@ -18,34 +18,35 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.client.api;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai.AiClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPromptFactory;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.memory.PluginChatMemoryStore;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiClientBase;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiResponseContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model.LangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.LangChainProviderFactory;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.ai.IAiClient;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
+import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.openai.OpenAiChatModel;
 import lombok.extern.slf4j.Slf4j;
-
-import java.time.Duration;
 
 import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.isJsonObjectAsString;
 import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.unwrapJsonCode;
 
 @Slf4j
 @Singleton
-public class LangChainClient extends OpenAiClientBase implements IAiClient {
+public class LangChainClient extends AiClientBase implements IAiClient {
 
   private static final String KEY_INSTRUCTIONS_ADDED = "lc_instructions_added";
 
@@ -68,7 +69,7 @@ public class LangChainClient extends OpenAiClientBase implements IAiClient {
   }
 
   @Override
-  public OpenAiResponseContent ask(
+  public AiResponseContent ask(
       ChangeSetData changeSetData, GerritChange change, String patchSet) throws Exception {
     try {
       // Build prompts
@@ -122,28 +123,19 @@ public class LangChainClient extends OpenAiClientBase implements IAiClient {
               ? Double.parseDouble(config.getAiCommentTemperature())
               : Double.parseDouble(config.getAiReviewTemperature());
 
-      String baseUrl = config.getAiDomain();
-      // Some providers expect `/v1`; only append for default OpenAI
-      if (Configuration.OPENAI_DOMAIN.equals(baseUrl)) {
-        baseUrl = baseUrl.endsWith("/v1") ? baseUrl : baseUrl + "/v1";
-      }
-
-      ChatModel model =
-          OpenAiChatModel.builder()
-              .baseUrl(baseUrl)
-              .apiKey(config.getAiToken())
-              .modelName(config.getAiModel())
-              .temperature(temperature)
-              .timeout(Duration.ofSeconds(config.getAiConnectionTimeout()))
-              .build();
+      LangChainProviders providerType = config.getLcProvider();
+      ILangChainProvider provider = LangChainProviderFactory.get(providerType);
+      LangChainProvider providerModel = provider.buildChatModel(config, temperature);
+      ChatModel model = providerModel.getModel();
 
       // Generate response using simple string interface for compatibility
       log.info(
-          "LangChain request for {} using model {} (temperature={}, baseUrl={})",
+          "LangChain request for {} using provider {} model {} (temperature={}, endpoint={})",
           memoryId,
+          providerType,
           config.getAiModel(),
           temperature,
-          baseUrl);
+          providerModel.getEndpoint());
 
       String responseText = model.chat(userMessage);
 
@@ -164,10 +156,10 @@ public class LangChainClient extends OpenAiClientBase implements IAiClient {
       if (isJsonObjectAsString(responseText)) {
         return convertResponseContentFromJson(unwrapJsonCode(responseText));
       }
-      return new OpenAiResponseContent(responseText);
+      return new AiResponseContent(responseText);
     } catch (Exception e) {
       log.warn("Error while processing LangChain request", e);
-      throw new OpenAiConnectionFailException(e);
+      throw new AiConnectionFailException(e);
     }
   }
 

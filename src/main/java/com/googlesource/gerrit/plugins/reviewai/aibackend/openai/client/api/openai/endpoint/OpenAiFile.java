@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiApiBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiFilesResponse;
@@ -34,7 +34,7 @@ public class OpenAiFile extends OpenAiApiBase {
     super(config);
   }
 
-  public OpenAiFilesResponse uploadFile(Path repoPath) throws OpenAiConnectionFailException {
+  public OpenAiFilesResponse uploadFile(Path repoPath) throws AiConnectionFailException {
     Request request = createUploadFileRequest(repoPath);
     log.debug("OpenAI Upload File request: {}", request);
 

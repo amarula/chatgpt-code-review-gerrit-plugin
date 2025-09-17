@@ -16,6 +16,7 @@
 
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
 
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiDialogueItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -25,7 +26,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @SuperBuilder
 @ToString(callSuper = true)
-public class OpenAiGetContextItem extends OpenAiDialogueItem {
+public class OpenAiGetContextItem extends AiDialogueItem {
   private String requestType;
   private String otherDescription;
   private String entityCategory;

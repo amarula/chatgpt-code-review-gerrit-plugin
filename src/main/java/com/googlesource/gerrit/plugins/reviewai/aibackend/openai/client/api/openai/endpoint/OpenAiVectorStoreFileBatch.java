@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiApiBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiCreateVectorStoreRequest;
@@ -35,7 +35,7 @@ public class OpenAiVectorStoreFileBatch extends OpenAiApiBase {
   }
 
   public OpenAiResponse createVectorStoreFileBatch(String vectorStoreId, List<String> fileIds)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     Request request = vectorStoreFileBatchCreateRequest(vectorStoreId, fileIds);
     log.debug("OpenAI Create Vector Store File Batch request: {}", request);
 

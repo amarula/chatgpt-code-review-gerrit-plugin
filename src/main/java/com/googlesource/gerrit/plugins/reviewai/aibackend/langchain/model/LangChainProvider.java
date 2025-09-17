@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model;
 
-import lombok.AccessLevel;
+import dev.langchain4j.model.chat.ChatModel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class OpenAiDialogueItem {
-  protected Integer id;
-  protected String filename;
-  protected Integer lineNumber;
-  protected String codeSnippet;
+@AllArgsConstructor
+public class LangChainProvider {
+  private ChatModel model;
+  private String endpoint;
 }

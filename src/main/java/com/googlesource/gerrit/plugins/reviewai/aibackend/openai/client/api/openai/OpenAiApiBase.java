@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRunResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -37,7 +37,7 @@ public abstract class OpenAiApiBase extends ClientBase {
   }
 
   public <T> T getOpenAiResponse(Request request, Class<T> clazz)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     log.debug("OpenAI Client request: {}", request);
     clientResponse = httpClient.execute(request);
     log.debug("OpenAI Client response: {}", clientResponse);
@@ -45,7 +45,7 @@ public abstract class OpenAiApiBase extends ClientBase {
     return jsonToClass(clientResponse, clazz);
   }
 
-  public OpenAiRunResponse getOpenAiResponse(Request request) throws OpenAiConnectionFailException {
+  public OpenAiRunResponse getOpenAiResponse(Request request) throws AiConnectionFailException {
     return getOpenAiResponse(request, OpenAiRunResponse.class);
   }
 }
