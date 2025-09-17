@@ -14,18 +14,19 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.code.context.ondemand;
 
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextItem;
 import lombok.Data;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
+@EqualsAndHashCode(callSuper = true)
 @Data
-@RequiredArgsConstructor
-public class OpenAiResponseContent {
-  private List<OpenAiReplyItem> replies;
-  private String changeId;
-  @NonNull private String messageContent;
+@SuperBuilder
+@ToString(callSuper = true)
+public class GetContextOutputItemOpen extends OpenAiGetContextItem {
+  private String definition;
+  private String body;
 }

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai;
 
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Data
-@SuperBuilder
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public abstract class OpenAiDialogueItem {
-  protected Integer id;
-  protected String filename;
-  protected Integer lineNumber;
-  protected String codeSnippet;
+@RequiredArgsConstructor
+public class AiResponseContent {
+  private List<AiReplyItem> replies;
+  private String changeId;
+  @NonNull private String messageContent;
 }

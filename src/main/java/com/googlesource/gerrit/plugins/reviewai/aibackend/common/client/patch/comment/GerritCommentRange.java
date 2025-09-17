@@ -21,7 +21,7 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerr
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritClient;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.patch.InlineCode;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.patch.diff.FileDiffProcessed;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiReplyItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiReplyItem;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritCodeRange;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,7 +40,7 @@ public class GerritCommentRange {
     log.debug("Initialized File Diffs processed : {}", fileDiffsProcessed);
   }
 
-  public Optional<GerritCodeRange> getGerritCommentRange(OpenAiReplyItem replyItem) {
+  public Optional<GerritCodeRange> getGerritCommentRange(AiReplyItem replyItem) {
     log.debug("Retrieving Gerrit comment range for reply item: {}", replyItem);
     Optional<GerritCodeRange> gerritCommentRange = Optional.empty();
     String filename = replyItem.getFilename();

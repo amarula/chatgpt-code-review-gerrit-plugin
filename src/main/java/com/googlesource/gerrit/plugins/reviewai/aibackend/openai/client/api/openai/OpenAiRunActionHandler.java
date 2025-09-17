@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
@@ -49,7 +49,7 @@ public class OpenAiRunActionHandler extends ClientBase {
   }
 
   public boolean runActionRequired(OpenAiRunResponse runResponse)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     log.debug("Response status: {}", runResponse.getStatus());
     if (OpenAiPoller.isActionRequired(runResponse.getStatus())) {
       actionRequiredRetries++;

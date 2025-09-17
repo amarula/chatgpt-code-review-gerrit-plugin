@@ -24,7 +24,7 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerr
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextItem;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.git.GitRepoFiles;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.code.context.ondemand.GetContextOutputItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.code.context.ondemand.GetContextOutputItemOpen;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ public class CodeContextBuilder extends ClientBase {
     if (replies == null || replies.isEmpty()) {
       return CONTEXT_NOT_PROVIDED;
     }
-    List<GetContextOutputItem> getContextOutput = new ArrayList<>();
+    List<GetContextOutputItemOpen> getContextOutput = new ArrayList<>();
     for (OpenAiGetContextItem openAiGetContextItem : replies) {
       IEntityLocator entityLocator;
       try {
@@ -66,8 +66,8 @@ public class CodeContextBuilder extends ClientBase {
             "Unable to find definition for `{}`", openAiGetContextItem.getContextRequiredEntity());
         definition = CONTEXT_NOT_PROVIDED;
       }
-      GetContextOutputItem getContextOutputItem =
-          GetContextOutputItem.builder()
+      GetContextOutputItemOpen getContextOutputItem =
+          GetContextOutputItemOpen.builder()
               .requestType(openAiGetContextItem.getRequestType())
               .entityCategory(openAiGetContextItem.getEntityCategory())
               .contextRequiredEntity(openAiGetContextItem.getContextRequiredEntity())

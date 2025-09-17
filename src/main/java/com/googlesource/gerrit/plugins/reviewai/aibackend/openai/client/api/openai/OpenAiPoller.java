@@ -17,7 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRunResponse;
 import com.googlesource.gerrit.plugins.reviewai.utils.TimeUtils;
 import lombok.Getter;
@@ -55,7 +55,7 @@ public class OpenAiPoller extends OpenAiApiBase {
   }
 
   public OpenAiRunResponse runPoll(String uri, OpenAiRunResponse pollResponse)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     long startTime = TimeUtils.getCurrentMillis();
 
     while (isPending(pollResponse.getStatus())) {
@@ -69,7 +69,7 @@ public class OpenAiPoller extends OpenAiApiBase {
       elapsedTime = (double) (TimeUtils.getCurrentMillis() - startTime) / 1000;
       if (elapsedTime >= pollingTimeout) {
         log.error("Polling timed out after {} seconds.", elapsedTime);
-        throw new OpenAiConnectionFailException();
+        throw new AiConnectionFailException();
       }
     }
     return pollResponse;

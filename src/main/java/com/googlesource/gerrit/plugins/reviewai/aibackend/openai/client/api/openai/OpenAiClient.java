@@ -22,12 +22,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.ResponseEmptyRepliesException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.ai.IAiClient;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiResponseContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint.OpenAiThread;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint.OpenAiThreadMessage;
@@ -39,7 +39,7 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.unwra
 
 @Slf4j
 @Singleton
-public class OpenAiClient extends OpenAiClientImpl implements IAiClient {
+public class OpenAiClient extends OpenAiClientBase implements IAiClient {
   public enum ReviewAssistantStages {
     REVIEW_CODE,
     REVIEW_COMMIT_MESSAGE,
@@ -67,50 +67,50 @@ public class OpenAiClient extends OpenAiClientImpl implements IAiClient {
     log.debug("Initialized OpenAiClient.");
   }
 
-  public OpenAiResponseContent ask(
+  public AiResponseContent ask(
       ChangeSetData changeSetData, GerritChange change, String patchSet)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     isCommentEvent = change.getIsCommentEvent();
     log.info(
         "Processing OPENAI OpenAI Request with changeId: {}, Patch Set: {}",
         change.getFullChangeId(),
         patchSet);
 
-    OpenAiResponseContent openAiResponseContent = null;
+    AiResponseContent aiResponseContent = null;
     for (int reiterate = 0; reiterate < MAX_REITERATION_REQUESTS; reiterate++) {
       try {
-        openAiResponseContent = askSingleRequest(changeSetData, change, patchSet);
+        aiResponseContent = askSingleRequest(changeSetData, change, patchSet);
       } catch (ResponseEmptyRepliesException | JsonSyntaxException e) {
         log.debug("Review response in incorrect format; Requesting resend with correct format.");
         changeSetData.setForcedStagedReview(true);
         changeSetData.setReviewAssistantStage(ReviewAssistantStages.REVIEW_REITERATED);
         continue;
       }
-      if (openAiResponseContent == null) {
+      if (aiResponseContent == null) {
         return null;
       }
       break;
     }
-    return openAiResponseContent;
+    return aiResponseContent;
   }
 
-  private OpenAiResponseContent askSingleRequest(
+  private AiResponseContent askSingleRequest(
       ChangeSetData changeSetData, GerritChange change, String patchSet)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     log.debug("Processing Single OpenAI Request");
     String threadId = createThreadWithMessage(changeSetData, change, patchSet);
     runThread(changeSetData, change, threadId);
-    OpenAiResponseContent openAiResponseContent = getResponseContentOpenAI(threadId);
+    AiResponseContent aiResponseContent = getResponseContentOpenAI(threadId);
     openAiRunHandler.cancelRun();
-    if (!isCommentEvent && openAiResponseContent.getReplies() == null) {
+    if (!isCommentEvent && aiResponseContent.getReplies() == null) {
       throw new ResponseEmptyRepliesException();
     }
-    return openAiResponseContent;
+    return aiResponseContent;
   }
 
   private String createThreadWithMessage(
       ChangeSetData changeSetData, GerritChange change, String patchSet)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     OpenAiThread openAiThread = new OpenAiThread(config, changeSetData, pluginDataHandlerProvider);
     String threadId = openAiThread.createThread();
     log.debug("Created OpenAI thread with ID: {}", threadId);
@@ -127,7 +127,7 @@ public class OpenAiClient extends OpenAiClientImpl implements IAiClient {
   }
 
   private void runThread(ChangeSetData changeSetData, GerritChange change, String threadId)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     openAiRunHandler =
         new OpenAiRunHandler(
             threadId, config, changeSetData, change, codeContextPolicy, pluginDataHandlerProvider);
@@ -135,8 +135,8 @@ public class OpenAiClient extends OpenAiClientImpl implements IAiClient {
     openAiRunHandler.pollRunStep();
   }
 
-  private OpenAiResponseContent getResponseContentOpenAI(String threadId)
-      throws OpenAiConnectionFailException {
+  private AiResponseContent getResponseContentOpenAI(String threadId)
+      throws AiConnectionFailException {
     return switch (openAiRunHandler.getFirstStepDetails().getType()) {
       case TYPE_MESSAGE_CREATION -> {
         log.debug("Retrieving thread message for thread ID: {}", threadId);
@@ -152,8 +152,8 @@ public class OpenAiClient extends OpenAiClientImpl implements IAiClient {
     };
   }
 
-  private OpenAiResponseContent retrieveThreadMessage(String threadId)
-      throws OpenAiConnectionFailException {
+  private AiResponseContent retrieveThreadMessage(String threadId)
+      throws AiConnectionFailException {
     OpenAiThreadMessage openAiThreadMessage = new OpenAiThreadMessage(threadId, config);
     String messageId = openAiRunHandler.getFirstStepDetails().getMessageCreation().getMessageId();
     log.debug("Retrieving message with ID: {}", messageId);
@@ -173,10 +173,10 @@ public class OpenAiClient extends OpenAiClientImpl implements IAiClient {
     }
 
     log.debug("Response text is not JSON, returning as is.");
-    return new OpenAiResponseContent(responseText);
+    return new AiResponseContent(responseText);
   }
 
-  private OpenAiResponseContent extractResponseContent(String responseText) {
+  private AiResponseContent extractResponseContent(String responseText) {
     log.debug("Extracting response content from JSON.");
     return convertResponseContentFromJson(unwrapJsonCode(responseText));
   }

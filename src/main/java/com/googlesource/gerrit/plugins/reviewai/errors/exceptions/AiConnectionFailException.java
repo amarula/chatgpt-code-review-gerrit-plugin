@@ -16,16 +16,16 @@
 
 package com.googlesource.gerrit.plugins.reviewai.errors.exceptions;
 
-public class OpenAiConnectionFailException extends Exception {
-  public OpenAiConnectionFailException() {
-    super("Failed to connect to OpenAI services");
+public class AiConnectionFailException extends Exception {
+  public AiConnectionFailException() {
+    super("Failed to connect to AI services");
   }
 
-  public OpenAiConnectionFailException(String message) {
+  public AiConnectionFailException(String message) {
     super(message);
   }
 
-  public OpenAiConnectionFailException(Throwable cause) {
+  public AiConnectionFailException(Throwable cause) {
     super(cause);
   }
 }

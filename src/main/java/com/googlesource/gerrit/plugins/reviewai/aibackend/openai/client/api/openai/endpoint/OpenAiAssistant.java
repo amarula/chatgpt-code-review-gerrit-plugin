@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.ope
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPromptFactory;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.prompt.AiPromptBase;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiParameters;
@@ -64,7 +64,7 @@ public class OpenAiAssistant extends OpenAiApiBase {
     temperature = openAiParameters.getAiTemperature();
   }
 
-  public String createAssistant(String vectorStoreId) throws OpenAiConnectionFailException {
+  public String createAssistant(String vectorStoreId) throws AiConnectionFailException {
     log.debug("Creating assistant with vector store ID: {}", vectorStoreId);
     Request request = createRequest(vectorStoreId);
     log.debug("OpenAI Create Assistant request: {}", request);

@@ -14,19 +14,15 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.code.context.ondemand;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model;
 
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextItem;
+import dev.langchain4j.model.chat.ChatModel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-@SuperBuilder
-@ToString(callSuper = true)
-public class GetContextOutputItem extends OpenAiGetContextItem {
-  private String definition;
-  private String body;
+@AllArgsConstructor
+public class LangChainProvider {
+  private ChatModel model;
+  private String endpoint;
 }
