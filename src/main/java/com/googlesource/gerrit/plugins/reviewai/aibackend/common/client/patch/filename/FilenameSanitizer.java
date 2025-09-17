@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.patch.f
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritClient;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiReplyItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiReplyItem;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -35,7 +35,7 @@ public class FilenameSanitizer {
     log.debug("Initialized Patch set files: {}", patchSetFiles);
   }
 
-  public void sanitizeFilename(OpenAiReplyItem replyItem) {
+  public void sanitizeFilename(AiReplyItem replyItem) {
     String filename = replyItem.getFilename();
     log.debug("Sanitizing filename: {}", filename);
     if (filename == null || filename.isEmpty() || patchSetFiles.contains(filename)) {

@@ -30,7 +30,7 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.A
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiResponseContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiListResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -206,7 +206,7 @@ public class OpenAiReviewTestBase extends ReviewTestBase {
             .get(tollCallId)
             .getFunction()
             .getArguments();
-    return jsonToClass(reviewJsonResponse, OpenAiResponseContent.class)
+    return jsonToClass(reviewJsonResponse, AiResponseContent.class)
         .getReplies()
         .get(0)
         .getReply();

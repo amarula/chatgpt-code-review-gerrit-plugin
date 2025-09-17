@@ -18,7 +18,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.ope
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
@@ -64,7 +64,7 @@ public class OpenAiRunHandler extends OpenAiApiBase {
     openAiPoller = new OpenAiPoller(config);
   }
 
-  public void setupRun() throws OpenAiConnectionFailException {
+  public void setupRun() throws AiConnectionFailException {
     OpenAiAssistantHandler openAiAssistantHandler =
         new OpenAiAssistantHandler(
             config, changeSetData, change, codeContextPolicy, pluginDataHandlerProvider);
@@ -72,8 +72,8 @@ public class OpenAiRunHandler extends OpenAiApiBase {
     runResponse = openAiRun.createRun();
   }
 
-  public void pollRunStep() throws OpenAiConnectionFailException {
-    OpenAiConnectionFailException exception = null;
+  public void pollRunStep() throws AiConnectionFailException {
+    AiConnectionFailException exception = null;
     codeContextPolicy.setupRunAction(openAiRun);
     for (int retries = 0; retries < MAX_STEP_RETRIEVAL_RETRIES; retries++) {
       runResponse =
@@ -86,7 +86,7 @@ public class OpenAiRunHandler extends OpenAiApiBase {
       log.debug("OpenAI Retrieve Run Steps request: {}", stepsRequest);
       try {
         stepResponse = getOpenAiResponse(stepsRequest, OpenAiListResponse.class);
-      } catch (OpenAiConnectionFailException e) {
+      } catch (AiConnectionFailException e) {
         exception = e;
         log.warn("Error retrieving run steps from OpenAI: {}", e.getMessage());
         threadSleep(STEP_RETRIEVAL_INTERVAL);
@@ -105,7 +105,7 @@ public class OpenAiRunHandler extends OpenAiApiBase {
       }
       return;
     }
-    throw new OpenAiConnectionFailException(exception);
+    throw new AiConnectionFailException(exception);
   }
 
   public OpenAiResponseMessage getFirstStepDetails() {

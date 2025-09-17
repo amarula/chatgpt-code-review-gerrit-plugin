@@ -18,7 +18,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.ope
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
@@ -55,7 +55,7 @@ public class OpenAiVectorStoreHandler extends ClientBase {
     openAiPoller = new OpenAiPoller(config);
   }
 
-  public String generateVectorStore() throws OpenAiConnectionFailException {
+  public String generateVectorStore() throws AiConnectionFailException {
     log.debug("Creating or retrieving vector store.");
     String vectorStoreId = projectDataHandler.getValue(KEY_VECTOR_STORE_ID);
     if (vectorStoreId == null) {
@@ -70,7 +70,7 @@ public class OpenAiVectorStoreHandler extends ClientBase {
     projectDataHandler.removeValue(KEY_VECTOR_STORE_FILE_BATCH_STATUS);
   }
 
-  private String createEmptyVectorStore() throws OpenAiConnectionFailException {
+  private String createEmptyVectorStore() throws AiConnectionFailException {
     log.debug("Creating empty Vector Store.");
     OpenAiVectorStore vectorStore = new OpenAiVectorStore(config, change);
     OpenAiResponse createVectorStoreResponse = vectorStore.createVectorStore();
@@ -82,7 +82,7 @@ public class OpenAiVectorStoreHandler extends ClientBase {
   }
 
   private void createVectorStoreFileBatch(String vectorStoreId, List<String> fileIds)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     log.debug("Creating Vector Store File Batch.");
     OpenAiVectorStoreFileBatch vectorStoreFileBatch = new OpenAiVectorStoreFileBatch(config);
     OpenAiResponse createVectorStoreFileBatchResponse =
@@ -96,7 +96,7 @@ public class OpenAiVectorStoreHandler extends ClientBase {
         createVectorStoreFileBatchResponse.getStatus());
   }
 
-  private String createVectorStore() throws OpenAiConnectionFailException {
+  private String createVectorStore() throws AiConnectionFailException {
     log.debug("Creating new vector store.");
     List<String> fileIds = openAiRepoUploader.uploadRepoFiles();
     String vectorStoreId = createEmptyVectorStore();
@@ -106,7 +106,7 @@ public class OpenAiVectorStoreHandler extends ClientBase {
   }
 
   private boolean checkVectorStoreStatus(String vectorStoreId)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     String vectorStoreFileBatchStatus =
         projectDataHandler.getValue(KEY_VECTOR_STORE_FILE_BATCH_STATUS);
     if (OpenAiPoller.isNotCompleted(vectorStoreFileBatchStatus)) {
@@ -132,7 +132,7 @@ public class OpenAiVectorStoreHandler extends ClientBase {
         KEY_VECTOR_STORE_FILE_BATCH_STATUS, vectorStoreFileBatchResponse.getStatus());
   }
 
-  private String validateVectorStore(String vectorStoreId) throws OpenAiConnectionFailException {
+  private String validateVectorStore(String vectorStoreId) throws AiConnectionFailException {
     int retries = 0;
     while (true) {
       retries++;
@@ -147,6 +147,6 @@ public class OpenAiVectorStoreHandler extends ClientBase {
       }
       vectorStoreId = createVectorStore();
     }
-    throw new OpenAiConnectionFailException("Error calculating Vector Store");
+    throw new AiConnectionFailException("Error calculating Vector Store");
   }
 }

@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.co
 import com.google.common.annotations.VisibleForTesting;
 import com.google.inject.Inject;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiTools;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
@@ -58,7 +58,7 @@ public class CodeContextPolicyOnDemand extends CodeContextPolicyBase implements 
 
   @Override
   public boolean runActionRequired(OpenAiRunResponse runResponse)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     log.debug("Checking Run Action Required with On-Demand code context policy");
     return openAiRunActionHandler.runActionRequired(runResponse);
   }

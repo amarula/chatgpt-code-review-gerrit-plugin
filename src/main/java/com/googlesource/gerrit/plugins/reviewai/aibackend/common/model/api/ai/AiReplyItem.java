@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.errors.exceptions;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai;
 
-public class ResponseEmptyRepliesException extends AiConnectionFailException {
-  public ResponseEmptyRepliesException() {
-    super("Invalid JSON format in response");
-  }
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
+
+@EqualsAndHashCode(callSuper = true)
+@Data
+@SuperBuilder
+public class AiReplyItem extends AiDialogueItem {
+  private String reply;
+  private Integer score;
+  private Double relevance;
+  private boolean repeated;
+  private boolean conflicting;
 }

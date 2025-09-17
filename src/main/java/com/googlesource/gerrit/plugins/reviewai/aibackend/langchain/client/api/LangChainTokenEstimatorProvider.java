@@ -17,18 +17,22 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.client.api;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.messages.LangChainMessageTextExtractor;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.LangChainProviderFactory;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
+import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
 import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.model.TokenCountEstimator;
-import dev.langchain4j.model.openai.OpenAiTokenCountEstimator;
-import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 class LangChainTokenEstimatorProvider {
 
   private static final long TOKEN_ESTIMATOR_TIMEOUT_MS = TimeUnit.SECONDS.toMillis(5);
+  private static final TokenCountEstimator APPROXIMATE_ESTIMATOR =
+      new ApproximateTokenCountEstimator();
 
   private final Configuration config;
 
@@ -47,22 +51,30 @@ class LangChainTokenEstimatorProvider {
       if (cachedEstimator != null) {
         return cachedEstimator;
       }
+      LangChainProviders provider = config.getLcProvider();
       try {
-        log.info("Initializing OpenAI token estimator for model {}", config.getAiModel());
+        log.info(
+            "Initializing {} token estimator for model {}", provider, config.getAiModel());
         TokenCountEstimator estimator =
-            CompletableFuture.supplyAsync(() -> new OpenAiTokenCountEstimator(config.getAiModel()))
+            CompletableFuture.supplyAsync(() -> createEstimator(provider))
                 .get(TOKEN_ESTIMATOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         cachedEstimator = estimator;
-        log.info("Initialized OpenAI token estimator for model {}", config.getAiModel());
+        log.info("Initialized {} token estimator for model {}", provider, config.getAiModel());
       } catch (Exception e) {
         log.warn(
-            "Failed to initialize OpenAI token estimator for model {}. Using approximate estimator.",
+            "Failed to initialize {} token estimator for model {}. Using approximate estimator.",
+            provider,
             config.getAiModel(),
             e);
-        cachedEstimator = new ApproximateTokenCountEstimator();
+        cachedEstimator = APPROXIMATE_ESTIMATOR;
       }
       return cachedEstimator;
     }
+  }
+
+  private TokenCountEstimator createEstimator(LangChainProviders provider) {
+    ILangChainProvider adapter = LangChainProviderFactory.get(provider);
+    return adapter.createTokenEstimator(config).orElse(APPROXIMATE_ESTIMATOR);
   }
 
   private static final class ApproximateTokenCountEstimator implements TokenCountEstimator {
