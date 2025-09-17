@@ -21,12 +21,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.OpenAiConnectionFailException;
+import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.ai.IAiClient;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiReplyItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiResponseContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiReplyItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,31 +49,31 @@ public class OpenAiClientTaskSpecific extends OpenAiClient implements IAiClient 
     log.debug("Initialized OpenAiClientTaskSpecific.");
   }
 
-  public OpenAiResponseContent ask(
+  public AiResponseContent ask(
       ChangeSetData changeSetData, GerritChange change, String patchSet)
-      throws OpenAiConnectionFailException {
+      throws AiConnectionFailException {
     log.debug("Task-specific OpenAI ask method called with changeId: {}", change.getFullChangeId());
     if (change.getIsCommentEvent()) {
       return super.ask(changeSetData, change, patchSet);
     }
-    List<OpenAiResponseContent> openAiResponseContents = new ArrayList<>();
+    List<AiResponseContent> aiResponseContents = new ArrayList<>();
     for (ReviewAssistantStages assistantStage : TASK_SPECIFIC_ASSISTANT_STAGES) {
       changeSetData.setReviewAssistantStage(assistantStage);
       log.debug("Processing stage: {}", assistantStage);
-      openAiResponseContents.add(super.ask(changeSetData, change, patchSet));
+      aiResponseContents.add(super.ask(changeSetData, change, patchSet));
     }
-    return mergeResponses(openAiResponseContents);
+    return mergeResponses(aiResponseContents);
   }
 
-  private OpenAiResponseContent mergeResponses(List<OpenAiResponseContent> openAiResponseContents) {
+  private AiResponseContent mergeResponses(List<AiResponseContent> aiResponseContents) {
     log.debug("Merging responses from different task-specific stages.");
-    OpenAiResponseContent mergedResponse = openAiResponseContents.remove(0);
-    for (OpenAiResponseContent openAiResponseContent : openAiResponseContents) {
-      List<OpenAiReplyItem> replies = openAiResponseContent.getReplies();
+    AiResponseContent mergedResponse = aiResponseContents.remove(0);
+    for (AiResponseContent aiResponseContent : aiResponseContents) {
+      List<AiReplyItem> replies = aiResponseContent.getReplies();
       if (replies != null) {
         mergedResponse.getReplies().addAll(replies);
       } else {
-        mergedResponse.setMessageContent(openAiResponseContent.getMessageContent());
+        mergedResponse.setMessageContent(aiResponseContent.getMessageContent());
       }
     }
     log.debug("Merged response content: {}", mergedResponse.getMessageContent());

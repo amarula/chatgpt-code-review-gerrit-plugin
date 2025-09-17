@@ -16,6 +16,7 @@
 
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
 
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiDialogueItem;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -27,7 +28,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class OpenAiMessageItem extends OpenAiDialogueItem {
+public class OpenAiMessageItem extends AiDialogueItem {
   private String request;
   private List<OpenAiRequestMessage> history;
 
