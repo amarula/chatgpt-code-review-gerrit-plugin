@@ -38,6 +38,8 @@ import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
@@ -52,10 +54,13 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.unwra
 @Singleton
 public class LangChainClient extends AiClientBase implements IAiClient {
 
+  private static final String FORMAT_REPLIES_SCHEMA_RESOURCE = "config/formatRepliesTool.json";
+
   private final ICodeContextPolicy codeContextPolicy;
   private final LangChainTokenEstimatorProvider tokenEstimatorProvider;
   private final GerritClient gerritClient;
   private final Localizer localizer;
+  private final ResponseFormat structuredResponseFormat;
 
   private String requestBody;
 
@@ -70,12 +75,15 @@ public class LangChainClient extends AiClientBase implements IAiClient {
     this.tokenEstimatorProvider = new LangChainTokenEstimatorProvider(config);
     this.gerritClient = gerritClient;
     this.localizer = localizer;
+    this.structuredResponseFormat =
+        new LangChainStructuredResponseFactory(FORMAT_REPLIES_SCHEMA_RESOURCE)
+            .loadStructuredResponseFormat();
     log.debug("Initialized LangChainClient");
   }
 
   @Override
-  public AiResponseContent ask(
-      ChangeSetData changeSetData, GerritChange change, String patchSet) throws Exception {
+  public AiResponseContent ask(ChangeSetData changeSetData, GerritChange change, String patchSet)
+      throws Exception {
     try {
       var prompt = AiPromptFactory.getAiPrompt(config, changeSetData, change, codeContextPolicy);
       String systemInstructions = prompt.getDefaultAiAssistantInstructions();
@@ -95,8 +103,7 @@ public class LangChainClient extends AiClientBase implements IAiClient {
 
       GerritClientData gerritClientData = gerritClient.getClientData(change);
       AiHistory aiHistory = new AiHistory(config, changeSetData, gerritClientData, localizer);
-      List<ChatMessage> history =
-          LangChainChatMessages.build(aiHistory, gerritClientData, change);
+      List<ChatMessage> history = LangChainChatMessages.build(aiHistory, gerritClientData, change);
       for (ChatMessage message : history) {
         memory.add(message);
       }
@@ -129,7 +136,12 @@ public class LangChainClient extends AiClientBase implements IAiClient {
           memorySnapshot.size(),
           memorySnapshot);
 
-      ChatResponse response = model.chat(memorySnapshot);
+      ChatRequest.Builder requestBuilder = ChatRequest.builder().messages(memorySnapshot);
+      if (structuredResponseFormat != null) {
+        requestBuilder.responseFormat(structuredResponseFormat);
+      }
+
+      ChatResponse response = model.chat(requestBuilder.build());
       AiMessage ai = response != null ? response.aiMessage() : null;
       String responseText = ai != null ? ai.text() : null;
 
