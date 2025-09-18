@@ -35,6 +35,24 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "03400c1e_22eb63a8",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0a9817a_a4244255",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7c20432a_5ebbf3a4",
@@ -48,6 +66,24 @@
       "writtenOn": "2025-09-17T16:44:47Z",
       "side": 1,
       "message": "Drop then this change",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "123887e0_33b779db",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7c20432a_5ebbf3a4",
       "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
@@ -69,6 +105,24 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "923c100b_363ed0fe",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c9669f8_5169a210",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0aa96428_7c539408",
@@ -82,6 +136,24 @@
       "writtenOn": "2025-09-17T16:44:47Z",
       "side": 1,
       "message": "Here",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "24d07b50_118ea3a8",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0aa96428_7c539408",
       "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
@@ -103,6 +175,24 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d5d1408a_c47695f9",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f605bb23_a3be36f6",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b8f42071_5b0a2eb5",
@@ -116,6 +206,24 @@
       "writtenOn": "2025-09-17T16:44:47Z",
       "side": 1,
       "message": "Here",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "51f69d88_51b27137",
+        "filename": "README.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8f42071_5b0a2eb5",
       "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
@@ -137,6 +245,24 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd710f2d_d109bdc8",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/reviewai/aibackend/common/client/http/HttpClient.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d602325_fa701c66",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "638f4ff8_3c5a56c0",
@@ -154,6 +280,24 @@
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "658f1785_47f8b90e",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/reviewai/aibackend/langchain/provider/gemini/GeminiLangChainProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "638f4ff8_3c5a56c0",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a4d5af00_3cc65868",
@@ -167,6 +311,24 @@
       "writtenOn": "2025-09-17T16:44:47Z",
       "side": 1,
       "message": "Again",
+      "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "66d6b318_83956178",
+        "filename": "src/main/java/com/googlesource/gerrit/plugins/reviewai/aibackend/langchain/provider/gemini/GeminiLangChainProvider.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-18T08:00:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4d5af00_3cc65868",
       "revId": "166c97a2bef61580b98df7376b67bb67c30b6977",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
