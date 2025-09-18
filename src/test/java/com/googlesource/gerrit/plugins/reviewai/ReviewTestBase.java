@@ -438,7 +438,7 @@ public class ReviewTestBase extends TestBase {
                   config, getCodeContextPolicy(), pluginDataHandlerProvider)
               : new OpenAiClient(config, getCodeContextPolicy(), pluginDataHandlerProvider);
       case LANGCHAIN ->
-          new LangChainClient(config, getCodeContextPolicy(), pluginDataHandlerProvider);
+          new LangChainClient(config, getCodeContextPolicy(), gerritClient, localizer);
     };
   }
 

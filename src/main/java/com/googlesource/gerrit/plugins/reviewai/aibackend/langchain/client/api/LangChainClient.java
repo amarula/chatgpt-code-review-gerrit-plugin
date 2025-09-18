@@ -20,25 +20,29 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai.AiClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritClient;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiHistory;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPromptFactory;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.memory.PluginChatMemoryStore;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.GerritClientData;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.messages.LangChainChatMessages;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model.LangChainProvider;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.LangChainProviderFactory;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
-import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.ai.IAiClient;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
 import dev.langchain4j.data.message.AiMessage;
-import dev.langchain4j.data.message.SystemMessage;
-import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.data.message.ChatMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.isJsonObjectAsString;
@@ -48,11 +52,10 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.unwra
 @Singleton
 public class LangChainClient extends AiClientBase implements IAiClient {
 
-  private static final String KEY_INSTRUCTIONS_ADDED = "lc_instructions_added";
-
   private final ICodeContextPolicy codeContextPolicy;
-  private final PluginDataHandlerProvider pluginDataHandlerProvider;
   private final LangChainTokenEstimatorProvider tokenEstimatorProvider;
+  private final GerritClient gerritClient;
+  private final Localizer localizer;
 
   private String requestBody;
 
@@ -60,11 +63,13 @@ public class LangChainClient extends AiClientBase implements IAiClient {
   public LangChainClient(
       Configuration config,
       ICodeContextPolicy codeContextPolicy,
-      PluginDataHandlerProvider pluginDataHandlerProvider) {
+      GerritClient gerritClient,
+      Localizer localizer) {
     super(config);
     this.codeContextPolicy = codeContextPolicy;
-    this.pluginDataHandlerProvider = pluginDataHandlerProvider;
     this.tokenEstimatorProvider = new LangChainTokenEstimatorProvider(config);
+    this.gerritClient = gerritClient;
+    this.localizer = localizer;
     log.debug("Initialized LangChainClient");
   }
 
@@ -72,7 +77,6 @@ public class LangChainClient extends AiClientBase implements IAiClient {
   public AiResponseContent ask(
       ChangeSetData changeSetData, GerritChange change, String patchSet) throws Exception {
     try {
-      // Build prompts
       var prompt = AiPromptFactory.getAiPrompt(config, changeSetData, change, codeContextPolicy);
       String systemInstructions = prompt.getDefaultAiAssistantInstructions();
       String userMessage = prompt.getDefaultAiThreadReviewMessage(patchSet);
@@ -81,43 +85,25 @@ public class LangChainClient extends AiClientBase implements IAiClient {
       log.info("LangChain system instructions for {}: {}", memoryId, systemInstructions);
       log.info("LangChain user prompt for {} patchSet {}: {}", memoryId, patchSet, userMessage);
 
-      // Prepare memory, persisted per change scope
-      var changeScope = pluginDataHandlerProvider.getChangeScope();
-      var memoryStore = new PluginChatMemoryStore(changeScope);
-      log.info("LangChain initializing chat memory for {}", memoryId);
       ChatMemory memory =
           TokenWindowChatMemory.builder()
               .id(memoryId)
               .maxTokens(config.getLcMaxMemoryTokens(), tokenEstimatorProvider.get())
-              .chatMemoryStore(memoryStore)
               .build();
-      log.info("LangChain chat memory ready for {}", memoryId);
 
-      // Add system instructions once per thread
-      String instructionsAdded = changeScope.getValue(KEY_INSTRUCTIONS_ADDED);
-      if (instructionsAdded == null || instructionsAdded.isEmpty()) {
-        try {
-          memory.add(SystemMessage.from(systemInstructions));
-        } catch (Throwable t) {
-          // Fallback for older method signatures
-          memory.add(new SystemMessage(systemInstructions));
-        }
-        log.info("LangChain system instructions added to memory for {}", memoryId);
-        changeScope.setValue(KEY_INSTRUCTIONS_ADDED, "true");
-        log.info("LangChain system instructions persisted for {}", memoryId);
+      memory.add(LangChainChatMessages.systemMessage(systemInstructions));
+
+      GerritClientData gerritClientData = gerritClient.getClientData(change);
+      AiHistory aiHistory = new AiHistory(config, changeSetData, gerritClientData, localizer);
+      List<ChatMessage> history =
+          LangChainChatMessages.build(aiHistory, gerritClientData, change);
+      for (ChatMessage message : history) {
+        memory.add(message);
       }
 
-      // Add user message
-      try {
-        log.info("LangChain adding user message to memory for {}", memoryId);
-        memory.add(UserMessage.from(userMessage));
-      } catch (Throwable t) {
-        memory.add(new UserMessage(userMessage));
-      }
-      log.info("LangChain user message stored in memory for {}", memoryId);
+      memory.add(LangChainChatMessages.userMessage(userMessage));
       requestBody = userMessage; // exposed for tests/inspection
 
-      // Build model from config
       double temperature =
           change.getIsCommentEvent()
               ? Double.parseDouble(config.getAiCommentTemperature())
@@ -128,7 +114,6 @@ public class LangChainClient extends AiClientBase implements IAiClient {
       LangChainProvider providerModel = provider.buildChatModel(config, temperature);
       ChatModel model = providerModel.getModel();
 
-      // Generate response using simple string interface for compatibility
       log.info(
           "LangChain request for {} using provider {} model {} (temperature={}, endpoint={})",
           memoryId,
@@ -137,16 +122,16 @@ public class LangChainClient extends AiClientBase implements IAiClient {
           temperature,
           providerModel.getEndpoint());
 
-      String responseText = model.chat(userMessage);
+      List<ChatMessage> memorySnapshot = memory.messages();
+      log.debug(
+          "LangChain memory prepared for {} with {} messages: {}",
+          memoryId,
+          memorySnapshot.size(),
+          memorySnapshot);
 
-      // Persist AI message into memory for continuity
-      AiMessage ai;
-      try {
-        ai = AiMessage.from(responseText);
-      } catch (Throwable t) {
-        ai = new AiMessage(responseText);
-      }
-      memory.add(ai);
+      ChatResponse response = model.chat(memorySnapshot);
+      AiMessage ai = response != null ? response.aiMessage() : null;
+      String responseText = ai != null ? ai.text() : null;
 
       if (responseText == null) {
         log.warn("LangChain model returned null response text");
