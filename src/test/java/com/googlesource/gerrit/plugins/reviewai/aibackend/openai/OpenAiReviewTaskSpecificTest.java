@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.openai;
 
 import com.github.tomakehurst.wiremock.stubbing.Scenario;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPromptFactory;
-import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiListResponse;
+import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
 import com.googlesource.gerrit.plugins.reviewai.utils.GsonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;

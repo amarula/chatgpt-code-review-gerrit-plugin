@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.openai;
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
@@ -27,12 +27,12 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gson.JsonArray;
 import com.googlesource.gerrit.plugins.reviewai.ReviewTestBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPromptFactory;
-import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
-import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
-import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiListResponse;
+import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
+import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
+import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.entity.ContentType;
 import org.mockito.ArgumentCaptor;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.openai;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.google.common.net.HttpHeaders;

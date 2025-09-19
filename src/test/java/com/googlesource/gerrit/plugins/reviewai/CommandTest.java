@@ -24,7 +24,7 @@ import com.google.gson.Gson;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.reviewai.listener.EventHandlerTask;
-import com.googlesource.gerrit.plugins.reviewai.openai.OpenAiReviewTestBase;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.OpenAiReviewTestBase;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
