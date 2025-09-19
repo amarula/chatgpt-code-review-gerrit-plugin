@@ -40,6 +40,8 @@ public class Configuration extends ConfigCore {
   public static final String GEMINI_DOMAIN = "https://generativelanguage.googleapis.com";
   public static final String MOONSHOT_DOMAIN = "https://api.moonshot.ai";
   public static final String DEFAULT_AI_MODEL = "gpt-4o";
+  public static final String DEFAULT_GEMINI_AI_MODEL = "gemini-2.5-flash";
+  public static final String DEFAULT_MOONSHOT_AI_MODEL = "moonshot-v1-8k";
   public static final double DEFAULT_AI_REVIEW_TEMPERATURE = 0.2;
   public static final double DEFAULT_AI_COMMENT_TEMPERATURE = 1.0;
 
@@ -172,7 +174,16 @@ public class Configuration extends ConfigCore {
   }
 
   public String getAiModel() {
-    return getString(KEY_AI_MODEL, DEFAULT_AI_MODEL);
+    String model = getString(KEY_AI_MODEL);
+    if (model != null && !model.isEmpty()) {
+      return model;
+    }
+
+    if (getAiBackend() == AiBackends.LANGCHAIN) {
+      return getDefaultLangChainModel();
+    }
+
+    return DEFAULT_AI_MODEL;
   }
 
   // The default system prompt/instructions are specified in the prompt files and are passed as a
@@ -368,6 +379,18 @@ public class Configuration extends ConfigCore {
   public List<String> getSelectiveLogLevelOverride() {
     return splitListIntoItems(
         KEY_SELECTIVE_LOG_LEVEL_OVERRIDE, DEFAULT_SELECTIVE_LOG_LEVEL_OVERRIDE);
+  }
+
+  private String getDefaultLangChainModel() {
+    return switch (getLcProvider()) {
+      case GEMINI -> DEFAULT_GEMINI_AI_MODEL;
+      case MOONSHOT -> DEFAULT_MOONSHOT_AI_MODEL;
+      case OPENAI -> DEFAULT_AI_MODEL;
+    };
+  }
+
+  private static boolean isBlank(String value) {
+    return value == null || value.isBlank();
   }
 
   public boolean isDefinedKey(String key) {
