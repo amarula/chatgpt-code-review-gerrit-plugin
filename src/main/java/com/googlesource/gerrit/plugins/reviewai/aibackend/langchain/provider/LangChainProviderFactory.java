@@ -17,6 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.gemini.GeminiLangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.moonshot.MoonshotLangChainProvider;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.openai.OpenAiLangChainProvider;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
 import com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
@@ -25,6 +26,7 @@ public final class LangChainProviderFactory {
 
   private static final ILangChainProvider OPENAI_PROVIDER = new OpenAiLangChainProvider();
   private static final ILangChainProvider GEMINI_PROVIDER = new GeminiLangChainProvider();
+  private static final ILangChainProvider MOONSHOT_PROVIDER = new MoonshotLangChainProvider();
 
   private LangChainProviderFactory() {}
 
@@ -32,6 +34,7 @@ public final class LangChainProviderFactory {
     return switch (provider) {
       case OPENAI -> OPENAI_PROVIDER;
       case GEMINI -> GEMINI_PROVIDER;
+      case MOONSHOT -> MOONSHOT_PROVIDER;
     };
   }
 }

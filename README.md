@@ -140,7 +140,7 @@ OpenAI Backend uses the **Assistant** resource to maintain a richer interaction 
 ### LangChain Backend
 
 The LangChain backend relies on the LangChain framework to connect with an AI provider.
-OpenAI is used by default, and Google Gemini can also be selected when configuring the `lcProvider` parameter.
+OpenAI is used by default, and you can select Google Gemini or Moonshot by configuring the `lcProvider` parameter.
 
 ## Optional Parameters
 
@@ -248,8 +248,8 @@ directive = End each reply with \"Hope this helps!\"
 ### Optional Parameters Specific to LangChain Backend
 
 - `lcProvider`: Selects the LangChain provider (requires `aiBackend = LANGCHAIN`). Supported providers are `OPENAI`
-  (default) and `GEMINI`. When `GEMINI` is selected, the plugin connects to Google Gemini using the provided API token.
-  If `aiDomain` retains its default value, the Gemini endpoint is applied automatically.
+  (default), `GEMINI`, and `MOONSHOT`. When `GEMINI` is selected, the plugin connects to Google Gemini using the
+  provided API token. If `aiDomain` retains its default value, the Gemini endpoint is applied automatically.
 - `lcMaxMemoryTokens`: Maximum number of tokens retained in memory per Change. The default value is 16K.
 
 ### Optional Parameters for Global Configuration only
