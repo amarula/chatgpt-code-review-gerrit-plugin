@@ -88,6 +88,10 @@ public abstract class ConfigCore {
     return globalConfig.getString(key, defaultValue);
   }
 
+  public String getString(String key) {
+    return getString(key, null);
+  }
+
   public Locale getLocaleDefault() {
     return Locale.getDefault();
   }
