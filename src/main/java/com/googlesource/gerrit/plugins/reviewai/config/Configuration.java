@@ -38,6 +38,7 @@ public class Configuration extends ConfigCore {
   // Default Config values
   public static final String OPENAI_DOMAIN = "https://api.openai.com";
   public static final String GEMINI_DOMAIN = "https://generativelanguage.googleapis.com";
+  public static final String MOONSHOT_DOMAIN = "https://api.moonshot.ai";
   public static final String DEFAULT_AI_MODEL = "gpt-4o";
   public static final double DEFAULT_AI_REVIEW_TEMPERATURE = 0.2;
   public static final double DEFAULT_AI_COMMENT_TEMPERATURE = 1.0;
