@@ -147,7 +147,8 @@ OpenAI is used by default, and you can select Google Gemini or Moonshot by confi
 - `aiBackend`: Selects the AI Backend for request processing. The currently supported Backend options are:
     - **OPENAI** (The default value)
     - **LANGCHAIN**
-- `aiModel`: The default model is `gpt-4o`. You can also configure it to `gpt-3.5-turbo` or `gpt-4-turbo`.
+- `aiModel`: Default models vary by provider. OpenAI uses `gpt-4o`, Gemini uses `gemini-2.5-flash` and Moonshot
+  `moonshot-v1-8k`. You can override the setting with other compatible models such as `gpt-4.1` or `gemini-2.5-pro`.
 - `aiSystemPromptInstructions`: You can customize the default instructions ("Act as a PatchSet Reviewer") to your
   preferred prompt.
 - `aiReviewTemperature`: Specifies the temperature setting for AI when reviewing a Patch Set, with a default
