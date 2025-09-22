@@ -89,7 +89,8 @@ public abstract class ConfigCore {
   }
 
   public String getString(String key) {
-    return getString(key, null);
+    // Use getString(key, "") instead of getString(key) to avoid inconsistencies in mock behavior.
+    return getString(key, "");
   }
 
   public Locale getLocaleDefault() {

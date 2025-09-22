@@ -270,8 +270,10 @@ directive = End each reply with \"Hope this helps!\"
 
 These parameters are specific to connecting with the OpenAI server and should only be modified by advanced users:
 
-- `aiDomain`: Specifies the base domain for the OpenAI-compatible API. By default it points to `https://api.openai.com`;
-  when `lcProvider = GEMINI` and this value is unchanged, the plugin uses the Google Gemini endpoint automatically.
+- `aiDomain`: Specifies the base domain for the OpenAI-compatible API. Defaults match the selected backend:
+  `https://api.openai.com` for OpenAI and for LangChain `OPENAI`, `https://generativelanguage.googleapis.com` for
+  `GEMINI`, and `https://api.moonshot.ai` for `MOONSHOT`. Override only when you need a custom endpoint; leaving it
+  unset lets the plugin pick the provider default automatically.
 - `aiConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
 - `aiPollingTimeout`: Sets the timeout for terminating OpenAI polling on requests, defaulting to 180 seconds.
 - `getPollingInterval`: Sets the interval for OpenAI polling on requests, defaulting to 1 second.
