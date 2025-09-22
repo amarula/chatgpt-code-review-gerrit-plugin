@@ -170,7 +170,16 @@ public class Configuration extends ConfigCore {
   }
 
   public String getAiDomain() {
-    return getString(KEY_AI_DOMAIN, OPENAI_DOMAIN);
+    String aiDomain = getString(KEY_AI_DOMAIN);
+    if (aiDomain != null && !aiDomain.isEmpty()) {
+      return aiDomain;
+    }
+
+    if (getAiBackend() == AiBackends.LANGCHAIN) {
+      return getDefaultLangChainDomain();
+    }
+
+    return OPENAI_DOMAIN;
   }
 
   public String getAiModel() {
@@ -386,6 +395,14 @@ public class Configuration extends ConfigCore {
       case GEMINI -> DEFAULT_GEMINI_AI_MODEL;
       case MOONSHOT -> DEFAULT_MOONSHOT_AI_MODEL;
       case OPENAI -> DEFAULT_AI_MODEL;
+    };
+  }
+
+  private String getDefaultLangChainDomain() {
+    return switch (getLcProvider()) {
+      case GEMINI -> GEMINI_DOMAIN;
+      case MOONSHOT -> MOONSHOT_DOMAIN;
+      case OPENAI -> OPENAI_DOMAIN;
     };
   }
 
