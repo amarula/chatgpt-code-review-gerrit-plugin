@@ -147,6 +147,10 @@ OpenAI is used by default, and you can select Google Gemini or Moonshot by confi
 - `aiBackend`: Selects the AI Backend for request processing. The currently supported Backend options are:
     - **OPENAI** (The default value)
     - **LANGCHAIN**
+- `aiDomain`: Specifies the base domain for the OpenAI-compatible API. Defaults match the selected provider (whether
+  connected directly or via LangChain): `https://api.openai.com` for OpenAI, `https://generativelanguage.googleapis.com`
+  for Gemini, and `https://api.moonshot.ai` for Moonshot. Override only when you need a custom endpoint; leaving it
+  unset lets the plugin pick the provider default automatically.
 - `aiModel`: Default models vary by provider. OpenAI uses `gpt-4o`, Gemini uses `gemini-2.5-flash` and Moonshot
   `moonshot-v1-8k`. You can override the setting with other compatible models such as `gpt-4.1` or `gemini-2.5-pro`.
 - `aiSystemPromptInstructions`: You can customize the default instructions ("Act as a PatchSet Reviewer") to your
@@ -269,8 +273,6 @@ directive = End each reply with \"Hope this helps!\"
 
 These parameters are specific to connecting with the OpenAI server and should only be modified by advanced users:
 
-- `aiDomain`: Specifies the base domain for the OpenAI-compatible API. By default it points to `https://api.openai.com`;
-  when `lcProvider = GEMINI` and this value is unchanged, the plugin uses the Google Gemini endpoint automatically.
 - `aiConnectionTimeout`: Defines the timeout for connections to the OpenAI server, with a default of 30 seconds.
 - `aiPollingTimeout`: Sets the timeout for terminating OpenAI polling on requests, defaulting to 180 seconds.
 - `getPollingInterval`: Sets the interval for OpenAI polling on requests, defaulting to 1 second.
