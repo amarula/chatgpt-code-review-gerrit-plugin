@@ -186,10 +186,10 @@ public class GerritClientReview extends GerritClientAccount {
                       range.startLine,
                       range.endLine);
                 });
-        unresolved = !config.getInlineCommentsAsResolved();
+        unresolved = !config.inlineCommentsAsResolved();
         log.debug("Comment for file '{}' is marked as unresolved: {}", filename, unresolved);
       } else {
-        unresolved = !config.getPatchSetCommentsAsResolved();
+        unresolved = !config.patchSetCommentsAsResolved();
         log.debug(
             "Patch set comment for file '{}' is marked as unresolved: {}", filename, unresolved);
       }

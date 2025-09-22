@@ -139,8 +139,8 @@ public class ReviewTestBase extends TestBase {
   @Before
   public void before() throws RestApiException {
     initGlobalAndProjectConfig();
-    initConfig();
     setupMockRequests();
+    initConfig();
     initComparisonContent();
     initTest();
   }
@@ -175,13 +175,21 @@ public class ReviewTestBase extends TestBase {
     projectConfig = mock(PluginConfig.class);
 
     // Mock the Project Config values
-    when(projectConfig.getBoolean(Mockito.eq("isEnabled"), Mockito.anyBoolean())).thenReturn(true);
+    lenient()
+        .when(projectConfig.getBoolean(Mockito.eq("isEnabled"), Mockito.anyBoolean()))
+        .thenReturn(true);
+    lenient().when(projectConfig.getString("isEnabled")).thenReturn("true");
   }
 
   protected void initConfig() {
     config =
         new Configuration(
             context, gerritApi, globalConfig, projectConfig, "ai@email.com", Account.id(1000000));
+  }
+
+  protected void rebuildConfiguration() throws RestApiException {
+    initConfig();
+    initTest();
   }
 
   protected void setupMockRequests() throws RestApiException {
@@ -327,7 +335,7 @@ public class ReviewTestBase extends TestBase {
   protected void initTest() {
     changeSetData =
         new ChangeSetData(
-            AI_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getVotingMaxScore());
+            AI_USER_ACCOUNT_ID, config.votingMinScore(), config.votingMaxScore());
     when(changeSetDataProvider.get()).thenReturn(changeSetData);
 
     localizer = new Localizer(config);
@@ -359,7 +367,7 @@ public class ReviewTestBase extends TestBase {
   }
 
   protected ICodeContextPolicy getCodeContextPolicy() {
-    return switch (config.getCodeContextPolicy()) {
+    return switch (config.codeContextPolicy()) {
       case NONE -> new CodeContextPolicyNone(config);
       case ON_DEMAND -> new CodeContextPolicyOnDemand(config, getGerritChange(), gitRepoFiles);
       case UPLOAD_ALL ->
@@ -431,9 +439,9 @@ public class ReviewTestBase extends TestBase {
   }
 
   private IAiClient getOpenAIClient() {
-    return switch (config.getAiBackend()) {
+    return switch (config.aiBackend()) {
       case OPENAI ->
-          config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants()
+          config.aiReviewCommitMessages() && config.taskSpecificAssistants()
               ? new OpenAiClientTaskSpecific(
                   config, getCodeContextPolicy(), pluginDataHandlerProvider)
               : new OpenAiClient(config, getCodeContextPolicy(), pluginDataHandlerProvider);
@@ -443,7 +451,7 @@ public class ReviewTestBase extends TestBase {
   }
 
   private IGerritClientPatchSet getGerritClientPatchSet() {
-    return switch (config.getAiBackend()) {
+    return switch (config.aiBackend()) {
       case OPENAI, LANGCHAIN -> new GerritClientPatchSetOpenAi(config, accountCacheMock);
     };
   }

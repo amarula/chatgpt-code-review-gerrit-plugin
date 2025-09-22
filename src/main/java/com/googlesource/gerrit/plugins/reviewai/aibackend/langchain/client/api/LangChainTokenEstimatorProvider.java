@@ -51,20 +51,20 @@ class LangChainTokenEstimatorProvider {
       if (cachedEstimator != null) {
         return cachedEstimator;
       }
-      LangChainProviders provider = config.getLcProvider();
+      LangChainProviders provider = config.lcProvider();
       try {
         log.info(
-            "Initializing {} token estimator for model {}", provider, config.getAiModel());
+            "Initializing {} token estimator for model {}", provider, config.aiModel());
         TokenCountEstimator estimator =
             CompletableFuture.supplyAsync(() -> createEstimator(provider))
                 .get(TOKEN_ESTIMATOR_TIMEOUT_MS, TimeUnit.MILLISECONDS);
         cachedEstimator = estimator;
-        log.info("Initialized {} token estimator for model {}", provider, config.getAiModel());
+        log.info("Initialized {} token estimator for model {}", provider, config.aiModel());
       } catch (Exception e) {
         log.warn(
             "Failed to initialize {} token estimator for model {}. Using approximate estimator.",
             provider,
-            config.getAiModel(),
+            config.aiModel(),
             e);
         cachedEstimator = APPROXIMATE_ESTIMATOR;
       }

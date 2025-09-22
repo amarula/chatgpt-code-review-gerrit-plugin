@@ -21,6 +21,7 @@ import com.google.gerrit.extensions.common.CommentInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.json.OutputFormat;
 import com.google.gson.Gson;
+import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.reviewai.listener.EventHandlerTask;
@@ -78,8 +79,10 @@ public class CommandTest extends OpenAiReviewTestBase {
     mockGerritChangeCommentsApiCall(comments);
   }
 
-  private void enableMessageDebugging() {
-    when(config.getEnableMessageDebugging()).thenReturn(true);
+  private void enableMessageDebugging() throws RestApiException {
+    when(globalConfig.getBoolean(Mockito.eq("enableMessageDebugging"), Mockito.anyBoolean()))
+        .thenReturn(true);
+    rebuildConfiguration();
   }
 
   private PluginDataHandler getChangeDataHandler() {
@@ -110,6 +113,7 @@ public class CommandTest extends OpenAiReviewTestBase {
   public void commandReview() throws RestApiException {
     when(globalConfig.getBoolean(Mockito.eq("enabledVoting"), Mockito.anyBoolean()))
         .thenReturn(true);
+    rebuildConfiguration();
 
     setupCommandComment("/review");
     String reviewMessage = readTestFile("__files/commands/review.json");

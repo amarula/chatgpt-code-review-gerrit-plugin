@@ -175,12 +175,12 @@ public class PatchSetReviewer {
       throws Exception {
     log.debug("Generating review reply for patch set.");
     List<String> patchLines = Arrays.asList(patchSet.split("\n"));
-    if (patchLines.size() > config.getMaxReviewLines()) {
+    if (patchLines.size() > config.maxReviewLines()) {
       log.warn(
           "Patch set too large for review, size: {}, max allowed: {}",
           patchLines.size(),
-          config.getMaxReviewLines());
-      return new AiResponseContent(String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines()));
+          config.maxReviewLines());
+      return new AiResponseContent(String.format(SPLIT_REVIEW_MSG, config.maxReviewLines()));
     }
 
     return openAiClient.ask(changeSetData, change, patchSet);
@@ -188,7 +188,7 @@ public class PatchSetReviewer {
 
   private Integer getReviewScore(GerritChange change) {
     log.debug("Calculating review score for change ID: {}", change.getFullChangeId());
-    if (config.isVotingEnabled()) {
+    if (config.enabledVoting()) {
       return change.getIsCommentEvent()
           ? null
           : (reviewScores.isEmpty() ? 0 : Collections.min(reviewScores));
@@ -199,13 +199,13 @@ public class PatchSetReviewer {
 
   private boolean isNotNegativeReply(Integer score) {
     return score != null
-        && config.getFilterNegativeComments()
-        && score >= config.getFilterCommentsBelowScore();
+        && config.filterNegativeComments()
+        && score >= config.filterCommentsBelowScore();
   }
 
   private boolean isIrrelevantReply(AiReplyItem replyItem) {
-    return config.getFilterRelevantComments()
+    return config.filterRelevantComments()
         && replyItem.getRelevance() != null
-        && replyItem.getRelevance() < config.getFilterCommentsRelevanceThreshold();
+        && replyItem.getRelevance() < config.filterCommentsRelevanceThreshold();
   }
 }

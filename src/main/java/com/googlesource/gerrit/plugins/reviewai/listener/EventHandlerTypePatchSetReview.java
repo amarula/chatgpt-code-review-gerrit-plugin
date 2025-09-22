@@ -75,7 +75,7 @@ public class EventHandlerTypePatchSetReview implements IEventHandlerType {
   }
 
   private boolean isPatchSetReviewEnabled(GerritChange change) {
-    if (!config.getAiReviewPatchSet()) {
+    if (!config.aiReviewPatchSet()) {
       log.debug("OpenAI review of patch sets is disabled in configuration.");
       return false;
     }

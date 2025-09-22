@@ -148,7 +148,7 @@ public class AiPrompt {
   public String getPatchSetReviewPromptInstructions() {
     log.debug("Getting patch set review prompt instructions.");
     List<String> attributes = new ArrayList<>(PATCH_SET_REVIEW_REPLY_ATTRIBUTES);
-    if (config.isVotingEnabled() || config.getFilterNegativeComments()) {
+    if (config.enabledVoting() || config.filterNegativeComments()) {
       updateScoreDescription();
     } else {
       attributes.remove(ATTRIBUTE_SCORE);
@@ -167,7 +167,10 @@ public class AiPrompt {
     String scoreDescription = DEFAULT_AI_REPLIES_ATTRIBUTES.get(ATTRIBUTE_SCORE);
     if (scoreDescription.contains("%d")) {
       scoreDescription =
-          String.format(scoreDescription, config.getVotingMinScore(), config.getVotingMaxScore());
+          String.format(
+              scoreDescription,
+              config.votingMinScore(),
+              config.votingMaxScore());
       DEFAULT_AI_REPLIES_ATTRIBUTES.put(ATTRIBUTE_SCORE, scoreDescription);
       log.debug("Updated score description to: {}", scoreDescription);
     }

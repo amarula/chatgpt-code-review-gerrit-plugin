@@ -28,14 +28,17 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.function.Function;
 
 import static com.googlesource.gerrit.plugins.reviewai.utils.CollectionUtils.arrayToList;
 import static com.googlesource.gerrit.plugins.reviewai.utils.StringUtils.*;
 
 @Slf4j
 public abstract class ConfigCore {
-  private static final Set<String> EXCLUDE_FROM_DUMP = Set.of("KEY_AI_TOKEN");
+  private static final Set<String> EXCLUDED_SETTING_KEYS = Set.of("aiToken");
   private static final String GLOBAL_CONFIG = "GlobalConfig";
   private static final String PROJECT_CONFIG = "ProjectConfig";
 
@@ -93,6 +96,10 @@ public abstract class ConfigCore {
     return getString(key, "");
   }
 
+  public <T> T get(ConfigurationSetting<T> setting) {
+    return setting.read(this);
+  }
+
   public Locale getLocaleDefault() {
     return Locale.getDefault();
   }
@@ -117,38 +124,65 @@ public abstract class ConfigCore {
     isDumpingConfig = true;
     try {
       for (Field field : configClass.getDeclaredFields()) {
-        String fieldName = field.getName();
-        log.debug("Processing dumping config field `{}`", fieldName);
-        if (!fieldName.startsWith(PREFIX_KEY) || EXCLUDE_FROM_DUMP.contains(fieldName)) {
-          continue;
-        }
-        String fieldValue = getFieldConfigValue(field);
-        String getterName = PREFIX_GETTER + capitalizeFirstLetter(fieldValue);
-        String configValue;
-        try {
-          configValue = configClass.getDeclaredMethod(getterName).invoke(this).toString();
-        } catch (NoSuchMethodException e) {
-          log.debug(
-              "Config field `{}` lacking getter method `{}` is excluded from the dump",
-              fieldName,
-              getterName);
-          continue;
-        }
-        log.debug(
-            "Config entities retrieved - Field Value: `{}`, Getter Name: `{}`, Config "
-                + "Value: `{}`",
-            fieldValue,
-            getterName,
-            configValue);
-        configMap.put(fieldValue, configValue);
+        setConfigField(field, configMap);
       }
       return configMap;
-    } catch (InvocationTargetException | IllegalAccessException e) {
+    } catch (IllegalAccessException e) {
       log.warn("Error retrieving configuration", e);
       return null;
     } finally {
       isDumpingConfig = false;
     }
+  }
+
+  private void setConfigField(Field field, TreeMap<String, String> configMap) throws IllegalAccessException {
+    if (!Modifier.isStatic(field.getModifiers())) {
+      return;
+    }
+    boolean isConfigurationSetting = ConfigurationSetting.class.isAssignableFrom(field.getType());
+    boolean isKeyField = field.getType().equals(String.class) && field.getName().startsWith(PREFIX_KEY);
+
+    if (!isConfigurationSetting && !isKeyField) {
+      log.debug("Skipping non-config field `{}`", field.getName());
+      return;
+    }
+    field.setAccessible(true);
+
+    if (isConfigurationSetting) {
+      ConfigurationSetting<?> setting = (ConfigurationSetting<?>) field.get(null);
+      if (setting == null) {
+        log.debug("Skipping null setting held by field `{}`", field.getName());
+        return;
+      }
+      if (EXCLUDED_SETTING_KEYS.contains(setting.key())) {
+        log.debug("Skipping excluded config key `{}`", setting.key());
+        return;
+      }
+      Object configValue = get(setting);
+      log.debug(
+          "Config entry retrieved - Field `{}`, Key `{}`, Value `{}`",
+          field.getName(),
+          setting.key(),
+          configValue);
+      configMap.put(setting.key(), configValue != null ? configValue.toString() : "");
+      return;
+    }
+    String key = getFieldConfigValue(field);
+    if (EXCLUDED_SETTING_KEYS.contains(key)) {
+      log.debug("Skipping excluded config key `{}`", key);
+      return;
+    }
+    if (configMap.containsKey(key)) {
+      log.debug("Key `{}` already captured, skipping field `{}`", key, field.getName());
+      return;
+    }
+    String value = getValueFromMethods(key, this::getString);
+    log.debug(
+        "Config key retrieved from field `{}` - Key `{}`, Value `{}`",
+        field.getName(),
+        key,
+        value);
+    configMap.put(key, value != null ? value : "");
   }
 
   protected String getValidatedOrThrow(String key) {
@@ -187,13 +221,13 @@ public abstract class ConfigCore {
     return Double.parseDouble(getString(key, String.valueOf(defaultValue)));
   }
 
-  protected <T extends Enum<T>> T getEnum(String key, String defaultValue, Class<T> enumClass) {
-    String value = getString(key, defaultValue);
+  protected <T extends Enum<T>> T getEnum(String key, T defaultValue, Class<T> enumClass) {
+    String value = getString(key, defaultValue.name());
     try {
       return Enum.valueOf(enumClass, value);
     } catch (IllegalArgumentException e) {
       unknownEnumSettings.add(key);
-      return Enum.valueOf(enumClass, defaultValue);
+      return defaultValue;
     }
   }
 
@@ -240,5 +274,35 @@ public abstract class ConfigCore {
   private String getFieldConfigValue(Field field) throws IllegalAccessException {
     field.setAccessible(true);
     return field.get(null).toString();
+  }
+
+  private String getValueFromMethods(String key, Function<String, String> directSupplier) {
+    String directValue = directSupplier.apply(key);
+    if (directValue != null && !directValue.isEmpty()) {
+      return directValue;
+    }
+
+    String capitalizedKey = capitalizeFirstLetter(key);
+    List<String> candidateMethods = List.of(PREFIX_GETTER + capitalizedKey, key);
+
+    for (String methodName : candidateMethods) {
+      try {
+        Method method = this.getClass().getMethod(methodName);
+        method.setAccessible(true);
+        Object value = method.invoke(this);
+        if (value != null) {
+          String stringValue = value.toString();
+          if (!stringValue.isEmpty()) {
+            return stringValue;
+          }
+        }
+      } catch (NoSuchMethodException e) {
+        log.debug("No fallback method `{}` for key `{}`", methodName, key);
+      } catch (IllegalAccessException | InvocationTargetException e) {
+        log.debug("Unable to invoke fallback method `{}` for key `{}`", methodName, key, e);
+      }
+    }
+
+    return directValue != null ? directValue : "";
   }
 }

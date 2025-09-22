@@ -55,7 +55,7 @@ public class CodeReviewPluginIT {
 
   @Test
   public void getPatchSet() throws Exception {
-    when(config.getGerritUserName()).thenReturn("Your Gerrit username");
+    when(config.gerritUserName()).thenReturn("Your Gerrit username");
 
     String patchSet = gerritClient.getPatchSet("${changeId}");
     log.info("patchSet: {}", patchSet);
@@ -65,9 +65,9 @@ public class CodeReviewPluginIT {
   @Test
   public void setReview() throws Exception {
     ChangeSetData changeSetData =
-        new ChangeSetData(1, config.getVotingMinScore(), config.getVotingMaxScore());
+        new ChangeSetData(1, config.votingMinScore(), config.votingMaxScore());
     Localizer localizer = new Localizer(config);
-    when(config.getGerritUserName()).thenReturn("Your Gerrit username");
+    when(config.gerritUserName()).thenReturn("Your Gerrit username");
 
     List<ReviewBatch> reviewBatches = new ArrayList<>();
     reviewBatches.add(new ReviewBatch("message"));

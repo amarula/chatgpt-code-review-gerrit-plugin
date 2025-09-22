@@ -60,7 +60,7 @@ public class OpenAiAssistant extends OpenAiApiBase {
     this.codeContextPolicy = codeContextPolicy;
     description = aiPromptOpenAi.getDefaultAiAssistantDescription();
     instructions = aiPromptOpenAi.getDefaultAiAssistantInstructions();
-    model = config.getAiModel();
+    model = config.aiModel();
     temperature = openAiParameters.getAiTemperature();
   }
 

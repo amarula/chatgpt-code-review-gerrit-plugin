@@ -39,8 +39,8 @@ public class GerritClientAccount extends GerritClientBase {
   }
 
   public boolean isDisabledUser(String authorUsername) {
-    List<String> enabledUsers = config.getEnabledUsers();
-    List<String> disabledUsers = config.getDisabledUsers();
+    List<String> enabledUsers = config.enabledUsers();
+    List<String> disabledUsers = config.disabledUsers();
     boolean isDisabled =
         !enabledUsers.contains(Configuration.ENABLED_USERS_ALL)
                 && !enabledUsers.contains(authorUsername)
@@ -51,8 +51,8 @@ public class GerritClientAccount extends GerritClientBase {
   }
 
   public boolean isDisabledTopic(String topic) {
-    List<String> enabledTopicFilter = config.getEnabledTopicFilter();
-    List<String> disabledTopicFilter = config.getDisabledTopicFilter();
+    List<String> enabledTopicFilter = config.enabledTopicFilter();
+    List<String> disabledTopicFilter = config.disabledTopicFilter();
     boolean isDisabled =
         !enabledTopicFilter.contains(Configuration.ENABLED_TOPICS_ALL)
                 && enabledTopicFilter.stream().noneMatch(topic::contains)
@@ -96,8 +96,8 @@ public class GerritClientAccount extends GerritClientBase {
   }
 
   private boolean isDisabledUserGroup(String authorUsername) {
-    List<String> enabledGroups = config.getEnabledGroups();
-    List<String> disabledGroups = config.getDisabledGroups();
+    List<String> enabledGroups = config.enabledGroups();
+    List<String> disabledGroups = config.disabledGroups();
     if (enabledGroups.isEmpty() && disabledGroups.isEmpty()) {
       return false;
     }

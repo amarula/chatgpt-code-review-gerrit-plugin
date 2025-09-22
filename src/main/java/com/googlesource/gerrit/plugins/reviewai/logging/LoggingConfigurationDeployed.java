@@ -35,7 +35,7 @@ public class LoggingConfigurationDeployed {
     Appender appender = logger.getAppender("error_log");
     PluginDataHandler globalDataHandler = pluginDataHandlerBaseProvider.get();
     String originalLogLevelStr = globalDataHandler.getValue(ORIGINAL_LOG_LEVEL);
-    List<String> selectiveLogLevelOverride = config.getSelectiveLogLevelOverride();
+    List<String> selectiveLogLevelOverride = config.selectiveLogLevelOverride();
     log.debug("Logger configured for selective override: {} - Appender: {}", logger, appender);
     if (selectiveLogLevelOverride.isEmpty()) {
       if (originalLogLevelStr != null) {

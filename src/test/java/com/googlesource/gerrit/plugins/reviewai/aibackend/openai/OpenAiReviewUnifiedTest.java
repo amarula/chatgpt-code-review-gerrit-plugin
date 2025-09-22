@@ -79,6 +79,7 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
                             + FAILED_STATUS
                             + "}")));
     when(globalConfig.getInt(Mockito.eq("aiPollingInterval"), Mockito.anyInt())).thenReturn(0);
+    rebuildConfigurationUnchecked();
   }
 
   @Test
@@ -113,12 +114,21 @@ public class OpenAiReviewUnifiedTest extends OpenAiReviewTestBase {
         .thenReturn(2);
     when(globalConfig.getInt(Mockito.eq("aiConnectionRetryInterval"), Mockito.anyInt()))
         .thenReturn(0);
+    rebuildConfigurationUnchecked();
 
     handleEventBasedOnType(SupportedEvents.PATCH_SET_CREATED);
 
     Assert.assertEquals(
         localizer.getText("message.openai.connection.error"),
         changeSetData.getReviewSystemMessage());
+  }
+
+  private void rebuildConfigurationUnchecked() {
+    try {
+      rebuildConfiguration();
+    } catch (RestApiException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Test

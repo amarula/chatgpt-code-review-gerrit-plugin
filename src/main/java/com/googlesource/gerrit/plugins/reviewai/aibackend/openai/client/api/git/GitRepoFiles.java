@@ -50,7 +50,7 @@ public class GitRepoFiles {
   public List<String> getGitRepoFilesAsJson(Configuration config, GerritChange change) {
     log.debug("Getting Repository files as JSON");
     gitFileChunkBuilder = new GitFileChunkBuilder(config);
-    enabledFileExtensions = config.getEnabledFileExtensions();
+    enabledFileExtensions = config.enabledFileExtensions();
     try (Repository repository = openRepository(change)) {
       List<Map<String, String>> chunkedFileContent = listFilesWithContent(repository);
       return chunkedFileContent.stream()
@@ -63,7 +63,7 @@ public class GitRepoFiles {
 
   public List<FileEntry> getDirFiles(Configuration config, GerritChange change, String path) {
     log.debug("Getting files from selected directory");
-    enabledFileExtensions = config.getEnabledFileExtensions();
+    enabledFileExtensions = config.enabledFileExtensions();
     try (Repository repository = openRepository(change)) {
       Map<String, List<FileEntry>> dirFilesMap =
           getDirFilesMap(repository, PathFilter.create(path));

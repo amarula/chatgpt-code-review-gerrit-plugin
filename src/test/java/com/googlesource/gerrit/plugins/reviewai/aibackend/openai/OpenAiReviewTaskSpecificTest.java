@@ -35,7 +35,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import static com.googlesource.gerrit.plugins.reviewai.listener.EventHandlerTask.SupportedEvents;
 import static com.googlesource.gerrit.plugins.reviewai.settings.Settings.GERRIT_PATCH_SET_FILENAME;
 import static com.googlesource.gerrit.plugins.reviewai.utils.GsonUtils.getGson;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.class)
@@ -55,7 +55,8 @@ public class OpenAiReviewTaskSpecificTest extends OpenAiReviewTestBase {
   protected void initGlobalAndProjectConfig() {
     super.initGlobalAndProjectConfig();
 
-    when(globalConfig.getBoolean(Mockito.eq("taskSpecificAssistants"), Mockito.anyBoolean()))
+    lenient()
+        .when(globalConfig.getBoolean(Mockito.eq("taskSpecificAssistants"), Mockito.anyBoolean()))
         .thenReturn(true);
   }
 

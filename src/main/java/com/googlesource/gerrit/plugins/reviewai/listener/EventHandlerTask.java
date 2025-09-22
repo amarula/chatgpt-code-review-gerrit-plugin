@@ -171,10 +171,10 @@ public class EventHandlerTask implements Runnable {
 
   private boolean isReviewEnabled(GerritChange change) {
     List<String> enabledProjects =
-        Splitter.on(",").omitEmptyStrings().splitToList(config.getEnabledProjects());
-    if (!config.isGlobalEnable()
+        Splitter.on(",").omitEmptyStrings().splitToList(config.enabledProjects());
+    if (!config.globalEnable()
         && !enabledProjects.contains(change.getProjectNameKey().get())
-        && !config.isProjectEnable()) {
+        && !config.projectEnable()) {
       log.debug("The project {} is not enabled for review", change.getProjectNameKey());
       return false;
     }

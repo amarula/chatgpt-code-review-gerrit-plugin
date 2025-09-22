@@ -144,8 +144,8 @@ public class AiHistory extends AiComment {
 
   private boolean isInactiveComment(GerritComment comment) {
     boolean isInactive =
-        config.getIgnoreResolvedAiComments() && isFromAssistant(comment) && comment.isResolved()
-            || config.getIgnoreOutdatedInlineComments()
+        config.ignoreResolvedAiComments() && isFromAssistant(comment) && comment.isResolved()
+            || config.ignoreOutdatedInlineComments()
                 && comment.getOneBasedPatchSet() != revisionBase
                 && !comment.isPatchSetComment();
     log.debug("Checking if comment is inactive: {}", isInactive);

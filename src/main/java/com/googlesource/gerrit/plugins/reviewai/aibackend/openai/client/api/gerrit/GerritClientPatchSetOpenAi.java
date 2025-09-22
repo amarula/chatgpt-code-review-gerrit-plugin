@@ -75,7 +75,7 @@ public class GerritClientPatchSetOpenAi extends GerritClientPatchSet
   }
 
   private String filterPatch(String formattedPatch) {
-    if (config.getAiReviewCommitMessages()) {
+    if (config.aiReviewCommitMessages()) {
       String patchWithCommitMessage = filterPatchWithCommitMessage(formattedPatch);
       log.debug("Patch filtered to include commit messages: {}", patchWithCommitMessage);
       return patchWithCommitMessage;

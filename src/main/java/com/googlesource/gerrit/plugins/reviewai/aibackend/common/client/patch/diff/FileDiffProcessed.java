@@ -133,7 +133,7 @@ public class FileDiffProcessed {
       charToLineMapItem.put(startingPosition, lineNum);
     }
 
-    if (config.getAiFullFileReview() || !diffType.equals("ab")) {
+    if (config.aiFullFileReview() || !diffType.equals("ab")) {
       // Store the new field's value in the diff content for the Patch Set review
       // `reviewDiffContentItem`
       diffField.set(reviewDiffContentItem, content);
