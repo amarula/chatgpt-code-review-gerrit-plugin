@@ -56,6 +56,30 @@ public class ConfigurationDefaultsTest {
     assertEquals(Configuration.DEFAULT_AI_MODEL, configuration.getAiModel());
   }
 
+  @Test
+  public void shouldDefaultToLangChainGeminiDomainWhenUnset() {
+    Configuration configuration = createConfiguration(AiBackends.LANGCHAIN, LangChainProviders.GEMINI);
+    assertEquals(Configuration.GEMINI_DOMAIN, configuration.getAiDomain());
+  }
+
+  @Test
+  public void shouldDefaultToLangChainMoonshotDomainWhenUnset() {
+    Configuration configuration = createConfiguration(AiBackends.LANGCHAIN, LangChainProviders.MOONSHOT);
+    assertEquals(Configuration.MOONSHOT_DOMAIN, configuration.getAiDomain());
+  }
+
+  @Test
+  public void shouldDefaultToLangChainOpenAiDomainWhenUnset() {
+    Configuration configuration = createConfiguration(AiBackends.LANGCHAIN, LangChainProviders.OPENAI);
+    assertEquals(Configuration.OPENAI_DOMAIN, configuration.getAiDomain());
+  }
+
+  @Test
+  public void shouldDefaultToOpenAiDomainForNonLangChainBackend() {
+    Configuration configuration = createConfiguration(AiBackends.OPENAI, LangChainProviders.OPENAI);
+    assertEquals(Configuration.OPENAI_DOMAIN, configuration.getAiDomain());
+  }
+
   private Configuration createConfiguration(AiBackends backend, LangChainProviders provider) {
     PluginConfig projectConfig = emptyPluginConfig();
     PluginConfig globalConfig = pluginConfigWithBackend(backend, provider);
