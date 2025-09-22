@@ -42,7 +42,7 @@ public class OpenAiParameters extends ClientBase {
   }
 
   public boolean shouldSpecializeAssistants() {
-    return config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants();
+    return config.get(Configuration.REVIEW_COMMIT_MESSAGES) && config.get(Configuration.TASK_SPECIFIC_ASSISTANTS);
   }
 
   private Double retrieveTemperature(String temperatureKey, Double defaultTemperature) {

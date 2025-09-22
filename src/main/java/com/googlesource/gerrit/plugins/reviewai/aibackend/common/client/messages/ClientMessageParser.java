@@ -60,7 +60,7 @@ public class ClientMessageParser extends ClientMessageBase {
       log.debug(
           "Skipping action since the comment does not mention the AI bot."
               + " Expected bot name in comment: {}, Actual comment text: {}",
-          config.getGerritUserName(),
+          config.get(Configuration.GERRIT_USERNAME),
           message);
       return false;
     }

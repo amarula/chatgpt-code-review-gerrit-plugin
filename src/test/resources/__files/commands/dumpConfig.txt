@@ -60,15 +60,18 @@ enabledTopicFilter:
     ALL
 enabledUsers: 
     ALL
+enabledVoting: false
 filterCommentsBelowScore: 0
 filterCommentsRelevanceThreshold: 0.6
 filterNegativeComments: true
 filterRelevantComments: true
 forceCreateAssistant: false
 gerritUserName: gpt
+globalEnable: false
 ignoreOutdatedInlineComments: false
 ignoreResolvedAiComments: true
 inlineCommentsAsResolved: false
+isEnabled: true
 lcMaxMemoryTokens: 16384
 lcProvider: OPENAI
 maxReviewLines: 1000

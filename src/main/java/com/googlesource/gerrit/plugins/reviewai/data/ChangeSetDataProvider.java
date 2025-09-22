@@ -34,12 +34,14 @@ public class ChangeSetDataProvider implements Provider<ChangeSetData> {
   @Inject
   ChangeSetDataProvider(Configuration config, AccountCache accountCache) {
     this.config = config;
-    Optional<AccountState> accountState = accountCache.getByUsername(config.getGerritUserName());
+    Optional<AccountState> accountState = accountCache.getByUsername(config.get(Configuration.GERRIT_USERNAME));
     if (accountState.isPresent()) {
       aiAccountId = accountState.get().account().id().get();
       log.debug("AI account ID set to {}", aiAccountId);
     } else {
-      log.error("Failed to retrieve AI account ID for username {}", config.getGerritUserName());
+      log.error(
+          "Failed to retrieve AI account ID for username {}",
+          config.get(Configuration.GERRIT_USERNAME));
       throw new IllegalStateException("AI account not found for given username");
     }
   }
@@ -49,8 +51,11 @@ public class ChangeSetDataProvider implements Provider<ChangeSetData> {
     log.debug(
         "Providing ChangeSetData with accountId: {}, minScore: {}, maxScore: {}",
         aiAccountId,
-        config.getVotingMinScore(),
-        config.getVotingMaxScore());
-    return new ChangeSetData(aiAccountId, config.getVotingMinScore(), config.getVotingMaxScore());
+        config.get(Configuration.VOTING_MIN_SCORE),
+        config.get(Configuration.VOTING_MAX_SCORE));
+    return new ChangeSetData(
+        aiAccountId,
+        config.get(Configuration.VOTING_MIN_SCORE),
+        config.get(Configuration.VOTING_MAX_SCORE));
   }
 }

@@ -34,7 +34,7 @@ public class GitFileChunkBuilder {
   private long currentChunkSize = 0;
 
   public GitFileChunkBuilder(Configuration config) {
-    maxChunkSize = 1024 * 1024 * (long) config.getAiUploadedChunkSizeMb();
+    maxChunkSize = 1024 * 1024 * (long) config.get(Configuration.AI_UPLOADED_CHUNK_SIZE_MB);
   }
 
   public void addFiles(String path, List<FileEntry> fileEntries) {

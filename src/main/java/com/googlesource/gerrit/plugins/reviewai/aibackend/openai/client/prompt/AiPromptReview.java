@@ -58,7 +58,7 @@ public class AiPromptReview extends AiPromptBase implements IAiPrompt {
   @Override
   public void addAiAssistantInstructions(List<String> instructions) {
     addReviewInstructions(instructions);
-    if (config.getAiReviewCommitMessages()) {
+    if (config.get(Configuration.REVIEW_COMMIT_MESSAGES)) {
       instructions.add(getReviewPromptCommitMessages());
     }
     log.debug("AI Assistant Review Instructions added: {}", instructions);
@@ -94,8 +94,8 @@ public class AiPromptReview extends AiPromptBase implements IAiPrompt {
         List.of(
             DEFAULT_AI_ASSISTANT_INSTRUCTIONS_HISTORY,
             DEFAULT_AI_ASSISTANT_INSTRUCTIONS_FOCUS_PATCH_SET));
-    if (config.getDirective() != null) {
-      rules.addAll(config.getDirective());
+    if (config.get(Configuration.DIRECTIVES) != null) {
+      rules.addAll(config.get(Configuration.DIRECTIVES));
     }
     log.debug("Rules used in the assistant: {}", rules);
     return joinWithNewLine(

@@ -38,17 +38,17 @@ public class GeminiLangChainProvider implements ILangChainProvider {
 
   @Override
   public LangChainProvider buildChatModel(Configuration config, double temperature) {
-    String endpoint = config.getAiDomain();
+    String endpoint = config.get(Configuration.AI_DOMAIN);
     if (endpoint == null || endpoint.isBlank() || OPENAI_DOMAIN.equals(endpoint)) {
       endpoint = GEMINI_DOMAIN;
     }
 
     ChatModel model =
         GoogleAiGeminiChatModel.builder()
-            .apiKey(config.getAiToken())
-            .modelName(config.getAiModel())
+            .apiKey(config.get(Configuration.AI_TOKEN))
+            .modelName(config.get(Configuration.AI_MODEL))
             .temperature(temperature)
-            .timeout(Duration.ofSeconds(config.getAiConnectionTimeout()))
+            .timeout(Duration.ofSeconds(config.get(Configuration.AI_CONNECTION_TIMEOUT)))
             .build();
 
     return new LangChainProvider(model, endpoint);
@@ -60,11 +60,11 @@ public class GeminiLangChainProvider implements ILangChainProvider {
       return Optional.empty();
     }
     try {
-      String token = config.getAiToken();
+      String token = config.get(Configuration.AI_TOKEN);
       Class<?> estimatorClass = Class.forName(TOKEN_ESTIMATOR_CLASS);
       Object builder = estimatorClass.getMethod("builder").invoke(null);
       builder.getClass().getMethod("apiKey", String.class).invoke(builder, token);
-      builder.getClass().getMethod("modelName", String.class).invoke(builder, config.getAiModel());
+      builder.getClass().getMethod("modelName", String.class).invoke(builder, config.get(Configuration.AI_MODEL));
       Object estimator = builder.getClass().getMethod("build").invoke(builder);
       estimatorAvailable = true;
       return Optional.of((TokenCountEstimator) estimator);
@@ -83,7 +83,7 @@ public class GeminiLangChainProvider implements ILangChainProvider {
       estimatorAvailable = false;
       log.warn(
           "Google Gemini token estimator unavailable for model {}. Using approximate estimator.",
-          config.getAiModel(),
+          config.get(Configuration.AI_MODEL),
           t);
       return Optional.empty();
     }

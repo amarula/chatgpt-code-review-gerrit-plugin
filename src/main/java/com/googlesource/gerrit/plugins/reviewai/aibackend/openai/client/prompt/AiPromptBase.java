@@ -73,7 +73,7 @@ public abstract class AiPromptBase extends AiPrompt implements IAiPrompt {
     List<String> instructions =
         new ArrayList<>(
             List.of(
-                config.getAiSystemPromptInstructions(DEFAULT_AI_SYSTEM_PROMPT_INSTRUCTIONS)
+                config.aiSystemPromptInstructions(DEFAULT_AI_SYSTEM_PROMPT_INSTRUCTIONS)
                     + DOT));
     codeContextPolicy.addCodeContextPolicyAwareAssistantInstructions(instructions);
     addAiAssistantInstructions(instructions);
