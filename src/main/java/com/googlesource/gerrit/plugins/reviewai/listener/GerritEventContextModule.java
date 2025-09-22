@@ -75,9 +75,9 @@ public class GerritEventContextModule extends FactoryModule {
   }
 
   private Class<? extends IAiClient> getAiClient() {
-    return switch (config.getAiBackend()) {
+    return switch (config.get(Configuration.AI_BACKEND)) {
       case OPENAI ->
-          config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants()
+          config.get(Configuration.REVIEW_COMMIT_MESSAGES) && config.get(Configuration.TASK_SPECIFIC_ASSISTANTS)
               ? OpenAiClientTaskSpecific.class
               : OpenAiClient.class;
       case LANGCHAIN -> LangChainClient.class;
@@ -85,13 +85,13 @@ public class GerritEventContextModule extends FactoryModule {
   }
 
   private Class<? extends IGerritClientPatchSet> getClientPatchSet() {
-    return switch (config.getAiBackend()) {
+    return switch (config.get(Configuration.AI_BACKEND)) {
       case OPENAI, LANGCHAIN -> GerritClientPatchSetOpenAi.class;
     };
   }
 
   private Class<? extends ICodeContextPolicy> getCodeContextPolicy() {
-    return switch (config.getCodeContextPolicy()) {
+    return switch (config.get(Configuration.CODE_CONTEXT_POLICY)) {
       case NONE -> CodeContextPolicyNone.class;
       case ON_DEMAND -> CodeContextPolicyOnDemand.class;
       case UPLOAD_ALL -> CodeContextPolicyUploadAll.class;

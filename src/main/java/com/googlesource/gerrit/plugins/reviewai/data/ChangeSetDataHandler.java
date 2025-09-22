@@ -40,15 +40,15 @@ public class ChangeSetDataHandler {
 
     changeSetData.setCommentPropertiesSize(gerritClientData.getCommentProperties().size());
     changeSetData.setAiDataPrompt(aiDataPrompt.buildPrompt());
-    if (config.isVotingEnabled() && !change.getIsCommentEvent()) {
+    if (config.get(Configuration.ENABLED_VOTING) && !change.getIsCommentEvent()) {
       GerritPermittedVotingRange permittedVotingRange =
           gerritClient.getPermittedVotingRange(change);
       if (permittedVotingRange != null) {
-        if (permittedVotingRange.getMin() > config.getVotingMinScore()) {
+        if (permittedVotingRange.getMin() > config.get(Configuration.VOTING_MIN_SCORE)) {
           log.debug("Minimum OpenAI voting score set to {}", permittedVotingRange.getMin());
           changeSetData.setVotingMinScore(permittedVotingRange.getMin());
         }
-        if (permittedVotingRange.getMax() < config.getVotingMaxScore()) {
+        if (permittedVotingRange.getMax() < config.get(Configuration.VOTING_MAX_SCORE)) {
           log.debug("Maximum OpenAI voting score set to {}", permittedVotingRange.getMax());
           changeSetData.setVotingMaxScore(permittedVotingRange.getMax());
         }

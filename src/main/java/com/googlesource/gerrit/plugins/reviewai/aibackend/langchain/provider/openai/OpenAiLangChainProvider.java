@@ -31,7 +31,7 @@ public class OpenAiLangChainProvider implements ILangChainProvider {
 
   @Override
   public LangChainProvider buildChatModel(Configuration config, double temperature) {
-    String baseUrl = config.getAiDomain();
+    String baseUrl = config.get(Configuration.AI_DOMAIN);
     if (Configuration.OPENAI_DOMAIN.equals(baseUrl)) {
       baseUrl = baseUrl.endsWith("/v1") ? baseUrl : baseUrl + "/v1";
     }
@@ -39,10 +39,10 @@ public class OpenAiLangChainProvider implements ILangChainProvider {
     var model =
         OpenAiChatModel.builder()
             .baseUrl(baseUrl)
-            .apiKey(config.getAiToken())
-            .modelName(config.getAiModel())
+            .apiKey(config.get(Configuration.AI_TOKEN))
+            .modelName(config.get(Configuration.AI_MODEL))
             .temperature(temperature)
-            .timeout(Duration.ofSeconds(config.getAiConnectionTimeout()))
+            .timeout(Duration.ofSeconds(config.get(Configuration.AI_CONNECTION_TIMEOUT)))
             .build();
 
     return new LangChainProvider(model, baseUrl);
@@ -51,11 +51,11 @@ public class OpenAiLangChainProvider implements ILangChainProvider {
   @Override
   public Optional<TokenCountEstimator> createTokenEstimator(Configuration config) {
     try {
-      return Optional.of(new OpenAiTokenCountEstimator(config.getAiModel()));
+      return Optional.of(new OpenAiTokenCountEstimator(config.get(Configuration.AI_MODEL)));
     } catch (Throwable t) {
       log.warn(
           "OpenAI token estimator unavailable for model {}. Using approximate estimator.",
-          config.getAiModel(),
+          config.get(Configuration.AI_MODEL),
           t);
       return Optional.empty();
     }

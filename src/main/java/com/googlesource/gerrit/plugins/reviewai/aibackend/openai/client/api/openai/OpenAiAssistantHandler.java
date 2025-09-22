@@ -64,7 +64,7 @@ public class OpenAiAssistantHandler extends ClientBase {
     String assistantIdHashKey = calculateAssistantIdHashKey();
     log.info("Calculated assistant id hash key: {}", assistantIdHashKey);
     String assistantId = assistantsDataHandler.getValue(assistantIdHashKey);
-    if (assistantId == null || config.getForceCreateAssistant()) {
+    if (assistantId == null || config.get(Configuration.FORCE_CREATE_ASSISTANT)) {
       log.debug("Setup Assistant for project {}", change.getProjectNameKey());
       String vectorStoreId = codeContextPolicy.generateVectorStore();
       assistantId = openAiAssistant.createAssistant(vectorStoreId);

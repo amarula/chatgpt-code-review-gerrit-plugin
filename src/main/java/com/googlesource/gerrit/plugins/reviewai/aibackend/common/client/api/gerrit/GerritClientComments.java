@@ -88,7 +88,7 @@ public class GerritClientComments extends GerritClientAccount {
     CommentAddedEvent commentAddedEvent = (CommentAddedEvent) change.getEvent();
     authorUsername = commentAddedEvent.author.get().username;
     log.debug("Found comments by '{}' on {}", authorUsername, change.getEventTimeStamp());
-    if (authorUsername.equals(config.getGerritUserName())) {
+    if (authorUsername.equals(config.get(Configuration.GERRIT_USERNAME))) {
       log.debug("These are the Bot's own comments, do not process them.");
       return false;
     }

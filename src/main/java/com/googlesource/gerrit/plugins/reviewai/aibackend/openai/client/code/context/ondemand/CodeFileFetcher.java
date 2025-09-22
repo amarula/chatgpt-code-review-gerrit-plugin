@@ -41,8 +41,8 @@ public class CodeFileFetcher extends ClientBase {
     super(config);
     this.change = change;
     this.gitRepoFiles = gitRepoFiles;
-    if (!config.getCodeContextOnDemandBasePath().isEmpty()) {
-      basePathRegEx = "^" + config.getCodeContextOnDemandBasePath() + "/";
+    if (!config.get(Configuration.CODE_CONTEXT_ON_DEMAND_BASE_PATH).isEmpty()) {
+      basePathRegEx = "^" + config.get(Configuration.CODE_CONTEXT_ON_DEMAND_BASE_PATH) + "/";
     }
   }
 

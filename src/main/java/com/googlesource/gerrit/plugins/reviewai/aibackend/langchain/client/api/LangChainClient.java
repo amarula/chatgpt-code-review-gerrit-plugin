@@ -96,7 +96,7 @@ public class LangChainClient extends AiClientBase implements IAiClient {
       ChatMemory memory =
           TokenWindowChatMemory.builder()
               .id(memoryId)
-              .maxTokens(config.getLcMaxMemoryTokens(), tokenEstimatorProvider.get())
+              .maxTokens(config.get(Configuration.LC_MAX_MEMORY_TOKENS), tokenEstimatorProvider.get())
               .build();
 
       memory.add(LangChainChatMessages.systemMessage(systemInstructions));
@@ -113,10 +113,10 @@ public class LangChainClient extends AiClientBase implements IAiClient {
 
       double temperature =
           change.getIsCommentEvent()
-              ? Double.parseDouble(config.getAiCommentTemperature())
-              : Double.parseDouble(config.getAiReviewTemperature());
+              ? Double.parseDouble(config.get(Configuration.AI_COMMENT_TEMPERATURE))
+              : Double.parseDouble(config.get(Configuration.AI_REVIEW_TEMPERATURE));
 
-      LangChainProviders providerType = config.getLcProvider();
+      LangChainProviders providerType = config.get(Configuration.LC_PROVIDER);
       ILangChainProvider provider = LangChainProviderFactory.get(providerType);
       LangChainProvider providerModel = provider.buildChatModel(config, temperature);
       ChatModel model = providerModel.getModel();
@@ -125,7 +125,7 @@ public class LangChainClient extends AiClientBase implements IAiClient {
           "LangChain request for {} using provider {} model {} (temperature={}, endpoint={})",
           memoryId,
           providerType,
-          config.getAiModel(),
+          config.get(Configuration.AI_MODEL),
           temperature,
           providerModel.getEndpoint());
 

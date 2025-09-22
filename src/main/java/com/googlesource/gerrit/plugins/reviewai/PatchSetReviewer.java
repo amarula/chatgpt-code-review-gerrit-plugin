@@ -175,12 +175,12 @@ public class PatchSetReviewer {
       throws Exception {
     log.debug("Generating review reply for patch set.");
     List<String> patchLines = Arrays.asList(patchSet.split("\n"));
-    if (patchLines.size() > config.getMaxReviewLines()) {
+    if (patchLines.size() > config.get(Configuration.MAX_REVIEW_LINES)) {
       log.warn(
           "Patch set too large for review, size: {}, max allowed: {}",
           patchLines.size(),
-          config.getMaxReviewLines());
-      return new AiResponseContent(String.format(SPLIT_REVIEW_MSG, config.getMaxReviewLines()));
+          config.get(Configuration.MAX_REVIEW_LINES));
+      return new AiResponseContent(String.format(SPLIT_REVIEW_MSG, config.get(Configuration.MAX_REVIEW_LINES)));
     }
 
     return openAiClient.ask(changeSetData, change, patchSet);
@@ -188,7 +188,7 @@ public class PatchSetReviewer {
 
   private Integer getReviewScore(GerritChange change) {
     log.debug("Calculating review score for change ID: {}", change.getFullChangeId());
-    if (config.isVotingEnabled()) {
+    if (config.get(Configuration.ENABLED_VOTING)) {
       return change.getIsCommentEvent()
           ? null
           : (reviewScores.isEmpty() ? 0 : Collections.min(reviewScores));
@@ -199,13 +199,13 @@ public class PatchSetReviewer {
 
   private boolean isNotNegativeReply(Integer score) {
     return score != null
-        && config.getFilterNegativeComments()
-        && score >= config.getFilterCommentsBelowScore();
+        && config.get(Configuration.FILTER_NEGATIVE_COMMENTS)
+        && score >= config.get(Configuration.FILTER_COMMENTS_BELOW_SCORE);
   }
 
   private boolean isIrrelevantReply(AiReplyItem replyItem) {
-    return config.getFilterRelevantComments()
+    return config.get(Configuration.FILTER_RELEVANT_COMMENTS)
         && replyItem.getRelevance() != null
-        && replyItem.getRelevance() < config.getFilterCommentsRelevanceThreshold();
+        && replyItem.getRelevance() < config.get(Configuration.FILTER_COMMENTS_RELEVANCE_THRESHOLD);
   }
 }

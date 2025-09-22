@@ -39,7 +39,7 @@ public abstract class ClientMessageBase extends ClientBase {
   }
 
   private String getUserNameOrEmail() {
-    String escapedUserName = Pattern.quote(config.getGerritUserName());
+    String escapedUserName = Pattern.quote(config.get(Configuration.GERRIT_USERNAME));
     String userEmail = config.getGerritUserEmail();
     if (userEmail.isBlank()) {
       return escapedUserName;

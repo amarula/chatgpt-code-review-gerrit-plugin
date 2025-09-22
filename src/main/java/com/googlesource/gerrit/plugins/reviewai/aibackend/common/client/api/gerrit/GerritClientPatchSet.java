@@ -88,7 +88,7 @@ public class GerritClientPatchSet extends GerritClientAccount {
   }
 
   protected void retrieveFileDiff(GerritChange change, int revisionBase) throws Exception {
-    List<String> enabledFileExtensions = config.getEnabledFileExtensions();
+    List<String> enabledFileExtensions = config.get(Configuration.ENABLED_FILE_EXTENSIONS);
     log.debug("Retrieving file diff for change: {}", change.getFullChangeId());
     try (ManualRequestContext requestContext = config.openRequestContext()) {
       for (String filename : patchSetFiles) {

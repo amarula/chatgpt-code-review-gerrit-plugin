@@ -61,7 +61,7 @@ public abstract class DebugCodeBlocksPromptingParamBase extends DebugCodeBlocksC
   }
 
   private List<String> getPromptingParameters() {
-    switch (config.getAiBackend()) {
+    switch (config.get(Configuration.AI_BACKEND)) {
       case OPENAI -> populateOpenAiParameters();
     }
     return promptingParameters.entrySet().stream()

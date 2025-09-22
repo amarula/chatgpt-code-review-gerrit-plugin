@@ -151,7 +151,7 @@ public class ClientCommandParser extends ClientCommandBase {
     if (optionsMismatch(command)) {
       return false;
     }
-    if (!config.getEnableMessageDebugging() && requiresMessageDebugging(command)) {
+    if (!config.get(Configuration.ENABLE_MESSAGE_DEBUGGING) && requiresMessageDebugging(command)) {
       changeSetData.setReviewSystemMessage(
           localizer.getText("message.command.debugging.messages.disabled"));
       log.debug(

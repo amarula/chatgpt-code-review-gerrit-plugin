@@ -327,7 +327,7 @@ public class ReviewTestBase extends TestBase {
   protected void initTest() {
     changeSetData =
         new ChangeSetData(
-            AI_USER_ACCOUNT_ID, config.getVotingMinScore(), config.getVotingMaxScore());
+            AI_USER_ACCOUNT_ID, config.get(Configuration.VOTING_MIN_SCORE), config.get(Configuration.VOTING_MAX_SCORE));
     when(changeSetDataProvider.get()).thenReturn(changeSetData);
 
     localizer = new Localizer(config);
@@ -359,7 +359,7 @@ public class ReviewTestBase extends TestBase {
   }
 
   protected ICodeContextPolicy getCodeContextPolicy() {
-    return switch (config.getCodeContextPolicy()) {
+    return switch (config.get(Configuration.CODE_CONTEXT_POLICY)) {
       case NONE -> new CodeContextPolicyNone(config);
       case ON_DEMAND -> new CodeContextPolicyOnDemand(config, getGerritChange(), gitRepoFiles);
       case UPLOAD_ALL ->
@@ -431,9 +431,9 @@ public class ReviewTestBase extends TestBase {
   }
 
   private IAiClient getOpenAIClient() {
-    return switch (config.getAiBackend()) {
+    return switch (config.get(Configuration.AI_BACKEND)) {
       case OPENAI ->
-          config.getAiReviewCommitMessages() && config.getTaskSpecificAssistants()
+          config.get(Configuration.REVIEW_COMMIT_MESSAGES) && config.get(Configuration.TASK_SPECIFIC_ASSISTANTS)
               ? new OpenAiClientTaskSpecific(
                   config, getCodeContextPolicy(), pluginDataHandlerProvider)
               : new OpenAiClient(config, getCodeContextPolicy(), pluginDataHandlerProvider);
@@ -443,7 +443,7 @@ public class ReviewTestBase extends TestBase {
   }
 
   private IGerritClientPatchSet getGerritClientPatchSet() {
-    return switch (config.getAiBackend()) {
+    return switch (config.get(Configuration.AI_BACKEND)) {
       case OPENAI, LANGCHAIN -> new GerritClientPatchSetOpenAi(config, accountCacheMock);
     };
   }

@@ -21,6 +21,7 @@ import com.google.gerrit.extensions.common.CommentInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.json.OutputFormat;
 import com.google.gson.Gson;
+import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.reviewai.listener.EventHandlerTask;
@@ -79,7 +80,7 @@ public class CommandTest extends OpenAiReviewTestBase {
   }
 
   private void enableMessageDebugging() {
-    when(config.getEnableMessageDebugging()).thenReturn(true);
+    when(config.get(Configuration.ENABLE_MESSAGE_DEBUGGING)).thenReturn(true);
   }
 
   private PluginDataHandler getChangeDataHandler() {

@@ -34,12 +34,13 @@ public class HttpClient {
   private final String domain;
 
   public HttpClient(Configuration config) {
-    this.bearer = config.getAiToken();
-    this.domain = config.getAiDomain();
-    int connectionTimeout = config.getAiConnectionTimeout();
+    this.bearer = config.get(Configuration.AI_TOKEN);
+    this.domain = config.get(Configuration.AI_DOMAIN);
+    int connectionTimeout = config.get(Configuration.AI_CONNECTION_TIMEOUT);
     HttpRetryInterceptor httpRetryInterceptor =
         new HttpRetryInterceptor(
-            config.getAiConnectionMaxRetryAttempts(), config.getAiConnectionRetryInterval());
+            config.get(Configuration.AI_CONNECTION_MAX_RETRY_ATTEMPTS),
+            config.get(Configuration.AI_CONNECTION_RETRY_INTERVAL));
     this.client =
         new OkHttpClient.Builder()
             .addInterceptor(httpRetryInterceptor)
