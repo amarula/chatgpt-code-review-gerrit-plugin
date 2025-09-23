@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "46e5329c_219478ab",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-23T17:07:05Z",
+      "side": 1,
+      "message": "@patrizio.gelosi@amarulasolutions.com Is really a nice to have? I mean as a system engeenering I would like to have the possibility to know the model I applied and if not defined, not let it work. The default can be get invalid and then we need to apply a patch in the code. So please give a reseon in the commit message the is a good idea.",
+      "revId": "29f6f94d38537d88169e026325ad6a1865c73cfa",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
