@@ -80,6 +80,7 @@
                                     <include>com.squareup.*</include>
                                     <include>org.apache.commons*</include>
                                     <include>org.jetbrains*</include>
+                                    <include>com.knuddels*</include>
                                     <include>dev.langchain4j*</include>
                                     <include>com.fasterxml.jackson*</include>
                                 </includes>

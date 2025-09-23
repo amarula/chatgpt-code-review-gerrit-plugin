@@ -20,11 +20,13 @@ import static com.googlesource.gerrit.plugins.reviewai.config.Configuration.GEMI
 import static com.googlesource.gerrit.plugins.reviewai.config.Configuration.OPENAI_DOMAIN;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model.LangChainProvider;
-import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.FallbackTokenCountEstimator;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
+import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
 import dev.langchain4j.model.TokenCountEstimator;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.googleai.GoogleAiGeminiChatModel;
+import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -59,12 +61,13 @@ public class GeminiLangChainProvider implements ILangChainProvider {
     if (Boolean.FALSE.equals(estimatorAvailable)) {
       return Optional.empty();
     }
+    String model = config.aiModel();
     try {
       String token = config.aiToken();
       Class<?> estimatorClass = Class.forName(TOKEN_ESTIMATOR_CLASS);
       Object builder = estimatorClass.getMethod("builder").invoke(null);
       builder.getClass().getMethod("apiKey", String.class).invoke(builder, token);
-      builder.getClass().getMethod("modelName", String.class).invoke(builder, config.aiModel());
+      builder.getClass().getMethod("modelName", String.class).invoke(builder, model);
       Object estimator = builder.getClass().getMethod("build").invoke(builder);
       estimatorAvailable = true;
       return Optional.of((TokenCountEstimator) estimator);
@@ -79,13 +82,32 @@ public class GeminiLangChainProvider implements ILangChainProvider {
           "aiToken is not configured. Falling back to approximate token estimator: {}",
           e.getMessage());
       return Optional.empty();
+    } catch (InvocationTargetException e) {
+      Throwable cause = e.getCause();
+      if (cause instanceof IllegalArgumentException && isGeminiModel(model)) {
+        log.info(
+            "Gemini model {} is not registered for token counting; using cl100k-based estimator.",
+            model);
+        log.debug("Gemini token estimator fallback due to {}", cause.getMessage(), cause);
+        return Optional.of(new FallbackTokenCountEstimator());
+      }
+      estimatorAvailable = false;
+      log.warn(
+          "Google Gemini token estimator unavailable for model {}. Using approximate estimator.",
+          model,
+          cause == null ? e : cause);
+      return Optional.empty();
     } catch (Throwable t) {
       estimatorAvailable = false;
       log.warn(
           "Google Gemini token estimator unavailable for model {}. Using approximate estimator.",
-          config.aiModel(),
+          model,
           t);
       return Optional.empty();
     }
+  }
+
+  private static boolean isGeminiModel(String model) {
+    return model != null && model.startsWith("gemini-");
   }
 }

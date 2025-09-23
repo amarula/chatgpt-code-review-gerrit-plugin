@@ -20,6 +20,7 @@ import static com.googlesource.gerrit.plugins.reviewai.config.Configuration.MOON
 import static com.googlesource.gerrit.plugins.reviewai.config.Configuration.OPENAI_DOMAIN;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model.LangChainProvider;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.FallbackTokenCountEstimator;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
 import dev.langchain4j.model.TokenCountEstimator;
@@ -56,14 +57,28 @@ public class MoonshotLangChainProvider implements ILangChainProvider {
 
   @Override
   public Optional<TokenCountEstimator> createTokenEstimator(Configuration config) {
+    String model = config.aiModel();
     try {
-      return Optional.of(new OpenAiTokenCountEstimator(config.aiModel()));
+      return Optional.of(new OpenAiTokenCountEstimator(model));
+    } catch (IllegalArgumentException e) {
+      if (isMoonshotModel(model)) {
+        log.info(
+            "Moonshot model {} is not registered in jtokkit; using cl100k-based estimator.",
+            model);
+        log.debug("Moonshot token estimator fallback due to {}", e.getMessage(), e);
+        return Optional.of(new FallbackTokenCountEstimator());
+      }
+      throw e;
     } catch (Throwable t) {
       log.warn(
           "Moonshot token estimator unavailable for model {}. Using approximate estimator.",
-          config.aiModel(),
+          model,
           t);
       return Optional.empty();
     }
+  }
+
+  private static boolean isMoonshotModel(String model) {
+    return model != null && model.startsWith("moonshot-");
   }
 }
