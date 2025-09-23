@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "83ccc168_0202042b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-23T17:08:05Z",
+      "side": 1,
+      "message": "I need more info in the commit message here. I get the info from the comment but please extend it",
+      "revId": "b89b666bc16a7b0e47034639084a98982e624aa4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
