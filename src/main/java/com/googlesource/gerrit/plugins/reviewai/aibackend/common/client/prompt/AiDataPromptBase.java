@@ -22,7 +22,7 @@ import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.patch.InlineCode;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.patch.diff.FileDiffProcessed;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRequestMessage;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.CommentData;
@@ -84,7 +84,7 @@ public abstract class AiDataPromptBase implements IAiDataPrompt {
   }
 
   protected void setHistory(
-      OpenAiMessageItem messageItem, List<OpenAiRequestMessage> messageHistory) {
+      OpenAiMessageItem messageItem, List<AiRequestMessage> messageHistory) {
     if (!messageHistory.isEmpty()) {
       messageItem.setHistory(messageHistory);
       log.debug("Set message history for message item.");

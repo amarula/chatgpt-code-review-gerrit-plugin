@@ -20,11 +20,11 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai.A
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.code.context.ondemand.GetContextContent;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint.OpenAiRun;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.git.GitRepoFiles;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.ondemand.CodeContextBuilder;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.context.ondemand.CodeContextBuilder;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolOutput;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,8 +69,8 @@ public class OpenAiRunToolOutputHandler extends AiClientBase {
   private String getOutput(int i) {
     OpenAiToolCall.Function function = getFunction(openAiToolCalls, i);
     if (ON_DEMAND_FUNCTION_NAMES.contains(function.getName())) {
-      OpenAiGetContextContent getContextContent =
-          getArgumentAsType(openAiToolCalls, i, OpenAiGetContextContent.class);
+      GetContextContent getContextContent =
+          getArgumentAsType(openAiToolCalls, i, GetContextContent.class);
       log.debug("OpenAI `get_context` Response Content: {}", getContextContent);
       return codeContextBuilder.buildCodeContext(getContextContent);
     }

@@ -20,7 +20,7 @@ import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.prompt.IAiDataPrompt;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRequestMessage;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +56,7 @@ public class AiDataPromptReview extends AiDataPromptBase implements IAiDataPromp
   protected OpenAiMessageItem getMessageItem(int i) {
     log.debug("Retrieving message item for review at index: {}", i);
     OpenAiMessageItem messageItem = super.getMessageItem(i);
-    List<OpenAiRequestMessage> messageHistory =
+    List<AiRequestMessage> messageHistory =
         aiMessageHistory.retrieveHistory(commentProperties.get(i), true);
     setHistory(messageItem, messageHistory);
     log.debug("Message item populated with history for review: {}", messageItem);

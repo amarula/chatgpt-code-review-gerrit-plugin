@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRequestMessage;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.GerritClientData;
@@ -32,7 +32,7 @@ import static com.googlesource.gerrit.plugins.reviewai.settings.Settings.OPENAI_
 @Slf4j
 public class AiDataPromptRequests extends AiDataPromptBase {
   protected OpenAiMessageItem messageItem;
-  protected List<OpenAiRequestMessage> messageHistory;
+  protected List<AiRequestMessage> messageHistory;
 
   public AiDataPromptRequests(
       Configuration config,
@@ -57,7 +57,7 @@ public class AiDataPromptRequests extends AiDataPromptBase {
     messageItem = super.getMessageItem(i);
     log.debug("Retrieving extended message item for index: {}", i);
     messageHistory = aiMessageHistory.retrieveHistory(commentProperties.get(i));
-    OpenAiRequestMessage request = extractLastUserMessageFromHistory();
+    AiRequestMessage request = extractLastUserMessageFromHistory();
     if (request != null) {
       messageItem.setRequest(request.getContent());
     } else {
@@ -74,11 +74,11 @@ public class AiDataPromptRequests extends AiDataPromptBase {
     messageItem.setRequest(cleanedMessage);
   }
 
-  private OpenAiRequestMessage extractLastUserMessageFromHistory() {
+  private AiRequestMessage extractLastUserMessageFromHistory() {
     log.debug("Extracting last user message from history.");
     for (int i = messageHistory.size() - 1; i >= 0; i--) {
       if (OPENAI_ROLE_USER.equals(messageHistory.get(i).getRole())) {
-        OpenAiRequestMessage request = messageHistory.remove(i);
+        AiRequestMessage request = messageHistory.remove(i);
         log.debug("Last user message extracted: {}", request);
         return request;
       }

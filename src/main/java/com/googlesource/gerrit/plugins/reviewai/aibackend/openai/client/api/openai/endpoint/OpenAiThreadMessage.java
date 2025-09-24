@@ -22,7 +22,7 @@ import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFa
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.openai.client.prompt.IAiPrompt;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRequestMessage;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.OpenAiUriResourceLocator;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiApiBase;
@@ -41,7 +41,7 @@ public class OpenAiThreadMessage extends OpenAiApiBase {
   private GerritChange change;
   private ICodeContextPolicy codeContextPolicy;
   private String patchSet;
-  private OpenAiRequestMessage addMessageRequestBody;
+  private AiRequestMessage addMessageRequestBody;
 
   public OpenAiThreadMessage(String threadId, Configuration config) {
     super(config);
@@ -98,7 +98,7 @@ public class OpenAiThreadMessage extends OpenAiApiBase {
     IAiPrompt openAiPromptOpenAI =
         AiPromptFactory.getAiPrompt(config, changeSetData, change, codeContextPolicy);
     addMessageRequestBody =
-        OpenAiRequestMessage.builder()
+        AiRequestMessage.builder()
             .role("user")
             .content(openAiPromptOpenAI.getDefaultAiThreadReviewMessage(patchSet))
             .build();

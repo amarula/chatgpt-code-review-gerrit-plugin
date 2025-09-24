@@ -14,26 +14,21 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.code.context.ondemand;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiDialogueItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-
-import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@NoArgsConstructor
 @SuperBuilder
-public class OpenAiMessageItem extends AiDialogueItem {
-  private String request;
-  private List<AiRequestMessage> history;
-
-  public void appendToRequest(String appended) {
-    request += appended;
-  }
+@ToString(callSuper = true)
+public class GetContextItem extends AiDialogueItem {
+  private String requestType;
+  private String otherDescription;
+  private String entityCategory;
+  private String contextRequiredEntity;
 }

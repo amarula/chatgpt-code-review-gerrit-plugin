@@ -31,7 +31,7 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerri
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.CommentData;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.git.GitRepoFiles;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
