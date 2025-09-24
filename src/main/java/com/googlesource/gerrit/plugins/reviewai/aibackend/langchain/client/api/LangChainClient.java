@@ -29,6 +29,9 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.Gerr
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.messages.LangChainChatMessages;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.model.LangChainProvider;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.provider.LangChainProviderFactory;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.ondemand.CodeContextBuilder;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextContent;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.ai.IAiClient;
@@ -36,15 +39,23 @@ import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.clie
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
+import com.googlesource.gerrit.plugins.reviewai.utils.GsonUtils;
+import dev.langchain4j.agent.tool.ToolExecutionRequest;
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.request.ResponseFormat;
+import dev.langchain4j.data.message.ToolExecutionResultMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
+import dev.langchain4j.model.chat.request.ChatRequestParameters;
+import dev.langchain4j.model.chat.request.ResponseFormat;
+import dev.langchain4j.model.chat.request.ToolChoice;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.isJsonObjectAsString;
@@ -55,12 +66,16 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.unwra
 public class LangChainClient extends AiClientBase implements IAiClient {
 
   private static final String FORMAT_REPLIES_SCHEMA_RESOURCE = "config/formatRepliesTool.json";
+  private static final String GET_CONTEXT_TOOL_RESOURCE = "config/getContextTool.json";
+  private static final Set<String> ON_DEMAND_FUNCTION_NAMES = Set.of("get_context");
+  private static final int MAX_TOOL_EXECUTION_ROUNDS = 1;
 
   private final ICodeContextPolicy codeContextPolicy;
   private final LangChainTokenEstimatorProvider tokenEstimatorProvider;
   private final GerritClient gerritClient;
   private final Localizer localizer;
   private final ResponseFormat structuredResponseFormat;
+  private final ToolSpecification getContextTool;
 
   private String requestBody;
 
@@ -78,6 +93,12 @@ public class LangChainClient extends AiClientBase implements IAiClient {
     this.structuredResponseFormat =
         new LangChainStructuredResponseFactory(FORMAT_REPLIES_SCHEMA_RESOURCE)
             .loadStructuredResponseFormat();
+    if (config != null && config.getCodeContextPolicy() == CodeContextPolicies.ON_DEMAND) {
+      this.getContextTool =
+          new LangChainToolSpecificationFactory(GET_CONTEXT_TOOL_RESOURCE).loadToolSpecification();
+    } else {
+      this.getContextTool = null;
+    }
     log.debug("Initialized LangChainClient");
   }
 
@@ -136,13 +157,7 @@ public class LangChainClient extends AiClientBase implements IAiClient {
           memorySnapshot.size(),
           memorySnapshot);
 
-      ChatRequest.Builder requestBuilder = ChatRequest.builder().messages(memorySnapshot);
-      if (structuredResponseFormat != null) {
-        requestBuilder.responseFormat(structuredResponseFormat);
-      }
-
-      ChatResponse response = model.chat(requestBuilder.build());
-      AiMessage ai = response != null ? response.aiMessage() : null;
+      AiMessage ai = executeWithTools(model, change, memory);
       String responseText = ai != null ? ai.text() : null;
 
       if (responseText == null) {
@@ -163,5 +178,88 @@ public class LangChainClient extends AiClientBase implements IAiClient {
   @Override
   public String getRequestBody() {
     return requestBody;
+  }
+
+  private AiMessage executeWithTools(ChatModel model, GerritChange change, ChatMemory memory) {
+    ChatRequest initialRequest = buildChatRequest(memory.messages());
+    ChatResponse response = model.chat(initialRequest);
+    AiMessage aiMessage = response != null ? response.aiMessage() : null;
+
+    int iteration = 0;
+    while (aiMessage != null
+        && aiMessage.hasToolExecutionRequests()
+        && iteration < MAX_TOOL_EXECUTION_ROUNDS) {
+      iteration++;
+      memory.add(aiMessage);
+      List<ToolExecutionRequest> requests = aiMessage.toolExecutionRequests();
+      if (requests == null || requests.isEmpty()) {
+        break;
+      }
+      for (ToolExecutionRequest request : requests) {
+        String output = executeToolRequest(request, change);
+        memory.add(ToolExecutionResultMessage.from(request, output));
+      }
+      response = model.chat(buildChatRequest(memory.messages()));
+      aiMessage = response != null ? response.aiMessage() : null;
+    }
+
+    return aiMessage;
+  }
+
+  private ChatRequest buildChatRequest(List<ChatMessage> messages) {
+    ChatRequest.Builder requestBuilder = ChatRequest.builder().messages(messages);
+    var parametersBuilder = ChatRequestParameters.builder();
+    boolean parametersUsed = false;
+
+    if (getContextTool != null) {
+      parametersBuilder
+          .toolSpecifications(getContextTool)
+          .toolChoice(ToolChoice.AUTO);
+      parametersUsed = true;
+    }
+
+    if (structuredResponseFormat != null) {
+      if (!parametersUsed) {
+        requestBuilder.responseFormat(structuredResponseFormat);
+      } else {
+        parametersBuilder.responseFormat(structuredResponseFormat);
+        parametersUsed = true;
+      }
+    }
+
+    if (parametersUsed) {
+      requestBuilder.parameters(parametersBuilder.build());
+    }
+    return requestBuilder.build();
+  }
+
+  private String executeToolRequest(ToolExecutionRequest request, GerritChange change) {
+    if (request == null || getContextTool == null) {
+      return "";
+    }
+    String toolName = request.name();
+    if (!ON_DEMAND_FUNCTION_NAMES.contains(toolName)) {
+      log.debug("Ignoring unsupported tool request: {}", toolName);
+      return "";
+    }
+    String arguments = request.arguments();
+    if (arguments == null || arguments.isBlank()) {
+      log.warn("Received empty arguments for tool request: {}", toolName);
+      return "";
+    }
+    try {
+      OpenAiGetContextContent getContextContent =
+          GsonUtils.jsonToClass(arguments, OpenAiGetContextContent.class);
+      if (getContextContent == null) {
+        log.warn("Failed to deserialize arguments for tool {}", toolName);
+        return "";
+      }
+      CodeContextBuilder codeContextBuilder =
+          new CodeContextBuilder(config, change, new GitRepoFiles());
+      return codeContextBuilder.buildCodeContext(getContextContent);
+    } catch (Exception e) {
+      log.warn("Error executing tool request {}", toolName, e);
+      return "";
+    }
   }
 }
