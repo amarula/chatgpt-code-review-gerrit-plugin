@@ -16,6 +16,24 @@
       "message": "I need more info in the commit message here. I get the info from the comment but please extend it",
       "revId": "b89b666bc16a7b0e47034639084a98982e624aa4",
       "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "38d6a841_e8f3a563",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1037991
+      },
+      "writtenOn": "2025-09-24T07:26:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83ccc168_0202042b",
+      "revId": "b89b666bc16a7b0e47034639084a98982e624aa4",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
     }
   ]
 }
