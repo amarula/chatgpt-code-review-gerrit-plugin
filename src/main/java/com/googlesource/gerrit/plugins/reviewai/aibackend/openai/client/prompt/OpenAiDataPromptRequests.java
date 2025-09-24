@@ -20,7 +20,7 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.A
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.prompt.IAiDataPrompt;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiMessageItem;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.GerritClientData;
@@ -42,9 +42,9 @@ public class OpenAiDataPromptRequests extends AiDataPromptRequests implements IA
   }
 
   @Override
-  protected OpenAiMessageItem getMessageItem(int i) {
+  protected AiMessageItem getMessageItem(int i) {
     log.debug("Getting OpenAI Message Item");
-    OpenAiMessageItem messageItem = new OpenAiMessageItem();
+    AiMessageItem messageItem = new AiMessageItem();
     setRequestFromCommentProperty(messageItem, i);
     String inReplyToMessage = getReferenceToLastMessage(i);
     if (inReplyToMessage != null) {

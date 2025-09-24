@@ -21,8 +21,8 @@ import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.clie
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.patch.InlineCode;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.patch.diff.FileDiffProcessed;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRequestMessage;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiMessageItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.CommentData;
@@ -39,7 +39,7 @@ public abstract class AiDataPromptBase implements IAiDataPrompt {
   protected final GerritClientData gerritClientData;
   protected final HashMap<String, FileDiffProcessed> fileDiffsProcessed;
   protected final CommentData commentData;
-  @Getter protected final List<OpenAiMessageItem> messageItems;
+  @Getter protected final List<AiMessageItem> messageItems;
 
   protected AiHistory aiMessageHistory;
   @Getter protected List<GerritComment> commentProperties;
@@ -59,9 +59,9 @@ public abstract class AiDataPromptBase implements IAiDataPrompt {
 
   public abstract void addMessageItem(int i);
 
-  protected OpenAiMessageItem getMessageItem(int i) {
+  protected AiMessageItem getMessageItem(int i) {
     log.debug("Creating message item for comment index: {}", i);
-    OpenAiMessageItem messageItem = new OpenAiMessageItem();
+    AiMessageItem messageItem = new AiMessageItem();
     GerritComment commentProperty = commentProperties.get(i);
     log.debug("Retrieved comment property for index {}: {}", i, commentProperty);
     if (commentProperty.getLine() != null || commentProperty.getRange() != null) {
@@ -84,7 +84,7 @@ public abstract class AiDataPromptBase implements IAiDataPrompt {
   }
 
   protected void setHistory(
-      OpenAiMessageItem messageItem, List<OpenAiRequestMessage> messageHistory) {
+      AiMessageItem messageItem, List<AiRequestMessage> messageHistory) {
     if (!messageHistory.isEmpty()) {
       messageItem.setHistory(messageHistory);
       log.debug("Set message history for message item.");

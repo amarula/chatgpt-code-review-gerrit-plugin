@@ -20,9 +20,9 @@ import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiToolCall;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint.OpenAiRun;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.git.GitRepoFiles;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRunResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,7 +66,7 @@ public class OpenAiRunActionHandler extends ClientBase {
     return false;
   }
 
-  private List<OpenAiToolCall> getRunToolCalls(OpenAiRunResponse runResponse) {
+  private List<AiToolCall> getRunToolCalls(OpenAiRunResponse runResponse) {
     return runResponse.getRequiredAction().getSubmitToolOutputs().getToolCalls();
   }
 }

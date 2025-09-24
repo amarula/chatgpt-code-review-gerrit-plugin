@@ -16,7 +16,7 @@
 
 package com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.prompt;
 
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiMessageItem;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 
 import java.util.List;
@@ -26,5 +26,5 @@ public interface IAiDataPrompt {
 
   List<GerritComment> getCommentProperties();
 
-  List<OpenAiMessageItem> getMessageItems();
+  List<AiMessageItem> getMessageItems();
 }

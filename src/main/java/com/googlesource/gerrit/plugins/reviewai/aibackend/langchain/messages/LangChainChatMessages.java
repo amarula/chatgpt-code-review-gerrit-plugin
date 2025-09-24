@@ -21,7 +21,7 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.A
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.CommentData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.GerritClientData;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRequestMessage;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import com.googlesource.gerrit.plugins.reviewai.settings.Settings;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
@@ -90,12 +90,12 @@ public final class LangChainChatMessages {
     appendMessages(historyMessages, aiHistory.retrieveHistory(comment, filterInactive));
   }
 
-  private static void appendMessages(List<ChatMessage> messages, List<OpenAiRequestMessage> source) {
-    // Render OpenAI request messages into the native LangChain message hierarchy.
+  private static void appendMessages(List<ChatMessage> messages, List<AiRequestMessage> source) {
+    // Render request messages into the native LangChain message hierarchy.
     if (source == null) {
       return;
     }
-    for (OpenAiRequestMessage message : source) {
+    for (AiRequestMessage message : source) {
       if (message == null) {
         continue;
       }
@@ -107,7 +107,7 @@ public final class LangChainChatMessages {
     }
   }
 
-  private static ChatMessage toChatMessage(OpenAiRequestMessage message) {
+  private static ChatMessage toChatMessage(AiRequestMessage message) {
     String role = message.getRole();
     String text = message.getContent();
     if (role == null) {

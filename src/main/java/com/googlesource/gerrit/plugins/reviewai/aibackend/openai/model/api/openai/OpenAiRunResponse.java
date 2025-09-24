@@ -17,6 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
 
 import com.google.gson.annotations.SerializedName;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiToolCall;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -40,7 +41,7 @@ public class OpenAiRunResponse extends OpenAiResponse {
     @Data
     public static class SubmitToolOutputs {
       @SerializedName("tool_calls")
-      private List<OpenAiToolCall> toolCalls;
+      private List<AiToolCall> toolCalls;
     }
   }
 }

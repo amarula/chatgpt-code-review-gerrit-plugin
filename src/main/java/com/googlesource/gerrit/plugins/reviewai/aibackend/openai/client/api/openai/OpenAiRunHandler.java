@@ -16,6 +16,7 @@
 
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai;
 
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiToolCall;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandlerProvider;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
@@ -112,7 +113,7 @@ public class OpenAiRunHandler extends OpenAiApiBase {
     return getFirstStep().getStepDetails();
   }
 
-  public List<OpenAiToolCall> getFirstStepToolCalls() {
+  public List<AiToolCall> getFirstStepToolCalls() {
     return getFirstStepDetails().getToolCalls();
   }
 

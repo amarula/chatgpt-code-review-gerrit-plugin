@@ -24,7 +24,7 @@ import com.google.gerrit.server.util.OneOffRequestContext;
 import java.util.*;
 
 import static com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.AiPrompt.getJsonPromptValues;
-import static com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
+import static com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
 import static com.googlesource.gerrit.plugins.reviewai.settings.Settings.AiBackends;
 import static com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
 

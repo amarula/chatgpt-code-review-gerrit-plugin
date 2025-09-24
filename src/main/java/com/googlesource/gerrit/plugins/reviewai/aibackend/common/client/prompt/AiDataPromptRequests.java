@@ -18,8 +18,8 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt;
 
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiRequestMessage;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiMessageItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiRequestMessage;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.GerritClientData;
@@ -31,8 +31,8 @@ import static com.googlesource.gerrit.plugins.reviewai.settings.Settings.OPENAI_
 
 @Slf4j
 public class AiDataPromptRequests extends AiDataPromptBase {
-  protected OpenAiMessageItem messageItem;
-  protected List<OpenAiRequestMessage> messageHistory;
+  protected AiMessageItem messageItem;
+  protected List<AiRequestMessage> messageHistory;
 
   public AiDataPromptRequests(
       Configuration config,
@@ -46,18 +46,18 @@ public class AiDataPromptRequests extends AiDataPromptBase {
 
   public void addMessageItem(int i) {
     log.debug("Adding message item for comment index: {}", i);
-    OpenAiMessageItem messageItem = getMessageItem(i);
+    AiMessageItem messageItem = getMessageItem(i);
     messageItem.setId(i);
     messageItems.add(messageItem);
     log.debug("Added message item: {}", messageItem);
   }
 
   @Override
-  protected OpenAiMessageItem getMessageItem(int i) {
+  protected AiMessageItem getMessageItem(int i) {
     messageItem = super.getMessageItem(i);
     log.debug("Retrieving extended message item for index: {}", i);
     messageHistory = aiMessageHistory.retrieveHistory(commentProperties.get(i));
-    OpenAiRequestMessage request = extractLastUserMessageFromHistory();
+    AiRequestMessage request = extractLastUserMessageFromHistory();
     if (request != null) {
       messageItem.setRequest(request.getContent());
     } else {
@@ -67,18 +67,18 @@ public class AiDataPromptRequests extends AiDataPromptBase {
     return messageItem;
   }
 
-  protected void setRequestFromCommentProperty(OpenAiMessageItem messageItem, int i) {
+  protected void setRequestFromCommentProperty(AiMessageItem messageItem, int i) {
     GerritComment gerritComment = commentProperties.get(i);
     String cleanedMessage = aiMessageHistory.getCleanedMessage(gerritComment);
     log.debug("Getting cleaned Message: {}", cleanedMessage);
     messageItem.setRequest(cleanedMessage);
   }
 
-  private OpenAiRequestMessage extractLastUserMessageFromHistory() {
+  private AiRequestMessage extractLastUserMessageFromHistory() {
     log.debug("Extracting last user message from history.");
     for (int i = messageHistory.size() - 1; i >= 0; i--) {
       if (OPENAI_ROLE_USER.equals(messageHistory.get(i).getRole())) {
-        OpenAiRequestMessage request = messageHistory.remove(i);
+        AiRequestMessage request = messageHistory.remove(i);
         log.debug("Last user message extracted: {}", request);
         return request;
       }

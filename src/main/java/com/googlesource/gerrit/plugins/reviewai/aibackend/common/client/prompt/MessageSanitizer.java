@@ -30,7 +30,7 @@ public class MessageSanitizer {
   private static final Pattern SANITIZE_NUM_REGEX =
       Pattern.compile("^(\\s*)(#+)(?=\\s)", Pattern.MULTILINE);
 
-  public static String sanitizeOpenAiMessage(String message) {
+  public static String sanitizeAiMessage(String message) {
     log.debug("Sanitizing OpenAI message.");
     // Sanitize code blocks (delimited by CODE_DELIMITER) by stripping out the language for syntax
     // highlighting and

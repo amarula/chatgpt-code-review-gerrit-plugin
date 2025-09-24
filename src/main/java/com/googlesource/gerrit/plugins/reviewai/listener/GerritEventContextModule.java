@@ -21,6 +21,7 @@ import com.google.gerrit.server.events.Event;
 import com.google.inject.Singleton;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiClientTaskSpecific;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.client.api.LangChainClient;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.OpenAiCodeContextPolicyOnDemand;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.data.ChangeSetDataProvider;
 import com.googlesource.gerrit.plugins.reviewai.data.PluginDataHandler;
@@ -29,12 +30,13 @@ import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.clie
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.api.gerrit.IGerritClientPatchSet;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.code.context.ICodeContextPolicy;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.CodeContextPolicyNone;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.CodeContextPolicyOnDemand;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.context.CodeContextPolicyNone;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.context.CodeContextPolicyOnDemand;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.CodeContextPolicyUploadAll;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.OpenAiClient;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.gerrit.GerritClientPatchSetOpenAi;
+import com.googlesource.gerrit.plugins.reviewai.settings.Settings;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.google.inject.Scopes.SINGLETON;
@@ -93,7 +95,10 @@ public class GerritEventContextModule extends FactoryModule {
   private Class<? extends ICodeContextPolicy> getCodeContextPolicy() {
     return switch (config.getCodeContextPolicy()) {
       case NONE -> CodeContextPolicyNone.class;
-      case ON_DEMAND -> CodeContextPolicyOnDemand.class;
+      case ON_DEMAND ->
+          config.getAiBackend() == Settings.AiBackends.OPENAI
+              ? OpenAiCodeContextPolicyOnDemand.class
+              : CodeContextPolicyOnDemand.class;
       case UPLOAD_ALL -> CodeContextPolicyUploadAll.class;
     };
   }

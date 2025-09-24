@@ -20,7 +20,7 @@ import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.prompt.IAiDataPrompt;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiMessageItem;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiMessageItem;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.ChangeSetData;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.data.GerritClientData;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +51,7 @@ public class AiDataPrompt {
       openAiDataPromptHandler.addMessageItem(i);
       log.debug("Added message item to prompt for comment index: {}", i);
     }
-    List<OpenAiMessageItem> messageItems = openAiDataPromptHandler.getMessageItems();
+    List<AiMessageItem> messageItems = openAiDataPromptHandler.getMessageItems();
     String promptJson = messageItems.isEmpty() ? "" : getGson().toJson(messageItems);
     log.debug("Final OpenAI prompt JSON: {}", promptJson);
     return promptJson;

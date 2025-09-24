@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.ClientBase;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiToolCall;
 
 import java.util.List;
 
@@ -35,19 +35,19 @@ public abstract class AiClientBase extends ClientBase {
     return jsonToClass(content, AiResponseContent.class);
   }
 
-  protected OpenAiToolCall.Function getFunction(List<OpenAiToolCall> toolCalls, int ind) {
+  protected AiToolCall.Function getFunction(List<AiToolCall> toolCalls, int ind) {
     return toolCalls.get(ind).getFunction();
   }
 
-  protected String getArgumentAsString(List<OpenAiToolCall> toolCalls, int ind) {
+  protected String getArgumentAsString(List<AiToolCall> toolCalls, int ind) {
     return getFunction(toolCalls, ind).getArguments();
   }
 
-  protected AiResponseContent getArgumentAsResponse(List<OpenAiToolCall> toolCalls, int ind) {
+  protected AiResponseContent getArgumentAsResponse(List<AiToolCall> toolCalls, int ind) {
     return convertResponseContentFromJson(getArgumentAsString(toolCalls, ind));
   }
 
-  protected <T> T getArgumentAsType(List<OpenAiToolCall> toolCalls, int ind, Class<T> clazz) {
+  protected <T> T getArgumentAsType(List<AiToolCall> toolCalls, int ind, Class<T> clazz) {
     return jsonToClass(getArgumentAsString(toolCalls, ind), clazz);
   }
 }

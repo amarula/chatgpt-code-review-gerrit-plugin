@@ -19,7 +19,7 @@ package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.ope
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai.AiClientBase;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiResponseContent;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiToolCall;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,7 +35,7 @@ public abstract class OpenAiClientBase extends AiClientBase {
     log.debug("OpenAiClientBase initialized with configuration.");
   }
 
-  protected AiResponseContent getResponseContent(List<OpenAiToolCall> toolCalls) {
+  protected AiResponseContent getResponseContent(List<AiToolCall> toolCalls) {
     log.debug("Getting response content from tool calls: {}", toolCalls);
     if (toolCalls.size() > 1) {
       return mergeToolCalls(toolCalls);
@@ -44,7 +44,7 @@ public abstract class OpenAiClientBase extends AiClientBase {
     }
   }
 
-  private AiResponseContent mergeToolCalls(List<OpenAiToolCall> toolCalls) {
+  private AiResponseContent mergeToolCalls(List<AiToolCall> toolCalls) {
     log.debug("Merging responses from multiple tool calls.");
     AiResponseContent responseContent = getArgumentAsResponse(toolCalls, 0);
     for (int ind = 1; ind < toolCalls.size(); ind++) {

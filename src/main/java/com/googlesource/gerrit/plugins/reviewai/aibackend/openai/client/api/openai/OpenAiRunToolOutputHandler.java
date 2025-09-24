@@ -20,11 +20,11 @@ import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.ai.A
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.errors.exceptions.AiConnectionFailException;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextContent;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolCall;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.code.context.ondemand.GetContextContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiToolCall;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.openai.endpoint.OpenAiRun;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.git.GitRepoFiles;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.ondemand.CodeContextBuilder;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.context.ondemand.CodeContextBuilder;
 import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiToolOutput;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +41,7 @@ public class OpenAiRunToolOutputHandler extends AiClientBase {
   private final OpenAiRun openAiRun;
   private final CodeContextBuilder codeContextBuilder;
 
-  private List<OpenAiToolCall> openAiToolCalls;
+  private List<AiToolCall> aiToolCalls;
 
   public OpenAiRunToolOutputHandler(
       Configuration config, GerritChange change, GitRepoFiles gitRepoFiles, OpenAiRun openAiRun) {
@@ -50,15 +50,15 @@ public class OpenAiRunToolOutputHandler extends AiClientBase {
     codeContextBuilder = new CodeContextBuilder(config, change, gitRepoFiles);
   }
 
-  public void submitToolOutput(List<OpenAiToolCall> openAiToolCalls)
+  public void submitToolOutput(List<AiToolCall> aiToolCalls)
       throws AiConnectionFailException {
-    this.openAiToolCalls = openAiToolCalls;
+    this.aiToolCalls = aiToolCalls;
     List<OpenAiToolOutput> toolOutputs = new ArrayList<>();
-    log.debug("OpenAI Tool Calls: {}", openAiToolCalls);
-    for (int i = 0; i < openAiToolCalls.size(); i++) {
+    log.debug("OpenAI Tool Calls: {}", aiToolCalls);
+    for (int i = 0; i < aiToolCalls.size(); i++) {
       toolOutputs.add(
           OpenAiToolOutput.builder()
-              .toolCallId(openAiToolCalls.get(i).getId())
+              .toolCallId(aiToolCalls.get(i).getId())
               .output(getOutput(i))
               .build());
     }
@@ -67,10 +67,10 @@ public class OpenAiRunToolOutputHandler extends AiClientBase {
   }
 
   private String getOutput(int i) {
-    OpenAiToolCall.Function function = getFunction(openAiToolCalls, i);
+    AiToolCall.Function function = getFunction(aiToolCalls, i);
     if (ON_DEMAND_FUNCTION_NAMES.contains(function.getName())) {
-      OpenAiGetContextContent getContextContent =
-          getArgumentAsType(openAiToolCalls, i, OpenAiGetContextContent.class);
+      GetContextContent getContextContent =
+          getArgumentAsType(aiToolCalls, i, GetContextContent.class);
       log.debug("OpenAI `get_context` Response Content: {}", getContextContent);
       return codeContextBuilder.buildCodeContext(getContextContent);
     }

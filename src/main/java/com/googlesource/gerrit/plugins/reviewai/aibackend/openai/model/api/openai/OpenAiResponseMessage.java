@@ -17,6 +17,7 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai;
 
 import com.google.gson.annotations.SerializedName;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiToolCall;
 import lombok.Data;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class OpenAiResponseMessage {
   private String type;
 
   @SerializedName("tool_calls")
-  private List<OpenAiToolCall> toolCalls;
+  private List<AiToolCall> toolCalls;
 
   @SerializedName("message_creation")
   private MessageCreation messageCreation;

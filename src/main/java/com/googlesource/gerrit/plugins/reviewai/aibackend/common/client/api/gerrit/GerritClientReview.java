@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.MessageSanitizer.sanitizeOpenAiMessage;
+import static com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.prompt.MessageSanitizer.sanitizeAiMessage;
 import static com.googlesource.gerrit.plugins.reviewai.utils.TextUtils.joinWithDoubleNewLine;
 
 @Slf4j
@@ -158,7 +158,7 @@ public class GerritClientReview extends GerritClientAccount {
     log.debug("Getting review comments.");
     Map<String, List<CommentInput>> comments = new HashMap<>();
     for (ReviewBatch reviewBatch : reviewBatches) {
-      String message = sanitizeOpenAiMessage(reviewBatch.getContent());
+      String message = sanitizeAiMessage(reviewBatch.getContent());
       if (message.trim().isEmpty()) {
         log.info(
             "Empty message from review not submitted for batch with ID: {}", reviewBatch.getId());
