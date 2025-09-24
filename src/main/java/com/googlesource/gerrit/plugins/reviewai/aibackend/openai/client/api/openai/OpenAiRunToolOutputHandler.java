@@ -34,8 +34,7 @@ import java.util.List;
 @Slf4j
 public class OpenAiRunToolOutputHandler extends AiClientBase {
   // OpenAI may occasionally return the fixed string "multi_tool_use" as the function name when
-  // multiple tools are
-  // utilized.
+  // multiple tools are utilized.
   private static final List<String> ON_DEMAND_FUNCTION_NAMES =
       List.of("get_context", "multi_tool_use");
 
