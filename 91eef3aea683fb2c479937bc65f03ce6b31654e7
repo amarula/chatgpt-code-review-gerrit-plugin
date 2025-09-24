@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d0e1d243_e4620770",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1037987
+      },
+      "writtenOn": "2025-09-24T13:12:56Z",
+      "side": 1,
+      "message": "@patrizio.gelosi@amarulasolutions.com You should explain what is the ON_DEMAND context policy in the commit message.",
+      "revId": "91eef3aea683fb2c479937bc65f03ce6b31654e7",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735"
+    }
+  ]
+}
