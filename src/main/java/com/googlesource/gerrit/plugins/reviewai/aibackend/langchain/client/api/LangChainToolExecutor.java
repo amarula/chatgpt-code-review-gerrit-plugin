@@ -17,9 +17,9 @@
 package com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.client.api;
 
 import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.gerrit.GerritChange;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.api.git.GitRepoFiles;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.ondemand.CodeContextBuilder;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.model.api.openai.OpenAiGetContextContent;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.api.git.GitRepoFiles;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.client.code.context.ondemand.CodeContextBuilder;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.code.context.ondemand.GetContextContent;
 import com.googlesource.gerrit.plugins.reviewai.config.Configuration;
 import com.googlesource.gerrit.plugins.reviewai.utils.GsonUtils;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
@@ -120,8 +120,8 @@ class LangChainToolExecutor {
     }
 
     try {
-      OpenAiGetContextContent getContextContent =
-          GsonUtils.jsonToClass(arguments, OpenAiGetContextContent.class);
+      GetContextContent getContextContent =
+          GsonUtils.jsonToClass(arguments, GetContextContent.class);
       if (getContextContent == null) {
         log.warn("Failed to deserialize arguments for tool {}", toolName);
         return "";

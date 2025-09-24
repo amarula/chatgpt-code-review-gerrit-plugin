@@ -14,17 +14,21 @@
  * limitations under the License.
  */
 
-package com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.client.prompt;
+package com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.code.context.ondemand;
 
-import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiMessageItem;
-import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.gerrit.GerritComment;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.common.model.api.ai.AiDialogueItem;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
-import java.util.List;
-
-public interface IAiDataPrompt {
-  void addMessageItem(int i);
-
-  List<GerritComment> getCommentProperties();
-
-  List<AiMessageItem> getMessageItems();
+@EqualsAndHashCode(callSuper = true)
+@Data
+@SuperBuilder
+@ToString(callSuper = true)
+public class GetContextItem extends AiDialogueItem {
+  private String requestType;
+  private String otherDescription;
+  private String entityCategory;
+  private String contextRequiredEntity;
 }
