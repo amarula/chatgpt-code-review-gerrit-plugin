@@ -16,28 +16,16 @@
 
 package com.googlesource.gerrit.plugins.reviewai.aibackend.langchain.client.api;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
 import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.model.chat.request.ResponseFormatType;
-import dev.langchain4j.model.chat.request.json.JsonArraySchema;
-import dev.langchain4j.model.chat.request.json.JsonBooleanSchema;
-import dev.langchain4j.model.chat.request.json.JsonEnumSchema;
-import dev.langchain4j.model.chat.request.json.JsonIntegerSchema;
-import dev.langchain4j.model.chat.request.json.JsonNumberSchema;
-import dev.langchain4j.model.chat.request.json.JsonObjectSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchema;
 import dev.langchain4j.model.chat.request.json.JsonSchemaElement;
-import dev.langchain4j.model.chat.request.json.JsonStringSchema;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -88,7 +76,7 @@ class LangChainStructuredResponseFactory {
       JsonSchemaElement rootElement = null;
       if (parametersElement.isJsonObject()) {
         try {
-          rootElement = buildJsonSchemaElement(parametersElement.getAsJsonObject());
+          rootElement = LangChainJsonSchemaParser.parse(parametersElement.getAsJsonObject());
         } catch (Exception e) {
           log.warn(
               "Failed to convert structured output schema {} into LangChain schema classes",
@@ -119,153 +107,6 @@ class LangChainStructuredResponseFactory {
           schemaResourcePath,
           e);
       return null;
-    }
-  }
-
-  private JsonSchemaElement buildJsonSchemaElement(JsonObject schemaObject) {
-    String type = getString(schemaObject, "type");
-    if (type == null) {
-      if (schemaObject.has("enum")) {
-        return buildEnumSchema(schemaObject);
-      }
-      throw new IllegalArgumentException("Schema definition missing type: " + schemaObject);
-    }
-
-    return switch (type) {
-      case "object" -> buildObjectSchema(schemaObject);
-      case "array" -> buildArraySchema(schemaObject);
-      case "string" ->
-          schemaObject.has("enum")
-              ? buildEnumSchema(schemaObject)
-              : buildStringSchema(schemaObject);
-      case "integer" -> buildIntegerSchema(schemaObject);
-      case "number" -> buildNumberSchema(schemaObject);
-      case "boolean" -> buildBooleanSchema(schemaObject);
-      default -> throw new IllegalArgumentException("Unsupported schema type: " + type);
-    };
-  }
-
-  private JsonSchemaElement buildObjectSchema(JsonObject schemaObject) {
-    JsonObjectSchema.Builder builder = JsonObjectSchema.builder();
-    setDescription(schemaObject, builder::description);
-
-    JsonObject properties = getObject(schemaObject, "properties");
-    if (properties != null) {
-      for (var entry : properties.entrySet()) {
-        JsonObject propertySchema = asObject(entry.getValue());
-        if (propertySchema != null) {
-          builder.addProperty(entry.getKey(), buildJsonSchemaElement(propertySchema));
-        }
-      }
-    }
-
-    JsonArray required = getArray(schemaObject, "required");
-    if (required != null) {
-      builder.required(toStringList(required));
-    }
-
-    JsonElement additionalProperties = schemaObject.get("additionalProperties");
-    if (additionalProperties != null
-        && additionalProperties.isJsonPrimitive()
-        && additionalProperties.getAsJsonPrimitive().isBoolean()) {
-      builder.additionalProperties(additionalProperties.getAsBoolean());
-    }
-
-    return builder.build();
-  }
-
-  private JsonSchemaElement buildArraySchema(JsonObject schemaObject) {
-    JsonArraySchema.Builder builder = JsonArraySchema.builder();
-    setDescription(schemaObject, builder::description);
-
-    JsonObject items = asObject(schemaObject.get("items"));
-    if (items != null) {
-      builder.items(buildJsonSchemaElement(items));
-    }
-
-    return builder.build();
-  }
-
-  private JsonSchemaElement buildStringSchema(JsonObject schemaObject) {
-    JsonStringSchema.Builder builder = JsonStringSchema.builder();
-    setDescription(schemaObject, builder::description);
-    return builder.build();
-  }
-
-  private JsonSchemaElement buildIntegerSchema(JsonObject schemaObject) {
-    JsonIntegerSchema.Builder builder = JsonIntegerSchema.builder();
-    setDescription(schemaObject, builder::description);
-    return builder.build();
-  }
-
-  private JsonSchemaElement buildNumberSchema(JsonObject schemaObject) {
-    JsonNumberSchema.Builder builder = JsonNumberSchema.builder();
-    setDescription(schemaObject, builder::description);
-    return builder.build();
-  }
-
-  private JsonSchemaElement buildBooleanSchema(JsonObject schemaObject) {
-    JsonBooleanSchema.Builder builder = JsonBooleanSchema.builder();
-    setDescription(schemaObject, builder::description);
-    return builder.build();
-  }
-
-  private JsonSchemaElement buildEnumSchema(JsonObject schemaObject) {
-    JsonArray enumValues = getArray(schemaObject, "enum");
-    if (enumValues == null || enumValues.isEmpty()) {
-      throw new IllegalArgumentException(
-          "Enum schema requires non-empty 'enum' array: " + schemaObject);
-    }
-    JsonEnumSchema.Builder builder = JsonEnumSchema.builder().enumValues(toStringList(enumValues));
-    setDescription(schemaObject, builder::description);
-    return builder.build();
-  }
-
-  private static JsonObject getObject(JsonObject source, String member) {
-    JsonElement element = source.get(member);
-    return asObject(element);
-  }
-
-  private static JsonObject asObject(JsonElement element) {
-    if (element != null && element.isJsonObject()) {
-      return element.getAsJsonObject();
-    }
-    return null;
-  }
-
-  private static JsonArray getArray(JsonObject source, String member) {
-    JsonElement element = source.get(member);
-    if (element != null && element.isJsonArray()) {
-      return element.getAsJsonArray();
-    }
-    return null;
-  }
-
-  private static String getString(JsonObject source, String member) {
-    JsonElement element = source.get(member);
-    if (element != null && element.isJsonPrimitive()) {
-      JsonPrimitive primitive = element.getAsJsonPrimitive();
-      if (primitive.isString()) {
-        return primitive.getAsString();
-      }
-    }
-    return null;
-  }
-
-  private static List<String> toStringList(JsonArray array) {
-    List<String> values = new ArrayList<>(array.size());
-    for (JsonElement element : array) {
-      if (element != null && element.isJsonPrimitive()) {
-        values.add(element.getAsJsonPrimitive().getAsString());
-      }
-    }
-    return values;
-  }
-
-  private static void setDescription(JsonObject source, Consumer<String> consumer) {
-    String description = getString(source, "description");
-    if (description != null && !description.isBlank()) {
-      consumer.accept(description);
     }
   }
 }

@@ -36,14 +36,14 @@ import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.common.clie
 import com.googlesource.gerrit.plugins.reviewai.interfaces.aibackend.langchain.provider.ILangChainProvider;
 import com.googlesource.gerrit.plugins.reviewai.localization.Localizer;
 import com.googlesource.gerrit.plugins.reviewai.settings.Settings.LangChainProviders;
+import com.googlesource.gerrit.plugins.reviewai.aibackend.openai.client.code.context.CodeContextPolicyBase.CodeContextPolicies;
+import dev.langchain4j.agent.tool.ToolSpecification;
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.model.chat.request.ChatRequest;
-import dev.langchain4j.model.chat.request.ResponseFormat;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.TokenWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
-import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.request.ResponseFormat;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 
@@ -55,12 +55,13 @@ import static com.googlesource.gerrit.plugins.reviewai.utils.JsonTextUtils.unwra
 public class LangChainClient extends AiClientBase implements IAiClient {
 
   private static final String FORMAT_REPLIES_SCHEMA_RESOURCE = "config/formatRepliesTool.json";
+  private static final String GET_CONTEXT_TOOL_RESOURCE = "config/getContextTool.json";
 
   private final ICodeContextPolicy codeContextPolicy;
   private final LangChainTokenEstimatorProvider tokenEstimatorProvider;
   private final GerritClient gerritClient;
   private final Localizer localizer;
-  private final ResponseFormat structuredResponseFormat;
+  private final LangChainToolExecutor toolExecutor;
 
   private String requestBody;
 
@@ -75,9 +76,14 @@ public class LangChainClient extends AiClientBase implements IAiClient {
     this.tokenEstimatorProvider = new LangChainTokenEstimatorProvider(config);
     this.gerritClient = gerritClient;
     this.localizer = localizer;
-    this.structuredResponseFormat =
-        new LangChainStructuredResponseFactory(FORMAT_REPLIES_SCHEMA_RESOURCE)
-            .loadStructuredResponseFormat();
+    ResponseFormat structuredResponseFormat = new LangChainStructuredResponseFactory(FORMAT_REPLIES_SCHEMA_RESOURCE)
+        .loadStructuredResponseFormat();
+    ToolSpecification contextTool = null;
+    if (config != null && config.getCodeContextPolicy() == CodeContextPolicies.ON_DEMAND) {
+      contextTool =
+          new LangChainToolSpecificationFactory(GET_CONTEXT_TOOL_RESOURCE).loadToolSpecification();
+    }
+    this.toolExecutor = new LangChainToolExecutor(config, structuredResponseFormat, contextTool);
     log.debug("Initialized LangChainClient");
   }
 
@@ -136,13 +142,7 @@ public class LangChainClient extends AiClientBase implements IAiClient {
           memorySnapshot.size(),
           memorySnapshot);
 
-      ChatRequest.Builder requestBuilder = ChatRequest.builder().messages(memorySnapshot);
-      if (structuredResponseFormat != null) {
-        requestBuilder.responseFormat(structuredResponseFormat);
-      }
-
-      ChatResponse response = model.chat(requestBuilder.build());
-      AiMessage ai = response != null ? response.aiMessage() : null;
+      AiMessage ai = toolExecutor.execute(model, change, memory);
       String responseText = ai != null ? ai.text() : null;
 
       if (responseText == null) {
@@ -164,4 +164,5 @@ public class LangChainClient extends AiClientBase implements IAiClient {
   public String getRequestBody() {
     return requestBody;
   }
+
 }
